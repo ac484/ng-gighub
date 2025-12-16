@@ -1617,12 +1617,9 @@ get_todos({})
 - [Context7 Documentation](https://context7.com)
 
 ### GigHub 專案文檔
-- **快速開始**: `.github/QUICK_START_COPILOT.md`
-- **Secrets 配置**: `.github/COPILOT_SECRETS_SETUP.md`
-- **下一步指南**: `.github/COPILOT_SETUP_NEXT_STEPS.md`
-- **架構說明**: `.github/COPILOT_ARCHITECTURE.md`
+- **完整設定指南**: `.github/COPILOT_SETUP_GUIDE.md`
+- **MCP 工具代理**: `.github/copilot/agents/mcp.yml`
 - **Workflow 文檔**: `.github/workflows/README.md`
-- **主要設定**: `.github/COPILOT_SETUP.md`
 
 ### 相關連結
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)

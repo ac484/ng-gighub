@@ -188,8 +188,7 @@
 
 ### 4. 疑難排解
 - 查看 `mcp.yml` 的 troubleshooting 區段
-- 檢查 `.github/COPILOT_ARCHITECTURE.md`
-- 參考 `.github/QUICK_START_COPILOT.md`
+- 參考 `.github/COPILOT_SETUP_GUIDE.md` 完整設定指南
 
 ## 🎯 代理選擇指南
 
@@ -211,8 +210,7 @@
 - **主指令**: `.github/copilot-instructions.md`
 - **MCP 配置**: `.github/copilot/mcp-servers.yml`
 - **MCP 指令參考**: `.github/MCP_COMMANDS_REFERENCE.md`
-- **快速開始**: `.github/QUICK_START_COPILOT.md`
-- **架構說明**: `.github/COPILOT_ARCHITECTURE.md`
+- **完整設定指南**: `.github/COPILOT_SETUP_GUIDE.md`
 - **安全規則**: `.github/copilot/security-rules.yml`
 
 ## 📊 統計資訊

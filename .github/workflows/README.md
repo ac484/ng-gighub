@@ -51,7 +51,7 @@ This workflow customizes the development environment for GitHub Copilot Coding A
 - Pull request changes to workflow file or copilot configuration files
 
 **Documentation:**
-- [Setup Guide](../COPILOT_SECRETS_SETUP.md) - Detailed guide for configuring secrets
+- [Setup Guide](../COPILOT_SETUP_GUIDE.md) - Comprehensive guide for configuring Copilot and secrets
 - [GitHub Docs](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/customize-the-agent-environment)
 
 ## Adding Secrets

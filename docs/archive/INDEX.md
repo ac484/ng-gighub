@@ -545,7 +545,7 @@ Google Generative AI 整合文檔。
 **活躍文檔**: 
 - `docs/README.md` - 主要文檔索引
 - `docs/GigHub_Architecture.md` - 當前架構
-- `docs/next.md` - 開發計畫
+- `docs/blueprint-architecture.md` - 開發計畫
 
 **歸檔日期**: 2025-12-15  
 **歸檔原因**: 功能已完成、文檔已過時或已整合到新文檔中  
