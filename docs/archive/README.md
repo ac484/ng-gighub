@@ -162,7 +162,7 @@ archive/
 
 - **主文檔**: `docs/README.md`
 - **當前架構**: `docs/GigHub_Architecture.md`
-- **開發計畫**: `docs/next.md`
+- **開發計畫**: `docs/blueprint-architecture.md`
 - **任務功能**: `docs/TASK_MODULE_FEATURES.md`
 
 ---
