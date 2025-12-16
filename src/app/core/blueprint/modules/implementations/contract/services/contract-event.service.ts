@@ -82,6 +82,40 @@ export interface WorkItemTaskLinkPayload {
   taskId: string;
 }
 
+export interface ContractParsingRequestedPayload {
+  blueprintId: string;
+  contractId: string;
+  requestId: string;
+  fileIds: string[];
+}
+
+export interface ContractParsingStartedPayload {
+  blueprintId: string;
+  contractId: string;
+  requestId: string;
+}
+
+export interface ContractParsingCompletedPayload {
+  blueprintId: string;
+  contractId: string;
+  requestId: string;
+  parsedData: import('../models').ContractParsedData;
+}
+
+export interface ContractParsingFailedPayload {
+  blueprintId: string;
+  contractId: string;
+  requestId: string;
+  errorMessage: string;
+}
+
+export interface ContractParsingConfirmedPayload {
+  blueprintId: string;
+  contractId: string;
+  confirmedBy: string;
+  confirmationType: 'confirmed' | 'modified';
+}
+
 @Injectable({ providedIn: 'root' })
 export class ContractEventService implements OnDestroy {
   private readonly eventBus = inject(BlueprintEventBus);
@@ -234,6 +268,70 @@ export class ContractEventService implements OnDestroy {
   }
 
   // ===============================
+  // Event Emission - Parsing
+  // ===============================
+
+  /**
+   * Emit parsing requested event
+   */
+  emitParsingRequested(blueprintId: string, contractId: string, requestId: string, fileIds: string[]): void {
+    this.emit<ContractParsingRequestedPayload>(
+      BlueprintEventType.CONTRACT_PARSING_REQUESTED,
+      { blueprintId, contractId, requestId, fileIds },
+      blueprintId
+    );
+  }
+
+  /**
+   * Emit parsing started event
+   */
+  emitParsingStarted(blueprintId: string, contractId: string, requestId: string): void {
+    this.emit<ContractParsingStartedPayload>(
+      BlueprintEventType.CONTRACT_PARSING_STARTED,
+      { blueprintId, contractId, requestId },
+      blueprintId
+    );
+  }
+
+  /**
+   * Emit parsing completed event
+   */
+  emitParsingCompleted(
+    blueprintId: string,
+    contractId: string,
+    requestId: string,
+    parsedData: import('../models').ContractParsedData
+  ): void {
+    this.emit<ContractParsingCompletedPayload>(
+      BlueprintEventType.CONTRACT_PARSING_COMPLETED,
+      { blueprintId, contractId, requestId, parsedData },
+      blueprintId
+    );
+  }
+
+  /**
+   * Emit parsing failed event
+   */
+  emitParsingFailed(blueprintId: string, contractId: string, requestId: string, errorMessage: string): void {
+    this.emit<ContractParsingFailedPayload>(
+      BlueprintEventType.CONTRACT_PARSING_FAILED,
+      { blueprintId, contractId, requestId, errorMessage },
+      blueprintId
+    );
+  }
+
+  /**
+   * Emit parsing confirmed event
+   */
+  emitParsingConfirmed(blueprintId: string, contractId: string, confirmedBy: string, confirmationType: 'confirmed' | 'modified'): void {
+    this.emit<ContractParsingConfirmedPayload>(
+      BlueprintEventType.CONTRACT_PARSING_CONFIRMED,
+      { blueprintId, contractId, confirmedBy, confirmationType },
+      blueprintId
+    );
+  }
+
+  // ===============================
   // Event Subscription
   // ===============================
 
@@ -326,6 +424,45 @@ export class ContractEventService implements OnDestroy {
    */
   onWorkItemTaskUnlinked(handler: EventHandler<WorkItemTaskLinkPayload>): () => void {
     return this.subscribe(BlueprintEventType.CONTRACT_WORK_ITEM_TASK_UNLINKED, handler);
+  }
+
+  // ===============================
+  // Event Subscription - Parsing
+  // ===============================
+
+  /**
+   * Subscribe to parsing requested events
+   */
+  onParsingRequested(handler: EventHandler<ContractParsingRequestedPayload>): () => void {
+    return this.subscribe(BlueprintEventType.CONTRACT_PARSING_REQUESTED, handler);
+  }
+
+  /**
+   * Subscribe to parsing started events
+   */
+  onParsingStarted(handler: EventHandler<ContractParsingStartedPayload>): () => void {
+    return this.subscribe(BlueprintEventType.CONTRACT_PARSING_STARTED, handler);
+  }
+
+  /**
+   * Subscribe to parsing completed events
+   */
+  onParsingCompleted(handler: EventHandler<ContractParsingCompletedPayload>): () => void {
+    return this.subscribe(BlueprintEventType.CONTRACT_PARSING_COMPLETED, handler);
+  }
+
+  /**
+   * Subscribe to parsing failed events
+   */
+  onParsingFailed(handler: EventHandler<ContractParsingFailedPayload>): () => void {
+    return this.subscribe(BlueprintEventType.CONTRACT_PARSING_FAILED, handler);
+  }
+
+  /**
+   * Subscribe to parsing confirmed events
+   */
+  onParsingConfirmed(handler: EventHandler<ContractParsingConfirmedPayload>): () => void {
+    return this.subscribe(BlueprintEventType.CONTRACT_PARSING_CONFIRMED, handler);
   }
 
   // ===============================

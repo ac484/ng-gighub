@@ -190,3 +190,44 @@ export interface FileUploadDto {
   /** User who uploads */
   uploadedBy: string;
 }
+
+/**
+ * Contract Parsing Request DTO
+ */
+export interface ContractParsingRequestDto {
+  /** Blueprint ID */
+  blueprintId: string;
+  /** Contract ID */
+  contractId: string;
+  /** File IDs to parse */
+  fileIds: string[];
+  /** Parsing engine preference */
+  enginePreference?: 'ocr' | 'ai' | 'auto';
+  /** User who requests parsing */
+  requestedBy: string;
+}
+
+/**
+ * Contract Parsing Confirmation DTO
+ */
+export interface ContractParsingConfirmationDto {
+  /** Blueprint ID */
+  blueprintId: string;
+  /** Contract ID */
+  contractId: string;
+  /** Whether data is confirmed as-is or modified */
+  confirmationType: 'confirmed' | 'modified';
+  /** Modified data (if any) */
+  modifiedData?: {
+    contractNumber?: string;
+    title?: string;
+    totalAmount?: number;
+    currency?: string;
+    startDate?: Date;
+    endDate?: Date;
+    owner?: Partial<ContractParty>;
+    contractor?: Partial<ContractParty>;
+  };
+  /** User who confirms */
+  confirmedBy: string;
+}

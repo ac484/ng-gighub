@@ -171,5 +171,21 @@ export enum BlueprintEventType {
   CONTRACT_WORK_ITEM_TASK_LINKED = 'CONTRACT_WORK_ITEM_TASK_LINKED',
 
   /** Contract work item unlinked from task */
-  CONTRACT_WORK_ITEM_TASK_UNLINKED = 'CONTRACT_WORK_ITEM_TASK_UNLINKED'
+  CONTRACT_WORK_ITEM_TASK_UNLINKED = 'CONTRACT_WORK_ITEM_TASK_UNLINKED',
+
+  // ===== Contract Parsing Events =====
+  /** Contract parsing requested */
+  CONTRACT_PARSING_REQUESTED = 'CONTRACT_PARSING_REQUESTED',
+
+  /** Contract parsing started */
+  CONTRACT_PARSING_STARTED = 'CONTRACT_PARSING_STARTED',
+
+  /** Contract parsing completed */
+  CONTRACT_PARSING_COMPLETED = 'CONTRACT_PARSING_COMPLETED',
+
+  /** Contract parsing failed */
+  CONTRACT_PARSING_FAILED = 'CONTRACT_PARSING_FAILED',
+
+  /** Contract parsed data confirmed */
+  CONTRACT_PARSING_CONFIRMED = 'CONTRACT_PARSING_CONFIRMED'
 }

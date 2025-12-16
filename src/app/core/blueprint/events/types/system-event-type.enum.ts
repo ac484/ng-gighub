@@ -49,6 +49,16 @@ export enum SystemEventType {
   CONTRACT_FILE_UPLOADED = 'contract.file.uploaded',
   /** 合約檔案移除 */
   CONTRACT_FILE_REMOVED = 'contract.file.removed',
+  /** 合約解析請求 */
+  CONTRACT_PARSING_REQUESTED = 'contract.parsing.requested',
+  /** 合約解析開始 */
+  CONTRACT_PARSING_STARTED = 'contract.parsing.started',
+  /** 合約解析完成 */
+  CONTRACT_PARSING_COMPLETED = 'contract.parsing.completed',
+  /** 合約解析失敗 */
+  CONTRACT_PARSING_FAILED = 'contract.parsing.failed',
+  /** 合約解析資料確認 */
+  CONTRACT_PARSING_CONFIRMED = 'contract.parsing.confirmed',
 
   // ===== Task Events =====
   /** 任務建立 */

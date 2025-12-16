@@ -2,7 +2,7 @@
  * Contract Upload Service
  *
  * Handles contract file uploads to Firebase Storage.
- * OCR/AI parsing functionality is interface-only (YAGNI principle).
+ * Integrates with ContractParsingService for OCR/AI parsing.
  * Implements SETC-012: Contract Upload & Parsing Service.
  *
  * @author GigHub Development Team
@@ -34,33 +34,6 @@ export interface FileValidationResult {
   errors: string[];
 }
 
-/**
- * Parsed contract data (interface only - not implemented in v1)
- */
-export interface ContractParsedData {
-  title?: string;
-  description?: string;
-  parties?: {
-    owner?: { name?: string; contactPerson?: string };
-    contractor?: { name?: string; contactPerson?: string };
-  };
-  amounts?: {
-    total?: number;
-    currency?: string;
-  };
-  dates?: {
-    startDate?: string;
-    endDate?: string;
-  };
-  workItems?: Array<{
-    name?: string;
-    quantity?: number;
-    unit?: string;
-    unitPrice?: number;
-  }>;
-  confidence?: number;
-}
-
 @Injectable({ providedIn: 'root' })
 export class ContractUploadService {
   private readonly storage = inject(Storage);
@@ -89,8 +62,13 @@ export class ContractUploadService {
 
   /**
    * Upload a single contract file
+   *
+   * @param blueprintId - Blueprint ID
+   * @param contractId - Contract ID
+   * @param file - File to upload
+   * @param uploadedBy - User ID who uploads (optional, defaults to 'current-user')
    */
-  async uploadContractFile(blueprintId: string, contractId: string, file: File): Promise<FileAttachment> {
+  async uploadContractFile(blueprintId: string, contractId: string, file: File, uploadedBy = 'current-user'): Promise<FileAttachment> {
     this._uploading.set(true);
     this._error.set(null);
 
@@ -146,7 +124,7 @@ export class ContractUploadService {
         fileUrl: downloadUrl,
         storagePath,
         uploadedAt: new Date(),
-        uploadedBy: 'current-user' // Should be replaced with actual user ID
+        uploadedBy
       };
 
       // Emit event
@@ -165,13 +143,23 @@ export class ContractUploadService {
 
   /**
    * Upload multiple files
+   *
+   * @param blueprintId - Blueprint ID
+   * @param contractId - Contract ID
+   * @param files - Files to upload
+   * @param uploadedBy - User ID who uploads (optional)
    */
-  async uploadMultipleFiles(blueprintId: string, contractId: string, files: File[]): Promise<FileAttachment[]> {
+  async uploadMultipleFiles(
+    blueprintId: string,
+    contractId: string,
+    files: File[],
+    uploadedBy = 'current-user'
+  ): Promise<FileAttachment[]> {
     const results: FileAttachment[] = [];
 
     for (const file of files) {
       try {
-        const attachment = await this.uploadContractFile(blueprintId, contractId, file);
+        const attachment = await this.uploadContractFile(blueprintId, contractId, file, uploadedBy);
         results.push(attachment);
       } catch (err) {
         console.error('[ContractUploadService]', 'Failed to upload file', file.name, err);
@@ -331,40 +319,32 @@ export class ContractUploadService {
   }
 
   // ===============================
-  // OCR/AI Parsing (Interface Only - NOT IMPLEMENTED)
+  // OCR/AI Parsing Integration
   // ===============================
 
   /**
-   * Trigger parsing for an uploaded file
+   * Trigger parsing for uploaded files
    *
-   * @note This is an interface placeholder - not implemented in v1 (YAGNI)
+   * @param blueprintId - Blueprint ID
+   * @param contractId - Contract ID
+   * @param fileIds - File IDs to parse
+   * @param requestedBy - User ID who requests parsing
+   * @returns Parsing request ID
+   *
+   * @deprecated Use ContractParsingService.requestParsing() directly
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async triggerParsing(contractId: string, fileId: string): Promise<void> {
-    console.warn('[ContractUploadService]', 'OCR/AI parsing not implemented in v1 (YAGNI)');
-    throw new Error('OCR/AI parsing not available - feature planned for future release');
-  }
+  async triggerParsing(blueprintId: string, contractId: string, fileIds: string[], requestedBy: string): Promise<string> {
+    // This method is kept for backward compatibility
+    // Import ContractParsingService dynamically to avoid circular dependency
+    const { ContractParsingService } = await import('./contract-parsing.service');
+    const parsingService = new ContractParsingService();
 
-  /**
-   * Confirm parsed data
-   *
-   * @note This is an interface placeholder - not implemented in v1 (YAGNI)
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async confirmParsedData(contractId: string, data: ContractParsedData): Promise<void> {
-    console.warn('[ContractUploadService]', 'Parsed data confirmation not implemented in v1 (YAGNI)');
-    throw new Error('Parsed data confirmation not available - feature planned for future release');
-  }
-
-  /**
-   * Get parsing status
-   *
-   * @note This is an interface placeholder - not implemented in v1 (YAGNI)
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getParsingStatus(contractId: string, fileId: string): Promise<'pending' | 'processing' | 'completed' | 'failed'> {
-    console.warn('[ContractUploadService]', 'Parsing status check not implemented in v1 (YAGNI)');
-    return 'pending';
+    return parsingService.requestParsing({
+      blueprintId,
+      contractId,
+      fileIds,
+      requestedBy
+    });
   }
 
   // ===============================
