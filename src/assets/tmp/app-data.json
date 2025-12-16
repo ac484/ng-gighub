@@ -1,0 +1,193 @@
+{
+  "app": {
+    "name": "GigHub",
+    "description": "工地施工進度追蹤管理系統"
+  },
+  "user": {
+    "name": "User",
+    "avatar": "./assets/tmp/img/avatar.jpg",
+    "email": ""
+  },
+    
+  "menu": [
+    {
+      "text": "主導航",
+      "i18n": "menu.main",
+      "group": true,
+      "hideInBreadcrumb": true,
+      "children": [
+        {
+          "text": "儀錶盤",
+          "i18n": "menu.dashboard",
+          "icon": "anticon-dashboard",
+          "link": "/dashboard/user",
+          "badge": 0
+        },
+        {
+          "text": "我的藍圖",
+          "i18n": "menu.blueprint",
+          "icon": "anticon-project",
+          "link": "/blueprints/user",
+          "badge": 0
+        },
+        {
+          "text": "個人設定",
+          "i18n": "menu.settings",
+          "icon": "anticon-setting",
+          "link": "/user/settings"
+        },
+        {
+          "text": "探索",
+          "i18n": "menu.explore",
+          "icon": "anticon-search",
+          "link": "/explore"
+        }
+      ]
+    }
+  ],
+  
+  "menus": {
+    "user": [
+      {
+        "text": "主導航",
+        "i18n": "menu.main",
+        "group": true,
+        "hideInBreadcrumb": true,
+        "children": [
+          {
+            "text": "儀錶盤",
+            "i18n": "menu.dashboard",
+            "icon": "anticon-dashboard",
+            "link": "/dashboard/user",
+            "badge": 0
+          },
+          {
+            "text": "我的藍圖",
+            "i18n": "menu.blueprint",
+            "icon": "anticon-project",
+            "link": "/blueprints/user",
+            "badge": 0
+          },
+          {
+            "text": "個人設定",
+            "i18n": "menu.settings",
+            "icon": "anticon-setting",
+            "link": "/user/settings"
+          },
+          {
+            "text": "探索",
+            "i18n": "menu.explore",
+            "icon": "anticon-search",
+            "link": "/explore"
+          },
+          {
+            "text": "AI 助理",
+            "i18n": "menu.ai_assistant",
+            "icon": "anticon-robot",
+            "link": "/ai-assistant"
+          }
+        ]
+      }
+    ],
+    "organization": [
+      {
+        "text": "組織導航",
+        "i18n": "menu.organization",
+        "group": true,
+        "hideInBreadcrumb": true,
+        "children": [
+          {
+            "text": "組織儀錶盤",
+            "i18n": "menu.dashboard",
+            "icon": "anticon-dashboard",
+            "link": "/dashboard/organization",
+            "badge": 0
+          },
+          {
+            "text": "組織藍圖",
+            "i18n": "menu.blueprint",
+            "icon": "anticon-project",
+            "link": "/blueprints/organization",
+            "badge": 0
+          },
+          {
+            "text": "組織成員",
+            "i18n": "menu.organization.members",
+            "icon": "anticon-team",
+            "link": "/organization/members",
+            "badge": 0
+          },
+          {
+            "text": "團隊管理",
+            "i18n": "menu.organization.teams",
+            "icon": "anticon-usergroup-add",
+            "link": "/organization/teams"
+          },
+          {
+            "text": "組織設定",
+            "i18n": "menu.settings",
+            "icon": "anticon-setting",
+            "link": "/organization/settings"
+          },
+          {
+            "text": "AI 助理",
+            "i18n": "menu.ai_assistant",
+            "icon": "anticon-robot",
+            "link": "/ai-assistant"
+          }
+        ]
+      }
+    ],
+    "team": [
+      {
+        "text": "團隊導航",
+        "i18n": "menu.team",
+        "group": true,
+        "hideInBreadcrumb": true,
+        "children": [
+          {
+            "text": "團隊工作臺",
+            "i18n": "menu.dashboard",
+            "icon": "anticon-dashboard",
+            "link": "/dashboard/team",
+            "badge": 0
+          },
+          {
+            "text": "團隊成員",
+            "i18n": "menu.team.members",
+            "icon": "anticon-team",
+            "link": "/team/members"
+          },
+          {
+            "text": "AI 助理",
+            "i18n": "menu.ai_assistant",
+            "icon": "anticon-robot",
+            "link": "/ai-assistant"
+          }
+        ]
+      }
+    ],
+    "bot": [
+      {
+        "text": "機器人導航",
+        "i18n": "menu.bot",
+        "group": true,
+        "hideInBreadcrumb": true,
+        "children": [
+          {
+            "text": "儀錶盤",
+            "i18n": "menu.dashboard",
+            "icon": "anticon-dashboard",
+            "children": [
+              {
+                "text": "機器人控制台",
+                "link": "/dashboard/monitor",
+                "i18n": "menu.dashboard.monitor"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

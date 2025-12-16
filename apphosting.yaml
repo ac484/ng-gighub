@@ -1,0 +1,130 @@
+# Settings for Cloud Run
+runConfig:
+  minInstances: 0
+  maxInstances: 10
+  concurrency: 5
+
+# Environment variables and secrets
+env:
+  # Example configuration for Firebase Storage bucket
+  # Uncomment and configure as needed
+  # - variable: STORAGE_BUCKET
+  #   value: mybucket.firebasestorage.app
+  #   availability:
+  #     - BUILD
+  #     - RUNTIME
+
+  # Example secret configurations (uncomment and configure as needed)
+  # - variable: API_KEY
+  #   secret: myApiKeySecret
+  #
+  # - variable: PINNED_API_KEY
+  #   secret: myApiKeySecret@5
+  #
+  # - variable: VERBOSE_API_KEY
+  #   secret: projects/test-project/secrets/secretID
+  #
+  # - variable: PINNED_VERBOSE_API_KEY
+  #   secret: projects/test-project/secrets/secretID/versions/5
+
+  # Google Generative AI API Key Secret
+  # Configured via: firebase functions:secrets:set GOOGLE_AI_API_KEY
+
+  - variable: NG_PUBLIC_SUPABASE_ANON_KEY
+    value: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplY3Nic3RqcWpxb3l0d2dqeWN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0OTk5MzcsImV4cCI6MjA4MTA3NTkzN30.GQSslGa2ujmjdR-DeqXwPiAUr0RPe2O3lwb37wnJQeE'
+
+  - variable: NG_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    value: 'sb_publishable_LZu1BRiT0v9XpE4LOZ0i_w_bo-p5_H-'
+
+  - variable: NG_PUBLIC_SUPABASE_URL
+    value: 'https://zecsbstjqjqoytwgjyct.supabase.co'
+
+  - variable: POSTGRES_DATABASE
+    value: 'postgres'
+
+  - variable: POSTGRES_HOST
+    value: 'db.zecsbstjqjqoytwgjyct.supabase.co'
+
+  - variable: POSTGRES_PASSWORD
+    value: 'IBXgJ6mxLrlQxNEm'
+
+  - variable: POSTGRES_PRISMA_URL
+    value: 'postgres://postgres.zecsbstjqjqoytwgjyct:IBXgJ6mxLrlQxNEm@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true'
+
+  - variable: POSTGRES_URL
+    value: 'postgres://postgres.zecsbstjqjqoytwgjyct:IBXgJ6mxLrlQxNEm@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require&supa=base-pooler.x'
+
+  - variable: POSTGRES_URL_NON_POOLING
+    value: 'postgres://postgres.zecsbstjqjqoytwgjyct:IBXgJ6mxLrlQxNEm@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require'
+
+  - variable: POSTGRES_USER
+    value: 'postgres'
+
+  - variable: SUPABASE_JWT_SECRET
+    value: 'UThV9Y0dpE23ZlQvXvT3pkSFYiv6sKg4oloGJlD+LKdhxhwqce+kGx52OTdQcBJqSqgN12kSu0asj6+4jdORiA=='
+
+  - variable: SUPABASE_PUBLISHABLE_KEY
+    value: 'sb_publishable_LZu1BRiT0v9XpE4LOZ0i_w_bo-p5_H-'
+
+  - variable: SUPABASE_SECRET_KEY
+    value: 'sb_secret_RVUxLLfip1E638_cHl1q3A_8zlUSIyy'
+
+  - variable: SUPABASE_SERVICE_ROLE_KEY
+    value: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplY3Nic3RqcWpxb3l0d2dqeWN0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTQ5OTkzNywiZXhwIjoyMDgxMDc1OTM3fQ.3k-encLQ4LPaYGOi6MLuyZS9d5Ft31XbZM1nWqVN2so'
+
+  - variable: FIREBASE_API_KEY
+    value: 'AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI'
+
+  - variable: FIREBASE_AUTH_DOMAIN
+    value: 'elite-chiller-455712-c4.firebaseapp.com'
+
+  - variable: FIREBASE_PROJECT_ID
+    value: 'elite-chiller-455712-c4'
+
+  - variable: FIREBASE_STORAGE_BUCKET
+    value: 'elite-chiller-455712-c4.firebasestorage.app'
+
+  - variable: FIREBASE_MESSAGING_SENDER_ID
+    value: '7807661688'
+
+  - variable: FIREBASE_APP_ID
+    value: '1:7807661688:web:5f96a5fe30b799f31d1f8d'
+
+  - variable: FIREBASE_MEASUREMENT_ID
+    value: 'G-5KJJ3DD2G7'
+
+  - variable: FIREBASE_VAPID_KEY
+    value: 'BMfTfys7cErI2JVFmjkWSeCb7ClvFklQ4r69lWGIYT2dSq5VD2eguZlckvdq2QJhdGskeyUg0G6RcC8WmlBztFY'
+
+  - variable: NG_PUBLIC_SUPABASE_URL
+    value: 'https://zecsbstjqjqoytwgjyct.supabase.co'
+
+  - variable: NG_PUBLIC_SUPABASE_ANON_KEY
+    value: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplY3Nic3RqcWpxb3l0d2dqeWN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0OTk5MzcsImV4cCI6MjA4MTA3NTkzN30.GQSslGa2ujmjdR-DeqXwPiAUr0RPe2O3lwb37wnJQeE'
+
+  - variable: NG_APP_ENABLE_SUPABASE
+    value: 'true'
+
+  - variable: NG_APP_ENABLE_DUAL_WRITE
+    value: 'false'
+
+  - variable: NG_APP_PRIMARY_DATASOURCE
+    value: 'supabase'
+
+  - variable: NG_APP_ENABLE_VERBOSE_LOGGING
+    value: 'false'
+
+  - variable: NG_APP_ENABLE_HEALTH_CHECK
+    value: 'true'
+
+  - variable: NG_APP_HEALTH_CHECK_INTERVAL
+    value: '30000'
+
+  - variable: NG_APP_PRODUCTION
+    value: 'false'
+
+  - variable: NG_APP_API_BASE_URL
+    value: './'
+
+  - variable: NG_APP_USE_HASH
+    value: 'true'

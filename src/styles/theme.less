@@ -1,0 +1,57 @@
+// Xuanwu (Black Tortoise) theme
+// Minimal overrides for @delon/theme dark baseline
+
+// Core palette
+@xuanwu-6: #1e3a8a;
+@xuanwu-8: #1d4ed8;
+@xuanwu-10: #0b1220;
+@teal-4: #0d9488;
+@teal-6: #0b5c6b;
+@steel-3: #64748b;
+
+// Semantic tokens
+@primary-color: @xuanwu-6;
+@success-color: @teal-4;
+@info-color: @steel-3;
+@warning-color: #f59e0b;
+@error-color: #ef4444;
+@processing-color: @primary-color;
+
+// Surface + typography tuned for dark mode
+@body-background: @xuanwu-10;
+@layout-body-background: #0c1323;
+@component-background: #0f172a;
+@text-color: #e5e7eb;
+@text-color-secondary: #9ca3af;
+@heading-color: #f8fafc;
+@disabled-color: #6b7280;
+@border-color-base: #1f2937;
+@border-color-split: #111827;
+@item-hover-bg: fade(@primary-color, 16%);
+@item-active-bg: fade(@primary-color, 24%);
+
+// Layout accents
+@alain-default-header-bg: transparent;
+@layout-header-background: transparent;
+@alain-default-aside-bg: #0f172a;
+@alain-default-aside-nav-selected-text-color: @primary-color;
+@alain-default-aside-nav-selected-bg: fade(@primary-color, 12%);
+@alain-default-content-bg: @layout-body-background;
+
+// Gradients + effects
+@gradient-primary: linear-gradient(135deg, @primary-color 0%, @teal-4 100%);
+@gradient-surface: linear-gradient(145deg, fade(@xuanwu-10, 94%) 0%, fade(@primary-color, 40%) 100%);
+@shadow-soft: 0 10px 30px fade(@primary-color, 28%);
+@transition-fast: 0.18s ease;
+@transition-base: 0.28s ease;
+
+// Import dark theme after tokens
+@import '@delon/theme/theme-dark.less';
+
+// Keep key component highlights in sync
+@tabs-ink-bar-color: @primary-color;
+@menu-highlight-color: @primary-color;
+@btn-primary-bg: @primary-color;
+@btn-primary-color: #ffffff;
+@badge-color: @primary-color;
+@progress-default-color: @primary-color;

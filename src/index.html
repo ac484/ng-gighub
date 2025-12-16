@@ -1,0 +1,390 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>GigHub - 工地施工進度追蹤管理系統</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- Apple Touch Icon -->
+  <!-- <link rel="apple-touch-icon" href="custom-icon.png"> -->
+  <!-- Xuanwu Theme Preloader Styles -->
+  <style type="text/css">
+    /* ============================================
+     * Xuanwu Theme - Construction Preloader
+     * 玄武主題 - 建築施工進度載入動畫
+     * ============================================
+     * Design: Professional construction crane animation
+     * Colors: Xuanwu gradient (#1E3A8A → #0D9488)
+     * Performance: GPU-accelerated (transform, opacity)
+     * Compatibility: Modern browsers (CSS3 animations)
+     * ============================================ */
+    
+    /* Preloader Container */
+    .preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1E3A8A 0%, #0D9488 100%);
+      transition: opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .preloader-hidden-add {
+      display: block;
+      opacity: 1;
+    }
+    
+    .preloader-hidden-add-active {
+      opacity: 0;
+    }
+    
+    .preloader-hidden {
+      display: none;
+    }
+    
+    /* Loader Container */
+    .cs-loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+    }
+    
+    /* Construction Site Base */
+    .construction-base {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 180px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+    }
+    
+    /* Crane Structure */
+    .crane {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 100px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+      border-radius: 2px;
+    }
+    
+    /* Crane Arm (Horizontal) */
+    .crane-arm {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform-origin: left center;
+      width: 120px;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
+      border-radius: 2px;
+      animation: crane-swing 3s ease-in-out infinite;
+    }
+    
+    /* Hook Cable */
+    .crane-cable {
+      position: absolute;
+      right: 10px;
+      top: 0;
+      width: 2px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.5);
+      transform-origin: top center;
+      animation: cable-bounce 3s ease-in-out infinite;
+    }
+    
+    /* Construction Block */
+    .construction-block {
+      position: absolute;
+      right: -8px;
+      bottom: -16px;
+      width: 18px;
+      height: 18px;
+      background: linear-gradient(135deg, #FFFFFF 0%, #E6F7FF 100%);
+      border-radius: 2px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      animation: block-lift 3s ease-in-out infinite;
+    }
+    
+    /* Progress Dots */
+    .progress-dots {
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+    }
+    
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      animation: dot-pulse 1.5s ease-in-out infinite;
+    }
+    
+    .progress-dot:nth-child(1) { animation-delay: 0s; }
+    .progress-dot:nth-child(2) { animation-delay: 0.2s; }
+    .progress-dot:nth-child(3) { animation-delay: 0.4s; }
+    .progress-dot:nth-child(4) { animation-delay: 0.6s; }
+    .progress-dot:nth-child(5) { animation-delay: 0.8s; }
+    
+    /* Loading Text */
+    .loading-text {
+      position: absolute;
+      bottom: -70px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      white-space: nowrap;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Progress Bar Container */
+    .progress-bar-container {
+      position: absolute;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Progress Bar Fill - Xuanwu Theme */
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, 
+        #1E3A8A 0%, 
+        #0D9488 50%, 
+        #1E3A8A 100%);
+      background-size: 200% 100%;
+      border-radius: 3px;
+      box-shadow: 0 0 10px rgba(30, 58, 138, 0.5);
+      animation: progress-fill 3s ease-in-out infinite,
+                 progress-shimmer 2s linear infinite;
+    }
+    
+    /* Progress Percentage Text */
+    .progress-percentage {
+      position: absolute;
+      bottom: -125px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 1px;
+    }
+    
+    /* ============================================
+     * Keyframe Animations
+     * ============================================ */
+    
+    /* Crane Arm Swing Animation */
+    @keyframes crane-swing {
+      0%, 100% {
+        transform: rotate(-5deg);
+      }
+      50% {
+        transform: rotate(5deg);
+      }
+    }
+    
+    /* Cable Bounce Animation */
+    @keyframes cable-bounce {
+      0%, 100% {
+        height: 50px;
+      }
+      50% {
+        height: 30px;
+      }
+    }
+    
+    /* Block Lift Animation */
+    @keyframes block-lift {
+      0%, 100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      50% {
+        transform: translateY(-20px);
+        opacity: 0.8;
+      }
+    }
+    
+    /* Dot Pulse Animation */
+    @keyframes dot-pulse {
+      0%, 100% {
+        background: rgba(255, 255, 255, 0.4);
+        transform: scale(1);
+      }
+      50% {
+        background: rgba(255, 255, 255, 0.9);
+        transform: scale(1.2);
+      }
+    }
+    
+    /* Glow Effect */
+    @keyframes glow-pulse {
+      0%, 100% {
+        box-shadow: 0 0 10px rgba(14, 165, 233, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(20, 184, 166, 0.5);
+      }
+    }
+    
+    /* Progress Bar Fill Animation */
+    @keyframes progress-fill {
+      0% {
+        width: 0%;
+      }
+      50% {
+        width: 75%;
+      }
+      100% {
+        width: 100%;
+      }
+    }
+    
+    /* Progress Bar Shimmer - Xuanwu Effect */
+    @keyframes progress-shimmer {
+      0% {
+        background-position: 0% 50%;
+      }
+      100% {
+        background-position: 200% 50%;
+      }
+    }
+    
+    /* ============================================
+     * Responsive Design
+     * ============================================ */
+    @media (max-width: 768px) {
+      .cs-loader {
+        width: 150px;
+        height: 150px;
+      }
+      
+      .crane {
+        height: 80px;
+      }
+      
+      .crane-arm {
+        width: 100px;
+      }
+      
+      .loading-text {
+        font-size: 14px;
+      }
+      
+      .progress-bar-container {
+        width: 150px;
+      }
+      
+      .progress-percentage {
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <app-root></app-root>
+  <div class="preloader">
+    <div class="cs-loader">
+      <!-- Construction Site Base -->
+      <div class="construction-base"></div>
+      
+      <!-- Crane Structure -->
+      <div class="crane">
+        <!-- Crane Arm -->
+        <div class="crane-arm">
+          <!-- Hook Cable -->
+          <div class="crane-cable">
+            <!-- Construction Block -->
+            <div class="construction-block"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Progress Dots -->
+      <div class="progress-dots">
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+      </div>
+      
+      <!-- Loading Text -->
+      <div class="loading-text">正在載入 GigHub...</div>
+      
+      <!-- Progress Bar with Xuanwu Theme -->
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill"></div>
+      </div>
+      
+      <!-- Progress Percentage -->
+      <div class="progress-percentage">0%</div>
+    </div>
+  </div>
+  
+  <!-- Progress Bar JavaScript - Simulated Loading -->
+  <script>
+    (function() {
+      'use strict';
+      
+      // Simulate progress bar loading
+      var progressFill = document.querySelector('.progress-bar-fill');
+      var progressText = document.querySelector('.progress-percentage');
+      var progress = 0;
+      var targetProgress = 100;
+      var duration = 3000; // 3 seconds to match animation
+      var startTime = Date.now();
+      
+      function updateProgress() {
+        var elapsed = Date.now() - startTime;
+        var percentage = Math.min((elapsed / duration) * 100, targetProgress);
+        progress = Math.floor(percentage);
+        
+        if (progressFill && progressText) {
+          progressFill.style.width = progress + '%';
+          progressText.textContent = progress + '%';
+        }
+        
+        if (progress < targetProgress) {
+          requestAnimationFrame(updateProgress);
+        }
+      }
+      
+      // Start progress animation
+      requestAnimationFrame(updateProgress);
+    })();
+  </script>
+</body>
+
+</html>

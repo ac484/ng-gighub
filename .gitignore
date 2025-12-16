@@ -59,5 +59,3 @@ yarn-error.log
 .firebase
 *-debug.log
 .runtimeconfig.json
-
-.env

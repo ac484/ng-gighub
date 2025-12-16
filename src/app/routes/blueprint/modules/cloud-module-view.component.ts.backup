@@ -1,0 +1,383 @@
+/**
+ * Cloud Module View Component
+ * 雲端域視圖元件
+ *
+ * Purpose: Display cloud storage, backup, and sync features
+ * Integrated with CloudStorageService and Blueprint EventBus
+ * Created: 2025-12-13
+ * Updated: 2025-12-13 - Integrated with Cloud Module
+ */
+
+import { Component, ChangeDetectionStrategy, OnInit, inject, input, ViewChild, ElementRef } from '@angular/core';
+import { CloudStorageService } from '@core/blueprint/modules/implementations/cloud';
+import type { CloudFile, CloudBackup } from '@core/blueprint/modules/implementations/cloud';
+import { STColumn } from '@delon/abc/st';
+import { SHARED_IMPORTS } from '@shared';
+import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzStatisticModule } from 'ng-zorro-antd/statistic';
+
+/**
+ * Cloud Module View Component
+ *
+ * Features:
+ * - Cloud storage statistics (real-time via service)
+ * - File management (upload/download/delete via CloudStorageService)
+ * - Backup management (create/restore via CloudStorageService)
+ * - Event-driven updates through Blueprint EventBus
+ *
+ * ✅ Follows Angular 20 Standalone Component pattern
+ * ✅ Uses Signals for state management
+ * ✅ Implements OnPush change detection
+ * ✅ Integrated with Blueprint Container and EventBus
+ */
+@Component({
+  selector: 'app-cloud-module-view',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SHARED_IMPORTS, NzStatisticModule, NzEmptyModule],
+  template: `
+    <nz-card nzTitle="雲端統計" class="mb-md">
+      <nz-row [nzGutter]="16">
+        <nz-col [nzSpan]="6">
+          <nz-statistic
+            [nzValue]="(stats().storageUsed / 1024 / 1024 / 1024).toFixed(2)"
+            nzTitle="已用容量 (GB)"
+            [nzPrefix]="storageIconTpl"
+          />
+          <ng-template #storageIconTpl>
+            <span nz-icon nzType="cloud-upload"></span>
+          </ng-template>
+        </nz-col>
+        <nz-col [nzSpan]="6">
+          <nz-statistic [nzValue]="stats().totalFiles" nzTitle="檔案數量" [nzPrefix]="filesIconTpl" />
+          <ng-template #filesIconTpl>
+            <span nz-icon nzType="file"></span>
+          </ng-template>
+        </nz-col>
+        <nz-col [nzSpan]="6">
+          <nz-statistic [nzValue]="files().length" nzTitle="已同步" [nzPrefix]="syncIconTpl" />
+          <ng-template #syncIconTpl>
+            <span nz-icon nzType="sync"></span>
+          </ng-template>
+        </nz-col>
+        <nz-col [nzSpan]="6">
+          <nz-statistic [nzValue]="stats().totalBackups" nzTitle="備份數" [nzPrefix]="backupIconTpl" />
+          <ng-template #backupIconTpl>
+            <span nz-icon nzType="save"></span>
+          </ng-template>
+        </nz-col>
+      </nz-row>
+
+      <!-- Usage Progress -->
+      <div class="mt-md">
+        <div style="margin-bottom: 8px;">
+          <span>儲存空間使用率: {{ stats().usagePercentage.toFixed(1) }}%</span>
+        </div>
+        <nz-progress [nzPercent]="stats().usagePercentage" [nzStatus]="stats().usagePercentage > 90 ? 'exception' : 'normal'" />
+      </div>
+    </nz-card>
+
+    <nz-card>
+      <nz-tabset>
+        <nz-tab nzTitle="雲端檔案">
+          <div class="mb-md">
+            <button nz-button nzType="primary" (click)="triggerFileUpload()" [nzLoading]="loading()">
+              <span nz-icon nzType="cloud-upload"></span>
+              上傳檔案
+            </button>
+            <input #fileInput type="file" style="display: none" (change)="onFileSelected($event)" multiple />
+          </div>
+          
+          @if (loading() && files().length === 0) {
+            <nz-spin nzSimple nzTip="載入中..." />
+          } @else if (files().length === 0) {
+            <nz-empty nzNotFoundContent="暫無雲端檔案，請上傳第一個檔案" />
+          } @else {
+            <st [data]="files()" [columns]="fileColumns" [loading]="loading()" />
+          }
+        </nz-tab>
+
+        <nz-tab nzTitle="同步狀態">
+          @if (loading()) {
+            <nz-spin nzSimple />
+          } @else {
+            <nz-empty nzNotFoundContent="同步功能即將推出" />
+          }
+        </nz-tab>
+
+        <nz-tab nzTitle="備份管理">
+          <div class="mb-md">
+            <button nz-button nzType="primary" (click)="createBackup()" [nzLoading]="loading()">
+              <span nz-icon nzType="save"></span>
+              建立備份
+            </button>
+          </div>
+          
+          @if (loading() && backups().length === 0) {
+            <nz-spin nzSimple nzTip="載入中..." />
+          } @else if (backups().length === 0) {
+            <nz-empty nzNotFoundContent="暫無備份記錄，請建立第一個備份" />
+          } @else {
+            <st [data]="backups()" [columns]="backupColumns" [loading]="loading()" />
+          }
+        </nz-tab>
+      </nz-tabset>
+    </nz-card>
+  `,
+  styles: []
+})
+export class CloudModuleViewComponent implements OnInit {
+  private readonly cloudService = inject(CloudStorageService);
+  private readonly message = inject(NzMessageService);
+
+  // ViewChild for file input
+  @ViewChild('fileInput', { static: false }) fileInput?: ElementRef<HTMLInputElement>;
+
+  // ✅ Modern Angular 20 input pattern
+  blueprintId = input.required<string>();
+
+  // ✅ Signal-based state from service
+  readonly files = this.cloudService.files;
+  readonly backups = this.cloudService.backups;
+  readonly loading = this.cloudService.loading;
+  readonly stats = this.cloudService.stats;
+
+  // Table columns configuration
+  fileColumns: STColumn[] = [
+    { title: '檔案名稱', index: 'name' },
+    {
+      title: '大小',
+      index: 'size',
+      width: '100px',
+      format: (item: CloudFile) => this.formatFileSize(item.size)
+    },
+    { title: '類型', index: 'mimeType', width: '150px' },
+    {
+      title: '狀態',
+      index: 'status',
+      width: '100px',
+      type: 'badge',
+      badge: {
+        synced: { text: '已同步', color: 'success' },
+        pending: { text: '待同步', color: 'processing' },
+        error: { text: '錯誤', color: 'error' }
+      }
+    },
+    { title: '上傳時間', index: 'uploadedAt', type: 'date', width: '180px', dateFormat: 'yyyy-MM-dd HH:mm' },
+    {
+      title: '操作',
+      buttons: [
+        {
+          text: '下載',
+          icon: 'download',
+          click: (record: CloudFile) => this.downloadFile(record)
+        },
+        {
+          text: '刪除',
+          icon: 'delete',
+          type: 'del',
+          pop: {
+            title: '確認刪除此檔案？',
+            okType: 'danger'
+          },
+          click: (record: CloudFile) => this.deleteFile(record)
+        }
+      ]
+    }
+  ];
+
+  backupColumns: STColumn[] = [
+    { title: '備份名稱', index: 'name' },
+    {
+      title: '大小',
+      index: 'size',
+      width: '120px',
+      format: (item: CloudBackup) => this.formatFileSize(item.size)
+    },
+    { title: '檔案數', index: 'fileCount', width: '100px' },
+    { title: '建立時間', index: 'createdAt', type: 'date', width: '180px', dateFormat: 'yyyy-MM-dd HH:mm' },
+    {
+      title: '操作',
+      buttons: [
+        {
+          text: '還原',
+          icon: 'reload',
+          click: (record: CloudBackup) => this.restoreBackup(record)
+        },
+        {
+          text: '下載',
+          icon: 'download',
+          click: (record: CloudBackup) => this.downloadBackup(record)
+        }
+      ]
+    }
+  ];
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  /**
+   * Load cloud data
+   */
+  private async loadData(): Promise<void> {
+    const blueprintId = this.blueprintId();
+
+    try {
+      await this.cloudService.loadFiles(blueprintId);
+      await this.cloudService.loadBackups(blueprintId);
+    } catch (error) {
+      this.message.error('載入雲端資料失敗');
+      console.error('[CloudModuleView] Load data failed', error);
+    }
+  }
+
+  /**
+   * Trigger file input click
+   */
+  triggerFileUpload(): void {
+    if (this.fileInput) {
+      this.fileInput.nativeElement.click();
+    }
+  }
+
+  /**
+   * Handle file selection
+   */
+  async onFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+
+    const blueprintId = this.blueprintId();
+    const files = Array.from(input.files);
+
+    for (const file of files) {
+      try {
+        await this.cloudService.uploadFile(blueprintId, {
+          file,
+          metadata: {
+            originalName: file.name,
+            description: `Uploaded from blueprint ${blueprintId}`
+          },
+          isPublic: false
+        });
+
+        this.message.success(`檔案 ${file.name} 上傳成功`);
+      } catch (error) {
+        this.message.error(`檔案 ${file.name} 上傳失敗`);
+        console.error('[CloudModuleView] Upload failed', error);
+      }
+    }
+
+    // Clear input
+    input.value = '';
+  }
+
+  /**
+   * Download file
+   */
+  async downloadFile(file: CloudFile): Promise<void> {
+    try {
+      const blueprintId = this.blueprintId();
+      const blob = await this.cloudService.downloadFile(blueprintId, { fileId: file.id });
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      this.message.success(`檔案 ${file.name} 下載成功`);
+    } catch (error) {
+      this.message.error(`檔案 ${file.name} 下載失敗`);
+      console.error('[CloudModuleView] Download failed', error);
+    }
+  }
+
+  /**
+   * Delete file
+   */
+  async deleteFile(file: CloudFile): Promise<void> {
+    try {
+      const blueprintId = this.blueprintId();
+      await this.cloudService.deleteFile(blueprintId, file.id);
+      this.message.success(`檔案 ${file.name} 刪除成功`);
+    } catch (error) {
+      this.message.error(`檔案 ${file.name} 刪除失敗`);
+      console.error('[CloudModuleView] Delete failed', error);
+    }
+  }
+
+  /**
+   * Create backup
+   */
+  async createBackup(): Promise<void> {
+    try {
+      const blueprintId = this.blueprintId();
+      const backupName = `Backup ${new Date().toISOString().split('T')[0]}`;
+
+      await this.cloudService.createBackup(blueprintId, {
+        name: backupName,
+        description: 'Manual backup created from UI',
+        options: {
+          compress: true,
+          encrypt: false
+        }
+      });
+
+      this.message.success(`備份 ${backupName} 建立成功`);
+    } catch (error) {
+      this.message.error('建立備份失敗');
+      console.error('[CloudModuleView] Create backup failed', error);
+    }
+  }
+
+  /**
+   * Restore backup
+   */
+  async restoreBackup(backup: CloudBackup): Promise<void> {
+    try {
+      const blueprintId = this.blueprintId();
+
+      await this.cloudService.restoreBackup(blueprintId, {
+        backupId: backup.id,
+        options: {
+          overwrite: false
+        }
+      });
+
+      this.message.success(`備份 ${backup.name} 還原成功`);
+    } catch (error) {
+      this.message.error(`備份 ${backup.name} 還原失敗`);
+      console.error('[CloudModuleView] Restore backup failed', error);
+    }
+  }
+
+  /**
+   * Download backup
+   */
+  downloadBackup(backup: CloudBackup): void {
+    this.message.info(`下載備份 ${backup.name} 功能即將推出`);
+    console.log('[CloudModuleView] Download backup:', backup);
+  }
+
+  /**
+   * Format file size
+   */
+  private formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 B';
+
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+  }
+}

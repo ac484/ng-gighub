@@ -1,0 +1,234 @@
+# Code Review Agent Configuration
+# 程式碼審查代理配置
+
+name: review
+description: "Specialized agent for code review with MCP tools integration"
+
+# MCP 工具用於程式碼審查
+mcp_tools:
+  primary:
+    - context7  # 驗證 API 使用
+    - supabase  # 檢查資料庫操作
+    - sequential-thinking  # 深度分析
+    - git  # 查看變更
+    - filesystem  # 讀取檔案
+  
+  secondary:
+    - github  # 取得 PR 資訊
+    - memory  # 記錄審查模式
+
+# 審查流程
+review_workflow:
+  steps:
+    - name: "取得變更"
+      tools: ["git.diff", "git.status"]
+      description: "查看所有變更檔案"
+    
+    - name: "讀取檔案"
+      tools: ["filesystem.read_multiple_files"]
+      description: "讀取相關檔案內容"
+    
+    - name: "驗證 API 使用"
+      tools: ["context7.get-library-docs"]
+      description: "確認 Angular/Supabase API 正確性"
+    
+    - name: "檢查資料庫操作"
+      tools: ["supabase.get_advisors"]
+      description: "安全性與效能檢查"
+    
+    - name: "深度分析"
+      tools: ["sequential-thinking.sequentialthinking"]
+      description: "架構與邏輯分析"
+    
+    - name: "記錄審查"
+      tools: ["memory.create_entities"]
+      description: "記錄審查模式與發現"
+
+# 審查檢查清單
+review_checklist:
+  angular:
+    - "使用 Standalone Components"
+    - "使用 Signals 而非 RxJS Subject (當適用時)"
+    - "使用新控制流語法 (@if, @for, @switch)"
+    - "使用 input()/output() 函式而非裝飾器 (Angular 19+)"
+    - "使用 inject() 而非 constructor DI"
+    - "OnPush 變更偵測策略"
+    - "適當的錯誤處理"
+    - "TypeScript 嚴格模式合規"
+  
+  ng_alain:
+    - "遵循三層架構 (Foundation/Container/Business)"
+    - "使用 SHARED_IMPORTS"
+    - "ST 表格使用 STColumn 型別"
+    - "動態表單使用 SFSchema"
+    - "ACL 權限控制"
+  
+  supabase:
+    - "使用 Repository Pattern"
+    - "Store Pattern with Signals"
+    - "適當的錯誤處理"
+    - "RLS policies 正確設定"
+    - "避免 N+1 查詢問題"
+    - "使用參數化查詢"
+  
+  security:
+    - "無硬編碼 secrets"
+    - "輸入驗證與消毒"
+    - "SQL injection 防護"
+    - "XSS 防護"
+    - "CSRF token 使用"
+    - "適當的權限檢查"
+  
+  performance:
+    - "Lazy loading 路由"
+    - "OnPush 策略"
+    - "適當的 trackBy"
+    - "避免記憶體洩漏"
+    - "Subscription 清理"
+    - "計算屬性使用 computed()"
+  
+  testing:
+    - "單元測試覆蓋率"
+    - "整合測試"
+    - "E2E 測試 (必要時)"
+  
+  documentation:
+    - "JSDoc 註解"
+    - "README 更新"
+    - "API 文檔"
+
+# 自動檢查觸發
+auto_checks:
+  # Angular API 驗證
+  - pattern: "from '@angular/"
+    action:
+      - tool: context7.resolve-library-id
+        params:
+          libraryName: "angular"
+      - tool: context7.get-library-docs
+        params:
+          context7CompatibleLibraryID: "/angular/angular"
+    reason: "驗證 Angular API 使用是否正確"
+  
+  # ng-alain API 驗證
+  - pattern: "from '@delon/"
+    action:
+      - tool: context7.resolve-library-id
+        params:
+          libraryName: "ng-alain"
+      - tool: context7.get-library-docs
+        params:
+          context7CompatibleLibraryID: "/ng-alain/delon"
+    reason: "驗證 ng-alain API 使用是否正確"
+  
+  # Supabase 操作檢查
+  - pattern: "supabase\\.client"
+    action:
+      - tool: supabase.get_advisors
+        params:
+          type: "security"
+      - tool: supabase.get_advisors
+        params:
+          type: "performance"
+    reason: "檢查資料庫操作安全性與效能"
+  
+  # SQL 查詢檢查
+  - pattern: "\\.(from|select|insert|update|delete)\\("
+    action:
+      - tool: sequential-thinking.sequentialthinking
+        params:
+          thought: "分析 SQL 查詢的安全性與效能"
+    reason: "確保 SQL 查詢安全且高效"
+
+# 審查評分
+review_criteria:
+  code_quality:
+    weight: 30
+    checks:
+      - "程式碼可讀性"
+      - "命名規範"
+      - "函式長度"
+      - "類別複雜度"
+      - "DRY 原則"
+  
+  architecture:
+    weight: 25
+    checks:
+      - "架構模式遵循"
+      - "關注點分離"
+      - "相依性注入"
+      - "模組化設計"
+  
+  security:
+    weight: 20
+    checks:
+      - "輸入驗證"
+      - "SQL injection 防護"
+      - "XSS 防護"
+      - "權限檢查"
+      - "Secrets 管理"
+  
+  performance:
+    weight: 15
+    checks:
+      - "變更偵測策略"
+      - "記憶體管理"
+      - "Bundle 大小"
+      - "API 呼叫優化"
+  
+  testing:
+    weight: 10
+    checks:
+      - "測試覆蓋率"
+      - "測試品質"
+      - "Edge cases"
+
+# 審查回饋模板
+feedback_templates:
+  angular_modern_syntax:
+    severity: warning
+    message: "建議使用 Angular 19+ 現代化語法"
+    examples:
+      - "使用 @if 而非 *ngIf"
+      - "使用 input() 而非 @Input()"
+      - "使用 inject() 而非 constructor injection"
+    mcp_tool: "context7.get-library-docs"
+    params:
+      context7CompatibleLibraryID: "/angular/angular"
+      topic: "modern-syntax"
+  
+  supabase_rls_missing:
+    severity: error
+    message: "資料表缺少 RLS policies"
+    examples:
+      - "啟用 RLS: ALTER TABLE table_name ENABLE ROW LEVEL SECURITY;"
+      - "建立 policy: CREATE POLICY ..."
+    mcp_tool: "supabase.get_advisors"
+    params:
+      type: "security"
+  
+  performance_oncreate:
+    severity: info
+    message: "考慮使用 OnPush 變更偵測策略"
+    examples:
+      - "changeDetection: ChangeDetectionStrategy.OnPush"
+    mcp_tool: "context7.get-library-docs"
+    params:
+      context7CompatibleLibraryID: "/angular/angular"
+      topic: "change-detection"
+
+# 記憶模式
+memory_patterns:
+  common_issues:
+    entity_type: "code_issue"
+    observations:
+      - "常見的程式碼問題"
+      - "審查中發現的模式"
+      - "團隊學習要點"
+  
+  best_practices:
+    entity_type: "best_practice"
+    observations:
+      - "良好的實作範例"
+      - "推薦的模式"
+      - "效能優化技巧"

@@ -1,0 +1,448 @@
+/**
+ * Workspace Context Service (Firebase Version) - Refactored with Angular 20 Best Practices
+ *
+ * 統一的工作區上下文管理服務 (Firebase 版本) - 使用 Angular 20 最佳實踐重構
+ * Unified workspace context management service (Firebase version) - Refactored with Angular 20 best practices
+ *
+ * Manages the current workspace context (user, organization, team, bot)
+ * and provides reactive state for context switching.
+ *
+ * Architecture:
+ * - RxJS Pipeline: Handles ALL async operations (data loading, HTTP requests)
+ * - Signals: Manages sync state only (context type, context ID)
+ * - Computed: Derived state (labels, icons, mappings)
+ * - Effects: Side effects only (sync to SettingsService, persistence)
+ *
+ * This follows Angular 20 best practices from Context7 documentation:
+ * - "RxJS for Async, Signals for Sync"
+ * - Use switchMap to handle async operations in pipelines
+ * - Use shareReplay(1) to prevent duplicate requests
+ * - Use toSignal to convert Observable to Signal at the end
+ * - Keep effects "thin and focused" - no async operations
+ *
+ * @module shared/services
+ */
+
+import { Injectable, computed, inject, signal, effect } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ContextType, Account, Organization, Team, Bot, FirebaseAuthService } from '@core';
+import { OrganizationRepository, TeamRepository } from '@core/repositories';
+import { SettingsService } from '@delon/theme';
+import { combineLatest, of, switchMap, map, shareReplay, catchError, BehaviorSubject } from 'rxjs';
+
+const STORAGE_KEY = 'workspace_context';
+
+/**
+ * User data structure containing all async-loaded data
+ */
+interface UserData {
+  user: Account | null;
+  organizations: Organization[];
+  teams: Team[];
+  bots: Bot[];
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class WorkspaceContextService {
+  private readonly firebaseAuth = inject(FirebaseAuthService);
+  private readonly organizationRepo = inject(OrganizationRepository);
+  private readonly teamRepo = inject(TeamRepository);
+  private readonly settingsService = inject(SettingsService);
+
+  // ============================================================================
+  // RxJS Pipeline: Handle ALL async operations
+  // ============================================================================
+
+  /**
+   * Reload trigger - use BehaviorSubject to manually trigger data reload
+   */
+  private readonly reloadTrigger$ = new BehaviorSubject<void>(undefined);
+
+  /**
+   * Main data pipeline using RxJS operators (Angular 20 best practice)
+   * - switchMap: Automatically cancels previous requests
+   * - combineLatest: Load multiple resources in parallel
+   * - shareReplay(1): Cache result, prevent duplicate requests
+   * - catchError: Handle errors gracefully
+   */
+  private readonly userData$ = combineLatest([this.firebaseAuth.user$, this.reloadTrigger$]).pipe(
+    switchMap(([user]) => {
+      if (!user) {
+        console.log('[WorkspaceContextService] 👤 No user authenticated');
+        return of({ user: null, organizations: [], teams: [], bots: [] });
+      }
+
+      console.log('[WorkspaceContextService] 👤 User authenticated:', user.email);
+
+      // Convert Firebase user to Account
+      const account: Account = {
+        id: user.uid,
+        uid: user.uid,
+        name: user.displayName || user.email?.split('@')[0] || user.email || '使用者',
+        email: user.email || '',
+        avatar_url: user.photoURL,
+        created_at: new Date().toISOString()
+      };
+
+      // Load organizations for this user
+      return this.organizationRepo.findByCreator(user.uid).pipe(
+        switchMap(organizations => {
+          console.log('[WorkspaceContextService] ✅ Organizations loaded:', organizations.length);
+
+          if (organizations.length === 0) {
+            return of({ user: account, organizations: [], teams: [], bots: [] });
+          }
+
+          // Load teams for all organizations in parallel
+          const teamObservables = organizations.map(org => this.teamRepo.findByOrganization(org.id));
+
+          return combineLatest(teamObservables).pipe(
+            map(teamArrays => {
+              const allTeams = teamArrays.flat();
+              console.log('[WorkspaceContextService] ✅ Teams loaded:', allTeams.length);
+              return {
+                user: account,
+                organizations,
+                teams: allTeams,
+                bots: [] as Bot[] // Bots not yet implemented
+              };
+            })
+          );
+        }),
+        catchError(error => {
+          console.error('[WorkspaceContextService] ❌ Error loading user data:', error);
+          // Return partial data on error (user info is still valid)
+          return of({ user: account, organizations: [], teams: [], bots: [] });
+        })
+      );
+    }),
+    shareReplay(1) // Cache result, prevent duplicate requests
+  );
+
+  // ============================================================================
+  // Signals: Manage sync state only
+  // ============================================================================
+
+  /**
+   * Convert Observable to Signal (only at the end of pipeline)
+   * This is the Angular 20 recommended pattern: RxJS for async, Signals for sync
+   */
+  private readonly _userData = toSignal(this.userData$, {
+    initialValue: { user: null, organizations: [], teams: [], bots: [] }
+  });
+
+  // Context state (sync, can be directly modified)
+  private readonly _contextType = signal<ContextType>(ContextType.USER);
+  private readonly _contextId = signal<string | null>(null);
+  private readonly _switching = signal<boolean>(false);
+
+  // ============================================================================
+  // Public Readonly Signals (Computed from userData)
+  // ============================================================================
+
+  readonly currentUser = computed(() => this._userData().user);
+  readonly organizations = computed(() => this._userData().organizations);
+  readonly teams = computed(() => this._userData().teams);
+  readonly bots = computed(() => this._userData().bots);
+
+  readonly contextType = this._contextType.asReadonly();
+  readonly contextId = this._contextId.asReadonly();
+  readonly switching = this._switching.asReadonly();
+
+  // Loading states (derived from userData state)
+  readonly isLoadingData = computed(() => {
+    const data = this._userData();
+    // If user exists but no organizations loaded yet, we're loading
+    return !!data.user && data.organizations.length === 0 && data.teams.length === 0;
+  });
+
+  // ============================================================================
+  // Computed Signals: Derived state (pure logic, no side effects)
+  // ============================================================================
+
+  /** Is user authenticated? */
+  readonly isAuthenticated = computed(() => !!this.currentUser());
+
+  /** Context label (displayed in UI) */
+  readonly contextLabel = computed(() => {
+    const type = this.contextType();
+    const id = this.contextId();
+    const user = this.currentUser();
+
+    // Handle USER context early loading state
+    if (type === ContextType.USER) {
+      if (!user) return '載入中...';
+      return user.name;
+    }
+
+    switch (type) {
+      case ContextType.ORGANIZATION:
+        const org = this.organizations().find(o => o.id === id);
+        return org?.name || '組織';
+      case ContextType.TEAM:
+        const team = this.teams().find(t => t.id === id);
+        return team?.name || '團隊';
+      case ContextType.BOT:
+        const bot = this.bots().find(b => b.id === id);
+        return bot?.name || '機器人';
+      default:
+        return '個人帳戶';
+    }
+  });
+
+  /** Context icon (displayed in UI) */
+  readonly contextIcon = computed(() => {
+    const iconMap = {
+      [ContextType.USER]: 'user',
+      [ContextType.ORGANIZATION]: 'team',
+      [ContextType.TEAM]: 'usergroup-add',
+      [ContextType.BOT]: 'robot'
+    };
+    return iconMap[this.contextType()] || 'user';
+  });
+
+  /** Teams grouped by organization */
+  readonly teamsByOrganization = computed(() => {
+    const teams = this.teams();
+    const orgs = this.organizations();
+    const map = new Map<string, Team[]>();
+
+    orgs.forEach(org => map.set(org.id, []));
+    teams.forEach(team => {
+      const orgId = team.organization_id;
+      if (orgId && map.has(orgId)) {
+        map.get(orgId)!.push(team);
+      }
+    });
+
+    return map;
+  });
+
+  // ============================================================================
+  // Effects: Side effects only (sync to SettingsService, persistence)
+  // ============================================================================
+
+  constructor() {
+    /**
+     * Effect #1: Sync to SettingsService for ng-alain components
+     * This is a "thin and focused" effect - only syncing state
+     * No async operations, no HTTP requests
+     */
+    effect(() => {
+      const user = this.currentUser();
+      const type = this.contextType();
+      const id = this.contextId();
+
+      if (!user) {
+        // Clear SettingsService when no user
+        this.settingsService.setUser({
+          name: '未登入',
+          email: '',
+          avatar: './assets/tmp/img/avatar.jpg'
+        });
+        return;
+      }
+
+      // Determine avatar and name based on context
+      let avatarUrl = user.avatar_url;
+      let name = user.name;
+
+      if (type === ContextType.ORGANIZATION) {
+        const org = this.organizations().find(o => o.id === id);
+        if (org) {
+          avatarUrl = org.logo_url || avatarUrl;
+          name = org.name;
+        }
+      } else if (type === ContextType.TEAM) {
+        const team = this.teams().find(t => t.id === id);
+        if (team) {
+          const parentOrg = this.organizations().find(o => o.id === team.organization_id);
+          avatarUrl = parentOrg?.logo_url || avatarUrl;
+          name = team.name;
+        }
+      }
+
+      // Sync to SettingsService (single source of truth for ng-alain)
+      this.settingsService.setUser({
+        name,
+        email: user.email,
+        avatar: avatarUrl || './assets/tmp/img/avatar.jpg'
+      });
+    });
+
+    /**
+     * Effect #2: Auto-restore context on initial load
+     * Runs once when user data is first loaded
+     */
+    effect(() => {
+      const user = this.currentUser();
+
+      // Only restore context when user is first loaded
+      if (user && this.contextType() === ContextType.USER && !this.contextId()) {
+        console.log('[WorkspaceContextService] 🔄 Auto-restoring context...');
+        this.restoreContext();
+      }
+    });
+  }
+  // ============================================================================
+  // Context Switching: Pure sync operations
+  // ============================================================================
+
+  /**
+   * Switch to user context
+   */
+  switchToUser(userId: string): void {
+    this.switchContext(ContextType.USER, userId);
+  }
+
+  /**
+   * Switch to organization context
+   */
+  switchToOrganization(organizationId: string): void {
+    this.switchContext(ContextType.ORGANIZATION, organizationId);
+  }
+
+  /**
+   * Switch to team context
+   */
+  switchToTeam(teamId: string): void {
+    this.switchContext(ContextType.TEAM, teamId);
+  }
+
+  /**
+   * Switch to bot context
+   */
+  switchToBot(botId: string): void {
+    this.switchContext(ContextType.BOT, botId);
+  }
+
+  /**
+   * Switch context (internal method)
+   * Pure sync operation - just updates signals
+   */
+  switchContext(type: ContextType, id: string | null): void {
+    console.log('[WorkspaceContextService] 🔀 Switching context:', { type, id });
+    this._switching.set(true);
+
+    this._contextType.set(type);
+    this._contextId.set(id);
+
+    this.persistContext();
+    this._switching.set(false);
+
+    console.log('[WorkspaceContextService] ✅ Context switched successfully');
+  }
+
+  // ============================================================================
+  // Data Management: Manual operations (for dynamic updates)
+  // ============================================================================
+
+  /**
+   * Add organization to the list
+   * Useful when user creates a new organization
+   */
+  addOrganization(org: Organization): void {
+    const current = this._userData();
+    const organizations = current.organizations;
+
+    // Check if already exists to avoid duplicates
+    if (!organizations.find(o => o.id === org.id)) {
+      // Note: We can't directly mutate _userData since it's from toSignal
+      // This is a limitation - ideally organizations should be a separate signal
+      // For now, we'll reload data
+      console.log('[WorkspaceContextService] ⚠️ Organization added, reloading data...');
+      this.reloadData();
+    }
+  }
+
+  /**
+   * Remove organization from the list
+   */
+  removeOrganization(orgId: string): void {
+    console.log('[WorkspaceContextService] ⚠️ Organization removed, reloading data...');
+    this.reloadData();
+  }
+
+  /**
+   * Add team to the list
+   */
+  addTeam(team: Team): void {
+    console.log('[WorkspaceContextService] ⚠️ Team added, reloading data...');
+    this.reloadData();
+  }
+
+  /**
+   * Remove team from the list
+   */
+  removeTeam(teamId: string): void {
+    console.log('[WorkspaceContextService] ⚠️ Team removed, reloading data...');
+    this.reloadData();
+  }
+
+  /**
+   * Reload data from Firebase
+   * Forces the userData$ pipeline to re-execute by emitting on reloadTrigger$
+   */
+  reloadData(): void {
+    console.log('[WorkspaceContextService] 🔄 Triggering data reload...');
+    this.reloadTrigger$.next();
+  }
+
+  /**
+   * Get teams for a specific organization
+   */
+  getTeamsForOrg(orgId: string): Team[] {
+    return this.teamsByOrganization().get(orgId) || [];
+  }
+
+  // ============================================================================
+  // Persistence: localStorage operations
+  // ============================================================================
+
+  /**
+   * Restore context from localStorage
+   */
+  private restoreContext(): void {
+    if (typeof localStorage === 'undefined') return;
+
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      console.log('[WorkspaceContextService] 💾 Restoring context from localStorage:', saved);
+
+      if (saved) {
+        const { type, id } = JSON.parse(saved);
+        this._contextType.set(type);
+        this._contextId.set(id);
+        console.log('[WorkspaceContextService] ✅ Context restored:', { type, id });
+      } else {
+        // Default to user context
+        const userId = this.currentUser()?.id;
+        if (userId) {
+          this.switchToUser(userId);
+        }
+      }
+    } catch (error) {
+      console.error('[WorkspaceContextService] ❌ Failed to restore context:', error);
+    }
+  }
+
+  /**
+   * Persist context to localStorage
+   */
+  private persistContext(): void {
+    if (typeof localStorage === 'undefined') return;
+
+    try {
+      const state = {
+        type: this.contextType(),
+        id: this.contextId()
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      console.log('[WorkspaceContextService] 💾 Context persisted:', state);
+    } catch (error) {
+      console.error('[WorkspaceContextService] ❌ Failed to persist context:', error);
+    }
+  }
+}

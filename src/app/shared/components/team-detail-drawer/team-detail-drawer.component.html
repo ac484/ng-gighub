@@ -1,0 +1,202 @@
+<div class="team-detail-drawer">
+  <!-- Header -->
+  <div class="drawer-header">
+    <h2>{{ team().name }}</h2>
+    <button nz-button nzType="text" nzSize="small" (click)="close()">
+      <span nz-icon nzType="close"></span>
+    </button>
+  </div>
+
+  <nz-divider></nz-divider>
+
+  <!-- Team Information -->
+  <div class="drawer-section">
+    <h3><span nz-icon nzType="info-circle"></span> 基本資訊</h3>
+    <nz-descriptions [nzColumn]="1" nzBordered nzSize="small">
+      <nz-descriptions-item nzTitle="團隊名稱">{{ team().name }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="描述">{{ team().description || '尚無描述' }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="建立時間">{{ formatDate(team().created_at) }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="成員數量">
+        <nz-tag nzColor="blue">
+          <span nz-icon nzType="user"></span>
+          {{ members().length }} 人
+        </nz-tag>
+      </nz-descriptions-item>
+    </nz-descriptions>
+  </div>
+
+  <nz-divider></nz-divider>
+
+  <!-- Members List -->
+  <div class="drawer-section">
+    <div class="section-header">
+      <h3><span nz-icon nzType="team"></span> 成員列表 ({{ members().length }})</h3>
+    </div>
+
+    @if (loading()) {
+      <div style="text-align: center; padding: 24px;">
+        <nz-spin nzSimple></nz-spin>
+        <p style="margin-top: 12px;">載入中...</p>
+      </div>
+    } @else {
+      @if (members().length > 0) {
+        <nz-list nzSize="small" [nzDataSource]="members()" nzBordered>
+          <nz-list-item *ngFor="let member of members()">
+            <nz-list-item-meta>
+              <nz-list-item-meta-title>
+                <span nz-icon nzType="user"></span>
+                {{ member.user_id }}
+              </nz-list-item-meta-title>
+              <nz-list-item-meta-description>
+                加入時間: {{ formatDate(member.joined_at) }}
+              </nz-list-item-meta-description>
+            </nz-list-item-meta>
+            <ul nz-list-item-actions>
+              <nz-list-item-action>
+                <nz-tag [nzColor]="roleColor(member.role)">
+                  {{ roleLabel(member.role) }}
+                </nz-tag>
+              </nz-list-item-action>
+              <nz-list-item-action>
+                <button nz-button nzType="link" nzSize="small" (click)="changeRole(member)">
+                  <span nz-icon nzType="swap"></span>
+                  變更角色
+                </button>
+              </nz-list-item-action>
+              <nz-list-item-action>
+                <button nz-button nzType="link" nzSize="small" nzDanger (click)="removeMember(member)">
+                  <span nz-icon nzType="delete"></span>
+                  移除
+                </button>
+              </nz-list-item-action>
+            </ul>
+          </nz-list-item>
+        </nz-list>
+      } @else {
+        <nz-empty nzNotFoundContent="此團隊尚無成員" [nzNotFoundFooter]="emptyFooter">
+          <ng-template #emptyFooter>
+            <p style="font-size: 12px;">請使用下方「新增成員」功能加入團隊成員</p>
+          </ng-template>
+        </nz-empty>
+      }
+    }
+  </div>
+
+  <nz-divider></nz-divider>
+
+  <!-- Add Member Section -->
+  <div class="drawer-section">
+    <h3><span nz-icon nzType="user-add"></span> 新增成員</h3>
+    
+    @if (availableOrgMembers().length > 0) {
+      <div class="add-member-form">
+        <nz-select
+          [(ngModel)]="selectedUserId"
+          nzShowSearch
+          nzPlaceHolder="選擇組織成員"
+          style="width: 100%; margin-bottom: 12px;"
+        >
+          @for (orgMember of availableOrgMembers(); track orgMember.user_id) {
+            <nz-option [nzValue]="orgMember.user_id" [nzLabel]="orgMember.user_id"></nz-option>
+          }
+        </nz-select>
+
+        <nz-select
+          [(ngModel)]="selectedRole"
+          nzPlaceHolder="選擇角色"
+          style="width: 100%; margin-bottom: 12px;"
+        >
+          <nz-option nzValue="MEMBER" nzLabel="成員"></nz-option>
+          <nz-option nzValue="LEADER" nzLabel="領導"></nz-option>
+        </nz-select>
+
+        <button 
+          nz-button 
+          nzType="primary" 
+          nzBlock
+          [nzLoading]="addingMember()"
+          [disabled]="!selectedUserId()"
+          (click)="addMember()"
+        >
+          <span nz-icon nzType="plus"></span>
+          新增至團隊
+        </button>
+      </div>
+    } @else {
+      <nz-alert
+        nzType="info"
+        nzMessage="沒有可新增的成員"
+        nzDescription="組織中的所有成員都已加入此團隊。"
+        nzShowIcon
+      ></nz-alert>
+    }
+  </div>
+
+  <nz-divider></nz-divider>
+
+  <!-- Actions -->
+  <div class="drawer-actions">
+    <nz-space [nzSize]="12">
+      <button *nzSpaceItem nz-button nzType="default" (click)="manageMembers()">
+        <span nz-icon nzType="team"></span>
+        詳細管理成員
+      </button>
+      <button *nzSpaceItem nz-button nzType="default" (click)="openEditModal()">
+        <span nz-icon nzType="edit"></span>
+        編輯團隊
+      </button>
+      <button *nzSpaceItem nz-button nzType="default" nzDanger (click)="deleteTeam()">
+        <span nz-icon nzType="delete"></span>
+        刪除團隊
+      </button>
+    </nz-space>
+  </div>
+</div>
+
+<style>
+  .team-detail-drawer {
+    padding: 0 24px 24px;
+  }
+
+  .drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 0 16px;
+  }
+
+  .drawer-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .drawer-section {
+    margin-bottom: 24px;
+  }
+
+  .drawer-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .add-member-form {
+    margin-top: 16px;
+  }
+
+      .drawer-actions {
+        padding-top: 16px;
+        border-top: 1px solid;
+      }
+</style>

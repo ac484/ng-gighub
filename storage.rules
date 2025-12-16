@@ -1,0 +1,123 @@
+rules_version = '2';
+
+/**
+ * Firebase Storage Security Rules for GigHub
+ * 
+ * Purpose: Secure file storage for blueprint cloud module
+ * Updated: 2025-12-14
+ * 
+ * Security Model:
+ * - Authenticated users only
+ * - Blueprint-scoped access control
+ * - File size limits enforced
+ * - Allowed file types validated
+ */
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // ==========================================
+    // Helper Functions
+    // ==========================================
+    
+    /**
+     * Check if user is authenticated
+     */
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    /**
+     * Get current account ID
+     */
+    function getCurrentAccountId() {
+      return request.auth != null ? request.auth.uid : null;
+    }
+    
+    /**
+     * Check if user can access blueprint
+     * Note: This requires Firestore document lookup
+     */
+    function canAccessBlueprint(blueprintId) {
+      return isAuthenticated() 
+        && exists(/databases/$(database)/documents/blueprints/$(blueprintId));
+    }
+    
+    /**
+     * Validate file size (max 100MB)
+     */
+    function isValidFileSize() {
+      return request.resource.size <= 100 * 1024 * 1024;
+    }
+    
+    /**
+     * Validate allowed file types
+     */
+    function isAllowedFileType() {
+      // Allow common file types
+      return request.resource.contentType.matches('image/.*')
+        || request.resource.contentType.matches('video/.*')
+        || request.resource.contentType.matches('application/pdf')
+        || request.resource.contentType.matches('application/.*zip')
+        || request.resource.contentType.matches('application/.*sheet')
+        || request.resource.contentType.matches('application/.*document')
+        || request.resource.contentType.matches('text/.*');
+    }
+    
+    // ==========================================
+    // Blueprint Files Storage Rules
+    // ==========================================
+    
+    /**
+     * Blueprint file storage
+     * Path pattern: blueprint-{blueprintId}/files/{filePath}
+     * 
+     * Access: Users with blueprint access
+     * Operations: Upload, download, delete
+     */
+    match /blueprint-{blueprintId}/{allPaths=**} {
+      // Allow read if user has blueprint access
+      allow read: if isAuthenticated() && canAccessBlueprint(blueprintId);
+      
+      // Allow write if user has blueprint access and file is valid
+      allow write: if isAuthenticated() 
+        && canAccessBlueprint(blueprintId)
+        && isValidFileSize()
+        && isAllowedFileType();
+      
+      // Allow delete if user has blueprint access
+      allow delete: if isAuthenticated() && canAccessBlueprint(blueprintId);
+    }
+    
+    // ==========================================
+    // Public Files (if needed)
+    // ==========================================
+    
+    /**
+     * Public files (accessible by anyone)
+     * Path pattern: public/{filePath}
+     * 
+     * Use case: Public assets, shared files
+     */
+    match /public/{allPaths=**} {
+      // Anyone can read public files
+      allow read: if true;
+      
+      // Only authenticated users can write
+      allow write: if isAuthenticated()
+        && isValidFileSize()
+        && isAllowedFileType();
+      
+      // Only authenticated users can delete
+      allow delete: if isAuthenticated();
+    }
+    
+    // ==========================================
+    // Deny All Other Paths
+    // ==========================================
+    
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

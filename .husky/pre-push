@@ -1,0 +1,19 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+export NODE_OPTIONS="--max-old-space-size=4096"
+
+echo "🚀 執行 Pre-push 完整檢查..."
+
+# 1. Lint 檢查
+echo "📝 執行 Lint..."
+yarn lint || exit 1
+
+# 2. 執行測試
+echo "🧪 執行測試..."
+yarn test --watch=false --browsers=ChromeHeadless || exit 1
+
+# 3. 執行建置
+echo "🏗️ 執行建置..."
+yarn build || exit 1
+
+echo "✅ Pre-push 檢查完成！可以 push 了！"

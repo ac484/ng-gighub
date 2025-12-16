@@ -1,0 +1,163 @@
+<div class="ai-assistant-container">
+  <!-- Page Header -->
+  <nz-page-header
+    nzTitle="AI 助理"
+    nzSubtitle="由 Google Gemini 驅動的智能對話助手"
+  >
+    <nz-page-header-extra>
+      <nz-space>
+        @if (totalTokensUsed() > 0) {
+          <nz-statistic
+            *nzSpaceItem
+            [nzValue]="totalTokensUsed()"
+            nzTitle="Token 使用量"
+            [nzValueStyle]="{ fontSize: '16px' }"
+          />
+        }
+        @if (hasHistory()) {
+          <button
+            *nzSpaceItem
+            nz-button
+            nzType="default"
+            nzDanger
+            (click)="clearHistory()"
+            [disabled]="loading()"
+          >
+            <span nz-icon nzType="delete" nzTheme="outline"></span>
+            清除對話
+          </button>
+        }
+      </nz-space>
+    </nz-page-header-extra>
+  </nz-page-header>
+
+  <!-- Error Alert -->
+  @if (error()) {
+    <nz-alert
+      nzType="error"
+      [nzMessage]="error()!"
+      nzCloseable
+      (nzOnClose)="clearError()"
+      nzShowIcon
+      style="margin-bottom: 16px;"
+    />
+  }
+
+  <!-- Chat Container -->
+  <div class="ai-chat-container">
+    <!-- Chat Messages -->
+    <div class="ai-chat-messages" #chatMessages>
+      @if (!hasHistory()) {
+        <!-- Welcome Message -->
+        <nz-empty
+          nzNotFoundImage="simple"
+          [nzNotFoundContent]="welcomeTemplate"
+        />
+        <ng-template #welcomeTemplate>
+          <div class="welcome-message">
+            <h3>👋 歡迎使用 AI 助理</h3>
+            <p>我可以幫助您：</p>
+            <ul>
+              <li>📝 解答工程管理相關問題</li>
+              <li>🔍 分析施工進度數據</li>
+              <li>💡 提供專業建議與最佳實踐</li>
+              <li>📊 生成報告與摘要</li>
+            </ul>
+            <p class="hint">在下方輸入您的問題開始對話...</p>
+          </div>
+        </ng-template>
+      } @else {
+        <!-- Message List -->
+        @for (message of chatHistory(); track $index) {
+          <div 
+            class="chat-message" 
+            [class.user-message]="message.role === 'user'"
+            [class.ai-message]="message.role === 'model'"
+          >
+            <div class="message-avatar">
+              @if (message.role === 'user') {
+                <nz-avatar nzIcon="user" [nzSize]="32" />
+              } @else {
+                <nz-avatar nzIcon="robot" [nzSize]="32" />
+              }
+            </div>
+            <div class="message-content">
+              <div class="message-header">
+                <span class="message-role">
+                  {{ message.role === 'user' ? '您' : 'AI 助理' }}
+                </span>
+              </div>
+              <div class="message-text">{{ message.content }}</div>
+            </div>
+          </div>
+        }
+
+        <!-- Loading Indicator -->
+        @if (loading()) {
+          <div class="chat-message ai-message loading">
+            <div class="message-avatar">
+              <nz-avatar nzIcon="robot" [nzSize]="32" />
+            </div>
+            <div class="message-content">
+              <div class="message-header">
+                <span class="message-role">AI 助理</span>
+              </div>
+              <div class="message-text">
+                <nz-spin nzSimple [nzSize]="'small'" />
+                <span style="margin-left: 8px;">正在思考中...</span>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Chat Input -->
+    <div class="ai-chat-input">
+      <nz-input-group [nzSuffix]="sendButton" nzSize="large">
+        <textarea
+          nz-input
+          placeholder="輸入您的問題... (按 Enter 發送，Shift + Enter 換行)"
+          [nzAutosize]="{ minRows: 1, maxRows: 4 }"
+          [ngModel]="userMessage()"
+          (ngModelChange)="userMessage.set($event)"
+          (keydown)="handleKeyPress($event)"
+          (compositionstart)="onCompositionStart()"
+          (compositionend)="onCompositionEnd()"
+          [disabled]="loading()"
+        ></textarea>
+      </nz-input-group>
+      <ng-template #sendButton>
+        <button
+          nz-button
+          nzType="primary"
+          nzSize="large"
+          [disabled]="!canSend()"
+          (click)="sendMessage()"
+          style="margin-left: 8px;"
+        >
+          <span nz-icon nzType="send" nzTheme="outline"></span>
+          發送
+        </button>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Info Footer -->
+  <div class="ai-info-footer">
+    <nz-alert
+      nzType="info"
+      nzMessage="AI 助理使用 Google Gemini 2.0 Flash 模型提供服務"
+      [nzDescription]="infoTemplate"
+      nzShowIcon
+      nzCloseable
+    />
+    <ng-template #infoTemplate>
+      <ul style="margin: 0; padding-left: 20px;">
+        <li>AI 回應僅供參考，重要決策請諮詢專業人士</li>
+        <li>對話內容將用於改善服務品質</li>
+        <li>請勿分享敏感或機密資訊</li>
+      </ul>
+    </ng-template>
+  </div>
+</div>

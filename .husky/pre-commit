@@ -1,0 +1,23 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+export NODE_OPTIONS="--max-old-space-size=4096"
+
+echo "🔍 執行 Pre-commit 檢查..."
+
+# 1. TypeScript 類型檢查
+echo "📝 TypeScript 類型檢查..."
+npx --no-install tsc -p tsconfig.app.json --noEmit || exit 1
+
+# 2. Lint-staged (自動修復 lint 問題)
+echo "🎨 Lint 檢查與自動修復..."
+npx --no-install lint-staged || exit 1
+
+# 3. 執行測試 (可選 - 取消註解以啟用)
+# echo "🧪 執行測試..."
+# yarn test --watch=false --browsers=ChromeHeadless || exit 1
+
+# 4. 執行建置 (可選 - 取消註解以啟用，較耗時)
+# echo "🏗️ 執行建置..."
+# yarn build || exit 1
+
+echo "✅ Pre-commit 檢查完成！"

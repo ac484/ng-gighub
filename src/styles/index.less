@@ -1,0 +1,145 @@
+// Xuanwu minimal surface styling
+
+body {
+  background:
+    radial-gradient(circle at 20% 20%, fade(@primary-color, 10%), transparent 30%),
+    radial-gradient(circle at 80% 10%, fade(@teal-4, 12%), transparent 28%),
+    @layout-body-background;
+  color: @text-color;
+}
+
+::selection {
+  background: fade(@primary-color, 45%);
+  color: #ffffff;
+}
+
+.alain-default__header {
+  background: @gradient-primary !important;
+  border-bottom: 1px solid fade(@primary-color, 25%);
+  box-shadow: @shadow-soft;
+}
+
+.alain-default__nav-item {
+  color: @text-color-secondary !important;
+  transition: color @transition-fast, background @transition-fast;
+
+  &.active,
+  &:hover {
+    color: @heading-color !important;
+    background: fade(@primary-color, 14%);
+  }
+}
+
+.ant-layout-sider {
+  background: @alain-default-aside-bg !important;
+  border-right: 1px solid @border-color-base;
+}
+
+.xuanwu-surface,
+.ant-card {
+  background: @gradient-surface;
+  border: 1px solid fade(@primary-color, 18%);
+  box-shadow: @shadow-soft;
+  border-radius: 12px;
+  color: @text-color;
+}
+
+.ant-card-head {
+  border-color: fade(@primary-color, 18%);
+  color: @heading-color;
+}
+
+.ant-modal-content,
+.ant-drawer-body {
+  background: @component-background;
+  border: 1px solid fade(@primary-color, 16%);
+  box-shadow: @shadow-soft;
+}
+
+.xuanwu-bg-primary {
+  background: @primary-color !important;
+}
+
+.xuanwu-text-primary {
+  color: @primary-color !important;
+}
+
+.ant-btn-primary {
+  background: @gradient-primary;
+  border: none;
+  color: #ffffff;
+  box-shadow: @shadow-soft;
+  transition: box-shadow @transition-base, transform @transition-fast;
+
+  &:hover {
+    box-shadow: 0 12px 34px fade(@primary-color, 35%);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: @shadow-soft;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px fade(@primary-color, 35%);
+  }
+}
+
+.ant-btn-default {
+  color: @text-color;
+  border-color: fade(@primary-color, 25%);
+  background: fade(@component-background, 80%);
+  transition: all @transition-fast;
+
+  &:hover {
+    border-color: @primary-color;
+    color: @heading-color;
+    background: fade(@primary-color, 12%);
+  }
+}
+
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select-selector {
+  background: fade(@component-background, 90%) !important;
+  border-color: @border-color-base !important;
+  color: @text-color !important;
+  transition: border-color @transition-fast, box-shadow @transition-fast;
+}
+
+.ant-input:hover,
+.ant-input-affix-wrapper:hover,
+.ant-select:not(.ant-select-disabled) .ant-select-selector:hover {
+  border-color: fade(@primary-color, 50%) !important;
+}
+
+.ant-input:focus,
+.ant-input-focused,
+.ant-select-focused .ant-select-selector,
+.ant-input-affix-wrapper-focused {
+  border-color: @primary-color !important;
+  box-shadow: 0 0 0 2px fade(@primary-color, 30%) !important;
+}
+
+a {
+  color: @primary-color;
+  transition: color @transition-fast;
+
+  &:hover {
+    color: @teal-4;
+  }
+}
+
+.ant-spin-dot-item {
+  background-color: @primary-color;
+}
+
+.ant-progress-bg {
+  background: @gradient-primary !important;
+}
+
+.xuanwu-glow {
+  box-shadow: @shadow-soft;
+}

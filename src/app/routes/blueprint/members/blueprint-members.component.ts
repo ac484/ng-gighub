@@ -1,0 +1,213 @@
+import { Component, ChangeDetectionStrategy, OnInit, inject, input } from '@angular/core';
+import { BlueprintMember, BlueprintRole, LoggerService } from '@core';
+import { BlueprintMemberRepository } from '@core/blueprint/repositories';
+import { STColumn } from '@delon/abc/st';
+import { ModalHelper } from '@delon/theme';
+import { SHARED_IMPORTS, createAsyncArrayState } from '@shared';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { firstValueFrom } from 'rxjs';
+
+/**
+ * Blueprint Members Component
+ * 藍圖成員元件 - 管理藍圖成員
+ *
+ * Features:
+ * - Display members list
+ * - Add new member
+ * - Update member role
+ * - Remove member
+ *
+ * Following Occam's Razor: Simple, focused member management
+ * ✅ Modernized with AsyncState pattern
+ */
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-blueprint-members',
+  standalone: true,
+  imports: [SHARED_IMPORTS],
+  template: `
+    <nz-card nzTitle="成員管理" [nzExtra]="extra">
+      <ng-template #extra>
+        <button nz-button nzType="primary" (click)="addMember()">
+          <span nz-icon nzType="user-add"></span>
+          新增成員
+        </button>
+      </ng-template>
+
+      @if (membersState.loading()) {
+        <nz-spin nzSimple></nz-spin>
+      } @else if (membersState.error()) {
+        <nz-alert
+          nzType="error"
+          nzShowIcon
+          [nzMessage]="'載入失敗'"
+          [nzDescription]="membersState.error()?.message || '無法載入成員列表'"
+          class="mb-md"
+        />
+      } @else {
+        <st #st [data]="membersState.data() || []" [columns]="columns" [page]="{ show: false }"></st>
+      }
+    </nz-card>
+  `,
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+    `
+  ]
+})
+export class BlueprintMembersComponent implements OnInit {
+  private readonly message = inject(NzMessageService);
+  private readonly modal = inject(ModalHelper);
+  private readonly logger = inject(LoggerService);
+  private readonly memberRepository: BlueprintMemberRepository = inject(BlueprintMemberRepository);
+
+  // Input: blueprint ID
+  blueprintId = input.required<string>();
+
+  // ✅ Modern Pattern: Use AsyncState for unified state management
+  readonly membersState = createAsyncArrayState<BlueprintMember>([]);
+
+  // Table columns
+  columns: STColumn[] = [
+    {
+      title: '成員 ID',
+      index: 'accountId',
+      width: '250px'
+    },
+    {
+      title: '角色',
+      index: 'role',
+      width: '120px',
+      type: 'badge',
+      badge: {
+        viewer: { text: '檢視者', color: 'default' },
+        contributor: { text: '貢獻者', color: 'processing' },
+        maintainer: { text: '維護者', color: 'success' }
+      }
+    },
+    {
+      title: '業務角色',
+      index: 'businessRole',
+      width: '150px',
+      format: (item: BlueprintMember) => this.getBusinessRoleName(item.businessRole),
+      default: '-'
+    },
+    {
+      title: '外部成員',
+      index: 'isExternal',
+      width: '100px',
+      type: 'yn'
+    },
+    {
+      title: '授予時間',
+      index: 'grantedAt',
+      type: 'date',
+      width: '150px'
+    },
+    {
+      title: '操作',
+      width: '180px',
+      buttons: [
+        {
+          text: '編輯',
+          type: 'link',
+          click: (record: any) => this.editMember(record)
+        },
+        {
+          text: '移除',
+          type: 'del',
+          pop: {
+            title: '確定要移除此成員嗎?',
+            okType: 'danger'
+          },
+          click: (record: any) => this.removeMember(record)
+        }
+      ]
+    }
+  ];
+
+  ngOnInit(): void {
+    this.loadMembers();
+  }
+
+  /**
+   * Load members
+   * 載入成員列表
+   * ✅ Using AsyncState for automatic state management
+   */
+  private async loadMembers(): Promise<void> {
+    try {
+      await this.membersState.load(firstValueFrom(this.memberRepository.findByBlueprint(this.blueprintId())));
+      this.logger.info('[BlueprintMembersComponent]', `Loaded ${this.membersState.length()} members`);
+    } catch (error) {
+      this.message.error('載入成員失敗');
+      this.logger.error('[BlueprintMembersComponent]', 'Failed to load members', error as Error);
+    }
+  }
+
+  /**
+   * Get business role display name
+   * 取得業務角色顯示名稱
+   */
+  private getBusinessRoleName(role?: string): string {
+    if (!role) return '-';
+
+    const roleMap: Record<string, string> = {
+      project_manager: '專案經理',
+      site_supervisor: '工地主任',
+      engineer: '工程師',
+      quality_inspector: '品管人員',
+      architect: '建築師',
+      contractor: '承包商',
+      client: '業主'
+    };
+
+    return roleMap[role] || role;
+  }
+
+  /**
+   * Add new member
+   * 新增成員
+   */
+  async addMember(): Promise<void> {
+    const { MemberModalComponent } = await import('./member-modal.component');
+    this.modal.createStatic(MemberModalComponent, { blueprintId: this.blueprintId() }, { size: 'md' }).subscribe(result => {
+      if (result) {
+        this.loadMembers();
+      }
+    });
+  }
+
+  /**
+   * Edit member role/permissions
+   * 編輯成員角色/權限
+   */
+  async editMember(record: any): Promise<void> {
+    const member = record as BlueprintMember;
+    const { MemberModalComponent } = await import('./member-modal.component');
+    this.modal.createStatic(MemberModalComponent, { blueprintId: this.blueprintId(), member }, { size: 'md' }).subscribe(result => {
+      if (result) {
+        this.loadMembers();
+      }
+    });
+  }
+
+  /**
+   * Remove member
+   * 移除成員
+   */
+  async removeMember(record: any): Promise<void> {
+    const member = record as BlueprintMember;
+
+    try {
+      await this.memberRepository.removeMember(this.blueprintId(), member.id);
+      this.message.success('成員已移除');
+      this.loadMembers();
+    } catch (error) {
+      this.message.error('移除成員失敗');
+      this.logger.error('[BlueprintMembersComponent]', 'Failed to remove member', error as Error);
+    }
+  }
+}
