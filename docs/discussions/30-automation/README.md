@@ -6,6 +6,118 @@
 
 ---
 
+## 🏗️ Blueprint Event Bus 整合 (MANDATORY)
+
+### 🚨 核心要求
+- ✅ **事件總線增強**: 擴展 BlueprintEventBus 功能（優先級、過濾、重試）
+- ✅ **工作流程協調**: WorkflowOrchestrator 協調跨模組自動化流程
+- ✅ **零直接依賴**: 所有自動化透過事件訂閱實現
+- ✅ **事件鏈編排**: 定義 Task → Log → QC → Acceptance → Invoice/Warranty 流程
+
+### 📡 自動化事件鏈
+
+#### 完整自動化流程
+```mermaid
+graph LR
+    A[task.completed] -->|自動| B[log.created]
+    B -->|自動| C[qc.pending_created]
+    C -->|條件| D{QC 結果}
+    D -->|通過| E[acceptance.pending_created]
+    D -->|失敗| F[defect.created]
+    E -->|通過| G[invoice.generated]
+    E -->|通過| H[warranty.started]
+    E -->|失敗| I[issue.created]
+    
+    style A fill:#bbf
+    style B fill:#bbf
+    style C fill:#bbf
+    style D fill:#f96
+    style E fill:#bbf
+    style F fill:#fbb
+    style G fill:#bfb
+    style H fill:#bfb
+    style I fill:#fbb
+```
+
+#### WorkflowOrchestrator 實作範例
+```typescript
+@Injectable({ providedIn: 'root' })
+export class WorkflowOrchestrator {
+  private eventBus = inject(EnhancedEventBusService);
+  private logService = inject(LogService);
+  private qcService = inject(QCService);
+  private destroyRef = inject(DestroyRef);
+  
+  constructor() {
+    this.setupAutomationChains();
+  }
+  
+  private setupAutomationChains(): void {
+    // Task → Log 自動化
+    this.eventBus.on('task.completed')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => this.autoCreateLog(event));
+    
+    // Log → QC 自動化
+    this.eventBus.on('log.created')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => this.autoCreateQC(event));
+    
+    // QC → Acceptance/Defect 分支
+    this.eventBus.on('qc.completed')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => this.handleQCResult(event));
+  }
+  
+  private async autoCreateLog(event: BlueprintEvent): Promise<void> {
+    const { taskId, taskName, blueprintId } = event.data;
+    await this.logService.autoCreateFromTask({
+      blueprintId,
+      taskId,
+      content: `任務 ${taskName} 已完成`,
+      type: 'auto_generated'
+    });
+  }
+}
+```
+
+### 🚫 禁止模式
+```typescript
+// ❌ 禁止: 直接呼叫下游服務
+@Injectable({ providedIn: 'root' })
+export class TaskService {
+  private logService = inject(LogService);  // ❌ 直接依賴
+  
+  async completeTask(taskId: string) {
+    await this.repository.update(taskId, { status: 'completed' });
+    await this.logService.createLog({ taskId });  // ❌ 直接呼叫
+  }
+}
+```
+
+### ✅ 正確模式：純事件驅動
+```typescript
+// ✅ 正確: 發送事件，由 Orchestrator 協調
+@Injectable({ providedIn: 'root' })
+export class TaskService {
+  private eventBus = inject(BlueprintEventBusService);
+  
+  async completeTask(taskId: string): Promise<void> {
+    await this.repository.update(taskId, { status: 'completed' });
+    
+    // 發送事件，觸發自動化鏈
+    this.eventBus.emit({
+      type: 'task.completed',
+      blueprintId: this.blueprintContext.currentBlueprint()?.id,
+      timestamp: new Date(),
+      data: { taskId, taskName: task.name }
+    });
+  }
+}
+```
+
+---
+
 ## 📋 任務清單
 
 ### SETC-018: Event Bus Enhancement

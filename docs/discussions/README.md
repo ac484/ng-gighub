@@ -4,6 +4,37 @@
 
 ---
 
+## 🏗️ Blueprint 架構說明
+
+GigHub 採用 **Blueprint Context 架構模式**，這是一個事件驅動的模組化架構：
+
+### 核心架構原則
+1. 🚨 **模組間零直接依賴** - 禁止模組服務直接注入其他模組服務
+2. 📡 **BlueprintEventBus 強制使用** - 所有模組間通訊必須透過事件總線
+3. 🔒 **上下文隔離** - 每個 Blueprint 有獨立的事件總線與資料範圍
+4. 🔄 **事件驅動自動化** - 透過事件訂閱實現業務流程自動化
+
+### 模組通訊範例
+```typescript
+// ✅ 正確: 透過 Event Bus 通訊
+TaskService 
+  → emit('task.completed') 
+  → BlueprintEventBus 
+  → LogService subscribes 
+  → auto create log
+
+// ❌ 禁止: 直接依賴
+TaskService 
+  → inject(LogService)  // ❌ 絕對禁止
+  → logService.createLog()
+```
+
+詳細說明請參考：
+- **核心規範**: [00-core/⭐.md](./00-core/⭐.md) - Blueprint 模組事件通訊章節
+- **整合指南**: [01-overview/SETC-MODULE-INTEGRATION.md](./01-overview/SETC-MODULE-INTEGRATION.md)
+
+---
+
 ## 📂 目錄結構
 
 本目錄採用**數字前綴分層結構**，便於快速定位與檢索：

@@ -6,6 +6,120 @@
 
 ---
 
+## 🏗️ Blueprint Event Bus 整合 (MANDATORY)
+
+### 🚨 核心要求
+- ✅ **零直接依賴**: Contract Module 不得直接注入其他模組服務
+- ✅ **事件驅動**: 所有模組間通訊透過 BlueprintEventBus
+- ✅ **階段零模組**: 作為工作流程起點，發送關鍵事件給下游模組
+- ✅ **發送領域事件**: 發送 contract.* 系列事件
+
+### 📡 事件整合
+
+#### 發送事件 (Emit)
+```typescript
+// Contract Module 發送的領域事件
+'contract.created'           → 合約建立
+'contract.activated'         → 合約生效（觸發 Task Module）
+'contract.amended'           → 合約變更
+'contract.suspended'         → 合約暫停
+'contract.completed'         → 合約完工
+'contract.closed'            → 合約結案
+'contract.work_item_added'   → 工項新增
+'contract.work_item_updated' → 工項更新
+```
+
+#### 下游模組訂閱 Contract 事件
+```typescript
+// Task Module 監聽
+'contract.activated' → 啟用任務建立功能
+
+// Finance Module 監聽
+'contract.activated' → 建立預算記錄
+'contract.work_item_updated' → 更新預算項目
+
+// Invoice Module 監聽
+'contract.activated' → 準備計價基準
+```
+
+#### 事件處理範例
+```typescript
+@Injectable({ providedIn: 'root' })
+export class ContractEventService {
+  private eventBus = inject(BlueprintEventBusService);
+  private blueprintContext = inject(BlueprintContextService);
+  
+  async activateContract(contractId: string): Promise<void> {
+    const contract = await this.repository.update(contractId, {
+      status: 'active',
+      activatedAt: new Date()
+    });
+    
+    // 發送合約生效事件
+    this.eventBus.emit({
+      type: 'contract.activated',
+      blueprintId: contract.blueprintId,
+      timestamp: new Date(),
+      actor: this.userContext.currentUser()?.id,
+      data: {
+        contractId: contract.id,
+        contractNumber: contract.contractNumber,
+        workItems: contract.workItems,
+        budget: contract.totalAmount,
+        startDate: contract.startDate,
+        endDate: contract.endDate
+      }
+    });
+  }
+}
+```
+
+### 🚫 禁止模式
+```typescript
+// ❌ 禁止: 直接注入下游模組服務
+@Injectable({ providedIn: 'root' })
+export class ContractService {
+  private taskService = inject(TaskService);       // ❌ 絕對禁止
+  private financeService = inject(FinanceService); // ❌ 絕對禁止
+  
+  async activateContract(contractId: string) {
+    await this.repository.update(contractId, { status: 'active' });
+    await this.taskService.enableTaskCreation(contractId); // ❌ 直接呼叫
+  }
+}
+
+// ❌ 禁止: 查詢其他模組資料
+async checkTaskProgress(contractId: string) {
+  const tasks = await getDocs(
+    query(collection(this.firestore, 'tasks'), 
+    where('contractId', '==', contractId))  // ❌ 跨模組查詢
+  );
+}
+```
+
+### ✅ 正確模式
+```typescript
+// ✅ 正確: 透過事件通知下游
+@Injectable({ providedIn: 'root' })
+export class ContractService {
+  private eventBus = inject(BlueprintEventBusService);
+  
+  async activateContract(contractId: string): Promise<void> {
+    await this.repository.update(contractId, { status: 'active' });
+    
+    // 發送事件讓下游模組自行處理
+    this.eventBus.emit({
+      type: 'contract.activated',
+      blueprintId: this.blueprintContext.currentBlueprint()?.id,
+      timestamp: new Date(),
+      data: { contractId }
+    });
+  }
+}
+```
+
+---
+
 ## 📋 任務清單
 
 ### SETC-009: Contract Module Foundation

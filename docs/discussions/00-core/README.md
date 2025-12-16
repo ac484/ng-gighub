@@ -4,6 +4,51 @@
 
 ---
 
+## 🏗️ Blueprint 架構總覽
+
+GigHub 採用 **Blueprint Context 架構**，所有業務模組在藍圖上下文內運作，並透過 **BlueprintEventBus** 進行模組間通訊。
+
+### 核心原則
+1. 🚨 **模組間零直接依賴** - 所有通訊透過 BlueprintEventBus
+2. 🔒 **上下文隔離** - 每個藍圖有獨立的事件總線與權限範圍
+3. 🔄 **事件驅動** - 模組透過訂閱/發布事件進行協作
+4. 📦 **鬆耦合設計** - 模組可獨立開發、測試、部署
+
+### 架構層級
+```
+User Context (使用者上下文)
+    ↓
+Organization Context (組織上下文)
+    ↓
+Blueprint Context (藍圖上下文) ⭐ 核心層級
+    ↓
+Module Layer (模組層)
+    - Contract Module
+    - Task Module
+    - Log Module
+    - QC Module
+    - Defect Module
+    - Acceptance Module
+    - Issue Module
+    - Warranty Module
+    - Finance Module
+```
+
+### 事件總線通訊模式
+```
+Module A                    Blueprint Event Bus                    Module B
+   |                               |                                    |
+   |--emit('event.type')---------->|                                    |
+   |                               |----broadcast to subscribers------->|
+   |                               |                                    |--handle event
+   |                               |<---emit('response.type')-----------|
+   |<--broadcast------------------ |                                    |
+```
+
+詳細說明請參考 `⭐.md` 中的「Blueprint 模組事件通訊」章節。
+
+---
+
 ## 📁 文件清單
 
 ### 1. ⭐.md

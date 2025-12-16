@@ -6,6 +6,126 @@
 
 ---
 
+## 🏗️ Blueprint Event Bus 整合 (MANDATORY)
+
+### 🚨 核心要求
+- ✅ **零直接依賴**: Defect Module 不得直接注入其他模組服務
+- ✅ **事件驅動**: 所有模組間通訊透過 BlueprintEventBus
+- ✅ **訂閱上游事件**: 監聽 QC、Acceptance 事件
+- ✅ **發送領域事件**: 發送 defect.* 系列事件
+- ✅ **Issue 整合**: 嚴重缺陷自動轉為 Issue
+
+### 📡 事件整合
+
+#### 訂閱事件 (Subscribe)
+```typescript
+// Defect Module 監聽其他模組事件
+'qc.failed'                  → 自動建立 Defect
+'qc.defect_found'            → 自動建立 Defect
+'acceptance.item_rejected'   → 建立 Defect (針對單項)
+```
+
+#### 發送事件 (Emit)
+```typescript
+// Defect Module 發送的領域事件
+'defect.created'             → 缺陷建立
+'defect.assigned'            → 指派處理
+'defect.resolved'            → 解決完成
+'defect.reinspection_requested' → 申請複檢
+'defect.verified'            → 複檢通過
+'defect.verification_failed' → 複檢失敗
+'defect.closed'              → 缺陷結案
+'defect.escalated_to_issue'  → 升級為 Issue（嚴重缺陷）
+```
+
+#### 事件處理範例
+```typescript
+@Injectable({ providedIn: 'root' })
+export class DefectEventService {
+  private eventBus = inject(BlueprintEventBusService);
+  private destroyRef = inject(DestroyRef);
+  
+  constructor() {
+    this.setupEventListeners();
+  }
+  
+  private setupEventListeners(): void {
+    // 監聽 QC 失敗 → 自動建立 Defect
+    this.eventBus.on('qc.failed')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => {
+        this.autoCreateDefectFromQC(event);
+      });
+    
+    // 監聽嚴重缺陷解決失敗 → 升級為 Issue
+    this.eventBus.on('defect.resolution_failed')
+      .pipe(
+        filter(event => event.data.severity === 'critical'),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(event => {
+        this.escalateToIssue(event);
+      });
+  }
+  
+  private async escalateToIssue(event: BlueprintEvent): Promise<void> {
+    const { defectId, blueprintId } = event.data;
+    
+    // 發送事件讓 Issue Module 建立
+    this.eventBus.emit({
+      type: 'defect.escalated_to_issue',
+      blueprintId,
+      timestamp: new Date(),
+      data: {
+        defectId,
+        severity: 'critical',
+        reason: 'Multiple resolution attempts failed'
+      }
+    });
+  }
+}
+```
+
+### 🚫 禁止模式
+```typescript
+// ❌ 禁止: 直接注入其他模組
+@Injectable({ providedIn: 'root' })
+export class DefectService {
+  private qcService = inject(QCService);      // ❌ 禁止
+  private issueService = inject(IssueService); // ❌ 禁止
+  
+  async createDefectFromQC(qcId: string) {
+    const qc = await this.qcService.getById(qcId);  // ❌ 跨模組呼叫
+  }
+}
+```
+
+### ✅ 正確模式
+```typescript
+// ✅ 正確: 透過事件通訊
+@Injectable({ providedIn: 'root' })
+export class DefectService {
+  private eventBus = inject(BlueprintEventBusService);
+  
+  async resolveDefect(defectId: string): Promise<void> {
+    await this.repository.update(defectId, {
+      status: 'resolved',
+      resolvedAt: new Date()
+    });
+    
+    // 發送事件
+    this.eventBus.emit({
+      type: 'defect.resolved',
+      blueprintId: this.blueprintContext.currentBlueprint()?.id,
+      timestamp: new Date(),
+      data: { defectId }
+    });
+  }
+}
+```
+
+---
+
 ## 📋 任務清單
 
 ### SETC-040: Defect Service Expansion

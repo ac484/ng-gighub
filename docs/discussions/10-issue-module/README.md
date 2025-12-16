@@ -6,6 +6,85 @@
 
 ---
 
+## 🏗️ Blueprint Event Bus 整合 (MANDATORY)
+
+### 🚨 核心要求
+- ✅ **零直接依賴**: Issue Module 不得直接注入其他模組服務
+- ✅ **事件驅動**: 所有模組間通訊透過 BlueprintEventBus
+- ✅ **訂閱其他模組事件**: 監聽 Acceptance、QC、Warranty 事件
+- ✅ **發送領域事件**: 發送 issue.* 系列事件
+
+### 📡 事件整合
+
+#### 訂閱事件 (Subscribe)
+```typescript
+// Issue Module 監聽其他模組事件
+'acceptance.rejected'        → 自動建立 Issue
+'qc.defect_critical'         → 自動建立 Issue  
+'warranty.defect_reported'   → 自動建立 Issue
+```
+
+#### 發送事件 (Emit)
+```typescript
+// Issue Module 發送的領域事件
+'issue.created'              → 通知其他模組有新問題
+'issue.assigned'             → 通知責任人
+'issue.resolved'             → 通知相關模組問題已解決
+'issue.verified'             → 驗證通過
+'issue.closed'               → 問題關閉
+'issue.reopened'             → 問題重新開啟
+```
+
+#### 事件處理範例
+```typescript
+@Injectable({ providedIn: 'root' })
+export class IssueEventService {
+  private eventBus = inject(BlueprintEventBusService);
+  private destroyRef = inject(DestroyRef);
+  
+  constructor() {
+    this.setupEventListeners();
+  }
+  
+  private setupEventListeners(): void {
+    // 監聽驗收不通過 → 自動建立 Issue
+    this.eventBus.on('acceptance.rejected')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => {
+        if (event.data.createIssue) {
+          this.autoCreateIssueFromAcceptance(event);
+        }
+      });
+    
+    // 監聽嚴重 QC 缺失 → 自動建立 Issue
+    this.eventBus.on('qc.defect_critical')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => {
+        this.autoCreateIssueFromQC(event);
+      });
+  }
+}
+```
+
+### 🚫 禁止模式
+```typescript
+// ❌ 禁止: 直接注入其他模組服務
+@Injectable({ providedIn: 'root' })
+export class IssueService {
+  private acceptanceService = inject(AcceptanceService);  // ❌ 絕對禁止
+  private qcService = inject(QCService);                  // ❌ 絕對禁止
+}
+
+// ❌ 禁止: 直接查詢其他模組 Firestore
+async checkAcceptanceStatus(acceptanceId: string) {
+  const doc = await getDoc(
+    doc(this.firestore, 'acceptances', acceptanceId)  // ❌ 跨模組查詢
+  );
+}
+```
+
+---
+
 ## 📋 任務清單
 
 ### SETC-001: Issue Module Foundation
