@@ -9,9 +9,20 @@
 
 ## 📚 目錄
 
-本目錄包含 GigHub 專案所有 15 個功能模組的詳細文檔，每個模組一個獨立檔案。
+本目錄包含 GigHub 專案所有 **21 個功能模組**的詳細文檔，每個模組一個獨立檔案。
 
-### 核心模組 (P0-P1) - 6個
+### 🏛️ Foundation Layer (基礎層) - 6個
+
+| 編號 | 模組名稱 | 優先級 | 狀態 | 文檔檔案 |
+|------|---------|--------|------|----------|
+| SETC-000-16 | Passport Module (身份驗證) | P0 | ✅ 已實作 | [SETC-000-16-passport-module.md](./SETC-000-16-passport-module.md) |
+| SETC-000-17 | Organization Module (組織管理) | P0 | ✅ 已實作 | [SETC-000-17-organization-module.md](./SETC-000-17-organization-module.md) |
+| SETC-000-18 | Team Module (團隊協作) | P1 | ✅ 已實作 | [SETC-000-18-team-module.md](./SETC-000-18-team-module.md) |
+| SETC-000-19 | User Module (使用者管理) | P0 | ✅ 已實作 | [SETC-000-19-user-module.md](./SETC-000-19-user-module.md) |
+| SETC-000-20 | Layout & Sidebar Module (佈局與側邊欄) | P0 | ✅ 已實作 | [SETC-000-20-layout-sidebar-module.md](./SETC-000-20-layout-sidebar-module.md) |
+| SETC-000-21 | Settings Module (設定管理) | P1 | ✅ 已實作 | [SETC-000-21-settings-module.md](./SETC-000-21-settings-module.md) |
+
+### 📦 Business Layer (業務層) - 核心模組 (P0-P1) - 5個
 
 | 編號 | 模組名稱 | 優先級 | 狀態 | 文檔檔案 |
 |------|---------|--------|------|----------|
@@ -21,7 +32,7 @@
 | SETC-000-07 | Issue Module (問題追蹤) | P1 | ✅ 已實作 | [SETC-000-07-issue-module.md](./SETC-000-07-issue-module.md) |
 | SETC-000-12 | Workflow Module (流程管理) | P1 | ✅ 已實作 | [SETC-000-12-workflow-module.md](./SETC-000-12-workflow-module.md) |
 
-### 必要模組 (P2) - 5個
+### 📦 Business Layer (業務層) - 必要模組 (P2) - 4個
 
 | 編號 | 模組名稱 | 優先級 | 狀態 | 文檔檔案 |
 |------|---------|--------|------|----------|
@@ -30,14 +41,14 @@
 | SETC-000-06 | Finance Module (財務管理) | P2 | ✅ 已實作 | [SETC-000-06-finance-module.md](./SETC-000-06-finance-module.md) |
 | SETC-000-08 | Warranty Module (保固管理) | P2 | ✅ 已實作 | [SETC-000-08-warranty-module.md](./SETC-000-08-warranty-module.md) |
 
-### 推薦模組 (P3) - 2個
+### 📦 Business Layer (業務層) - 推薦模組 (P3) - 2個
 
 | 編號 | 模組名稱 | 優先級 | 狀態 | 文檔檔案 |
 |------|---------|--------|------|----------|
 | SETC-000-09 | Material Module (材料管理) | P3 | ✅ 已實作 | [SETC-000-09-material-module.md](./SETC-000-09-material-module.md) |
 | SETC-000-15 | Audit Logs Module (稽核日誌) | P3 | ✅ 已實作 | [SETC-000-15-audit-logs-module.md](./SETC-000-15-audit-logs-module.md) |
 
-### 可選模組 (P4-P5) - 4個
+### 📦 Business Layer (業務層) - 可選模組 (P4-P5) - 4個
 
 | 編號 | 模組名稱 | 優先級 | 狀態 | 文檔檔案 |
 |------|---------|--------|------|----------|
@@ -52,23 +63,24 @@
 
 ### 模組分佈
 
-- **總模組數**: 15
-- **核心模組 (P0-P1)**: 5 個
-- **必要模組 (P2)**: 4 個
-- **推薦模組 (P3)**: 2 個
-- **可選模組 (P4-P5)**: 4 個
+- **總模組數**: 21
+- **Foundation Layer (基礎層)**: 6 個
+- **Business Layer - 核心模組 (P0-P1)**: 5 個
+- **Business Layer - 必要模組 (P2)**: 4 個
+- **Business Layer - 推薦模組 (P3)**: 2 個
+- **Business Layer - 可選模組 (P4-P5)**: 4 個
 
 ### 實作狀態
 
-- ✅ **已實作**: 15 個 (100%)
+- ✅ **已實作**: 21 個 (100%)
 - 🔴 **未實作**: 0 個 (0%)
 
 ### 文檔大小
 
-- **總文檔大小**: 約 120KB
-- **平均每個模組**: 約 8KB
-- **最大文檔**: Finance Module (8.8KB)
-- **最小文檔**: Material Module (2.1KB)
+- **總文檔大小**: 約 160KB
+- **平均每個模組**: 約 7.6KB
+- **最大文檔**: Finance Module (12KB)
+- **最小文檔**: Settings Module (1.5KB)
 
 ---
 
@@ -137,10 +149,24 @@ eventBus.on('task.created').subscribe(event => {
 
 ## 📝 模組依賴關係
 
-### 核心依賴
+### Foundation Layer (基礎層)
+
+```
+Passport Module → User Module → Organization Module → Team Module
+                       ↓
+                  Layout Module (Header, Sidebar, Theme)
+                       ↓
+                  Settings Module
+```
+
+### Business Layer 核心依賴
 
 ```mermaid
 graph TD
+    Passport[Passport Module] --> User[User Module]
+    User --> Org[Organization Module]
+    Org --> Team[Team Module]
+    
     Contract[Contract Module] --> Task[Tasks Module]
     Task --> Log[Log Module]
     Task --> QA[QA Module]
@@ -155,11 +181,13 @@ graph TD
 ### 支援依賴
 
 ```
+Layout Module → 所有已認證模組 (提供 UI 框架)
 Workflow Module → 所有模組 (提供工作流程)
 Communication Module → 所有模組 (提供通知)
 Cloud Module → 所有模組 (提供儲存)
 Log Module → 所有模組 (記錄操作)
 Audit Logs Module → 所有模組 (稽核記錄)
+Settings Module → 所有模組 (配置管理)
 ```
 
 ---
@@ -181,6 +209,16 @@ Audit Logs Module → 所有模組 (稽核記錄)
 ## 🔍 快速查詢
 
 ### 按功能查找模組
+
+**基礎與認證**:
+- [Passport Module](./SETC-000-16-passport-module.md) - 身份驗證 (登入/註冊/OAuth)
+- [User Module](./SETC-000-19-user-module.md) - 使用者個人資料與設定
+- [Organization Module](./SETC-000-17-organization-module.md) - 組織管理
+- [Team Module](./SETC-000-18-team-module.md) - 團隊協作
+
+**UI 與主題**:
+- [Layout & Sidebar Module](./SETC-000-20-layout-sidebar-module.md) - 佈局、側邊欄、主題
+- [Settings Module](./SETC-000-21-settings-module.md) - 應用程式設定
 
 **任務與工作管理**:
 - [Tasks Module](./SETC-000-01-tasks-module.md) - 任務管理
