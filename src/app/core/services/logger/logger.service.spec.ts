@@ -7,6 +7,7 @@ describe('LoggerService', () => {
   let consoleErrorSpy: jasmine.Spy;
   let consoleWarnSpy: jasmine.Spy;
   let consoleInfoSpy: jasmine.Spy;
+  let consoleLogSpy: jasmine.Spy;
 
   beforeEach(() => {
     TestBed.configureTestingModule({

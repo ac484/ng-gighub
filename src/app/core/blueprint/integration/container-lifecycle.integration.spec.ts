@@ -27,7 +27,7 @@ class TasksModule implements IBlueprintModule {
 
   initialized = false;
   started = false;
-  ready = false;
+  isReady = false;
   stopped = false;
   disposed = false;
 
@@ -44,7 +44,7 @@ class TasksModule implements IBlueprintModule {
   }
 
   async ready(): Promise<void> {
-    this.ready = true;
+    this.isReady = true;
     this.status.set(ModuleStatus.READY);
   }
 
@@ -71,7 +71,7 @@ class LogsModule implements IBlueprintModule {
 
   initialized = false;
   started = false;
-  ready = false;
+  isReady = false;
   stopped = false;
   disposed = false;
 
@@ -91,7 +91,7 @@ class LogsModule implements IBlueprintModule {
   }
 
   async ready(): Promise<void> {
-    this.ready = true;
+    this.isReady = true;
     this.status.set(ModuleStatus.READY);
   }
 
@@ -175,9 +175,9 @@ describe('Container Lifecycle Integration', () => {
       expect(container.isRunning()).toBe(true);
 
       expect(tasksModule.started).toBe(true);
-      expect(tasksModule.ready).toBe(true);
+      expect(tasksModule.isReady).toBe(true);
       expect(logsModule.started).toBe(true);
-      expect(logsModule.ready).toBe(true);
+      expect(logsModule.isReady).toBe(true);
 
       // 4. Stop container
       await container.stop();
