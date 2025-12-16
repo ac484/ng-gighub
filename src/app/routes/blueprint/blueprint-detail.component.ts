@@ -45,11 +45,13 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
  * - Integrated tasks (任務管理)
  * - Integrated audit logs (審計記錄) in overview sidebar
  * - Cloud module (雲端模組) for storage and backup
+ * - Container monitoring (容器監控) in separate dedicated tab
  *
  * ✅ Modernized with AsyncState pattern
  * ✅ Updated: 2025-12-11 - Added Construction Log & Task modules
  * ✅ Updated: 2025-12-12 - Simplified design, added audit logs to overview
  * ✅ Updated: 2025-12-13 - Added Cloud module tab
+ * ✅ Updated: 2025-12-16 - Separated Container Dashboard to dedicated "容器監控" tab
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -413,19 +415,28 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
           <!-- Settings Tab -->
           <nz-tab nzTitle="設定">
             <ng-template nz-tab>
-              <nz-card nzTitle="藍圖設定" class="mb-md">
-                <button nz-button (click)="edit()">
-                  <span nz-icon nzType="edit"></span>
-                  編輯藍圖資訊
-                </button>
-                <button nz-button class="ml-sm" (click)="configureModules()">
-                  <span nz-icon nzType="appstore"></span>
-                  配置模組
-                </button>
+              <nz-card nzTitle="藍圖設定">
+                <p class="mb-md text-grey">管理藍圖的基本資訊和模組配置</p>
+                <nz-space [nzSize]="'middle'">
+                  <button *nzSpaceItem nz-button nzType="primary" (click)="edit()">
+                    <span nz-icon nzType="edit"></span>
+                    編輯藍圖資訊
+                  </button>
+                  <button *nzSpaceItem nz-button (click)="configureModules()">
+                    <span nz-icon nzType="appstore"></span>
+                    配置模組
+                  </button>
+                </nz-space>
               </nz-card>
+            </ng-template>
+          </nz-tab>
 
-              <!-- Container Dashboard (Embedded) -->
-              <app-container-dashboard />
+          <!-- Container Monitoring Tab -->
+          <nz-tab nzTitle="容器監控">
+            <ng-template nz-tab>
+              @if (blueprint()?.id) {
+                <app-container-dashboard />
+              }
             </ng-template>
           </nz-tab>
         </nz-tabset>
