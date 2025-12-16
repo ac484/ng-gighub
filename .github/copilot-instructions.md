@@ -326,11 +326,10 @@ See `.github/instructions/` for detailed guidelines:
   - 內建 View Transitions
   - Functional Router Guards
   - 遷移工具使用說明
-- `angular.instructions.md` - Angular 20 基礎開發指引
 - `enterprise-angular-architecture.instructions.md` - 企業級架構模式
 - `typescript-5-es2022.instructions.md` - TypeScript 標準
 - `ng-alain-delon.instructions.md` - ng-alain & Delon 框架
-- `ng-zorro-antd.instructions.md` - Ant Design 元件
+- `ng-zorro-antd.instructions.md` - Ant Design 元件 ⭐
 - `sql-sp-generation.instructions.md` - 資料庫指引
 - `memory-bank.instructions.md` - 文件模式
 
