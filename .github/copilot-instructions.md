@@ -4,20 +4,30 @@
 
 ## 🎯 Quick Start (READ THIS FIRST)
 
+**使用統一代理 (Unified Agent):**
+
+此專案已整合所有開發規範至 **單一統一代理**: `.github/agents/gighub-unified.agent.md`
+
 **Before doing ANYTHING, you must:**
 
-1. ✅ **Read this file completely** - `.github/copilot-instructions.md`
-2. ✅ **Check mandatory tool usage policy** - See section below
-3. ✅ **Use context7** for ANY framework/library question
-4. ✅ **Use sequential-thinking** for complex problems
-5. ✅ **Use software-planning-tool** for new features
-6. ✅ **Reference quick-reference.instructions.md** for common patterns
+1. ✅ **讀取統一代理** - `.github/agents/gighub-unified.agent.md` (包含所有規範與工作流程)
+2. ✅ **使用 context7** - 查詢官方文檔與最佳實踐 (MANDATORY)
+3. ✅ **使用 sequential-thinking** - 邏輯分析與問題拆解 (MANDATORY)
+4. ✅ **使用 software-planning-tool** - 制定實施計畫 (MANDATORY)
+5. ✅ **遵循 ⭐.md** - 專案核心開發規範
+
+**核心原則來自 ⭐.md:**
+- KISS、YAGNI、MVP、SRP
+- 三層架構嚴格分離
+- Repository 模式強制
+- 事件驅動架構
+- Security First
 
 **New to this project?** Read these in order:
-1. This file (copilot-instructions.md) - Overview & mandatory policies
-2. `.github/instructions/quick-reference.instructions.md` - Common patterns
-3. `.github/copilot/constraints.md` - Forbidden practices
-4. `.github/copilot/shortcuts/chat-shortcuts.md` - Chat shortcuts
+1. `.github/agents/gighub-unified.agent.md` - **統一代理 (包含所有規範)** ⭐
+2. `.github/instructions/quick-reference.instructions.md` - 快速參考
+3. `⭐.md` - 專案核心規範
+4. `.github/copilot/constraints.md` - 禁止模式
 
 ---
 
