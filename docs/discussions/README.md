@@ -13,7 +13,7 @@
 **包含**: 
 - `⭐.md` - 用戶需求提交區與開發流程規範
 - `SUMMARY.md` - SETC 工作流程分析總結報告
-- `TREE.md` - 專案檔案樹狀圖
+- `TREE.md` - 專案檔案樹狀圖 (完整結構視覺化)
 - `TREE-EXPANSION.md` - 專案擴展規劃
 
 📍 **快速連結**: [進入核心文檔](./00-core/)
@@ -30,6 +30,8 @@
 - `SETC-COMPLETION-PLAN.md` - 文檔完成計畫
 - `SETC-DOCUMENTATION-VALIDATION.md` - 文檔驗證報告
 - `SETC-NEXT-MODULES-PLANNING.md` - 後續模組規劃
+- `SETC-WORKFLOW-PHASES.md` - ✨ **工作流程階段對照表** (Phase 0~3, 69 任務分布)
+- `SETC-MODULE-INTEGRATION.md` - ✨ **模組整合指南** (依賴關係、事件通訊、程式碼範例)
 
 📍 **快速連結**: [進入總覽文檔](./01-overview/)
 
@@ -40,6 +42,8 @@
 **包含**:
 - `MODULE-PLANNING.md` - 新模組開發規劃
 - `MODULE-MODIFICATIONS.md` - 現有模組修改分析
+- `IMPLEMENTATION-TIMELINE.md` - ✨ **實施時程規劃** (甘特圖、里程碑、資源配置)
+- `MODULE-DEPENDENCIES.md` - ✨ **模組依賴分析** (依賴矩陣、資料流、API 介面)
 
 📍 **快速連結**: [進入規劃文檔](./02-planning/)
 
@@ -131,7 +135,7 @@
 | **總任務數** | 69 | ✅ 文檔完成 |
 | **模組數** | 8 | 完整規劃 |
 | **預估總工時** | 約 131 天 | 約 6 個月 |
-| **文檔總數** | 93 個 | 100% 組織化 |
+| **文檔總數** | 98 個 | 100% 組織化 |
 
 ---
 
