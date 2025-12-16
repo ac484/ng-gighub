@@ -7,6 +7,34 @@
 
 ---
 
+## 🏗️ Blueprint Event Bus Implementation Checklist
+
+### 🚨 MANDATORY: Event Bus Integration for All Modules
+
+Every module implementation MUST include Event Bus integration. Use this checklist:
+
+#### Phase 6: Event Integration (Critical Step)
+- [ ] Define module domain events in `SystemEventType`
+- [ ] Implement `ModuleEventService` with event listeners
+- [ ] Subscribe to relevant upstream module events
+- [ ] Emit module lifecycle events
+- [ ] **Verify zero direct dependencies** (no cross-module service injection)
+- [ ] **Verify zero cross-module Firestore queries**
+- [ ] Document event integration in module README
+- [ ] Add event integration tests
+
+#### Anti-Pattern Check (Must Pass)
+- [ ] ❌ No `inject(OtherModuleService)` in any service
+- [ ] ❌ No `collection(firestore, 'other_module_collection')`
+- [ ] ❌ No direct method calls to other modules
+- [ ] ✅ All cross-module communication via BlueprintEventBus
+- [ ] ✅ All subscriptions use `takeUntilDestroyed()`
+- [ ] ✅ All events follow `[module].[action]` naming
+
+Detailed Integration Guide: [SETC-MODULE-INTEGRATION.md](../01-overview/SETC-MODULE-INTEGRATION.md)
+
+---
+
 ## 📋 Task Overview
 
 This document provides an index of all Serialized Executable Task Chain (SETC) implementation documents for the Issue Module independence project.

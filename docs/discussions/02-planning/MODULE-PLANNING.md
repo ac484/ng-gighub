@@ -1,10 +1,34 @@
 # 模組規劃文件
 
-> **文件版本**: 1.1.0  
+> **文件版本**: 2.0.0  
 > **規劃日期**: 2025-12-15  
-> **更新日期**: 2025-12-15  
+> **更新日期**: 2025-12-16  
 > **基於**: SETC 工作流程分析  
 > **規劃範圍**: 新增模組 + 現有模組擴展
+
+---
+
+## 🏗️ Blueprint Event Bus 架構要求 (MANDATORY)
+
+### 🚨 所有新增或擴展模組必須遵循以下原則
+
+1. **零直接依賴**: 模組間嚴禁直接注入其他模組服務
+2. **事件驅動通訊**: 所有模組間通訊透過 BlueprintEventBus
+3. **上下文隔離**: 每個模組在 Blueprint Context 內運作
+4. **事件規範**: 遵循 `[module].[action]` 命名格式
+
+### 模組整合檢查清單
+
+每個模組實作時必須完成：
+
+- [ ] 定義模組領域事件（emit events）
+- [ ] 定義訂閱其他模組事件（subscribe events）
+- [ ] 實作 EventService（事件處理服務）
+- [ ] 禁止注入其他模組服務
+- [ ] 禁止直接查詢其他模組 Firestore 資料
+- [ ] 文檔化事件整合（README 中加入 Event Bus 章節）
+
+詳細整合指南: [SETC-MODULE-INTEGRATION.md](../01-overview/SETC-MODULE-INTEGRATION.md)
 
 ---
 
