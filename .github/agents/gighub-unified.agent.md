@@ -117,6 +117,13 @@ mcp-servers:
 - **`.github/copilot-instructions.md`** - Copilot 主要指引
 - **`.github/COPILOT_INSTRUCTIONS_VALIDATION.md`** - 驗證測試指南
 - **`.github/COPILOT_SECRETS_SETUP.md`** - 祕密配置指南
+- **`⭐.md`** - 核心開發規範 (專案根目錄) ⭐
+- **`docs/README.md`** - 文檔導覽指南 📚
+- **`docs/ARCHITECTURE.md`** - 系統架構總覽 🏗️
+- **`docs/discussions/⭐.md`** - 討論區核心規範 ⭐
+- **`docs/discussions/SETC-*.md`** - 詳細任務規劃 (69個任務) 📋
+- **`docs/discussions/TREE.md`** - 專案結構樹狀圖 🌳
+- **`docs/discussions/SUMMARY.md`** - 專案進度總覽 📊
 
 ---
 
