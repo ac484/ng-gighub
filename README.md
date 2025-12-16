@@ -209,3 +209,67 @@ firebase open functions
     "functions:logs:ai": "firebase functions:log --only ai"
   }
 }
+
+## 🤖 GitHub Copilot Setup
+
+This repository is configured with comprehensive GitHub Copilot instructions and custom agents to enhance AI-assisted development.
+
+### Quick Start
+
+GitHub Copilot will automatically read project guidelines and coding standards from:
+
+- **Main Instructions**: `.github/copilot-instructions.md` - Project overview and mandatory tool usage
+- **Modular Instructions**: `.github/instructions/*.instructions.md` - Framework-specific guidelines
+- **Custom Agent**: `.github/agents/ng-gighub.agent.md` - GigHub project specialist
+
+### Key Features
+
+✅ **Intelligent Code Generation**:
+- Angular 20 with Standalone Components and Signals
+- Modern control flow syntax (@if, @for, @switch)
+- Enterprise architecture patterns
+- TypeScript 5.9 with strict mode
+
+✅ **Framework Integration**:
+- ng-alain business components
+- ng-zorro-antd UI components
+- Firebase/Firestore data access patterns
+- RxJS reactive programming
+
+✅ **MCP Tools** (Model Context Protocol):
+- **context7**: Up-to-date library documentation
+- **sequential-thinking**: Multi-step problem solving
+- **software-planning-tool**: Feature planning and tracking
+
+### Testing Copilot Setup
+
+Try these prompts in GitHub Copilot Chat:
+
+```
+@workspace How should I create a new Angular component in this project?
+```
+
+```
+@workspace Generate a task list component that displays data from Firestore
+```
+
+```
+@workspace Use context7 to show me how to use Angular Signals
+```
+
+### Documentation
+
+- **Setup Guide**: [.github/COPILOT_SETUP.md](.github/COPILOT_SETUP.md)
+- **Validation**: [.github/COPILOT_INSTRUCTIONS_VALIDATION.md](.github/COPILOT_INSTRUCTIONS_VALIDATION.md)
+- **Secrets Setup**: [.github/COPILOT_SECRETS_SETUP.md](.github/COPILOT_SECRETS_SETUP.md)
+
+### For Contributors
+
+When contributing code, Copilot will help you follow project standards:
+- ✅ Use `inject()` for dependency injection
+- ✅ Use `input()`/`output()` instead of decorators
+- ✅ Use Signals for state management
+- ✅ Follow three-layer architecture (Foundation/Container/Business)
+- ✅ Use Repository pattern for Firestore access
+
+For detailed guidelines, see [.github/copilot-instructions.md](.github/copilot-instructions.md).
