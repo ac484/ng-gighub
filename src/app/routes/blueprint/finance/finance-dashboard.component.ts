@@ -44,7 +44,21 @@ export class FinanceDashboardComponent implements OnInit {
     payables: { total: 0, paid: 0, pending: 0, paymentRate: 0 },
     grossProfit: 0,
     grossProfitMargin: 0,
-    asOf: new Date()
+    asOf: new Date(),
+    // 擴展欄位
+    totalBilled: 0,
+    totalReceived: 0,
+    pendingReceivable: 0,
+    overdueReceivable: 0,
+    receivableInvoiceCount: 0,
+    paidReceivableCount: 0,
+    overdueInvoiceCount: 0,
+    totalPayable: 0,
+    totalPaid: 0,
+    accountsReceivableBalance: 0,
+    accountsPayableBalance: 0,
+    monthlyBilled: 0,
+    monthlyReceived: 0
   });
 
   /** 格式化百分比 */
@@ -87,7 +101,21 @@ export class FinanceDashboardComponent implements OnInit {
         },
         grossProfit: 470000,
         grossProfitMargin: 24.5,
-        asOf: new Date()
+        asOf: new Date(),
+        // 擴展欄位
+        totalBilled: 2850000,
+        totalReceived: 1920000,
+        pendingReceivable: 930000,
+        overdueReceivable: 180000,
+        receivableInvoiceCount: 12,
+        paidReceivableCount: 8,
+        overdueInvoiceCount: 2,
+        totalPayable: 1850000,
+        totalPaid: 1450000,
+        accountsReceivableBalance: 930000,
+        accountsPayableBalance: 400000,
+        monthlyBilled: 450000,
+        monthlyReceived: 320000
       });
       this.loading.set(false);
     }, 500);
