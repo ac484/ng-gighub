@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, OnInit, effect, D
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ContextType, PartnerMember, PartnerRole, OrganizationMember, PartnerStore } from '@core';
-import { OrganizationMemberRepository } from '@core/repositories';
+import { ContextType, PartnerMember, PartnerRole, OrganizationMember, PartnerStore, Account } from '@core';
+import { OrganizationMemberRepository, AccountRepository } from '@core/repositories';
 import { SHARED_IMPORTS, WorkspaceContextService } from '@shared';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
@@ -11,11 +11,22 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
+import { NzAvatarModule } from 'ng-zorro-antd/avatar';
+import { forkJoin, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+
+/**
+ * Partner Member with Account Information
+ * 包含帳戶資訊的夥伴成員
+ */
+export interface PartnerMemberWithAccount extends PartnerMember {
+  account?: Account;
+}
 
 @Component({
   selector: 'app-partner-members',
   standalone: true,
-  imports: [SHARED_IMPORTS, NzAlertModule, NzEmptyModule, NzSelectModule, NzSpaceModule, FormsModule],
+  imports: [SHARED_IMPORTS, NzAlertModule, NzEmptyModule, NzSelectModule, NzSpaceModule, NzAvatarModule, FormsModule],
   template: `
     <page-header [title]="'夥伴成員'" [content]="headerContent" [breadcrumb]="breadcrumb"></page-header>
 
@@ -75,7 +86,7 @@ import { NzSpaceModule } from 'ng-zorro-antd/space';
         <nz-table #table [nzData]="displayMembers()">
           <thead>
             <tr>
-              <th nzWidth="200px">成員 ID</th>
+              <th nzWidth="300px">成員</th>
               <th nzWidth="140px">角色</th>
               <th nzWidth="200px">加入時間</th>
               <th nzWidth="200px">操作</th>
@@ -84,7 +95,19 @@ import { NzSpaceModule } from 'ng-zorro-antd/space';
           <tbody>
             @for (member of table.data; track member.id) {
               <tr>
-                <td>{{ member.user_id }}</td>
+                <td>
+                  <div class="member-info">
+                    <nz-avatar 
+                      [nzSize]="40" 
+                      [nzSrc]="getMemberAccount(member.user_id)?.avatar_url || undefined" 
+                      [nzText]="getMemberInitials(member.user_id)"
+                    ></nz-avatar>
+                    <div class="member-details">
+                      <div class="member-name">{{ getMemberAccount(member.user_id)?.name || member.user_id }}</div>
+                      <div class="member-email">{{ getMemberAccount(member.user_id)?.email || '載入中...' }}</div>
+                    </div>
+                  </div>
+                </td>
                 <td>
                   <nz-tag [nzColor]="roleColor(member.role)">{{ roleLabel(member.role) }}</nz-tag>
                 </td>
@@ -124,6 +147,29 @@ import { NzSpaceModule } from 'ng-zorro-antd/space';
       :host {
         display: block;
       }
+
+      .member-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .member-details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .member-name {
+        font-weight: 500;
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.85);
+      }
+
+      .member-email {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.45);
+      }
     `
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -151,6 +197,7 @@ export class PartnerMembersComponent implements OnInit {
   readonly workspaceContext = inject(WorkspaceContextService);
   readonly partnerStore = inject(PartnerStore);
   private readonly orgMemberRepository = inject(OrganizationMemberRepository);
+  private readonly accountRepository = inject(AccountRepository);
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
   private readonly route = inject(ActivatedRoute);
@@ -164,6 +211,9 @@ export class PartnerMembersComponent implements OnInit {
     const params = this.queryParams();
     return (params['partnerId'] as string) || null;
   });
+
+  // Member accounts cache for displaying user information
+  private readonly memberAccountsMap = new Map<string, Account>();
 
   readonly PartnerRole = PartnerRole;
 
@@ -199,6 +249,16 @@ export class PartnerMembersComponent implements OnInit {
       if (partnerId) {
         queueMicrotask(() => {
           this.partnerStore.loadMembers(partnerId);
+        });
+      }
+    });
+
+    // Effect to load member accounts when members change
+    effect(() => {
+      const members = this.displayMembers();
+      if (members.length > 0) {
+        queueMicrotask(() => {
+          this.loadMemberAccounts();
         });
       }
     });
@@ -346,7 +406,7 @@ export class PartnerMembersComponent implements OnInit {
         }
 
         try {
-          await this.partnerStore.updateMemberRole(member.id, partnerId, member.user_id, newRole);
+          await this.partnerStore.updateMemberRole(member.id, partnerId, newRole);
           this.message.success('角色已變更');
           return true;
         } catch (error) {
@@ -391,6 +451,88 @@ export class PartnerMembersComponent implements OnInit {
       case PartnerRole.MEMBER:
       default:
         return 'default';
+    }
+  }
+
+  /**
+   * Get member account information from cache
+   * 從快取取得成員帳戶資訊
+   *
+   * @param userId User ID
+   * @returns Account or undefined
+   */
+  getMemberAccount(userId: string): Account | undefined {
+    return this.memberAccountsMap.get(userId);
+  }
+
+  /**
+   * Get member initials for avatar
+   * 取得成員姓名縮寫用於頭像
+   *
+   * @param userId User ID
+   * @returns Initials string (e.g., "JD" for John Doe)
+   */
+  getMemberInitials(userId: string): string {
+    const account = this.memberAccountsMap.get(userId);
+    if (account?.name) {
+      // For Chinese names, take first 2 characters
+      // For English names, take first letter of first 2 words
+      const name = account.name.trim();
+      if (/[\u4e00-\u9fa5]/.test(name)) {
+        // Chinese name
+        return name.slice(0, 2);
+      } else {
+        // English name
+        const parts = name.split(/\s+/);
+        return parts
+          .slice(0, 2)
+          .map(part => part[0])
+          .join('')
+          .toUpperCase();
+      }
+    }
+    // Fallback to first 2 characters of user ID
+    return userId.slice(0, 2).toUpperCase();
+  }
+
+  /**
+   * Load member accounts for displaying user information
+   * 載入成員帳戶資訊以顯示使用者資訊
+   *
+   * This method fetches account details for all current partner members.
+   * It uses parallel requests for better performance.
+   */
+  private async loadMemberAccounts(): Promise<void> {
+    const members = this.displayMembers();
+    if (members.length === 0) {
+      return;
+    }
+
+    console.log('[PartnerMembersComponent] 🔄 Loading accounts for', members.length, 'members');
+
+    // Create parallel requests for all member accounts
+    const accountRequests = members.map(member =>
+      this.accountRepository.findById(member.user_id).pipe(
+        map(account => ({ userId: member.user_id, account })),
+        catchError(error => {
+          console.warn(`[PartnerMembersComponent] ⚠️ Failed to load account for ${member.user_id}:`, error);
+          return of({ userId: member.user_id, account: null });
+        })
+      )
+    );
+
+    try {
+      const results = await forkJoin(accountRequests).toPromise();
+      if (results) {
+        results.forEach(({ userId, account }) => {
+          if (account) {
+            this.memberAccountsMap.set(userId, account);
+          }
+        });
+        console.log('[PartnerMembersComponent] ✅ Loaded', this.memberAccountsMap.size, 'member accounts');
+      }
+    } catch (error) {
+      console.error('[PartnerMembersComponent] ❌ Failed to load member accounts:', error);
     }
   }
 }
