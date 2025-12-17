@@ -10,7 +10,7 @@
  */
 
 import { Injectable, inject, OnDestroy } from '@angular/core';
-import { BlueprintEventBus } from '@core/blueprint/events/event-bus';
+import { EventBus } from '@core/blueprint/events/event-bus';
 import type { IBlueprintEvent, EventHandler } from '@core/blueprint/events/event-bus.interface';
 import { BlueprintEventType } from '@core/blueprint/events/event-types';
 
@@ -118,7 +118,7 @@ export interface ContractParsingConfirmedPayload {
 
 @Injectable({ providedIn: 'root' })
 export class ContractEventService implements OnDestroy {
-  private readonly eventBus = inject(BlueprintEventBus);
+  private readonly eventBus = inject(EventBus);
   private readonly subscriptions: Array<() => void> = [];
   private readonly MODULE_SOURCE = 'contract';
 
@@ -472,8 +472,10 @@ export class ContractEventService implements OnDestroy {
   /**
    * Emit an event to the event bus
    */
-  private emit<T>(type: BlueprintEventType, payload: T, blueprintId: string): void {
-    this.eventBus.emit(type, payload, this.MODULE_SOURCE, blueprintId);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private emit<T>(type: BlueprintEventType, payload: T, _blueprintId: string): void {
+    // Note: blueprintId is included in payload, EventBus uses its own context
+    this.eventBus.emit(type, payload, this.MODULE_SOURCE);
   }
 
   /**

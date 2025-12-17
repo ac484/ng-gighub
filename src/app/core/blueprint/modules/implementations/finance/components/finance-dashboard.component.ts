@@ -130,7 +130,9 @@ import { PaymentStatusTrackingService } from '../services/payment-status-trackin
                 <nz-col [nzSpan]="12">
                   <div class="stat-item">
                     <span class="stat-label">應收帳款餘額</span>
-                    <span class="stat-value">{{ financialSummary()?.accountsReceivableBalance | currency: 'TWD' : 'symbol' : '1.0-0' }}</span>
+                    <span class="stat-value">{{
+                      financialSummary()?.accountsReceivableBalance | currency: 'TWD' : 'symbol' : '1.0-0'
+                    }}</span>
                   </div>
                 </nz-col>
                 <nz-col [nzSpan]="12">
