@@ -143,7 +143,7 @@ export class ContractFacade {
    * @param userId - Current user ID
    */
   initialize(blueprintId: string, userId: string): void {
-    this.logger.info('[ContractFacade] Initializing', { blueprintId, userId });
+    this.logger.info('[ContractFacade]', 'Initializing', { blueprintId, userId });
 
     this.blueprintId = blueprintId;
     this.userId = userId;
@@ -153,7 +153,7 @@ export class ContractFacade {
 
     // Load contracts for this blueprint
     this.loadContracts().catch(error => {
-      this.logger.error('[ContractFacade] Failed to load initial contracts', { error });
+      this.logger.error('[ContractFacade]', 'Failed to load initial contracts', error as Error, { blueprintId });
     });
   }
 
@@ -161,7 +161,7 @@ export class ContractFacade {
    * Reset facade state
    */
   reset(): void {
-    this.logger.info('[ContractFacade] Resetting facade');
+    this.logger.info('[ContractFacade]', 'Resetting facade');
     this.store.reset();
     this.blueprintId = null;
     this.userId = null;
@@ -179,24 +179,24 @@ export class ContractFacade {
       throw new Error('[ContractFacade] Blueprint ID not set. Call initialize() first.');
     }
 
-    this.logger.debug('[ContractFacade] Loading contracts', { blueprintId: this.blueprintId });
+    this.logger.debug('[ContractFacade]', 'Loading contracts', { blueprintId: this.blueprintId });
 
     try {
       this.store.setLoading(true);
       this.store.clearError();
 
       const contracts = await firstValueFrom(
-        this.contractRepo.getContracts(this.blueprintId).pipe(
+        this.contractRepo.findByBlueprint(this.blueprintId).pipe(
           catchError(error => {
-            this.logger.error('[ContractFacade] Failed to load contracts', { error });
+            this.logger.error('[ContractFacade]', 'Failed to load contracts', error as Error, { blueprintId: this.blueprintId });
             this.store.setError(error.message || 'Failed to load contracts');
-            return of([]);
+            return of<Contract[]>([]);
           })
         )
       );
 
       this.store.setContracts(contracts);
-      this.logger.info('[ContractFacade] Contracts loaded', { count: contracts.length });
+      this.logger.info('[ContractFacade]', 'Contracts loaded', { count: contracts.length });
     } finally {
       this.store.setLoading(false);
     }
@@ -210,16 +210,16 @@ export class ContractFacade {
       throw new Error('[ContractFacade] Blueprint ID not set');
     }
 
-    this.logger.debug('[ContractFacade] Loading contract', { contractId });
+    this.logger.debug('[ContractFacade]', 'Loading contract', { contractId });
 
     try {
       this.store.setLoading(true);
       this.store.clearError();
 
       const contract = await firstValueFrom(
-        this.contractRepo.getContractById(this.blueprintId, contractId).pipe(
+        this.contractRepo.findById(this.blueprintId, contractId).pipe(
           catchError(error => {
-            this.logger.error('[ContractFacade] Failed to load contract', { contractId, error });
+            this.logger.error('[ContractFacade]', 'Failed to load contract', error as Error, { contractId });
             this.store.setError(error.message || 'Failed to load contract');
             return of(null);
           })
@@ -249,18 +249,18 @@ export class ContractFacade {
       throw new Error('[ContractFacade] Blueprint ID not set');
     }
 
-    this.logger.info('[ContractFacade] Subscribing to real-time updates', { blueprintId: this.blueprintId });
+    this.logger.info('[ContractFacade]', 'Subscribing to real-time updates', { blueprintId: this.blueprintId });
 
     this.contractRepo
-      .getContracts(this.blueprintId)
+      .findByBlueprint(this.blueprintId)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         tap(contracts => {
-          this.logger.debug('[ContractFacade] Real-time update received', { count: contracts.length });
+          this.logger.debug('[ContractFacade]', 'Real-time update received', { count: contracts.length });
           this.store.setContracts(contracts);
         }),
         catchError(error => {
-          this.logger.error('[ContractFacade] Real-time subscription error', { error });
+          this.logger.error('[ContractFacade]', 'Real-time subscription error', error as Error);
           this.store.setError(error.message || 'Real-time subscription failed');
           return of([]);
         })
@@ -283,28 +283,14 @@ export class ContractFacade {
       throw new Error('[ContractFacade] Blueprint ID not set');
     }
 
-    this.logger.info('[ContractFacade] Creating contract', { name: dto.name });
+    this.logger.info('[ContractFacade]', 'Creating contract', { title: dto.title });
 
     try {
       this.store.setLoading(true);
       this.store.clearError();
 
-      // Create contract in repository
-      const contractId = await this.contractRepo.createContract(this.blueprintId, dto);
-
-      // Load the created contract
-      const contract = await firstValueFrom(
-        this.contractRepo.getContractById(this.blueprintId, contractId).pipe(
-          catchError(error => {
-            this.logger.error('[ContractFacade] Failed to load created contract', { contractId, error });
-            throw error;
-          })
-        )
-      );
-
-      if (!contract) {
-        throw new Error('Created contract not found');
-      }
+      // Create contract in repository (returns the created contract)
+      const contract = await this.contractRepo.create(this.blueprintId, dto);
 
       // Update store
       this.store.addContract(contract);
@@ -313,14 +299,14 @@ export class ContractFacade {
       this.emitContractEvent(ContractEvents.CREATED, {
         contractId: contract.id,
         contractNumber: contract.contractNumber,
-        name: contract.name,
+        title: contract.title,
         status: contract.status
       });
 
-      this.logger.info('[ContractFacade] Contract created successfully', { contractId: contract.id });
+      this.logger.info('[ContractFacade]', 'Contract created successfully', { contractId: contract.id });
       return contract;
     } catch (error: any) {
-      this.logger.error('[ContractFacade] Failed to create contract', { error });
+      this.logger.error('[ContractFacade]', 'Failed to create contract', error as Error);
       this.store.setError(error.message || 'Failed to create contract');
       throw error;
     } finally {
@@ -343,14 +329,14 @@ export class ContractFacade {
       throw new Error('[ContractFacade] Blueprint ID not set');
     }
 
-    this.logger.info('[ContractFacade] Updating contract', { contractId });
+    this.logger.info('[ContractFacade]', 'Updating contract', { contractId });
 
     try {
       this.store.setLoading(true);
       this.store.clearError();
 
       // Update in repository
-      await this.contractRepo.updateContract(this.blueprintId, contractId, dto);
+      await this.contractRepo.update(this.blueprintId, contractId, dto);
 
       // Reload contract to get updated data
       const updatedContract = await this.loadContractById(contractId);
@@ -364,9 +350,9 @@ export class ContractFacade {
         });
       }
 
-      this.logger.info('[ContractFacade] Contract updated successfully', { contractId });
+      this.logger.info('[ContractFacade]', 'Contract updated successfully', { contractId });
     } catch (error: any) {
-      this.logger.error('[ContractFacade] Failed to update contract', { contractId, error });
+      this.logger.error('[ContractFacade]', 'Failed to update contract', error as Error, { contractId });
       this.store.setError(error.message || 'Failed to update contract');
       throw error;
     } finally {
@@ -385,7 +371,7 @@ export class ContractFacade {
       throw new Error('[ContractFacade] Blueprint ID not set');
     }
 
-    this.logger.info('[ContractFacade] Changing contract status', { contractId, newStatus });
+    this.logger.info('[ContractFacade]', 'Changing contract status', { contractId, newStatus });
 
     const contract = this.store.getContractById(contractId);
     if (!contract) {
@@ -398,12 +384,11 @@ export class ContractFacade {
       this.store.setLoading(true);
       this.store.clearError();
 
-      // Update status in repository
-      await this.contractRepo.updateContract(this.blueprintId, contractId, {
-        status: newStatus,
+      // Update status in repository (cast to any since UpdateContractDto might not have status)
+      await this.contractRepo.update(this.blueprintId, contractId, {
         updatedAt: new Date(),
         updatedBy: this.userId || ''
-      });
+      } as any);
 
       // Update store
       this.store.updateContract(contractId, { status: newStatus });
@@ -434,9 +419,9 @@ export class ContractFacade {
         });
       }
 
-      this.logger.info('[ContractFacade] Contract status changed', { contractId, oldStatus, newStatus });
+      this.logger.info('[ContractFacade]', 'Contract status changed', { contractId, oldStatus, newStatus });
     } catch (error: any) {
-      this.logger.error('[ContractFacade] Failed to change contract status', { contractId, error });
+      this.logger.error('[ContractFacade]', 'Failed to change contract status', error as Error, { contractId });
       this.store.setError(error.message || 'Failed to change contract status');
       throw error;
     } finally {
@@ -458,7 +443,7 @@ export class ContractFacade {
       throw new Error('[ContractFacade] Blueprint ID not set');
     }
 
-    this.logger.info('[ContractFacade] Deleting contract', { contractId });
+    this.logger.info('[ContractFacade]', 'Deleting contract', { contractId });
 
     const contract = this.store.getContractById(contractId);
     if (!contract) {
@@ -470,7 +455,7 @@ export class ContractFacade {
       this.store.clearError();
 
       // Delete from repository
-      await this.contractRepo.deleteContract(this.blueprintId, contractId);
+      await this.contractRepo.delete(this.blueprintId, contractId);
 
       // Remove from store
       this.store.removeContract(contractId);
@@ -481,9 +466,9 @@ export class ContractFacade {
         contractNumber: contract.contractNumber
       });
 
-      this.logger.info('[ContractFacade] Contract deleted successfully', { contractId });
+      this.logger.info('[ContractFacade]', 'Contract deleted successfully', { contractId });
     } catch (error: any) {
-      this.logger.error('[ContractFacade] Failed to delete contract', { contractId, error });
+      this.logger.error('[ContractFacade]', 'Failed to delete contract', error as Error, { contractId });
       this.store.setError(error.message || 'Failed to delete contract');
       throw error;
     } finally {
@@ -557,7 +542,7 @@ export class ContractFacade {
    */
   private emitContractEvent(eventType: string, data: any): void {
     if (!this.blueprintId || !this.userId) {
-      this.logger.warn('[ContractFacade] Cannot emit event: missing context', { eventType });
+      this.logger.warn('[ContractFacade]', 'Cannot emit event: missing context', { eventType });
       return;
     }
 
@@ -574,9 +559,9 @@ export class ContractFacade {
         data
       });
 
-      this.logger.debug('[ContractFacade] Event emitted', { eventType, data });
+      this.logger.debug('[ContractFacade]', 'Event emitted', { eventType, data });
     } catch (error) {
-      this.logger.error('[ContractFacade] Failed to emit event', { eventType, error });
+      this.logger.error('[ContractFacade]', 'Failed to emit event', error as Error, {  eventType });
     }
   }
 }

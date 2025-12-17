@@ -14,7 +14,7 @@ import { Firestore, collection, doc, addDoc, updateDoc, getDoc, Timestamp } from
 import { Functions, httpsCallable } from '@angular/fire/functions';
 
 import type { ContractParsedData, ContractParsingRequest, ContractParsingStatus, FileAttachment } from '../models';
-import { ContractEventService } from './contract-event.service';
+// import { ContractEventService } from './contract-event.service'; // TODO: Events now handled by ContractFacade
 import type { ContractParsingRequestDto, ContractParsingConfirmationDto, CreateContractDto } from '../models/dtos';
 import { ContractRepository } from '../repositories/contract.repository';
 import {
@@ -50,7 +50,7 @@ export class ContractParsingService {
   private readonly functions = inject(Functions);
   private readonly firestore = inject(Firestore);
   private readonly contractRepository = inject(ContractRepository);
-  private readonly eventService = inject(ContractEventService);
+  // private readonly eventService = inject(ContractEventService); // TODO: Events now handled by ContractFacade
 
   // State signals
   private readonly _parsing = signal(false);
@@ -101,7 +101,7 @@ export class ContractParsingService {
       });
 
       // Emit event
-      this.eventService.emitParsingRequested(dto.blueprintId, dto.contractId, requestId, dto.fileIds);
+      // this.eventService.emitParsingRequested(dto.blueprintId, dto.contractId, requestId, dto.fileIds); // TODO: Events now handled by ContractFacade
 
       // Trigger Firebase Function for parsing (async)
       this.triggerParsingFunction(dto.blueprintId, dto.contractId, requestId, dto.fileIds).catch(err => {
@@ -135,7 +135,7 @@ export class ContractParsingService {
       });
 
       // Emit event
-      this.eventService.emitParsingStarted(blueprintId, contractId, requestId);
+      // this.eventService.emitParsingStarted(blueprintId, contractId, requestId); // TODO: Events now handled by ContractFacade
 
       // Get contract files for parsing
       const contract = await this.contractRepository.findByIdOnce(blueprintId, contractId);
@@ -178,7 +178,7 @@ export class ContractParsingService {
         });
 
         // Emit event
-        this.eventService.emitParsingCompleted(blueprintId, contractId, requestId, result.data.parsedData);
+        // this.eventService.emitParsingCompleted(blueprintId, contractId, requestId, result.data.parsedData); // TODO: Events now handled by ContractFacade
       } else {
         throw new Error(result.data.errorMessage || 'Parsing failed');
       }
@@ -196,7 +196,7 @@ export class ContractParsingService {
       });
 
       // Emit event
-      this.eventService.emitParsingFailed(blueprintId, contractId, requestId, message);
+      // this.eventService.emitParsingFailed(blueprintId, contractId, requestId, message); // TODO: Events now handled by ContractFacade
 
       throw err;
     }
@@ -312,7 +312,7 @@ export class ContractParsingService {
       });
 
       // Emit event
-      this.eventService.emitParsingConfirmed(dto.blueprintId, dto.contractId, dto.confirmedBy, dto.confirmationType);
+      // this.eventService.emitParsingConfirmed(dto.blueprintId, dto.contractId, dto.confirmedBy, dto.confirmationType); // TODO: Events now handled by ContractFacade
 
       console.log('[ContractParsingService]', `Parsed data confirmed for contract ${dto.contractId}`);
     } catch (err) {

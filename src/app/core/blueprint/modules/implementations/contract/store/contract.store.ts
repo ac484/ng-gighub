@@ -77,10 +77,7 @@ export class ContractStore {
 
   /** Active filter criteria */
   private readonly _filters = signal<ContractFilters>({
-    status: undefined,
-    searchTerm: undefined,
-    startDate: undefined,
-    endDate: undefined
+    status: undefined
   });
 
   // ============================================================================
@@ -123,29 +120,8 @@ export class ContractStore {
     const filters = this._filters();
 
     return contracts.filter(contract => {
-      // Status filter
-      if (filters.status && contract.status !== filters.status) {
-        return false;
-      }
-
-      // Search term filter (name, contractNumber, owner, contractor)
-      if (filters.searchTerm) {
-        const searchLower = filters.searchTerm.toLowerCase();
-        const matchesName = contract.name.toLowerCase().includes(searchLower);
-        const matchesNumber = contract.contractNumber.toLowerCase().includes(searchLower);
-        const matchesOwner = contract.owner.name.toLowerCase().includes(searchLower);
-        const matchesContractor = contract.contractor?.name.toLowerCase().includes(searchLower);
-
-        if (!matchesName && !matchesNumber && !matchesOwner && !matchesContractor) {
-          return false;
-        }
-      }
-
-      // Date range filters
-      if (filters.startDate && contract.startDate < filters.startDate) {
-        return false;
-      }
-      if (filters.endDate && contract.endDate > filters.endDate) {
+      // Status filter (filters.status is an array, contract.status is a string)
+      if (filters.status && filters.status.length > 0 && !filters.status.includes(contract.status)) {
         return false;
       }
 
@@ -203,10 +179,7 @@ export class ContractStore {
   readonly hasActiveFilters = computed<boolean>(() => {
     const filters = this._filters();
     return !!(
-      filters.status ||
-      filters.searchTerm ||
-      filters.startDate ||
-      filters.endDate
+      filters.status && filters.status.length > 0
     );
   });
 
@@ -232,7 +205,7 @@ export class ContractStore {
    * Set loading state
    */
   setLoading(loading: boolean): void {
-    this.logger.debug('[ContractStore] setLoading', { loading });
+    this.logger.debug('[ContractStore]', 'setLoading', { loading });
     this._loading.set(loading);
   }
 
@@ -240,7 +213,7 @@ export class ContractStore {
    * Set error state
    */
   setError(error: string | null): void {
-    this.logger.error('[ContractStore] setError', { error });
+    this.logger.error('[ContractStore]', 'setError', error ? new Error(error) : undefined, { error });
     this._error.set(error);
   }
 
@@ -248,7 +221,7 @@ export class ContractStore {
    * Clear error state
    */
   clearError(): void {
-    this.logger.debug('[ContractStore] clearError');
+    this.logger.debug('[ContractStore]', 'clearError');
     this._error.set(null);
   }
 
@@ -256,7 +229,7 @@ export class ContractStore {
    * Set all contracts (replaces existing array)
    */
   setContracts(contracts: Contract[]): void {
-    this.logger.debug('[ContractStore] setContracts', { count: contracts.length });
+    this.logger.debug('[ContractStore]', 'setContracts', { count: contracts.length });
     this._contracts.set(contracts);
   }
 
@@ -264,7 +237,7 @@ export class ContractStore {
    * Add a single contract to the store
    */
   addContract(contract: Contract): void {
-    this.logger.debug('[ContractStore] addContract', { contractId: contract.id });
+    this.logger.debug('[ContractStore]', 'addContract', { contractId: contract.id });
     this._contracts.update(current => [...current, contract]);
   }
 
@@ -272,7 +245,7 @@ export class ContractStore {
    * Update a contract in the store
    */
   updateContract(contractId: string, updates: Partial<Contract>): void {
-    this.logger.debug('[ContractStore] updateContract', { contractId, updates });
+    this.logger.debug('[ContractStore]', 'updateContract', { contractId, updates });
     this._contracts.update(current =>
       current.map(c => (c.id === contractId ? { ...c, ...updates } : c))
     );
@@ -282,7 +255,7 @@ export class ContractStore {
    * Remove a contract from the store
    */
   removeContract(contractId: string): void {
-    this.logger.debug('[ContractStore] removeContract', { contractId });
+    this.logger.debug('[ContractStore]', 'removeContract', { contractId });
     this._contracts.update(current => current.filter(c => c.id !== contractId));
 
     // Clear selection if removed contract was selected
@@ -295,7 +268,7 @@ export class ContractStore {
    * Select a contract by ID
    */
   selectContract(contractId: string | null): void {
-    this.logger.debug('[ContractStore] selectContract', { contractId });
+    this.logger.debug('[ContractStore]', 'selectContract', { contractId });
     this._selectedContractId.set(contractId);
   }
 
@@ -303,7 +276,7 @@ export class ContractStore {
    * Clear contract selection
    */
   clearSelection(): void {
-    this.logger.debug('[ContractStore] clearSelection');
+    this.logger.debug('[ContractStore]', 'clearSelection');
     this._selectedContractId.set(null);
   }
 
@@ -311,7 +284,7 @@ export class ContractStore {
    * Set active filters
    */
   setFilters(filters: Partial<ContractFilters>): void {
-    this.logger.debug('[ContractStore] setFilters', { filters });
+    this.logger.debug('[ContractStore]', 'setFilters', { filters });
     this._filters.update(current => ({ ...current, ...filters }));
   }
 
@@ -319,12 +292,9 @@ export class ContractStore {
    * Clear all filters
    */
   clearFilters(): void {
-    this.logger.debug('[ContractStore] clearFilters');
+    this.logger.debug('[ContractStore]', 'clearFilters');
     this._filters.set({
-      status: undefined,
-      searchTerm: undefined,
-      startDate: undefined,
-      endDate: undefined
+      status: undefined
     });
   }
 
@@ -332,16 +302,13 @@ export class ContractStore {
    * Reset entire store to initial state
    */
   reset(): void {
-    this.logger.debug('[ContractStore] reset');
+    this.logger.debug('[ContractStore]', 'reset');
     this._loading.set(false);
     this._error.set(null);
     this._contracts.set([]);
     this._selectedContractId.set(null);
     this._filters.set({
-      status: undefined,
-      searchTerm: undefined,
-      startDate: undefined,
-      endDate: undefined
+      status: undefined
     });
   }
 

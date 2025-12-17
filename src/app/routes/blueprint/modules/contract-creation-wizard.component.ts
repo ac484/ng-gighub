@@ -810,7 +810,7 @@ export class ContractCreationWizardComponent implements OnInit {
       }
 
       // Submit for activation using ContractFacade
-      await this.facade.changeContractStatus(contract.id, 'pending');
+      await this.facade.changeContractStatus(contract.id, 'pending_activation');
       this.message.success('合約已提交待生效');
       
       // Reload contract to get updated status
