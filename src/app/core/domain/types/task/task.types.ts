@@ -40,6 +40,21 @@ export enum TaskPriority {
 }
 
 /**
+ * Assignee type enum
+ * 指派對象類型列舉
+ *
+ * Defines who the task can be assigned to
+ */
+export enum AssigneeType {
+  /** Individual user */
+  USER = 'user',
+  /** Internal team */
+  TEAM = 'team',
+  /** External partner */
+  PARTNER = 'partner'
+}
+
+/**
  * Task entity
  * 任務實體
  *
@@ -65,11 +80,39 @@ export interface Task {
   /** Task priority */
   priority: TaskPriority;
 
-  /** Assignee account ID (optional) */
+  /**
+   * Assignee type - who is this task assigned to
+   * 指派對象類型
+   */
+  assigneeType?: AssigneeType;
+
+  /** Assignee account ID (optional) - for USER type */
   assigneeId?: string;
 
-  /** Assignee name (optional) */
+  /** Assignee name (optional) - for USER type */
   assigneeName?: string;
+
+  /**
+   * Team ID (optional) - for TEAM type
+   * Reference to teams collection
+   */
+  assigneeTeamId?: string;
+
+  /**
+   * Team name (optional) - for TEAM type
+   */
+  assigneeTeamName?: string;
+
+  /**
+   * Partner ID (optional) - for PARTNER type
+   * Reference to partners collection
+   */
+  assigneePartnerId?: string;
+
+  /**
+   * Partner name (optional) - for PARTNER type
+   */
+  assigneePartnerName?: string;
 
   /** Creator account ID */
   creatorId: string;
@@ -164,11 +207,39 @@ export interface CreateTaskRequest {
   /** Task priority (defaults to MEDIUM) */
   priority?: TaskPriority;
 
-  /** Assignee account ID (optional) */
+  /**
+   * Assignee type - who is this task assigned to
+   * 指派對象類型
+   */
+  assigneeType?: AssigneeType;
+
+  /** Assignee account ID (optional) - for USER type */
   assigneeId?: string;
 
-  /** Assignee name (optional) */
+  /** Assignee name (optional) - for USER type */
   assigneeName?: string;
+
+  /**
+   * Team ID (optional) - for TEAM type
+   * Reference to teams collection
+   */
+  assigneeTeamId?: string;
+
+  /**
+   * Team name (optional) - for TEAM type
+   */
+  assigneeTeamName?: string;
+
+  /**
+   * Partner ID (optional) - for PARTNER type
+   * Reference to partners collection
+   */
+  assigneePartnerId?: string;
+
+  /**
+   * Partner name (optional) - for PARTNER type
+   */
+  assigneePartnerName?: string;
 
   /** Creator account ID */
   creatorId: string;
@@ -230,11 +301,39 @@ export interface UpdateTaskRequest {
   /** Task priority */
   priority?: TaskPriority;
 
-  /** Assignee account ID */
+  /**
+   * Assignee type - who is this task assigned to
+   * 指派對象類型
+   */
+  assigneeType?: AssigneeType;
+
+  /** Assignee account ID - for USER type */
   assigneeId?: string;
 
-  /** Assignee name */
+  /** Assignee name - for USER type */
   assigneeName?: string;
+
+  /**
+   * Team ID - for TEAM type
+   * Reference to teams collection
+   */
+  assigneeTeamId?: string;
+
+  /**
+   * Team name - for TEAM type
+   */
+  assigneeTeamName?: string;
+
+  /**
+   * Partner ID - for PARTNER type
+   * Reference to partners collection
+   */
+  assigneePartnerId?: string;
+
+  /**
+   * Partner name - for PARTNER type
+   */
+  assigneePartnerName?: string;
 
   /** Due date */
   dueDate?: Date;
