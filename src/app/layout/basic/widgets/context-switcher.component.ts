@@ -4,7 +4,7 @@
  * 帳戶上下文切換器元件 (Firebase 版本)
  * Account context switcher component (Firebase version)
  *
- * Allows users to switch between personal account, organizations, teams, and bots.
+ * Allows users to switch between personal account, organizations, teams, partners, and bots.
  * Integrated with WorkspaceContextService for state management.
  *
  * This component renders just menu items (<li> elements) without any dropdown wrapper.
@@ -15,7 +15,7 @@
 
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { ContextType, Team, Bot } from '@core';
+import { ContextType, Team, Partner, Bot } from '@core';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 
@@ -34,10 +34,10 @@ import { WorkspaceContextService } from '../../../shared/services/workspace-cont
       </li>
     }
 
-    <!-- Organizations with their teams (flat + nested teams) -->
+    <!-- Organizations with their teams and partners (flat + nested) -->
     @for (org of organizations(); track org.id) {
-      @if (getTeamsForOrg(org.id).length > 0) {
-        <!-- Organization with teams -->
+      @if (getTeamsForOrg(org.id).length > 0 || getPartnersForOrg(org.id).length > 0) {
+        <!-- Organization with teams/partners -->
         <li nz-submenu [nzTitle]="org.name" nzIcon="team">
           <ul nz-menu>
             <!-- Organization itself -->
@@ -46,17 +46,32 @@ import { WorkspaceContextService } from '../../../shared/services/workspace-cont
               <span>{{ org.name }}</span>
             </li>
             <li nz-menu-divider></li>
-            <!-- Teams under this organization -->
-            @for (team of getTeamsForOrg(org.id); track team.id) {
-              <li nz-menu-item (click)="switchToTeam(team.id)" [class.ant-menu-item-selected]="isTeamContext(team.id)">
-                <i nz-icon nzType="usergroup-add" class="mr-sm"></i>
-                <span>{{ team.name }}</span>
+            <!-- Teams under this organization (內部) -->
+            @if (getTeamsForOrg(org.id).length > 0) {
+              <li nz-menu-group nzTitle="內部團隊">
+                @for (team of getTeamsForOrg(org.id); track team.id) {
+                  <li nz-menu-item (click)="switchToTeam(team.id)" [class.ant-menu-item-selected]="isTeamContext(team.id)">
+                    <i nz-icon nzType="usergroup-add" class="mr-sm"></i>
+                    <span>{{ team.name }}</span>
+                  </li>
+                }
+              </li>
+            }
+            <!-- Partners under this organization (外部) -->
+            @if (getPartnersForOrg(org.id).length > 0) {
+              <li nz-menu-group nzTitle="外部夥伴">
+                @for (partner of getPartnersForOrg(org.id); track partner.id) {
+                  <li nz-menu-item (click)="switchToPartner(partner.id)" [class.ant-menu-item-selected]="isPartnerContext(partner.id)">
+                    <i nz-icon nzType="solution" class="mr-sm"></i>
+                    <span>{{ partner.name }}</span>
+                  </li>
+                }
               </li>
             }
           </ul>
         </li>
       } @else {
-        <!-- Organization without teams (flat item) -->
+        <!-- Organization without teams/partners (flat item) -->
         <li nz-menu-item (click)="switchToOrganization(org.id)" [class.ant-menu-item-selected]="isOrganizationContext(org.id)">
           <i nz-icon nzType="team" class="mr-sm"></i>
           <span>{{ org.name }}</span>
@@ -99,8 +114,10 @@ export class HeaderContextSwitcherComponent {
   readonly currentUser = this.workspaceContext.currentUser;
   readonly organizations = this.workspaceContext.organizations;
   readonly teams = this.workspaceContext.teams;
+  readonly partners = this.workspaceContext.partners;
   readonly bots = this.workspaceContext.bots;
   readonly teamsByOrganization = this.workspaceContext.teamsByOrganization;
+  readonly partnersByOrganization = this.workspaceContext.partnersByOrganization;
   readonly contextLabel = this.workspaceContext.contextLabel;
   readonly contextIcon = this.workspaceContext.contextIcon;
   readonly switching = this.workspaceContext.switching;
@@ -114,6 +131,13 @@ export class HeaderContextSwitcherComponent {
    */
   getTeamsForOrg(orgId: string): Team[] {
     return this.workspaceContext.getTeamsForOrg(orgId);
+  }
+
+  /**
+   * Get partners for a specific organization
+   */
+  getPartnersForOrg(orgId: string): Partner[] {
+    return this.workspaceContext.getPartnersForOrg(orgId);
   }
 
   /**
@@ -135,6 +159,13 @@ export class HeaderContextSwitcherComponent {
    */
   isTeamContext(teamId: string): boolean {
     return this.currentContextType() === ContextType.TEAM && this.currentContextId() === teamId;
+  }
+
+  /**
+   * Check if current context is the specified partner
+   */
+  isPartnerContext(partnerId: string): boolean {
+    return this.currentContextType() === ContextType.PARTNER && this.currentContextId() === partnerId;
   }
 
   /**
@@ -166,6 +197,13 @@ export class HeaderContextSwitcherComponent {
    */
   switchToTeam(teamId: string): void {
     this.workspaceContext.switchToTeam(teamId);
+  }
+
+  /**
+   * Switch to partner context
+   */
+  switchToPartner(partnerId: string): void {
+    this.workspaceContext.switchToPartner(partnerId);
   }
 
   /**
