@@ -2,11 +2,12 @@
  * Contract Module View Component
  * 合約域視圖元件 - 顯示於藍圖詳情頁面的 Tab 中
  *
- * ✅ Updated: 2025-12-15
+ * ✅ Updated: 2025-12-17
  * - 整合 Contract Module 服務
  * - 使用 Angular 20 Signals 管理狀態
  * - 使用 ng-alain ST 元件顯示清單
  * - 提供合約 CRUD 功能
+ * - 新增合約建立流程精靈 (ContractCreationWizardComponent)
  */
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal, computed, effect } from '@angular/core';
@@ -23,112 +24,126 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 
+import { ContractCreationWizardComponent } from './contract-creation-wizard.component';
 import { ContractModalComponent } from './contract-modal.component';
 
 @Component({
   selector: 'app-contract-module-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SHARED_IMPORTS, NzStatisticModule, NzEmptyModule, NzBadgeModule, NzTagModule],
+  imports: [SHARED_IMPORTS, NzStatisticModule, NzEmptyModule, NzBadgeModule, NzTagModule, ContractCreationWizardComponent],
   template: `
-    <!-- Statistics Card -->
-    <nz-card nzTitle="合約統計" class="mb-md">
-      <nz-row [nzGutter]="16">
-        <nz-col [nzSpan]="4">
-          <nz-statistic [nzValue]="statistics().total" nzTitle="總計" />
-        </nz-col>
-        <nz-col [nzSpan]="4">
-          <nz-statistic [nzValue]="statistics().draft" nzTitle="草稿" [nzPrefix]="draftIcon" />
-          <ng-template #draftIcon>
-            <span nz-icon nzType="file-text" style="color: #8c8c8c;"></span>
-          </ng-template>
-        </nz-col>
-        <nz-col [nzSpan]="4">
-          <nz-statistic [nzValue]="statistics().pendingActivation" nzTitle="待生效" [nzPrefix]="pendingIcon" />
-          <ng-template #pendingIcon>
-            <span nz-icon nzType="clock-circle" style="color: #1890ff;"></span>
-          </ng-template>
-        </nz-col>
-        <nz-col [nzSpan]="4">
-          <nz-statistic [nzValue]="statistics().active" nzTitle="已生效" [nzPrefix]="activeIcon" />
-          <ng-template #activeIcon>
-            <span nz-icon nzType="check-circle" style="color: #52c41a;"></span>
-          </ng-template>
-        </nz-col>
-        <nz-col [nzSpan]="4">
-          <nz-statistic [nzValue]="statistics().completed" nzTitle="已完成" [nzPrefix]="completedIcon" />
-          <ng-template #completedIcon>
-            <span nz-icon nzType="trophy" style="color: #722ed1;"></span>
-          </ng-template>
-        </nz-col>
-        <nz-col [nzSpan]="4">
-          <nz-statistic [nzValue]="statistics().terminated" nzTitle="已終止" [nzPrefix]="terminatedIcon" />
-          <ng-template #terminatedIcon>
-            <span nz-icon nzType="close-circle" style="color: #ff4d4f;"></span>
-          </ng-template>
-        </nz-col>
-      </nz-row>
-    </nz-card>
+    <!-- Creation Wizard Mode -->
+    @if (showCreationWizard()) {
+      <app-contract-creation-wizard
+        [blueprintId]="blueprintId()"
+        (completed)="onWizardCompleted($event)"
+        (cancelled)="onWizardCancelled()"
+      />
+    } @else {
+      <!-- Statistics Card -->
+      <nz-card nzTitle="合約統計" class="mb-md">
+        <nz-row [nzGutter]="16">
+          <nz-col [nzSpan]="4">
+            <nz-statistic [nzValue]="statistics().total" nzTitle="總計" />
+          </nz-col>
+          <nz-col [nzSpan]="4">
+            <nz-statistic [nzValue]="statistics().draft" nzTitle="草稿" [nzPrefix]="draftIcon" />
+            <ng-template #draftIcon>
+              <span nz-icon nzType="file-text" style="color: #8c8c8c;"></span>
+            </ng-template>
+          </nz-col>
+          <nz-col [nzSpan]="4">
+            <nz-statistic [nzValue]="statistics().pendingActivation" nzTitle="待生效" [nzPrefix]="pendingIcon" />
+            <ng-template #pendingIcon>
+              <span nz-icon nzType="clock-circle" style="color: #1890ff;"></span>
+            </ng-template>
+          </nz-col>
+          <nz-col [nzSpan]="4">
+            <nz-statistic [nzValue]="statistics().active" nzTitle="已生效" [nzPrefix]="activeIcon" />
+            <ng-template #activeIcon>
+              <span nz-icon nzType="check-circle" style="color: #52c41a;"></span>
+            </ng-template>
+          </nz-col>
+          <nz-col [nzSpan]="4">
+            <nz-statistic [nzValue]="statistics().completed" nzTitle="已完成" [nzPrefix]="completedIcon" />
+            <ng-template #completedIcon>
+              <span nz-icon nzType="trophy" style="color: #722ed1;"></span>
+            </ng-template>
+          </nz-col>
+          <nz-col [nzSpan]="4">
+            <nz-statistic [nzValue]="statistics().terminated" nzTitle="已終止" [nzPrefix]="terminatedIcon" />
+            <ng-template #terminatedIcon>
+              <span nz-icon nzType="close-circle" style="color: #ff4d4f;"></span>
+            </ng-template>
+          </nz-col>
+        </nz-row>
+      </nz-card>
 
-    <!-- Value Statistics -->
-    <nz-card nzTitle="合約金額" class="mb-md">
-      <nz-row [nzGutter]="16">
-        <nz-col [nzSpan]="12">
-          <nz-statistic [nzValue]="statistics().totalValue" nzTitle="合約總金額" nzPrefix="$" [nzValueStyle]="{ color: '#1890ff' }" />
-        </nz-col>
-        <nz-col [nzSpan]="12">
-          <nz-statistic [nzValue]="statistics().activeValue" nzTitle="生效中金額" nzPrefix="$" [nzValueStyle]="{ color: '#52c41a' }" />
-        </nz-col>
-      </nz-row>
-    </nz-card>
+      <!-- Value Statistics -->
+      <nz-card nzTitle="合約金額" class="mb-md">
+        <nz-row [nzGutter]="16">
+          <nz-col [nzSpan]="12">
+            <nz-statistic [nzValue]="statistics().totalValue" nzTitle="合約總金額" nzPrefix="$" [nzValueStyle]="{ color: '#1890ff' }" />
+          </nz-col>
+          <nz-col [nzSpan]="12">
+            <nz-statistic [nzValue]="statistics().activeValue" nzTitle="生效中金額" nzPrefix="$" [nzValueStyle]="{ color: '#52c41a' }" />
+          </nz-col>
+        </nz-row>
+      </nz-card>
 
-    <!-- Action Toolbar -->
-    <nz-card class="mb-md">
-      <nz-row [nzGutter]="16" nzAlign="middle">
-        <nz-col [nzFlex]="'auto'">
-          <button nz-button nzType="primary" (click)="createContract()" class="mr-sm">
-            <span nz-icon nzType="plus"></span>
-            新增合約
-          </button>
-          <button nz-button (click)="loadContracts()">
-            <span nz-icon nzType="reload"></span>
-            重新載入
-          </button>
-        </nz-col>
-        <nz-col [nzFlex]="'none'">
-          <nz-input-group [nzPrefix]="searchPrefix" style="width: 240px;">
-            <input nz-input placeholder="搜尋合約..." [(ngModel)]="searchText" (ngModelChange)="onSearchChange()" />
-          </nz-input-group>
-          <ng-template #searchPrefix>
-            <span nz-icon nzType="search"></span>
-          </ng-template>
-        </nz-col>
-      </nz-row>
-    </nz-card>
-
-    <!-- Contracts List -->
-    <nz-card nzTitle="合約列表">
-      @if (loading()) {
-        <nz-spin nzSimple />
-      } @else if (filteredContracts().length === 0) {
-        <nz-empty nzNotFoundContent="暫無合約記錄">
-          <ng-template #nzNotFoundFooter>
-            <button nz-button nzType="primary" (click)="createContract()">
+      <!-- Action Toolbar -->
+      <nz-card class="mb-md">
+        <nz-row [nzGutter]="16" nzAlign="middle">
+          <nz-col [nzFlex]="'auto'">
+            <button nz-button nzType="primary" (click)="startCreationWizard()" class="mr-sm">
               <span nz-icon nzType="plus"></span>
-              新增第一份合約
+              新增合約
             </button>
-          </ng-template>
-        </nz-empty>
-      } @else {
-        <st
-          [data]="filteredContracts()"
-          [columns]="columns"
-          [loading]="loading()"
-          [page]="{ front: true, show: true }"
-          (change)="handleTableChange($event)"
-        />
-      }
-    </nz-card>
+            <button nz-button (click)="createContractQuick()" class="mr-sm" nz-tooltip nzTooltipTitle="快速建立（跳過上傳與解析）">
+              <span nz-icon nzType="thunderbolt"></span>
+              快速建立
+            </button>
+            <button nz-button (click)="loadContracts()">
+              <span nz-icon nzType="reload"></span>
+              重新載入
+            </button>
+          </nz-col>
+          <nz-col [nzFlex]="'none'">
+            <nz-input-group [nzPrefix]="searchPrefix" style="width: 240px;">
+              <input nz-input placeholder="搜尋合約..." [(ngModel)]="searchText" (ngModelChange)="onSearchChange()" />
+            </nz-input-group>
+            <ng-template #searchPrefix>
+              <span nz-icon nzType="search"></span>
+            </ng-template>
+          </nz-col>
+        </nz-row>
+      </nz-card>
+
+      <!-- Contracts List -->
+      <nz-card nzTitle="合約列表">
+        @if (loading()) {
+          <nz-spin nzSimple />
+        } @else if (filteredContracts().length === 0) {
+          <nz-empty nzNotFoundContent="暫無合約記錄">
+            <ng-template #nzNotFoundFooter>
+              <button nz-button nzType="primary" (click)="startCreationWizard()">
+                <span nz-icon nzType="plus"></span>
+                新增第一份合約
+              </button>
+            </ng-template>
+          </nz-empty>
+        } @else {
+          <st
+            [data]="filteredContracts()"
+            [columns]="columns"
+            [loading]="loading()"
+            [page]="{ front: true, show: true }"
+            (change)="handleTableChange($event)"
+          />
+        }
+      </nz-card>
+    }
   `,
   styles: [
     `
@@ -150,6 +165,7 @@ export class ContractModuleViewComponent implements OnInit {
   // State signals
   contracts = signal<Contract[]>([]);
   loading = signal(false);
+  showCreationWizard = signal(false);
   searchText = '';
 
   // Filtered contracts based on search
@@ -285,11 +301,35 @@ export class ContractModuleViewComponent implements OnInit {
   }
 
   /**
-   * Create a new contract
+   * Start the creation wizard (full workflow)
    */
-  createContract(): void {
+  startCreationWizard(): void {
+    this.showCreationWizard.set(true);
+  }
+
+  /**
+   * Handle wizard completion
+   */
+  onWizardCompleted(contract: Contract): void {
+    this.showCreationWizard.set(false);
+    this.message.success(`合約 ${contract.contractNumber} 已成功建立並生效`);
+    this.loadContracts();
+  }
+
+  /**
+   * Handle wizard cancellation
+   */
+  onWizardCancelled(): void {
+    this.showCreationWizard.set(false);
+    this.loadContracts(); // Reload to show any draft contracts
+  }
+
+  /**
+   * Quick create contract (skip upload and parsing)
+   */
+  createContractQuick(): void {
     this.modalHelper
-      .createStatic(ContractModalComponent, { blueprintId: this.blueprintId() }, { size: 'lg', modalOptions: { nzTitle: '新增合約' } })
+      .createStatic(ContractModalComponent, { blueprintId: this.blueprintId() }, { size: 'lg', modalOptions: { nzTitle: '快速新增合約' } })
       .subscribe(result => {
         if (result) {
           this.loadContracts();

@@ -672,3 +672,276 @@ GigHub Development Team
 ## 📄 授權
 
 MIT License
+
+---
+
+## 🚀 已實現功能 (Implemented Features)
+
+### AI Functions
+
+本模組已實現以下 Cloud Functions，使用最新的 `@google/genai` SDK：
+
+#### 1. `ai-generateText` - 文字生成
+
+從提示詞生成文字內容。
+
+**請求參數:**
+```typescript
+{
+  prompt: string;           // 提示詞
+  maxTokens?: number;       // 最大 tokens (預設: 1000)
+  temperature?: number;     // 溫度參數 (預設: 0.7)
+  blueprintId?: string;     // Blueprint ID (用於記錄)
+}
+```
+
+**回應:**
+```typescript
+{
+  text: string;            // 生成的文字
+  tokensUsed: number;      // 使用的 tokens
+  model: string;           // 使用的模型
+  timestamp: number;       // 時間戳記
+}
+```
+
+**使用範例:**
+```typescript
+const result = await httpsCallable(functions, 'ai-generateText')({
+  prompt: '請說明施工安全的重要性',
+  maxTokens: 500
+});
+console.log(result.data.text);
+```
+
+#### 2. `ai-generateChat` - 對話生成
+
+維護對話歷史的多輪對話生成。
+
+**請求參數:**
+```typescript
+{
+  messages: Array<{
+    role: 'user' | 'model';
+    content: string;
+  }>;
+  maxTokens?: number;       // 最大 tokens (預設: 1000)
+  temperature?: number;     // 溫度參數 (預設: 0.7)
+  blueprintId?: string;     // Blueprint ID (用於記錄)
+}
+```
+
+**回應:**
+```typescript
+{
+  response: string;        // AI 回應
+  tokensUsed: number;      // 使用的 tokens
+  model: string;           // 使用的模型
+  timestamp: number;       // 時間戳記
+}
+```
+
+**使用範例:**
+```typescript
+const result = await httpsCallable(functions, 'ai-generateChat')({
+  messages: [
+    { role: 'user', content: '什麼是施工安全？' },
+    { role: 'model', content: '施工安全是...' },
+    { role: 'user', content: '有哪些重要措施？' }
+  ]
+});
+console.log(result.data.response);
+```
+
+### Contract Functions
+
+#### 3. `contract-parseContract` - 合約文件解析
+
+使用 Vision AI 解析合約文件，提取結構化資料。
+
+**請求參數:**
+```typescript
+{
+  blueprintId: string;
+  contractId: string;
+  requestId: string;
+  files: Array<{
+    id: string;
+    name: string;
+    dataUri?: string;      // Base64 data URI
+    url?: string;          // File URL
+    mimeType: string;
+    size: number;
+  }>;
+}
+```
+
+**回應:**
+```typescript
+{
+  success: boolean;
+  requestId: string;
+  parsedData?: {
+    name: string;                // 合約名稱
+    client: string;              // 客戶名稱
+    totalValue: number;          // 總金額（未稅）
+    tax?: number;                // 稅額
+    totalValueWithTax?: number;  // 總金額（含稅）
+    tasks: Array<{
+      id: string;
+      title: string;
+      quantity: number;
+      unitPrice: number;
+      value: number;
+      discount?: number;
+      lastUpdated: string;
+      completedQuantity: number;
+      subTasks: any[];
+    }>;
+  };
+  errorMessage?: string;
+}
+```
+
+**使用範例:**
+```typescript
+const result = await httpsCallable(functions, 'contract-parseContract')({
+  blueprintId: 'bp-123',
+  contractId: 'ct-456',
+  requestId: 'req-789',
+  files: [{
+    id: 'f1',
+    name: 'contract.pdf',
+    dataUri: 'data:application/pdf;base64,...',
+    mimeType: 'application/pdf',
+    size: 123456
+  }]
+});
+
+if (result.data.success) {
+  console.log('解析成功:', result.data.parsedData);
+}
+```
+
+## 📁 檔案結構
+
+```
+functions-ai/
+├── src/
+│   ├── ai/
+│   │   ├── client.ts          # GenAI 客戶端配置
+│   │   ├── generateText.ts    # 文字生成 Cloud Function
+│   │   └── generateChat.ts    # 對話生成 Cloud Function
+│   ├── contract/
+│   │   └── parseContract.ts   # 合約解析 Cloud Function
+│   ├── types/
+│   │   ├── ai.types.ts        # AI 型別定義
+│   │   └── contract.types.ts  # 合約型別定義
+│   └── index.ts               # 主入口點
+├── lib/                       # 編譯輸出
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+## 🔧 開發指令
+
+```bash
+# 安裝依賴
+npm install
+
+# 編譯 TypeScript
+npm run build
+
+# 監看模式編譯
+npm run build:watch
+
+# 執行 Lint
+npm run lint
+
+# 本地測試（Firebase Emulator）
+npm run serve
+```
+
+## 🚀 部署
+
+```bash
+# 部署所有 AI 函式
+firebase deploy --only functions:ai
+
+# 部署合約解析函式
+firebase deploy --only functions:contract
+
+# 部署特定函式
+firebase deploy --only functions:ai-generateText
+```
+
+## ⚙️ 配置
+
+### 環境變數
+
+需要設定 Google Gemini API Key：
+
+```bash
+# 使用 Firebase Secrets
+firebase functions:secrets:set GEMINI_API_KEY
+
+# 或在本地開發時設定 .env
+echo "GEMINI_API_KEY=your_api_key_here" > .env
+```
+
+### 使用的模型
+
+- **文字生成**: `gemini-2.5-flash`
+- **對話生成**: `gemini-2.5-flash`
+- **視覺分析**: `gemini-2.5-flash` (支援 multimodal)
+
+## 🔒 安全性
+
+- ✅ 所有函式要求身份驗證
+- ✅ 輸入驗證與清理
+- ✅ 錯誤處理與日誌記錄
+- ✅ API Key 安全儲存在 Firebase Secrets
+- ✅ 限制並發實例數 (maxInstances: 10)
+
+## ⚡ 效能配置
+
+- **記憶體**: 512MiB (AI functions), 1GiB (contract parsing)
+- **逾時時間**: 60s (AI functions), 300s (contract parsing)
+- **區域**: asia-east1
+- **最大實例數**: 10
+
+## 🔗 前端整合
+
+前端透過 Repository 模式呼叫這些函式：
+
+```typescript
+// src/app/core/data-access/ai/ai.repository.ts
+import { Functions, httpsCallable } from '@angular/fire/functions';
+
+async generateText(request: AIGenerateTextRequest): Promise<AIGenerateTextResponse> {
+  const callable = httpsCallable<AIGenerateTextRequest, AIGenerateTextResponse>(
+    this.functions,
+    'ai-generateText'
+  );
+  const result = await callable(request);
+  return result.data;
+}
+```
+
+## 🔄 從舊版遷移
+
+本模組取代舊的 `functions` 目錄中的 AI 函式：
+
+| 差異項目 | 舊版 (functions) | 新版 (functions-ai) |
+|---------|-----------------|-------------------|
+| SDK | `@google/generative-ai` | `@google/genai` |
+| 狀態 | 已棄用 | 最新版本 |
+| 函式名稱 | 相同 | 相同 |
+| 前端呼叫 | 無需變更 | 無需變更 |
+
+## 📚 參考資源
+
+- [Google GenAI SDK](https://github.com/googleapis/js-genai)
+- [Firebase Functions v2](https://firebase.google.com/docs/functions/beta)
+- [Gemini API Documentation](https://ai.google.dev/gemini-api/docs)

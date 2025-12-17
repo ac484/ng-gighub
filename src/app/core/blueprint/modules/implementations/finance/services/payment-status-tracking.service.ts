@@ -146,13 +146,39 @@ export class PaymentStatusTrackingService {
     const grossProfit = receivableSummary.collected - payableSummary.paid;
     const grossProfitMargin = receivableSummary.collected > 0 ? (grossProfit / receivableSummary.collected) * 100 : 0;
 
+    // 計算逾期統計
+    const now = new Date();
+    const overdueReceivables = receivables.filter(inv => !['paid', 'cancelled'].includes(inv.status) && inv.dueDate < now);
+    const paidReceivables = receivables.filter(inv => inv.status === 'paid');
+
+    // 計算本月統計
+    const thisMonth = new Date();
+    thisMonth.setDate(1);
+    thisMonth.setHours(0, 0, 0, 0);
+    const thisMonthReceivables = receivables.filter(inv => inv.createdAt >= thisMonth);
+    const thisMonthPaidReceivables = receivables.filter(inv => inv.paidDate && inv.paidDate >= thisMonth);
+
     const summary: FinancialSummary = {
       blueprintId,
       receivables: receivableSummary,
       payables: payableSummary,
       grossProfit,
       grossProfitMargin: Math.round(grossProfitMargin * 100) / 100,
-      asOf: new Date()
+      asOf: new Date(),
+      // 擴展欄位
+      totalBilled: receivableSummary.total,
+      totalReceived: receivableSummary.collected,
+      pendingReceivable: receivableSummary.pending,
+      overdueReceivable: overdueReceivables.reduce((sum, inv) => sum + inv.total, 0),
+      receivableInvoiceCount: receivables.length,
+      paidReceivableCount: paidReceivables.length,
+      overdueInvoiceCount: overdueReceivables.length,
+      totalPayable: payableSummary.total,
+      totalPaid: payableSummary.paid,
+      accountsReceivableBalance: receivableSummary.pending,
+      accountsPayableBalance: payableSummary.pending,
+      monthlyBilled: thisMonthReceivables.reduce((sum, inv) => sum + inv.total, 0),
+      monthlyReceived: thisMonthPaidReceivables.reduce((sum, inv) => sum + (inv.paidAmount ?? 0), 0)
     };
 
     // 快取結果

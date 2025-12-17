@@ -83,6 +83,8 @@ export interface FileAttachment {
   fileSize: number;
   /** File storage URL */
   fileUrl: string;
+  /** Storage path for file operations */
+  storagePath?: string;
   /** User who uploaded */
   uploadedBy: string;
   /** Upload timestamp */
@@ -90,8 +92,43 @@ export interface FileAttachment {
 }
 
 /**
+ * Contract Parsing Status
+ * - pending: 等待解析
+ * - processing: 解析中
+ * - completed: 解析完成
+ * - failed: 解析失敗
+ * - skipped: 跳過解析（手動建檔）
+ */
+export type ContractParsingStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'skipped';
+
+/**
+ * Contract Parsing Request (解析請求)
+ */
+export interface ContractParsingRequest {
+  /** Request identifier */
+  id: string;
+  /** Contract ID */
+  contractId: string;
+  /** Blueprint ID */
+  blueprintId: string;
+  /** Files to parse */
+  fileIds: string[];
+  /** Parsing engine preference */
+  enginePreference: 'ocr' | 'ai' | 'auto';
+  /** Request status */
+  status: ContractParsingStatus;
+  /** User who requested */
+  requestedBy: string;
+  /** Request timestamp */
+  requestedAt: Date;
+  /** Completion timestamp */
+  completedAt?: Date;
+  /** Error message if failed */
+  errorMessage?: string;
+}
+
+/**
  * Contract Parsed Data (OCR/AI 解析資料)
- * Note: First version - interface only, implementation deferred per YAGNI
  */
 export interface ContractParsedData {
   /** Parsing engine used */
@@ -103,13 +140,23 @@ export interface ContractParsedData {
   /** Extracted data */
   extractedData: {
     contractNumber?: string;
+    contractTitle?: string;
     totalAmount?: number;
+    currency?: string;
     parties?: Array<Partial<ContractParty>>;
     workItems?: Array<Partial<ContractWorkItem>>;
     terms?: Array<Partial<ContractTerm>>;
+    startDate?: string;
+    endDate?: string;
   };
   /** Flag indicating if verification is needed */
   needsVerification: boolean;
+  /** Verification status */
+  verificationStatus?: 'pending' | 'confirmed' | 'modified';
+  /** User who verified */
+  verifiedBy?: string;
+  /** Verification timestamp */
+  verifiedAt?: Date;
 }
 
 /**

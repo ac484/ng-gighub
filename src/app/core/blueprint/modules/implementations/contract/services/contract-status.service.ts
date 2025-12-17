@@ -89,9 +89,8 @@ export class ContractStatusService {
       // Record status history
       await this.addStatusHistory(blueprintId, contractId, {
         id: '',
-        contractId,
-        previousStatus: contract.status,
-        newStatus,
+        fromStatus: contract.status,
+        toStatus: newStatus,
         changedBy,
         changedAt: new Date(),
         reason: reason || `Status changed from ${contract.status} to ${newStatus}`
@@ -202,9 +201,8 @@ export class ContractStatusService {
         const data = docSnapshot.data();
         return {
           id: docSnapshot.id,
-          contractId,
-          previousStatus: data['previousStatus'] as ContractStatus,
-          newStatus: data['newStatus'] as ContractStatus,
+          fromStatus: (data['fromStatus'] as ContractStatus) || (data['previousStatus'] as ContractStatus),
+          toStatus: (data['toStatus'] as ContractStatus) || (data['newStatus'] as ContractStatus),
           changedBy: data['changedBy'] as string,
           changedAt: data['changedAt'] instanceof Timestamp ? data['changedAt'].toDate() : new Date(data['changedAt']),
           reason: data['reason'] as string | undefined
@@ -225,8 +223,8 @@ export class ContractStatusService {
 
       const docData = {
         contractId,
-        previousStatus: history.previousStatus,
-        newStatus: history.newStatus,
+        fromStatus: history.fromStatus,
+        toStatus: history.toStatus,
         changedBy: history.changedBy,
         changedAt: history.changedAt,
         reason: history.reason || null

@@ -114,6 +114,35 @@ export interface FinancialSummary {
   grossProfitMargin: number;
   /** 統計時間 */
   asOf: Date;
+
+  // === 擴展欄位 (用於 FinanceDashboardComponent) ===
+
+  /** 已請款總額 */
+  totalBilled: number;
+  /** 已收款金額 */
+  totalReceived: number;
+  /** 待收款金額 */
+  pendingReceivable: number;
+  /** 逾期應收款 */
+  overdueReceivable: number;
+  /** 應收款請款單數 */
+  receivableInvoiceCount: number;
+  /** 已收款請款單數 */
+  paidReceivableCount: number;
+  /** 逾期請款單數 */
+  overdueInvoiceCount: number;
+  /** 總應付金額 */
+  totalPayable: number;
+  /** 已付款金額 */
+  totalPaid: number;
+  /** 應收帳款餘額 */
+  accountsReceivableBalance: number;
+  /** 應付帳款餘額 */
+  accountsPayableBalance: number;
+  /** 本月請款 */
+  monthlyBilled: number;
+  /** 本月收款 */
+  monthlyReceived: number;
 }
 
 /**

@@ -1,5 +1,5 @@
 {
-  "name": "functions",
+  "name": "functions-fcm",
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",

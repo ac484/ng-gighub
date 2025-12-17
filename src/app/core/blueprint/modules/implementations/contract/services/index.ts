@@ -14,3 +14,4 @@ export * from './contract-lifecycle.service';
 export * from './contract-work-items.service';
 export * from './contract-event.service';
 export * from './contract-upload.service';
+export * from './contract-parsing.service';

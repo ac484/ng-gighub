@@ -55,8 +55,8 @@ export const DEFAULT_CONTRACT_MODULE_CONFIG: Readonly<ContractModuleConfig> = {
   enableManualCreation: true,
   enableFileUpload: true,
   enableWorkItems: true,
-  enableOcrParsing: false, // Deferred per YAGNI
-  enableAiParsing: false, // Deferred per YAGNI
+  enableOcrParsing: true, // Enabled - OCR parsing via Cloud Functions
+  enableAiParsing: true, // Enabled - AI parsing via Cloud Functions
 
   // Contract numbering format: CON-0001
   contractNumberPrefix: 'CON',
