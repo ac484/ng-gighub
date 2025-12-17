@@ -496,8 +496,6 @@ src/app/layout/
 ```
 src/app/routes/
 ├── ai-assistant/                           # AI 助理頁面
-│   ├── ai-assistant.component.ts
-│   ├── ai-assistant.component.html
 │   └── ai-assistant.component.less
 │
 ├── blueprint/                              # Blueprint 管理頁面
