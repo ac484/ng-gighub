@@ -15,7 +15,8 @@
  */
 
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
+import {onDocumentUpdated, onDocumentCreated} from 'firebase-functions/v2/firestore';
+import {onCall, HttpsError} from 'firebase-functions/v2/https';
 import * as logger from 'firebase-functions/logger';
 
 // Initialize Firebase Admin
@@ -146,70 +147,84 @@ async function notifyUser(
 /**
  * Notify when task status changes
  */
-export const onTaskStatusChanged = functions.firestore.document('tasks/{taskId}').onUpdate(async (change, context) => {
-  const before = change.before.data();
-  const after = change.after.data();
-  const taskId = context.params.taskId;
+export const onTaskStatusChanged = onDocumentUpdated(
+  {document: 'tasks/{taskId}'},
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    const taskId = event.params.taskId;
 
-  // Check if status changed
-  if (before.status === after.status) {
+    if (!before || !after) {
+      return null;
+    }
+
+    // Check if status changed
+    if (before.status === after.status) {
+      return null;
+    }
+
+    logger.info(`Task ${taskId} status changed: ${before.status} -> ${after.status}`);
+
+    // Notify assignee if exists
+    if (after.assigneeId && after.assigneeId !== after.updatedBy) {
+      const statusText = after.status || 'unknown';
+      await notifyUser(
+        after.assigneeId,
+        '待辦',
+        '任務狀態更新',
+        `任務「${after.name || '未命名'}」狀態已更改為 ${statusText}`,
+        `/tasks/${taskId}`,
+        statusText
+      );
+    }
+
+    // Notify creator if different from assignee and updater
+    if (after.creatorId && after.creatorId !== after.assigneeId && after.creatorId !== after.updatedBy) {
+      const statusText = after.status || 'unknown';
+      await notifyUser(
+        after.creatorId,
+        '通知',
+        '任務狀態更新',
+        `任務「${after.name || '未命名'}」狀態已更改為 ${statusText}`,
+        `/tasks/${taskId}`
+      );
+    }
+
     return null;
   }
-
-  logger.info(`Task ${taskId} status changed: ${before.status} -> ${after.status}`);
-
-  // Notify assignee if exists
-  if (after.assigneeId && after.assigneeId !== after.updatedBy) {
-    const statusText = after.status || 'unknown';
-    await notifyUser(
-      after.assigneeId,
-      '待辦',
-      '任務狀態更新',
-      `任務「${after.name || '未命名'}」狀態已更改為 ${statusText}`,
-      `/tasks/${taskId}`,
-      statusText
-    );
-  }
-
-  // Notify creator if different from assignee and updater
-  if (after.creatorId && after.creatorId !== after.assigneeId && after.creatorId !== after.updatedBy) {
-    const statusText = after.status || 'unknown';
-    await notifyUser(
-      after.creatorId,
-      '通知',
-      '任務狀態更新',
-      `任務「${after.name || '未命名'}」狀態已更改為 ${statusText}`,
-      `/tasks/${taskId}`
-    );
-  }
-
-  return null;
-});
+);
 
 /**
  * Notify when task is assigned
  */
-export const onTaskAssigned = functions.firestore.document('tasks/{taskId}').onUpdate(async (change, context) => {
-  const before = change.before.data();
-  const after = change.after.data();
-  const taskId = context.params.taskId;
+export const onTaskAssigned = onDocumentUpdated(
+  {document: 'tasks/{taskId}'},
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    const taskId = event.params.taskId;
 
-  // Check if assignee changed
-  if (before.assigneeId === after.assigneeId) {
+    if (!before || !after) {
+      return null;
+    }
+
+    // Check if assignee changed
+    if (before.assigneeId === after.assigneeId) {
+      return null;
+    }
+
+    // Only notify if newly assigned (not unassigned)
+    if (!after.assigneeId) {
+      return null;
+    }
+
+    logger.info(`Task ${taskId} assigned to: ${after.assigneeId}`);
+
+    await notifyUser(after.assigneeId, '待辦', '新任務指派', `您被指派了任務「${after.name || '未命名'}」`, `/tasks/${taskId}`, '新指派');
+
     return null;
   }
-
-  // Only notify if newly assigned (not unassigned)
-  if (!after.assigneeId) {
-    return null;
-  }
-
-  logger.info(`Task ${taskId} assigned to: ${after.assigneeId}`);
-
-  await notifyUser(after.assigneeId, '待辦', '新任務指派', `您被指派了任務「${after.name || '未命名'}」`, `/tasks/${taskId}`, '新指派');
-
-  return null;
-});
+);
 
 // ==========================================
 // Friend Request Notifications
@@ -218,45 +233,55 @@ export const onTaskAssigned = functions.firestore.document('tasks/{taskId}').onU
 /**
  * Notify when friend request is sent
  */
-export const onFriendRequestSent = functions.firestore.document('friend_relations/{relationId}').onCreate(async snapshot => {
-  const data = snapshot.data();
+export const onFriendRequestSent = onDocumentCreated(
+  {document: 'friend_relations/{relationId}'},
+  async (event) => {
+    const data = event.data?.data();
 
-  if (data.status !== 'pending') {
+    if (!data || data.status !== 'pending') {
+      return null;
+    }
+
+    logger.info(`Friend request sent: ${data.requesterId} -> ${data.recipientId}`);
+
+    // Get requester name (optional, requires users collection)
+    // For now, just use "某位使用者"
+    const requesterName = '某位使用者';
+
+    await notifyUser(data.recipientId, '消息', '新好友請求', `${requesterName} 想加您為好友`, `/friends/requests`, '待回應');
+
     return null;
   }
-
-  logger.info(`Friend request sent: ${data.requesterId} -> ${data.recipientId}`);
-
-  // Get requester name (optional, requires users collection)
-  // For now, just use "某位使用者"
-  const requesterName = '某位使用者';
-
-  await notifyUser(data.recipientId, '消息', '新好友請求', `${requesterName} 想加您為好友`, `/friends/requests`, '待回應');
-
-  return null;
-});
+);
 
 /**
  * Notify when friend request is accepted
  */
-export const onFriendRequestAccepted = functions.firestore.document('friend_relations/{relationId}').onUpdate(async change => {
-  const before = change.before.data();
-  const after = change.after.data();
+export const onFriendRequestAccepted = onDocumentUpdated(
+  {document: 'friend_relations/{relationId}'},
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
 
-  // Check if status changed to accepted
-  if (before.status === 'accepted' || after.status !== 'accepted') {
+    if (!before || !after) {
+      return null;
+    }
+
+    // Check if status changed to accepted
+    if (before.status === 'accepted' || after.status !== 'accepted') {
+      return null;
+    }
+
+    logger.info(`Friend request accepted: ${after.requesterId} <-> ${after.recipientId}`);
+
+    // Notify the original requester
+    const recipientName = '某位使用者';
+
+    await notifyUser(after.requesterId, '消息', '好友請求已接受', `${recipientName} 接受了您的好友請求`, `/friends`, '已接受');
+
     return null;
   }
-
-  logger.info(`Friend request accepted: ${after.requesterId} <-> ${after.recipientId}`);
-
-  // Notify the original requester
-  const recipientName = '某位使用者';
-
-  await notifyUser(after.requesterId, '消息', '好友請求已接受', `${recipientName} 接受了您的好友請求`, `/friends`, '已接受');
-
-  return null;
-});
+);
 
 // ==========================================
 // Log Update Notifications
@@ -265,36 +290,43 @@ export const onFriendRequestAccepted = functions.firestore.document('friend_rela
 /**
  * Notify when new log is created
  */
-export const onLogCreated = functions.firestore.document('logs/{logId}').onCreate(async (snapshot, context) => {
-  const data = snapshot.data();
-  const logId = context.params.logId;
+export const onLogCreated = onDocumentCreated(
+  {document: 'logs/{logId}'},
+  async (event) => {
+    const data = event.data?.data();
+    const logId = event.params.logId;
 
-  logger.info(`New log created: ${logId}`);
+    if (!data) {
+      return null;
+    }
 
-  // Notify blueprint owner or relevant users
-  if (data.blueprintId) {
-    // Get blueprint to find owner/subscribers
-    const blueprintDoc = await db.collection('blueprints').doc(data.blueprintId).get();
+    logger.info(`New log created: ${logId}`);
 
-    if (blueprintDoc.exists) {
-      const blueprint = blueprintDoc.data();
+    // Notify blueprint owner or relevant users
+    if (data.blueprintId) {
+      // Get blueprint to find owner/subscribers
+      const blueprintDoc = await db.collection('blueprints').doc(data.blueprintId).get();
 
-      // Notify owner if not the creator
-      if (blueprint?.ownerId && blueprint.ownerId !== data.creatorId) {
-        await notifyUser(
-          blueprint.ownerId,
-          '通知',
-          '新施工日誌',
-          `新增了施工日誌「${data.title || '未命名'}」`,
-          `/logs/${logId}`,
-          '新日誌'
-        );
-      }
+      if (blueprintDoc.exists) {
+        const blueprint = blueprintDoc.data();
+
+        // Notify owner if not the creator
+        if (blueprint?.ownerId && blueprint.ownerId !== data.creatorId) {
+          await notifyUser(
+            blueprint.ownerId,
+            '通知',
+            '新施工日誌',
+            `新增了施工日誌「${data.title || '未命名'}」`,
+            `/logs/${logId}`,
+            '新日誌'
+          );
+        }
     }
   }
 
   return null;
-});
+}
+);
 
 // ==========================================
 // Quality Inspection Notifications
@@ -303,56 +335,70 @@ export const onLogCreated = functions.firestore.document('logs/{logId}').onCreat
 /**
  * Notify when quality inspection is created
  */
-export const onQualityInspectionCreated = functions.firestore.document('quality/{qualityId}').onCreate(async (snapshot, context) => {
-  const data = snapshot.data();
-  const qualityId = context.params.qualityId;
+export const onQualityInspectionCreated = onDocumentCreated(
+  {document: 'quality/{qualityId}'},
+  async (event) => {
+    const data = event.data?.data();
+    const qualityId = event.params.qualityId;
 
-  logger.info(`New quality inspection created: ${qualityId}`);
+    if (!data) {
+      return null;
+    }
 
-  // Notify assigned inspector
-  if (data.inspectorId && data.inspectorId !== data.creatorId) {
-    await notifyUser(
-      data.inspectorId,
-      '待辦',
-      '新品質驗收任務',
-      `您被指派了品質驗收任務「${data.title || '未命名'}」`,
-      `/quality/${qualityId}`,
-      '待驗收'
-    );
+    logger.info(`New quality inspection created: ${qualityId}`);
+
+    // Notify assigned inspector
+    if (data.inspectorId && data.inspectorId !== data.creatorId) {
+      await notifyUser(
+        data.inspectorId,
+        '待辦',
+        '新品質驗收任務',
+        `您被指派了品質驗收任務「${data.title || '未命名'}」`,
+        `/quality/${qualityId}`,
+        '待驗收'
+      );
+    }
+
+    return null;
   }
-
-  return null;
-});
+);
 
 /**
  * Notify when quality inspection status changes
  */
-export const onQualityInspectionStatusChanged = functions.firestore.document('quality/{qualityId}').onUpdate(async (change, context) => {
-  const before = change.before.data();
-  const after = change.after.data();
-  const qualityId = context.params.qualityId;
+export const onQualityInspectionStatusChanged = onDocumentUpdated(
+  {document: 'quality/{qualityId}'},
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    const qualityId = event.params.qualityId;
 
-  // Check if status changed
-  if (before.status === after.status) {
+    if (!before || !after) {
+      return null;
+    }
+
+    // Check if status changed
+    if (before.status === after.status) {
+      return null;
+    }
+
+    logger.info(`Quality inspection ${qualityId} status changed: ${before.status} -> ${after.status}`);
+
+    // Notify creator about status change
+    if (after.creatorId && after.creatorId !== after.updatedBy) {
+      const statusText = after.status || 'unknown';
+      await notifyUser(
+        after.creatorId,
+        '通知',
+        '品質驗收狀態更新',
+        `品質驗收「${after.title || '未命名'}」狀態已更改為 ${statusText}`,
+        `/quality/${qualityId}`
+      );
+    }
+
     return null;
   }
-
-  logger.info(`Quality inspection ${qualityId} status changed: ${before.status} -> ${after.status}`);
-
-  // Notify creator about status change
-  if (after.creatorId && after.creatorId !== after.updatedBy) {
-    const statusText = after.status || 'unknown';
-    await notifyUser(
-      after.creatorId,
-      '通知',
-      '品質驗收狀態更新',
-      `品質驗收「${after.title || '未命名'}」狀態已更改為 ${statusText}`,
-      `/quality/${qualityId}`
-    );
-  }
-
-  return null;
-});
+);
 
 // ==========================================
 // Utility Functions
@@ -361,24 +407,30 @@ export const onQualityInspectionStatusChanged = functions.firestore.document('qu
 /**
  * Test function to manually send notification
  */
-export const sendTestNotification = functions.https.onCall(async (data, context) => {
+export const sendTestNotification = onCall<{
+  title?: string;
+  body?: string;
+  data?: Record<string, string>;
+  link?: string;
+}>(async (request) => {
   // Verify user is authenticated
-  if (!context.auth) {
-    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'User must be authenticated');
   }
 
-  const userId = context.auth.uid;
+  const userId = request.auth.uid;
+  const {title, body, data, link} = request.data;
   const token = await getUserFcmToken(userId);
 
   if (!token) {
-    throw new functions.https.HttpsError('not-found', 'No FCM token found for user');
+    throw new HttpsError('not-found', 'No FCM token found for user');
   }
 
-  const success = await sendPushNotification(token, data.title || '測試通知', data.body || '這是一則測試通知', data.data || {});
+  const success = await sendPushNotification(token, title || '測試通知', body || '這是一則測試通知', data);
 
   if (success) {
-    await createNotificationDocument(userId, '通知', data.title || '測試通知', data.body || '這是一則測試通知', data.link);
+    await createNotificationDocument(userId, '通知', title || '測試通知', body || '這是一則測試通知', link);
   }
 
-  return { success };
+  return {success};
 });
