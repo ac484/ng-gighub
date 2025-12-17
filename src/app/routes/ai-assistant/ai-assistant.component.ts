@@ -54,7 +54,11 @@ import { SHARED_IMPORTS } from '@shared';
         style="flex: 1; display: flex; flex-direction: column; background: var(--component-background); border-radius: 8px; overflow: hidden; margin: 0 16px 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);"
       >
         <!-- Chat Messages -->
-        <div #chatMessages style="flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div
+          id="chatMessages"
+          #chatMessages
+          style="flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px;"
+        >
           @if (!hasHistory()) {
             <!-- Welcome Message -->
             <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="welcomeTemplate" />
@@ -178,21 +182,21 @@ import { SHARED_IMPORTS } from '@shared';
       }
 
       /* Scrollbar styles */
-      [#chatMessages]::-webkit-scrollbar {
+      #chatMessages::-webkit-scrollbar {
         width: 6px;
       }
 
-      [#chatMessages]::-webkit-scrollbar-track {
+      #chatMessages::-webkit-scrollbar-track {
         background: rgba(31, 41, 55, 0.5);
         border-radius: 3px;
       }
 
-      [#chatMessages]::-webkit-scrollbar-thumb {
+      #chatMessages::-webkit-scrollbar-thumb {
         background: #6b7280;
         border-radius: 3px;
       }
 
-      [#chatMessages]::-webkit-scrollbar-thumb:hover {
+      #chatMessages::-webkit-scrollbar-thumb:hover {
         background: #9ca3af;
       }
 
