@@ -119,9 +119,9 @@ export class OrganizationRepositoryComponent implements OnInit {
       index: 'type',
       type: 'badge',
       badge: {
-        document: { text: '文檔', color: 'blue' },
-        code: { text: '代碼', color: 'green' },
-        design: { text: '設計', color: 'purple' },
+        document: { text: '文檔', color: 'processing' },
+        code: { text: '代碼', color: 'success' },
+        design: { text: '設計', color: 'warning' },
         other: { text: '其他', color: 'default' }
       },
       width: '10%'
