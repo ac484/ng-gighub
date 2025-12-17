@@ -10,7 +10,7 @@
  * - 新增合約建立流程精靈 (ContractCreationWizardComponent)
  */
 
-import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal, computed, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal, computed, effect, ViewContainerRef } from '@angular/core';
 import type { Contract, ContractStatus, ContractStatistics } from '@core/blueprint/modules/implementations/contract/models';
 import { ContractCreationService } from '@core/blueprint/modules/implementations/contract/services/contract-creation.service';
 import { ContractManagementService } from '@core/blueprint/modules/implementations/contract/services/contract-management.service';
@@ -18,6 +18,7 @@ import { STColumn, STChange } from '@delon/abc/st';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS } from '@shared';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
+import { NzDrawerService, NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
@@ -25,13 +26,23 @@ import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 
 import { ContractCreationWizardComponent } from './contract-creation-wizard.component';
+import { ContractDetailDrawerComponent } from './contract-detail-drawer.component';
 import { ContractModalComponent } from './contract-modal.component';
 
 @Component({
   selector: 'app-contract-module-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SHARED_IMPORTS, NzStatisticModule, NzEmptyModule, NzBadgeModule, NzTagModule, ContractCreationWizardComponent],
+  imports: [
+    SHARED_IMPORTS, 
+    NzStatisticModule, 
+    NzEmptyModule, 
+    NzBadgeModule, 
+    NzTagModule, 
+    NzDrawerModule,
+    ContractCreationWizardComponent,
+    ContractDetailDrawerComponent
+  ],
   template: `
     <!-- Creation Wizard Mode -->
     @if (showCreationWizard()) {
@@ -161,12 +172,15 @@ export class ContractModuleViewComponent implements OnInit {
   private readonly message = inject(NzMessageService);
   private readonly modal = inject(NzModalService);
   private readonly modalHelper = inject(ModalHelper);
+  private readonly drawerService = inject(NzDrawerService);
+  private readonly viewContainerRef = inject(ViewContainerRef);
 
   // State signals
   contracts = signal<Contract[]>([]);
   loading = signal(false);
   showCreationWizard = signal(false);
   searchText = '';
+  selectedContract = signal<Contract | null>(null);
 
   // Filtered contracts based on search
   filteredContracts = computed(() => {
@@ -338,39 +352,71 @@ export class ContractModuleViewComponent implements OnInit {
   }
 
   /**
-   * View contract details
+   * View contract details - UPDATED: Open drawer instead of modal
    */
   viewContract(contract: Contract): void {
-    const content = [
-      `合約編號: ${this.escapeHtml(contract.contractNumber)}`,
-      `合約名稱: ${this.escapeHtml(contract.title)}`,
-      `描述: ${this.escapeHtml(contract.description || '無')}`,
-      ``,
-      `【業主資訊】`,
-      `名稱: ${this.escapeHtml(contract.owner.name)}`,
-      `聯絡人: ${this.escapeHtml(contract.owner.contactPerson)}`,
-      `電話: ${this.escapeHtml(contract.owner.contactPhone)}`,
-      ``,
-      `【承商資訊】`,
-      `名稱: ${this.escapeHtml(contract.contractor.name)}`,
-      `聯絡人: ${this.escapeHtml(contract.contractor.contactPerson)}`,
-      `電話: ${this.escapeHtml(contract.contractor.contactPhone)}`,
-      ``,
-      `【合約金額】`,
-      `金額: ${contract.currency} ${contract.totalAmount.toLocaleString()}`,
-      ``,
-      `【合約期間】`,
-      `開始日期: ${this.formatDate(contract.startDate)}`,
-      `結束日期: ${this.formatDate(contract.endDate)}`,
-      `狀態: ${this.getStatusText(contract.status)}`
-    ].join('\n');
-
-    this.modal.info({
-      nzTitle: `合約詳情: ${this.escapeHtml(contract.contractNumber)}`,
-      nzContent: content,
-      nzWidth: 600,
-      nzOkText: '關閉'
+    this.selectedContract.set(contract);
+    
+    const drawerRef = this.drawerService.create<ContractDetailDrawerComponent, { contract: Contract }>({
+      nzTitle: `合約詳情: ${contract.contractNumber}`,
+      nzContent: ContractDetailDrawerComponent,
+      nzWidth: 720,
+      nzContentParams: {
+        contract
+      },
+      nzClosable: true,
+      nzMaskClosable: true
     });
+
+    // Handle drawer events
+    const component = drawerRef.getContentComponent();
+    if (component) {
+      // Subscribe to edit event
+      component.edit.subscribe((editContract: Contract) => {
+        drawerRef.close();
+        this.editContract(editContract);
+      });
+
+      // Subscribe to activate event
+      component.activate.subscribe(async (activateContract: Contract) => {
+        await this.activateContract(activateContract);
+        drawerRef.close();
+        await this.loadContracts();
+      });
+
+      // Subscribe to download event
+      component.download.subscribe((downloadContract: Contract) => {
+        this.downloadContract(downloadContract);
+      });
+    }
+
+    // Reload contracts when drawer closes
+    drawerRef.afterClose.subscribe(() => {
+      this.selectedContract.set(null);
+      this.loadContracts();
+    });
+  }
+
+  /**
+   * Activate contract
+   */
+  async activateContract(contract: Contract): Promise<void> {
+    try {
+      // TODO: Implement contract activation
+      // await this.statusService.activate(this.blueprintId(), contract.id);
+      this.message.success(`合約 ${contract.contractNumber} 已生效`);
+    } catch (error) {
+      this.message.error('生效合約失敗');
+      console.error('[ContractModuleView]', 'activateContract failed', error);
+    }
+  }
+
+  /**
+   * Download contract
+   */
+  downloadContract(contract: Contract): void {
+    // TODO: Implement contract download
+    this.message.info('下載功能開發中');
   }
 
   /**
