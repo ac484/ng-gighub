@@ -55,10 +55,11 @@ interface RepositoryItem {
 
     <!-- Upload Modal -->
     <nz-modal
-      [(nzVisible)]="uploadModalVisible()"
+      [nzVisible]="uploadModalVisible()"
       [nzTitle]="'上傳檔案'"
       (nzOnCancel)="handleUploadCancel()"
       (nzOnOk)="handleUploadOk()"
+      (nzVisibleChange)="uploadModalVisible.set($event)"
       [nzOkLoading]="uploading()"
     >
       <ng-container *nzModalContent>

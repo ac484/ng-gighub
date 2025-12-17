@@ -142,10 +142,11 @@ interface TodoItem {
 
     <!-- Add/Edit Modal -->
     <nz-modal
-      [(nzVisible)]="modalVisible()"
+      [nzVisible]="modalVisible()"
       [nzTitle]="modalTitle()"
       (nzOnCancel)="handleCancel()"
       (nzOnOk)="handleOk()"
+      (nzVisibleChange)="modalVisible.set($event)"
       [nzOkLoading]="saving()"
     >
       <ng-container *nzModalContent>
