@@ -123,9 +123,9 @@
             "link": "/organization/schedule"
           },
           {
-            "text": "組織倉庫",
+            "text": "物料倉庫",
             "i18n": "menu.organization.repository",
-            "icon": "anticon-database",
+            "icon": "anticon-gold",
             "link": "/organization/repository"
           },
           {

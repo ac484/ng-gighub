@@ -3,14 +3,27 @@ import { STColumn } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
-interface RepositoryItem {
+interface WarehouseLocation {
   id: string;
   name: string;
-  type: 'document' | 'code' | 'design' | 'other';
-  size: string;
-  updatedAt: Date;
-  updatedBy: string;
-  tags: string[];
+  address: string;
+  capacity: number;
+  currentStock: number;
+  manager: string;
+  status: 'active' | 'inactive' | 'maintenance';
+}
+
+interface MaterialItem {
+  id: string;
+  name: string;
+  category: 'construction' | 'electrical' | 'plumbing' | 'finishing' | 'other';
+  quantity: number;
+  unit: string;
+  locationId: string;
+  locationName: string;
+  minStock: number;
+  status: 'sufficient' | 'low' | 'critical';
+  lastUpdated: Date;
 }
 
 @Component({
@@ -19,57 +32,264 @@ interface RepositoryItem {
   imports: [SHARED_IMPORTS],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <page-header [title]="'組織倉庫'" [content]="headerContent">
+    <page-header [title]="'物料倉庫'" [content]="headerContent">
       <ng-template #extra>
         <button nz-button (click)="refresh()">
           <span nz-icon nzType="reload"></span>
           重新整理
         </button>
-        <button nz-button nzType="primary" (click)="showUploadModal()" class="ml-sm">
-          <span nz-icon nzType="upload"></span>
-          上傳檔案
+        <button nz-button (click)="showLocationModal()" class="ml-sm">
+          <span nz-icon nzType="environment"></span>
+          倉庫管理
+        </button>
+        <button nz-button nzType="primary" (click)="showAddMaterialModal()" class="ml-sm">
+          <span nz-icon nzType="plus"></span>
+          新增物料
         </button>
       </ng-template>
     </page-header>
 
     <ng-template #headerContent>
       <div class="header-desc">
-        <span nz-icon nzType="database" nzTheme="outline" class="mr-xs"></span>
-        集中管理組織文檔與資源
+        <span nz-icon nzType="gold" nzTheme="outline" class="mr-xs"></span>
+        管理多地點物料倉庫與庫存
       </div>
     </ng-template>
 
-    <nz-card [nzBordered]="false">
+    <!-- Warehouse locations summary -->
+    <div nz-row [nzGutter]="16" class="mb-lg">
+      @for (location of locations(); track location.id) {
+        <div nz-col [nzSpan]="6">
+          <nz-card [nzBordered]="false" class="location-card">
+            <div class="location-header">
+              <h4>
+                <span nz-icon nzType="environment" nzTheme="outline" class="mr-xs"></span>
+                {{ location.name }}
+              </h4>
+              <nz-badge
+                [nzStatus]="getLocationStatus(location.status)"
+                [nzText]="getLocationStatusText(location.status)"
+              ></nz-badge>
+            </div>
+            <div class="location-info">
+              <p class="text-secondary">{{ location.address }}</p>
+              <nz-progress
+                [nzPercent]="(location.currentStock / location.capacity) * 100"
+                [nzStatus]="getCapacityStatus(location)"
+                [nzShowInfo]="false"
+              ></nz-progress>
+              <div class="location-stats">
+                <span>庫存: {{ location.currentStock }} / {{ location.capacity }}</span>
+                <span class="text-secondary">管理員: {{ location.manager }}</span>
+              </div>
+            </div>
+          </nz-card>
+        </div>
+      }
+    </div>
+
+    <nz-card [nzBordered]="false" [nzTitle]="'物料清單'">
       <!-- Filter tabs -->
-      <nz-radio-group [(ngModel)]="currentTypeValue" (ngModelChange)="onTypeChange()" class="mb-lg">
-        <label nz-radio-button nzValue="all">全部</label>
-        <label nz-radio-button nzValue="document">文檔</label>
-        <label nz-radio-button nzValue="code">代碼</label>
-        <label nz-radio-button nzValue="design">設計</label>
-        <label nz-radio-button nzValue="other">其他</label>
-      </nz-radio-group>
+      <nz-space class="mb-lg">
+        <nz-select
+          *nzSpaceItem
+          [(ngModel)]="selectedLocationValue"
+          (ngModelChange)="onLocationChange()"
+          nzPlaceHolder="選擇倉庫地點"
+          style="width: 200px"
+        >
+          <nz-option nzValue="all" nzLabel="全部地點"></nz-option>
+          @for (location of locations(); track location.id) {
+            <nz-option [nzValue]="location.id" [nzLabel]="location.name"></nz-option>
+          }
+        </nz-select>
+
+        <nz-radio-group *nzSpaceItem [(ngModel)]="currentCategoryValue" (ngModelChange)="onCategoryChange()">
+          <label nz-radio-button nzValue="all">全部類別</label>
+          <label nz-radio-button nzValue="construction">建材</label>
+          <label nz-radio-button nzValue="electrical">電氣</label>
+          <label nz-radio-button nzValue="plumbing">水電</label>
+          <label nz-radio-button nzValue="finishing">裝修</label>
+          <label nz-radio-button nzValue="other">其他</label>
+        </nz-radio-group>
+
+        <nz-radio-group *nzSpaceItem [(ngModel)]="currentStatusValue" (ngModelChange)="onStatusChange()">
+          <label nz-radio-button nzValue="all">全部狀態</label>
+          <label nz-radio-button nzValue="sufficient">充足</label>
+          <label nz-radio-button nzValue="low">偏低</label>
+          <label nz-radio-button nzValue="critical">緊急</label>
+        </nz-radio-group>
+      </nz-space>
 
       <!-- Table -->
-      <st [data]="filteredItems()" [columns]="columns" [loading]="loading()" [page]="{ show: true, showSize: true }"></st>
+      <st
+        [data]="filteredMaterials()"
+        [columns]="columns"
+        [loading]="loading()"
+        [page]="{show: true, showSize: true}"
+      ></st>
     </nz-card>
 
-    <!-- Upload Modal -->
+    <!-- Add/Edit Material Modal -->
     <nz-modal
-      [nzVisible]="uploadModalVisible()"
-      [nzTitle]="'上傳檔案'"
-      (nzOnCancel)="handleUploadCancel()"
-      (nzOnOk)="handleUploadOk()"
-      (nzVisibleChange)="uploadModalVisible.set($event)"
-      [nzOkLoading]="uploading()"
+      [nzVisible]="materialModalVisible()"
+      [nzTitle]="materialModalTitle()"
+      (nzOnCancel)="handleMaterialCancel()"
+      (nzOnOk)="handleMaterialOk()"
+      (nzVisibleChange)="materialModalVisible.set($event)"
+      [nzOkLoading]="saving()"
+      [nzWidth]="600"
     >
       <ng-container *nzModalContent>
-        <nz-upload nzType="drag" [nzMultiple]="true" [nzBeforeUpload]="beforeUpload" class="upload-area">
-          <p class="ant-upload-drag-icon">
-            <span nz-icon nzType="inbox" nzTheme="outline"></span>
-          </p>
-          <p class="ant-upload-text">點擊或拖曳檔案到此區域上傳</p>
-          <p class="ant-upload-hint"> 支援單個或批次上傳，嚴禁上傳公司資料或其他敏感檔案 </p>
-        </nz-upload>
+        <form nz-form [nzLayout]="'vertical'">
+          <nz-form-item>
+            <nz-form-label [nzRequired]="true">物料名稱</nz-form-label>
+            <nz-form-control>
+              <input
+                nz-input
+                [(ngModel)]="editingMaterial().name"
+                name="name"
+                placeholder="輸入物料名稱"
+              />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label [nzRequired]="true">類別</nz-form-label>
+            <nz-form-control>
+              <nz-select
+                [(ngModel)]="editingMaterial().category"
+                name="category"
+                nzPlaceHolder="選擇類別"
+                class="w-full"
+              >
+                <nz-option nzValue="construction" nzLabel="建材"></nz-option>
+                <nz-option nzValue="electrical" nzLabel="電氣"></nz-option>
+                <nz-option nzValue="plumbing" nzLabel="水電"></nz-option>
+                <nz-option nzValue="finishing" nzLabel="裝修"></nz-option>
+                <nz-option nzValue="other" nzLabel="其他"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+          <div nz-row [nzGutter]="16">
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzRequired]="true">數量</nz-form-label>
+                <nz-form-control>
+                  <nz-input-number
+                    [(ngModel)]="editingMaterial().quantity"
+                    name="quantity"
+                    [nzMin]="0"
+                    [nzStep]="1"
+                    class="w-full"
+                  ></nz-input-number>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <div nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label [nzRequired]="true">單位</nz-form-label>
+                <nz-form-control>
+                  <nz-select
+                    [(ngModel)]="editingMaterial().unit"
+                    name="unit"
+                    nzPlaceHolder="選擇單位"
+                    class="w-full"
+                  >
+                    <nz-option nzValue="件" nzLabel="件"></nz-option>
+                    <nz-option nzValue="箱" nzLabel="箱"></nz-option>
+                    <nz-option nzValue="噸" nzLabel="噸"></nz-option>
+                    <nz-option nzValue="米" nzLabel="米"></nz-option>
+                    <nz-option nzValue="平方米" nzLabel="平方米"></nz-option>
+                    <nz-option nzValue="立方米" nzLabel="立方米"></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
+          <nz-form-item>
+            <nz-form-label [nzRequired]="true">存放地點</nz-form-label>
+            <nz-form-control>
+              <nz-select
+                [(ngModel)]="editingMaterial().locationId"
+                name="locationId"
+                nzPlaceHolder="選擇倉庫地點"
+                class="w-full"
+              >
+                @for (location of locations(); track location.id) {
+                  <nz-option [nzValue]="location.id" [nzLabel]="location.name"></nz-option>
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label [nzRequired]="true">最低庫存</nz-form-label>
+            <nz-form-control>
+              <nz-input-number
+                [(ngModel)]="editingMaterial().minStock"
+                name="minStock"
+                [nzMin]="0"
+                [nzStep]="1"
+                class="w-full"
+              ></nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+        </form>
+      </ng-container>
+    </nz-modal>
+
+    <!-- Location Management Modal -->
+    <nz-modal
+      [nzVisible]="locationModalVisible()"
+      [nzTitle]="'倉庫地點管理'"
+      (nzOnCancel)="handleLocationCancel()"
+      (nzVisibleChange)="locationModalVisible.set($event)"
+      [nzFooter]="null"
+      [nzWidth]="800"
+    >
+      <ng-container *nzModalContent>
+        <button nz-button nzType="primary" (click)="showAddLocationModal()" class="mb-md">
+          <span nz-icon nzType="plus"></span>
+          新增地點
+        </button>
+
+        <nz-list [nzDataSource]="locations()" [nzRenderItem]="locationItem">
+          <ng-template #locationItem let-location>
+            <nz-list-item [nzActions]="[editLocationAction, deleteLocationAction]">
+              <ng-template #editLocationAction>
+                <a (click)="editLocation(location)">編輯</a>
+              </ng-template>
+              <ng-template #deleteLocationAction>
+                <a (click)="deleteLocation(location)" class="text-error">刪除</a>
+              </ng-template>
+
+              <nz-list-item-meta>
+                <ng-template #nzTitle>
+                  <div class="location-title">
+                    <span nz-icon nzType="environment" nzTheme="outline" class="mr-sm"></span>
+                    <strong>{{ location.name }}</strong>
+                    <nz-badge
+                      [nzStatus]="getLocationStatus(location.status)"
+                      [nzText]="getLocationStatusText(location.status)"
+                      class="ml-sm"
+                    ></nz-badge>
+                  </div>
+                </ng-template>
+                <ng-template #nzDescription>
+                  <div class="location-details">
+                    <p>地址: {{ location.address }}</p>
+                    <p>容量: {{ location.currentStock }} / {{ location.capacity }}</p>
+                    <p>管理員: {{ location.manager }}</p>
+                  </div>
+                </ng-template>
+              </nz-list-item-meta>
+            </nz-list-item>
+          </ng-template>
+        </nz-list>
       </ng-container>
     </nz-modal>
   `,
@@ -80,17 +300,56 @@ interface RepositoryItem {
         font-size: 14px;
       }
 
-      .upload-area {
-        margin-bottom: 16px;
-      }
-
-      ::ng-deep .ant-upload.ant-upload-drag {
+      .location-card {
+        height: 100%;
         background: #0f172a;
-        border-color: #1f2937;
       }
 
-      ::ng-deep .ant-upload.ant-upload-drag:hover {
-        border-color: #1e3a8a;
+      .location-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .location-header h4 {
+        margin: 0;
+        font-size: 16px;
+        color: #e5e7eb;
+      }
+
+      .location-info {
+        font-size: 13px;
+      }
+
+      .location-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        font-size: 12px;
+      }
+
+      .text-secondary {
+        color: #6b7280;
+      }
+
+      .location-title {
+        display: flex;
+        align-items: center;
+      }
+
+      .location-details p {
+        margin: 4px 0;
+        color: #9ca3af;
+      }
+
+      .text-error {
+        color: #ef4444;
+      }
+
+      ::ng-deep .ant-progress-line {
+        margin-top: 8px;
+        margin-bottom: 8px;
       }
     `
   ]
@@ -100,62 +359,96 @@ export class OrganizationRepositoryComponent implements OnInit {
 
   // State signals
   loading = signal(false);
-  uploading = signal(false);
-  uploadModalVisible = signal(false);
-  currentType = signal<string>('all');
-  currentTypeValue = 'all'; // For template binding
-  items = signal<RepositoryItem[]>([]);
+  saving = signal(false);
+  materialModalVisible = signal(false);
+  locationModalVisible = signal(false);
+  
+  selectedLocation = signal<string>('all');
+  selectedLocationValue = 'all';
+  
+  currentCategory = signal<string>('all');
+  currentCategoryValue = 'all';
+  
+  currentStatus = signal<string>('all');
+  currentStatusValue = 'all';
+
+  locations = signal<WarehouseLocation[]>([]);
+  materials = signal<MaterialItem[]>([]);
+  
+  editingMaterial = signal<Partial<MaterialItem>>({
+    name: '',
+    category: 'construction',
+    quantity: 0,
+    unit: '件',
+    minStock: 0
+  });
 
   // Table columns
   columns: STColumn[] = [
     {
-      title: '檔案名稱',
+      title: '物料名稱',
       index: 'name',
-      render: 'name',
-      width: '30%'
+      width: '20%'
     },
     {
-      title: '類型',
-      index: 'type',
+      title: '類別',
+      index: 'category',
       type: 'badge',
       badge: {
-        document: { text: '文檔', color: 'processing' },
-        code: { text: '代碼', color: 'success' },
-        design: { text: '設計', color: 'warning' },
+        construction: { text: '建材', color: 'processing' },
+        electrical: { text: '電氣', color: 'warning' },
+        plumbing: { text: '水電', color: 'success' },
+        finishing: { text: '裝修', color: 'default' },
         other: { text: '其他', color: 'default' }
       },
       width: '10%'
     },
     {
-      title: '大小',
-      index: 'size',
+      title: '數量',
+      index: 'quantity',
+      render: 'quantity',
       width: '10%'
     },
     {
-      title: '標籤',
-      index: 'tags',
-      render: 'tags',
-      width: '20%'
+      title: '單位',
+      index: 'unit',
+      width: '8%'
     },
     {
-      title: '更新時間',
-      index: 'updatedAt',
-      type: 'date',
-      dateFormat: 'yyyy/MM/dd HH:mm',
+      title: '存放地點',
+      index: 'locationName',
       width: '15%'
     },
     {
-      title: '更新者',
-      index: 'updatedBy',
+      title: '庫存狀態',
+      index: 'status',
+      type: 'badge',
+      badge: {
+        sufficient: { text: '充足', color: 'success' },
+        low: { text: '偏低', color: 'warning' },
+        critical: { text: '緊急', color: 'error' }
+      },
       width: '10%'
+    },
+    {
+      title: '最低庫存',
+      index: 'minStock',
+      width: '10%'
+    },
+    {
+      title: '更新時間',
+      index: 'lastUpdated',
+      type: 'date',
+      dateFormat: 'yyyy/MM/dd HH:mm',
+      width: '12%'
     },
     {
       title: '操作',
       buttons: [
         {
-          text: '下載',
-          icon: 'download',
-          click: (record: RepositoryItem) => this.download(record)
+          text: '編輯',
+          icon: 'edit',
+          click: (record: MaterialItem) => this.editMaterial(record)
         },
         {
           text: '刪除',
@@ -165,7 +458,7 @@ export class OrganizationRepositoryComponent implements OnInit {
             title: '確定要刪除嗎？',
             okType: 'danger'
           },
-          click: (record: RepositoryItem) => this.delete(record)
+          click: (record: MaterialItem) => this.deleteMaterial(record)
         }
       ],
       width: '15%'
@@ -173,106 +466,292 @@ export class OrganizationRepositoryComponent implements OnInit {
   ];
 
   // Computed signals
-  filteredItems = computed(() => {
-    const type = this.currentType();
-    const allItems = this.items();
+  filteredMaterials = computed(() => {
+    const location = this.selectedLocation();
+    const category = this.currentCategory();
+    const status = this.currentStatus();
+    let allMaterials = this.materials();
 
-    if (type === 'all') {
-      return allItems;
+    if (location !== 'all') {
+      allMaterials = allMaterials.filter(m => m.locationId === location);
     }
 
-    return allItems.filter(item => item.type === type);
+    if (category !== 'all') {
+      allMaterials = allMaterials.filter(m => m.category === category);
+    }
+
+    if (status !== 'all') {
+      allMaterials = allMaterials.filter(m => m.status === status);
+    }
+
+    return allMaterials;
   });
 
+  materialModalTitle = computed(() =>
+    this.editingMaterial().id ? '編輯物料' : '新增物料'
+  );
+
   ngOnInit(): void {
-    this.loadItems();
+    this.loadData();
   }
 
-  loadItems(): void {
+  loadData(): void {
     this.loading.set(true);
 
-    // Mock data
+    // Mock data for locations
     setTimeout(() => {
-      this.items.set([
+      this.locations.set([
         {
           id: '1',
-          name: '專案架構設計文檔.pdf',
-          type: 'document',
-          size: '2.5 MB',
-          updatedAt: new Date(),
-          updatedBy: '張三',
-          tags: ['架構', '設計']
+          name: '北區倉庫',
+          address: '台北市內湖區工業路100號',
+          capacity: 1000,
+          currentStock: 750,
+          manager: '張三',
+          status: 'active'
         },
         {
           id: '2',
-          name: 'API 接口規範.docx',
-          type: 'document',
-          size: '856 KB',
-          updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-          updatedBy: '李四',
-          tags: ['API', '規範']
+          name: '中區倉庫',
+          address: '台中市西屯區工業區88號',
+          capacity: 800,
+          currentStock: 650,
+          manager: '李四',
+          status: 'active'
         },
         {
           id: '3',
-          name: 'UI 設計稿.fig',
-          type: 'design',
-          size: '15.2 MB',
-          updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-          updatedBy: '王五',
-          tags: ['UI', 'Figma']
+          name: '南區倉庫',
+          address: '高雄市前鎮區臨海路66號',
+          capacity: 1200,
+          currentStock: 400,
+          manager: '王五',
+          status: 'maintenance'
+        }
+      ]);
+
+      // Mock data for materials
+      this.materials.set([
+        {
+          id: '1',
+          name: '水泥',
+          category: 'construction',
+          quantity: 500,
+          unit: '噸',
+          locationId: '1',
+          locationName: '北區倉庫',
+          minStock: 100,
+          status: 'sufficient',
+          lastUpdated: new Date()
+        },
+        {
+          id: '2',
+          name: '鋼筋',
+          category: 'construction',
+          quantity: 80,
+          unit: '噸',
+          locationId: '1',
+          locationName: '北區倉庫',
+          minStock: 100,
+          status: 'low',
+          lastUpdated: new Date(Date.now() - 24 * 60 * 60 * 1000)
+        },
+        {
+          id: '3',
+          name: '電線',
+          category: 'electrical',
+          quantity: 20,
+          unit: '米',
+          locationId: '2',
+          locationName: '中區倉庫',
+          minStock: 50,
+          status: 'critical',
+          lastUpdated: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
         },
         {
           id: '4',
-          name: 'database-schema.sql',
-          type: 'code',
-          size: '128 KB',
-          updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-          updatedBy: '趙六',
-          tags: ['資料庫', 'SQL']
+          name: 'PVC管',
+          category: 'plumbing',
+          quantity: 300,
+          unit: '米',
+          locationId: '2',
+          locationName: '中區倉庫',
+          minStock: 100,
+          status: 'sufficient',
+          lastUpdated: new Date()
+        },
+        {
+          id: '5',
+          name: '油漆',
+          category: 'finishing',
+          quantity: 150,
+          unit: '箱',
+          locationId: '3',
+          locationName: '南區倉庫',
+          minStock: 50,
+          status: 'sufficient',
+          lastUpdated: new Date()
         }
       ]);
+
       this.loading.set(false);
     }, 500);
   }
 
-  onTypeChange(): void {
-    this.currentType.set(this.currentTypeValue);
+  onLocationChange(): void {
+    this.selectedLocation.set(this.selectedLocationValue);
+  }
+
+  onCategoryChange(): void {
+    this.currentCategory.set(this.currentCategoryValue);
+  }
+
+  onStatusChange(): void {
+    this.currentStatus.set(this.currentStatusValue);
   }
 
   refresh(): void {
-    this.loadItems();
+    this.loadData();
     this.message.info('已重新整理');
   }
 
-  showUploadModal(): void {
-    this.uploadModalVisible.set(true);
+  showLocationModal(): void {
+    this.locationModalVisible.set(true);
   }
 
-  handleUploadCancel(): void {
-    this.uploadModalVisible.set(false);
+  showAddMaterialModal(): void {
+    this.editingMaterial.set({
+      name: '',
+      category: 'construction',
+      quantity: 0,
+      unit: '件',
+      minStock: 0,
+      locationId: this.locations()[0]?.id
+    });
+    this.materialModalVisible.set(true);
   }
 
-  handleUploadOk(): void {
-    this.uploading.set(true);
+  showAddLocationModal(): void {
+    this.message.info('新增地點功能開發中');
+  }
+
+  editMaterial(material: MaterialItem): void {
+    this.editingMaterial.set({ ...material });
+    this.materialModalVisible.set(true);
+  }
+
+  deleteMaterial(material: MaterialItem): void {
+    this.materials.update(materials => materials.filter(m => m.id !== material.id));
+    this.message.success('已刪除物料');
+  }
+
+  editLocation(location: WarehouseLocation): void {
+    this.message.info('編輯地點功能開發中');
+  }
+
+  deleteLocation(location: WarehouseLocation): void {
+    this.message.info('刪除地點功能開發中');
+  }
+
+  handleMaterialCancel(): void {
+    this.materialModalVisible.set(false);
+  }
+
+  handleMaterialOk(): void {
+    const material = this.editingMaterial();
+
+    if (!material.name?.trim()) {
+      this.message.error('請輸入物料名稱');
+      return;
+    }
+
+    if (!material.locationId) {
+      this.message.error('請選擇存放地點');
+      return;
+    }
+
+    this.saving.set(true);
 
     setTimeout(() => {
-      this.message.success('上傳成功');
-      this.uploading.set(false);
-      this.uploadModalVisible.set(false);
-      this.loadItems();
-    }, 1000);
+      const location = this.locations().find(l => l.id === material.locationId);
+      const quantity = material.quantity || 0;
+      const minStock = material.minStock || 0;
+      
+      let status: 'sufficient' | 'low' | 'critical' = 'sufficient';
+      if (quantity < minStock * 0.5) {
+        status = 'critical';
+      } else if (quantity < minStock) {
+        status = 'low';
+      }
+
+      if (material.id) {
+        // Update existing
+        this.materials.update(materials =>
+          materials.map(m =>
+            m.id === material.id
+              ? {
+                  ...m,
+                  ...material,
+                  locationName: location?.name || '',
+                  status,
+                  lastUpdated: new Date()
+                } as MaterialItem
+              : m
+          )
+        );
+        this.message.success('已更新物料');
+      } else {
+        // Add new
+        const newMaterial: MaterialItem = {
+          ...material,
+          id: Date.now().toString(),
+          locationName: location?.name || '',
+          status,
+          lastUpdated: new Date()
+        } as MaterialItem;
+        this.materials.update(materials => [newMaterial, ...materials]);
+        this.message.success('已新增物料');
+      }
+
+      this.saving.set(false);
+      this.materialModalVisible.set(false);
+    }, 500);
   }
 
-  beforeUpload = (): boolean => {
-    return false; // Prevent auto upload
-  };
-
-  download(item: RepositoryItem): void {
-    this.message.info(`下載檔案: ${item.name}`);
+  handleLocationCancel(): void {
+    this.locationModalVisible.set(false);
   }
 
-  delete(item: RepositoryItem): void {
-    this.items.update(items => items.filter(i => i.id !== item.id));
-    this.message.success('已刪除檔案');
+  getLocationStatus(status: string): 'success' | 'processing' | 'default' | 'error' | 'warning' {
+    switch (status) {
+      case 'active':
+        return 'success';
+      case 'maintenance':
+        return 'warning';
+      case 'inactive':
+        return 'error';
+      default:
+        return 'default';
+    }
+  }
+
+  getLocationStatusText(status: string): string {
+    switch (status) {
+      case 'active':
+        return '運作中';
+      case 'maintenance':
+        return '維護中';
+      case 'inactive':
+        return '停用';
+      default:
+        return '';
+    }
+  }
+
+  getCapacityStatus(location: WarehouseLocation): 'success' | 'normal' | 'exception' {
+    const usage = (location.currentStock / location.capacity) * 100;
+    if (usage >= 90) return 'exception';
+    if (usage >= 70) return 'normal';
+    return 'success';
   }
 }
