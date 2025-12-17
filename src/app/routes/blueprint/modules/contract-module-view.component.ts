@@ -40,8 +40,8 @@ import { ContractModalComponent } from './contract-modal.component';
     NzBadgeModule,
     NzTagModule,
     NzDrawerModule,
-    ContractCreationWizardComponent,
-    ContractDetailDrawerComponent
+    ContractCreationWizardComponent
+    // ContractDetailDrawerComponent is not imported here since it's loaded dynamically via NzDrawerService
   ],
   template: `
     <!-- Creation Wizard Mode -->
@@ -362,7 +362,7 @@ export class ContractModuleViewComponent implements OnInit {
       nzContent: ContractDetailDrawerComponent,
       nzWidth: 720,
       nzContentParams: {
-        contract
+        contract: contract as any  // Pass the contract object directly
       },
       nzClosable: true,
       nzMaskClosable: true
