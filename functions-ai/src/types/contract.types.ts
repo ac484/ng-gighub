@@ -102,3 +102,6 @@ export interface ContractParsingResponse {
   /** Error message if failed */
   errorMessage?: string;
 }
+
+// Export enhanced contract parsing types (SETC-018)
+export * from './contract-enhanced.types';
