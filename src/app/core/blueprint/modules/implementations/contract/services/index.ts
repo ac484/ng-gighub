@@ -1,17 +1,21 @@
 /**
  * Contract Module - Services Export
  *
- * Service implementations for business logic.
+ * Specialized service implementations for file handling and AI parsing.
+ * Business logic has been migrated to ContractFacade.
  *
  * @author GigHub Development Team
- * @date 2025-12-15
+ * @date 2025-12-17
  */
 
-export * from './contract-management.service';
-export * from './contract-creation.service';
-export * from './contract-status.service';
-export * from './contract-lifecycle.service';
-export * from './contract-work-items.service';
-export * from './contract-event.service';
+// Specialized services (kept)
 export * from './contract-upload.service';
 export * from './contract-parsing.service';
+
+// Removed services (migrated to ContractFacade):
+// - contract-management.service → ContractFacade (CRUD operations)
+// - contract-creation.service → ContractFacade.createContract()
+// - contract-status.service → ContractFacade.changeContractStatus()
+// - contract-lifecycle.service → ContractFacade (lifecycle workflows)
+// - contract-work-items.service → ContractFacade (work item logic)
+// - contract-event.service → ContractFacade (integrated with BlueprintEventBus)
