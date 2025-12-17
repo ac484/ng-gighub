@@ -138,9 +138,11 @@ export class TasksComponent implements OnInit {
 
   // Input from parent (Angular 19+ input() function)
   blueprintId = input<string>();
+  blueprintOwnerType = input<string>();  // 'user' or 'organization' - required for task assignee validation
 
   // Internal state
   _blueprintId = signal<string>('');
+  _blueprintOwnerType = signal<string>('user');  // Default to user
   blueprintName = signal<string>('任務管理');
   selectedViewIndex = 0;
   currentViewMode = signal<TaskViewMode>(TaskViewMode.LIST);
@@ -156,6 +158,15 @@ export class TasksComponent implements OnInit {
         this.logger.info('[TasksComponent]', `Effect triggered: blueprintId changed to ${id}`);
         this._blueprintId.set(id);
         this.loadTasks(id);
+      }
+    });
+
+    // Watch for blueprintOwnerType input changes
+    effect(() => {
+      const ownerType = this.blueprintOwnerType();
+      if (ownerType && ownerType !== this._blueprintOwnerType()) {
+        this.logger.info('[TasksComponent]', `Effect triggered: blueprintOwnerType changed to ${ownerType}`);
+        this._blueprintOwnerType.set(ownerType);
       }
     });
   }
@@ -212,6 +223,7 @@ export class TasksComponent implements OnInit {
       nzContent: TaskModalComponent,
       nzData: {
         blueprintId: blueprintId,
+        blueprintOwnerType: this._blueprintOwnerType(),
         mode: 'create'
       },
       nzWidth: 800,
@@ -233,6 +245,7 @@ export class TasksComponent implements OnInit {
       nzContent: TaskModalComponent,
       nzData: {
         blueprintId: blueprintId,
+        blueprintOwnerType: this._blueprintOwnerType(),
         task: task,
         mode: 'edit'
       },
@@ -275,6 +288,7 @@ export class TasksComponent implements OnInit {
       nzContent: TaskModalComponent,
       nzData: {
         blueprintId: blueprintId,
+        blueprintOwnerType: this._blueprintOwnerType(),
         parentTask: parentTask,
         mode: 'create'
       },

@@ -198,7 +198,7 @@ export class ContractRepository {
       // Load work items from subcollection
       const workItemsRef = collection(this.firestore, 'blueprints', blueprintId, 'contracts', contractId, 'workItems');
       const workItemsSnapshot = await getDocs(workItemsRef);
-      
+
       contract.workItems = workItemsSnapshot.docs.map(doc => {
         const data = doc.data();
         return {
@@ -305,7 +305,7 @@ export class ContractRepository {
           contracts.map(async contract => {
             const workItemsRef = collection(this.firestore, 'blueprints', blueprintId, 'contracts', contract.id, 'workItems');
             const workItemsSnapshot = await getDocs(workItemsRef);
-            
+
             contract.workItems = workItemsSnapshot.docs.map(doc => {
               const data = doc.data();
               return {

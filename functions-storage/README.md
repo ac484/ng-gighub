@@ -2,14 +2,224 @@
 
 ## 📋 概述
 
-`functions-storage` 模組負責處理 Firebase Cloud Storage 相關的檔案管理功能。提供檔案上傳處理、圖片優化、檔案轉換、安全驗證和自動化備份功能,確保檔案儲存的安全性和效能。
+`functions-storage` 模組負責處理 Firebase Cloud Storage 相關的檔案管理功能。提供檔案上傳驗證、自動元資料處理、檔案刪除清理和事件日誌記錄功能。
 
-## 🎯 目標
+## 🎯 核心功能
 
-- **檔案處理**: 自動化檔案上傳和處理流程
-- **圖片優化**: 生成縮圖和優化圖片品質
-- **安全驗證**: 驗證檔案類型和大小限制
-- **自動備份**: 定期備份重要檔案
+### 1. 檔案上傳處理 (File Upload Processing)
+
+監聽所有儲存桶的 `onObjectFinalized` 事件，自動驗證和處理上傳的檔案。
+
+**功能特性**：
+- 檔案類型驗證（白名單機制）
+- 檔案大小驗證（最大 100MB）
+- 副檔名黑名單檢查（.exe, .bat, .cmd, .sh, .ps1）
+- 自動元資料標記
+- 圖片和文件的特殊處理
+- 事件記錄到 Firestore
+- 完整錯誤處理
+
+**驗證規則**：
+- **最大大小**: 100MB
+- **封鎖副檔名**: `.exe`, `.bat`, `.cmd`, `.sh`, `.ps1`
+- **允許類型**: 
+  - 圖片 (image/*)
+  - 影片 (video/*)
+  - 音訊 (audio/*)
+  - PDF (application/pdf)
+  - Office 文件 (MS Word, Excel 等)
+  - 文字檔案 (text/*)
+
+**元資料結構**：
+```typescript
+{
+  metadata: {
+    processed: 'true' | 'false',
+    validationStatus: 'success' | 'failed',
+    processedAt: string,
+    originalName: string,
+    fileType?: 'image' | 'document',
+    requiresThumbnail?: 'true',
+    requiresProcessing?: 'true',
+    validationReason?: string
+  }
+}
+```
+
+### 2. 檔案刪除處理 (File Deletion Handling)
+
+監聽所有儲存桶的 `onObjectDeleted` 事件，自動清理相關資源。
+
+**功能特性**：
+- 記錄刪除事件到 Firestore
+- 自動清理相關縮圖檔案
+- 追蹤刪除歷史
+- 清理失敗的錯誤處理
+
+**清理流程**：
+```
+1. 記錄刪除事件到 storage_events 集合
+2. 檢查相關縮圖檔案
+3. 如果存在則刪除縮圖
+4. 記錄清理結果
+```
+
+## 💻 技術堆疊
+
+- **Firebase Functions**: v7.0.0 (v2 API)
+- **Firebase Admin**: v13.6.0
+- **TypeScript**: v5.7.3
+- **Node.js**: v24
+
+## ⚙️ 配置
+
+- **Region**: `asia-east1`
+- **Max Instances**: 10 (成本控制)
+
+## 🚀 開發指令
+
+```bash
+# 安裝依賴
+npm install
+
+# 建置
+npm run build
+
+# 部署
+npm run deploy
+
+# 監視模式
+npm run build:watch
+```
+
+## 📊 事件流程
+
+### 檔案上傳事件流程
+```
+1. 檔案上傳到 Cloud Storage
+2. onFileUpload 觸發
+3. 提取檔案元資料（路徑、類型、大小）
+4. 驗證檔案（類型、大小、副檔名）
+5. 更新檔案元資料
+6. 記錄事件到 Firestore storage_events
+7. 回傳成功/失敗狀態
+```
+
+### 檔案刪除事件流程
+```
+1. 從 Cloud Storage 刪除檔案
+2. onFileDeleted 觸發
+3. 記錄刪除到 storage_events
+4. 檢查相關縮圖
+5. 如果存在則刪除縮圖
+6. 記錄清理結果
+```
+
+## 🔍 檔案驗證
+
+### validateFile() 函式
+
+根據安全性和大小限制檢查上傳的檔案。
+
+**參數**：
+- `contentType`: 檔案的 MIME 類型
+- `fileSize`: 檔案大小（位元組）
+- `fileExtension`: 副檔名（例如：'.pdf'）
+
+**回傳值**：
+```typescript
+{
+  valid: boolean;
+  reason?: string;  // 僅在無效時存在
+}
+```
+
+**範例**：
+```typescript
+// 有效檔案
+{ valid: true }
+
+// 無效檔案
+{ valid: false, reason: 'File size exceeds 100MB limit' }
+{ valid: false, reason: 'File extension .exe is not allowed' }
+{ valid: false, reason: 'Content type application/x-executable is not allowed' }
+```
+
+## 🔧 輔助函式
+
+### isDocumentFile()
+
+根據內容類型和副檔名判斷檔案是否為文件。
+
+**辨識的文件類型**：
+- PDF (application/pdf)
+- MS Word (.doc, .docx)
+- MS Excel (.xls, .xlsx)
+- 純文字 (.txt)
+- CSV 檔案 (.csv)
+
+## 📝 事件記錄
+
+所有儲存事件記錄到 Firestore 集合 `storage_events`：
+
+```typescript
+{
+  eventType: 'upload' | 'delete',
+  filePath: string,
+  contentType?: string,
+  fileSize?: number,
+  bucket: string,
+  timestamp: Timestamp,
+  status?: 'success' | 'failed'
+}
+```
+
+## 🛡️ 錯誤處理
+
+所有函式包含：
+- Try-catch 區塊進行錯誤隔離
+- 詳細的錯誤日誌與檔案上下文
+- 非關鍵操作的優雅降級
+- 錯誤重新拋出以支援 Firebase 重試機制
+
+## 📝 監控
+
+函式記錄以下事件：
+- 檔案上傳與驗證結果
+- 檔案刪除與清理狀態
+- 驗證失敗與原因
+- 縮圖清理操作
+- 錯誤詳情與檔案上下文
+
+## ✅ 最佳實踐
+
+1. **安全優先**: 處理前嚴格驗證檔案
+2. **冪等性**: 函式可安全重試
+3. **結構化日誌**: 所有日誌包含檔案上下文
+4. **資源清理**: 自動刪除相關檔案
+5. **類型安全**: 完整的 TypeScript 類型定義
+
+## 🔐 安全功能
+
+- 檔案類型驗證（白名單機制）
+- 檔案大小限制強制執行
+- 危險副檔名封鎖
+- 元資料清理
+- 稽核追蹤的事件日誌
+
+## 🔄 版本管理
+
+| 版本 | 日期 | 變更說明 |
+|------|------|----------|
+| 1.0.0 | 2024-12 | 初始版本 - 基礎儲存功能 |
+
+## 👥 維護者
+
+GigHub Development Team
+
+## 📄 授權
+
+MIT License
 
 ## 📦 核心功能
 

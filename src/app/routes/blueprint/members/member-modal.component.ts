@@ -1,6 +1,15 @@
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { BlueprintMember, BlueprintRole, BusinessRole, LoggerService, FirebaseAuthService } from '@core';
+import {
+  BlueprintMember,
+  BlueprintMemberType,
+  BlueprintRole,
+  BusinessRole,
+  OwnerType,
+  LoggerService,
+  FirebaseAuthService
+} from '@core';
+import { getAllowedMemberTypes } from '@core/domain/utils';
 import { BlueprintMemberRepository } from '@core/blueprint/repositories';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -20,9 +29,22 @@ import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
   template: `
     <form nz-form [formGroup]="form" (ngSubmit)="submit()">
       <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzRequired>成員類型</nz-form-label>
+        <nz-form-control [nzSpan]="16" nzErrorTip="請選擇成員類型">
+          <nz-radio-group formControlName="memberType" [nzDisabled]="isEdit">
+            @for (type of allowedMemberTypes; track type) {
+              <label nz-radio [nzValue]="type.value">
+                {{ type.label }}
+              </label>
+            }
+          </nz-radio-group>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
         <nz-form-label [nzSpan]="6" nzRequired>帳號 ID</nz-form-label>
         <nz-form-control [nzSpan]="16" nzErrorTip="請輸入帳號 ID">
-          <input nz-input formControlName="accountId" placeholder="輸入 Firebase Auth UID" [disabled]="isEdit" />
+          <input nz-input formControlName="accountId" placeholder="輸入 User/Team/Partner ID" [disabled]="isEdit" />
         </nz-form-control>
       </nz-form-item>
 
@@ -51,7 +73,14 @@ import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
       <nz-form-item>
         <nz-form-label [nzSpan]="6">外部成員</nz-form-label>
         <nz-form-control [nzSpan]="16">
-          <label nz-checkbox formControlName="isExternal"> 標記為外部成員（承包商、顧問等） </label>
+          <label nz-checkbox formControlName="isExternal" [nzDisabled]="isExternalDisabled()">
+            標記為外部成員（承包商、顧問等）
+          </label>
+          @if (isExternalDisabled()) {
+            <div class="text-muted mt-xs">
+              {{ memberType === BlueprintMemberType.TEAM ? '團隊成員自動標記為內部成員' : '夥伴成員自動標記為外部成員' }}
+            </div>
+          }
         </nz-form-control>
       </nz-form-item>
 
@@ -73,15 +102,21 @@ export class MemberModalComponent implements OnInit {
   private readonly logger = inject(LoggerService);
   private readonly authService = inject(FirebaseAuthService);
   private readonly memberRepository: BlueprintMemberRepository = inject(BlueprintMemberRepository);
-  private readonly data: { blueprintId: string; member?: BlueprintMember } = inject(NZ_MODAL_DATA);
+  private readonly data: { blueprintId: string; blueprintOwnerType: string; member?: BlueprintMember } = inject(NZ_MODAL_DATA);
 
-  // Expose enum for template
+  // Expose enums for template
   BlueprintRole = BlueprintRole;
+  BlueprintMemberType = BlueprintMemberType;
 
   submitting = signal(false);
   isEdit = false;
+  memberType = BlueprintMemberType.USER;  // Track current member type
+
+  // Calculate allowed member types based on blueprint owner type
+  allowedMemberTypes = this.calculateAllowedMemberTypes();
 
   form: FormGroup = this.fb.group({
+    memberType: [BlueprintMemberType.USER, [Validators.required]],
     accountId: ['', [Validators.required]],
     role: [BlueprintRole.VIEWER, [Validators.required]],
     businessRole: [null],
@@ -99,19 +134,69 @@ export class MemberModalComponent implements OnInit {
     { label: '業主', value: BusinessRole.CLIENT }
   ];
 
+  /**
+   * Calculate allowed member types based on blueprint owner type
+   */
+  private calculateAllowedMemberTypes() {
+    const ownerType = this.data.blueprintOwnerType as OwnerType;
+    const allowed = getAllowedMemberTypes(ownerType);
+
+    return allowed.map(type => ({
+      value: type,
+      label: type === BlueprintMemberType.USER ? '用戶' : type === BlueprintMemberType.TEAM ? '團隊' : '夥伴'
+    }));
+  }
+
+  /**
+   * Check if isExternal checkbox should be disabled
+   */
+  isExternalDisabled = signal(false);
+
   ngOnInit(): void {
-    // If editing, populate form
     if (this.data.member) {
       this.isEdit = true;
-      this.populateForm(this.data.member);
+      this.form.patchValue({
+        memberType: this.data.member.memberType,
+        accountId: this.data.member.accountId,
+        role: this.data.member.role,
+        businessRole: this.data.member.businessRole,
+        isExternal: this.data.member.isExternal
+      });
+      this.memberType = this.data.member.memberType;
+      this.updateExternalFieldState(this.data.member.memberType);
+    }
+
+    // Watch memberType changes to update isExternal field
+    this.form.get('memberType')?.valueChanges.subscribe((type: BlueprintMemberType) => {
+      this.memberType = type;
+      this.updateExternalFieldState(type);
+    });
+  }
+
+  /**
+   * Update isExternal field based on member type
+   */
+  private updateExternalFieldState(type: BlueprintMemberType): void {
+    if (type === BlueprintMemberType.TEAM) {
+      // Team members are always internal
+      this.form.patchValue({ isExternal: false });
+      this.isExternalDisabled.set(true);
+    } else if (type === BlueprintMemberType.PARTNER) {
+      // Partner members are always external
+      this.form.patchValue({ isExternal: true });
+      this.isExternalDisabled.set(true);
+    } else {
+      // User members can be either
+      this.isExternalDisabled.set(false);
     }
   }
 
   /**
-   * Populate form with member data
+   * Populate form with member data (unused, merged into ngOnInit)
    * 填充表單資料
    */
   private populateForm(member: BlueprintMember): void {
+    // This method is kept for compatibility but logic is in ngOnInit
     this.form.patchValue({
       accountId: member.accountId,
       role: member.role,
@@ -139,6 +224,7 @@ export class MemberModalComponent implements OnInit {
 
     try {
       const formValue = this.form.value;
+      const ownerType = this.data.blueprintOwnerType as OwnerType;
 
       if (this.isEdit) {
         // Update existing member
@@ -151,13 +237,16 @@ export class MemberModalComponent implements OnInit {
       } else {
         // Add new member
         const currentUser = this.authService.currentUser;
-        await this.memberRepository.addMember(this.data.blueprintId, {
+        await this.memberRepository.addMember(this.data.blueprintId, ownerType, {
           accountId: formValue.accountId,
+          memberType: formValue.memberType,
+          accountName: undefined, // Will be populated later if needed
           role: formValue.role,
           businessRole: formValue.businessRole,
           isExternal: formValue.isExternal,
           blueprintId: this.data.blueprintId,
-          grantedBy: currentUser?.uid || 'system'
+          grantedBy: currentUser?.uid || 'system',
+          permissions: this.getDefaultPermissions(formValue.role)
         });
         this.message.success('成員已新增');
       }
@@ -168,6 +257,36 @@ export class MemberModalComponent implements OnInit {
       this.logger.error('[MemberModalComponent]', 'Failed to save member', error as Error);
     } finally {
       this.submitting.set(false);
+    }
+  }
+
+  /**
+   * Get default permissions based on role
+   */
+  private getDefaultPermissions(role: BlueprintRole) {
+    switch (role) {
+      case BlueprintRole.MAINTAINER:
+        return {
+          canManageMembers: true,
+          canManageSettings: true,
+          canExportData: true,
+          canDeleteBlueprint: false // Only owner can delete
+        };
+      case BlueprintRole.CONTRIBUTOR:
+        return {
+          canManageMembers: false,
+          canManageSettings: false,
+          canExportData: true,
+          canDeleteBlueprint: false
+        };
+      case BlueprintRole.VIEWER:
+      default:
+        return {
+          canManageMembers: false,
+          canManageSettings: false,
+          canExportData: false,
+          canDeleteBlueprint: false
+        };
     }
   }
 

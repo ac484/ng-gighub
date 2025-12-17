@@ -4,14 +4,13 @@ import { Router, RouterLink } from '@angular/router';
 import { FirebaseAuthService, StartupService } from '@core';
 import { ReuseTabService } from '@delon/abc/reuse-tab';
 import { I18nPipe } from '@delon/theme';
-import { environment } from '@env/environment';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 import { firstValueFrom } from 'rxjs';
 
 /**
@@ -37,7 +36,7 @@ import { firstValueFrom } from 'rxjs';
     NzFormModule,
     NzInputModule,
     NzButtonModule,
-    NzToolTipModule,
+    NzTooltipModule,
     NzIconModule
   ]
 })

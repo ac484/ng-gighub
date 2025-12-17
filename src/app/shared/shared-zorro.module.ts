@@ -24,7 +24,6 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
-
 // 中頻使用模組 - 包含在 SHARED_IMPORTS 中
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzListModule } from 'ng-zorro-antd/list';
@@ -43,11 +42,10 @@ import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTagModule } from 'ng-zorro-antd/tag';
-
 // 低頻使用模組 - 按需導入 (不包含在 SHARED_IMPORTS)
 import { NzTimePickerModule } from 'ng-zorro-antd/time-picker';
 import { NzTimelineModule } from 'ng-zorro-antd/timeline';
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 import { NzUploadModule } from 'ng-zorro-antd/upload';
 
 /**
@@ -64,7 +62,7 @@ export const SHARED_ZORRO_MODULES = [
   NzIconModule,
   NzInputModule,
   NzListModule,
-  NzToolTipModule,
+  NzTooltipModule,
   NzDropDownModule,
   NzTabsModule,
   NzBreadCrumbModule,

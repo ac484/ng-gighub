@@ -210,6 +210,7 @@ export class BlueprintModalComponent implements OnInit {
         const contextId = this.workspaceContext.contextId();
 
         // Determine owner based on current context
+        // Note: Teams cannot own blueprints - they are organization sub-accounts
         let ownerId: string;
         let ownerType: OwnerType;
 
@@ -218,9 +219,11 @@ export class BlueprintModalComponent implements OnInit {
           ownerId = contextId;
           ownerType = OwnerType.ORGANIZATION;
         } else if (contextType === ContextType.TEAM && contextId) {
-          // Creating under team context
-          ownerId = contextId;
-          ownerType = OwnerType.TEAM;
+          // Team context: Create under the team's organization
+          // Teams are internal sub-accounts and cannot own blueprints
+          // TODO: Fetch team's organization ID and use that as owner
+          this.message.error('團隊無法直接擁有藍圖。請切換至組織視角或個人視角建立藍圖。');
+          return;
         } else {
           // Default to user context
           ownerId = (user as any).uid;
@@ -239,9 +242,7 @@ export class BlueprintModalComponent implements OnInit {
         };
 
         const blueprint = await this.blueprintService.create(request);
-        this.message.success(
-          `藍圖已在${ownerType === OwnerType.ORGANIZATION ? '組織' : ownerType === OwnerType.TEAM ? '團隊' : '個人'}視角建立`
-        );
+        this.message.success(`藍圖已在${ownerType === OwnerType.ORGANIZATION ? '組織' : '個人'}視角建立`);
         this.modal.close(blueprint);
         return;
       }

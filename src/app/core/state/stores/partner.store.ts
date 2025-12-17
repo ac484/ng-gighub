@@ -400,26 +400,29 @@ export class PartnerStore {
   }
 
   /**
-   * Update member role (simplified - remove and re-add)
-   * 更新成員角色（簡化版 - 刪除後重建）
+   * Update member role
+   * 更新成員角色
    *
-   * This is a simplified approach that removes and re-adds the member.
-   * For a production system, consider adding an `updateRole` method to the repository.
+   * Modern implementation using the repository's updateRole method.
+   * This preserves the member ID and joined_at timestamp.
    *
    * @param memberId Member ID
-   * @param partnerId Partner ID
-   * @param userId User ID
+   * @param partnerId Partner ID (for validation and state update)
    * @param newRole New partner role
    */
-  async updateMemberRole(memberId: string, partnerId: string, userId: string, newRole: PartnerRole): Promise<void> {
+  async updateMemberRole(memberId: string, partnerId: string, newRole: PartnerRole): Promise<void> {
     try {
-      // Remove and re-add with new role
-      // TODO: Consider adding a dedicated updateRole() method to PartnerMemberRepository
-      await this.memberRepository.removeMember(memberId);
-      const updatedMember = await this.memberRepository.addMember(partnerId, userId, newRole);
+      // Update role in Firestore
+      await this.memberRepository.updateRole(memberId, newRole);
 
-      // Update local state
-      this._members.update(members => members.map(member => (member.id === memberId ? updatedMember : member)));
+      // Update local state - find and update the member's role
+      this._members.update(members => 
+        members.map(member => 
+          member.id === memberId 
+            ? { ...member, role: newRole } 
+            : member
+        )
+      );
 
       this.logger.info('[PartnerStore]', `Member role updated: ${memberId} to ${newRole}`);
     } catch (err) {

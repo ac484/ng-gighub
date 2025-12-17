@@ -362,7 +362,7 @@ export class ContractModuleViewComponent implements OnInit {
       nzContent: ContractDetailDrawerComponent,
       nzWidth: 720,
       nzContentParams: {
-        contract: contract as any  // Pass the contract object directly
+        contract: contract as any // Pass the contract object directly
       },
       nzClosable: true,
       nzMaskClosable: true

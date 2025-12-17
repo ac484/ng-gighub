@@ -131,12 +131,58 @@ service cloud.firestore {
     
     /**
      * Validate blueprint data
+     * 
+     * Blueprint ownership rules:
+     * - Only 'user' and 'organization' can own blueprints
+     * - Teams and partners are sub-accounts and cannot own blueprints
      */
     function isValidBlueprintData(data) {
       return data.name is string && data.name.size() >= 3
         && data.slug is string && data.slug.matches('^[a-z0-9-]+$')
         && data.ownerType in ['user', 'organization']
         && data.status in ['draft', 'active', 'archived'];
+    }
+    
+    /**
+     * Validate member type is allowed for blueprint owner type
+     * 
+     * Business Rules:
+     * - User-owned blueprints: Only 'user' members allowed (individual collaborators)
+     * - Organization-owned blueprints: 'user', 'team', and 'partner' members allowed
+     */
+    function isValidMemberType(blueprintId, memberType) {
+      let ownerType = getOwnerType(blueprintId);
+      
+      // User-owned blueprints can only have user members
+      if (ownerType == 'user') {
+        return memberType == 'user';
+      }
+      
+      // Organization-owned blueprints can have all member types
+      if (ownerType == 'organization') {
+        return memberType in ['user', 'team', 'partner'];
+      }
+      
+      return false;
+    }
+    
+    /**
+     * Validate member data consistency
+     * 
+     * Ensures isExternal flag matches member type:
+     * - TEAM members: must have isExternal = false (internal sub-accounts)
+     * - PARTNER members: must have isExternal = true (external sub-accounts)
+     * - USER members: can be either internal or external
+     */
+    function isValidMemberData(data) {
+      return data.memberType is string
+        && data.memberType in ['user', 'team', 'partner']
+        && data.accountId is string
+        && data.role in ['viewer', 'contributor', 'maintainer']
+        && data.isExternal is bool
+        // Validate isExternal consistency
+        && (data.memberType != 'team' || data.isExternal == false)
+        && (data.memberType != 'partner' || data.isExternal == true);
     }
     
     /**
@@ -176,8 +222,11 @@ service cloud.firestore {
       match /members/{memberId} {
         allow read: if canReadBlueprint(blueprintId);
         allow create: if canManageMembers(blueprintId)
-          && request.resource.data.blueprintId == blueprintId;
-        allow update: if canManageMembers(blueprintId);
+          && request.resource.data.blueprintId == blueprintId
+          && isValidMemberData(request.resource.data)
+          && isValidMemberType(blueprintId, request.resource.data.memberType);
+        allow update: if canManageMembers(blueprintId)
+          && isValidMemberData(request.resource.data);
         allow delete: if canManageMembers(blueprintId);
       }
       
