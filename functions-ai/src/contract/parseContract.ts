@@ -11,6 +11,7 @@ import * as logger from 'firebase-functions/logger';
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 
 import { getGenAIClient, DEFAULT_VISION_MODEL } from '../ai/client';
+import { ENHANCED_PARSING_SYSTEM_PROMPT, createUserPrompt } from '../prompts/contract-parsing-enhanced.prompt';
 import type {
   ContractParsingRequest,
   ContractParsingResponse,
@@ -18,10 +19,10 @@ import type {
   EnhancedContractParsingOutput,
   TaskSchema
 } from '../types/contract.types';
-import { ENHANCED_PARSING_SYSTEM_PROMPT, createUserPrompt } from '../prompts/contract-parsing-enhanced.prompt';
 
 /**
  * Original system prompt (kept for backward compatibility)
+ *
  * @deprecated Use ENHANCED_PARSING_SYSTEM_PROMPT instead
  */
 const PARSING_SYSTEM_PROMPT =
@@ -259,7 +260,7 @@ export const parseContract = onCall<ContractParsingRequest, Promise<ContractPars
                 role: 'user',
                 parts: [
                   { text: systemPrompt },
-                  { text: '\n\n' + userPrompt },
+                  { text: `\n\n${userPrompt}` },
                   {
                     inlineData: {
                       mimeType: file.mimeType,

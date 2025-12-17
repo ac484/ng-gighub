@@ -37,7 +37,12 @@ interface TodoItem {
 
     <nz-card [nzBordered]="false" class="todo-container">
       <!-- Filter tabs -->
-      <nz-segmented [nzOptions]="filterOptions" [(ngModel)]="currentFilterValue" (ngModelChange)="onFilterChange()" class="mb-lg"></nz-segmented>
+      <nz-segmented
+        [nzOptions]="filterOptions"
+        [(ngModel)]="currentFilterValue"
+        (ngModelChange)="onFilterChange()"
+        class="mb-lg"
+      ></nz-segmented>
 
       <!-- Stats cards -->
       <div nz-row [nzGutter]="16" class="mb-lg">

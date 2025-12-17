@@ -247,6 +247,7 @@ export interface EnhancedContractParsingOutput {
 
 /**
  * Type alias for backward compatibility
+ *
  * @deprecated Use EnhancedContractParsingOutput instead
  */
 export type EnhancedParsingOutput = EnhancedContractParsingOutput;

@@ -8,9 +8,10 @@
  * @date 2025-12-17
  */
 
-import type { CreateContractDto, CreateWorkItemDto } from '../models/dtos';
-import type { ContractParty, ContractTerm } from '../models/contract.model';
 import { v4 as uuidv4 } from 'uuid';
+
+import type { ContractParty, ContractTerm } from '../models/contract.model';
+import type { CreateContractDto, CreateWorkItemDto } from '../models/dtos';
 
 /**
  * Enhanced Contract Parsing Output (from Firebase Function)
@@ -66,7 +67,7 @@ export interface ContractTermSchema {
 
 /**
  * Convert enhanced parsing output to CreateContractDto
- * 
+ *
  * @param enhanced - Enhanced parsing output from AI
  * @param blueprintId - Blueprint ID
  * @param createdBy - User ID who creates the contract
@@ -135,13 +136,11 @@ export function toContractCreateRequest(
 
 /**
  * Convert enhanced work item schemas to CreateWorkItemDto array
- * 
+ *
  * @param workItems - Enhanced work item schemas from AI
  * @returns Array of CreateWorkItemDto for work item creation
  */
-export function toWorkItemCreateRequests(
-  workItems: EnhancedWorkItemSchema[]
-): CreateWorkItemDto[] {
+export function toWorkItemCreateRequests(workItems: EnhancedWorkItemSchema[]): CreateWorkItemDto[] {
   return workItems.map(item => ({
     code: item.code,
     name: item.title,
@@ -155,25 +154,25 @@ export function toWorkItemCreateRequests(
 
 /**
  * Parse date string (ISO 8601 format) to Date object
- * 
+ *
  * @param dateString - Date string in ISO 8601 format (YYYY-MM-DD)
  * @returns Date object
  */
 function parseDate(dateString: string): Date {
   // Handle ISO 8601 format: YYYY-MM-DD
   const date = new Date(dateString);
-  
+
   // Validate date
   if (isNaN(date.getTime())) {
     throw new Error(`Invalid date format: ${dateString}`);
   }
-  
+
   return date;
 }
 
 /**
  * Validate enhanced parsing output
- * 
+ *
  * @param data - Data to validate
  * @returns True if data is valid EnhancedContractParsingOutput
  */
@@ -220,7 +219,7 @@ export function isEnhancedParsingOutput(data: unknown): data is EnhancedContract
 /**
  * Calculate total amount from work items
  * Used for verification and validation
- * 
+ *
  * @param workItems - Array of work items
  * @returns Total amount
  */
@@ -234,7 +233,7 @@ export function calculateTotalAmount(workItems: EnhancedWorkItemSchema[]): numbe
 
 /**
  * Validate financial calculations
- * 
+ *
  * @param totalAmount - Declared total amount
  * @param workItems - Array of work items
  * @param tolerance - Acceptable difference tolerance (default: 1)
@@ -243,7 +242,7 @@ export function calculateTotalAmount(workItems: EnhancedWorkItemSchema[]): numbe
 export function validateFinancialCalculation(
   totalAmount: number,
   workItems: EnhancedWorkItemSchema[],
-  tolerance: number = 1
+  tolerance = 1
 ): { valid: boolean; calculatedTotal: number; difference: number } {
   const calculatedTotal = calculateTotalAmount(workItems);
   const difference = Math.abs(totalAmount - calculatedTotal);

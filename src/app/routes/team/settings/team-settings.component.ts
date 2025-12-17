@@ -53,9 +53,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 
         <nz-form-item>
           <nz-form-control>
-            <button nz-button nzType="primary" [nzLoading]="saving()" (click)="saveBasic()">
-              儲存基本設定
-            </button>
+            <button nz-button nzType="primary" [nzLoading]="saving()" (click)="saveBasic()"> 儲存基本設定 </button>
           </nz-form-control>
         </nz-form-item>
       </form>
@@ -66,18 +64,9 @@ import { NzMessageService } from 'ng-zorro-antd/message';
         <nz-form-item>
           <nz-form-label>工作時間</nz-form-label>
           <nz-form-control>
-            <nz-time-picker
-              formControlName="workStartTime"
-              nzFormat="HH:mm"
-              nzPlaceHolder="開始時間"
-              class="mr-sm"
-            ></nz-time-picker>
+            <nz-time-picker formControlName="workStartTime" nzFormat="HH:mm" nzPlaceHolder="開始時間" class="mr-sm"></nz-time-picker>
             <span class="mr-sm">至</span>
-            <nz-time-picker
-              formControlName="workEndTime"
-              nzFormat="HH:mm"
-              nzPlaceHolder="結束時間"
-            ></nz-time-picker>
+            <nz-time-picker formControlName="workEndTime" nzFormat="HH:mm" nzPlaceHolder="結束時間"></nz-time-picker>
           </nz-form-control>
         </nz-form-item>
 
@@ -96,37 +85,24 @@ import { NzMessageService } from 'ng-zorro-antd/message';
         <nz-form-item>
           <nz-form-label>Sprint 週期（天）</nz-form-label>
           <nz-form-control>
-            <nz-input-number
-              formControlName="sprintDuration"
-              [nzMin]="7"
-              [nzMax]="30"
-              class="w-full"
-            ></nz-input-number>
+            <nz-input-number formControlName="sprintDuration" [nzMin]="7" [nzMax]="30" class="w-full"></nz-input-number>
           </nz-form-control>
         </nz-form-item>
 
         <nz-form-item>
           <nz-form-label>通知設定</nz-form-label>
           <nz-form-control>
-            <label nz-checkbox formControlName="notifyOnTaskAssigned">
-              任務分配時通知
-            </label>
+            <label nz-checkbox formControlName="notifyOnTaskAssigned"> 任務分配時通知 </label>
             <br />
-            <label nz-checkbox formControlName="notifyOnMeetingReminder">
-              會議前提醒
-            </label>
+            <label nz-checkbox formControlName="notifyOnMeetingReminder"> 會議前提醒 </label>
             <br />
-            <label nz-checkbox formControlName="notifyOnDeadline">
-              截止日期提醒
-            </label>
+            <label nz-checkbox formControlName="notifyOnDeadline"> 截止日期提醒 </label>
           </nz-form-control>
         </nz-form-item>
 
         <nz-form-item>
           <nz-form-control>
-            <button nz-button nzType="primary" [nzLoading]="saving()" (click)="savePreferences()">
-              儲存工作偏好
-            </button>
+            <button nz-button nzType="primary" [nzLoading]="saving()" (click)="savePreferences()"> 儲存工作偏好 </button>
           </nz-form-control>
         </nz-form-item>
       </form>
