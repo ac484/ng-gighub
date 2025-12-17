@@ -13,6 +13,11 @@ export const routes: Routes = [
     data: { title: '團隊管理' }
   },
   {
+    path: 'partners',
+    loadComponent: () => import('./partners/organization-partners.component').then(m => m.OrganizationPartnersComponent),
+    data: { title: '夥伴管理' }
+  },
+  {
     path: 'settings',
     loadComponent: () => import('./settings/organization-settings.component').then(m => m.OrganizationSettingsComponent),
     data: { title: '組織設定' }
