@@ -69,6 +69,12 @@
             "badge": 0
           },
           {
+            "text": "個人待辦",
+            "i18n": "menu.user.todo",
+            "icon": "anticon-check-square",
+            "link": "/user/todo"
+          },
+          {
             "text": "個人設定",
             "i18n": "menu.settings",
             "icon": "anticon-setting",
@@ -109,6 +115,18 @@
             "icon": "anticon-project",
             "link": "/blueprints/organization",
             "badge": 0
+          },
+          {
+            "text": "組織排程",
+            "i18n": "menu.organization.schedule",
+            "icon": "anticon-calendar",
+            "link": "/organization/schedule"
+          },
+          {
+            "text": "組織倉庫",
+            "i18n": "menu.organization.repository",
+            "icon": "anticon-database",
+            "link": "/organization/repository"
           },
           {
             "text": "組織成員",
@@ -153,10 +171,22 @@
             "badge": 0
           },
           {
+            "text": "團隊排程",
+            "i18n": "menu.team.schedule",
+            "icon": "anticon-calendar",
+            "link": "/team/schedule"
+          },
+          {
             "text": "團隊成員",
             "i18n": "menu.team.members",
             "icon": "anticon-team",
             "link": "/team/members"
+          },
+          {
+            "text": "團隊設定",
+            "i18n": "menu.team.settings",
+            "icon": "anticon-setting",
+            "link": "/team/settings"
           },
           {
             "text": "AI 助理",

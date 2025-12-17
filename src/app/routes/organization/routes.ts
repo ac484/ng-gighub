@@ -16,5 +16,15 @@ export const routes: Routes = [
     path: 'settings',
     loadComponent: () => import('./settings/organization-settings.component').then(m => m.OrganizationSettingsComponent),
     data: { title: '組織設定' }
+  },
+  {
+    path: 'schedule',
+    loadComponent: () => import('./schedule/organization-schedule.component').then(m => m.OrganizationScheduleComponent),
+    data: { title: '組織排程' }
+  },
+  {
+    path: 'repository',
+    loadComponent: () => import('./repository/organization-repository.component').then(m => m.OrganizationRepositoryComponent),
+    data: { title: '組織倉庫' }
   }
 ];
