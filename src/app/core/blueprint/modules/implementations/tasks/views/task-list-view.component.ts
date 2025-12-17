@@ -25,7 +25,8 @@ import { STColumn, STComponent, STData } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 import { provideNzIconsPatch } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
-
+import { NzModalService } from 'ng-zorro-antd/modal';
+import { TaskAssignModalComponent } from '../components/task-assign-modal/task-assign-modal.component';
 /**
  * Flat node for table display with hierarchy info
  * 用於表格顯示的扁平節點（含階層資訊）
@@ -169,6 +170,7 @@ interface TaskTableNode extends STData {
 export class TaskListViewComponent {
   private taskStore = inject(TaskStore);
   private message = inject(NzMessageService);
+  private modal = inject(NzModalService);
 
   @ViewChild('stTable') stTable?: STComponent;
 
@@ -179,6 +181,7 @@ export class TaskListViewComponent {
   readonly editTask = output<Task>();
   readonly deleteTask = output<Task>();
   readonly createChildTask = output<Task>();
+  readonly assignTask = output<Task>();
 
   // State
   expandedNodeIds = signal<Set<string>>(new Set());
@@ -334,8 +337,13 @@ export class TaskListViewComponent {
     },
     {
       title: '操作',
-      width: 220,
+      width: 280,
       buttons: [
+        {
+          text: '指派',
+          icon: 'user',
+          click: (record: TaskTableNode) => this.openAssignModal(record.task)
+        },
         {
           text: '編輯',
           icon: 'edit',
@@ -420,5 +428,30 @@ export class TaskListViewComponent {
   onTableChange(event: any): void {
     // Handle table events (sort, filter, etc.)
     console.log('Table change:', event);
+  }
+
+  /**
+   * Open assign modal
+   * 開啟指派模態框
+   */
+  openAssignModal(task: Task): void {
+    const modalRef = this.modal.create({
+      nzTitle: '指派任務',
+      nzContent: TaskAssignModalComponent,
+      nzWidth: 600,
+      nzData: {
+        blueprintId: this.blueprintId(),
+        task: task
+      },
+      nzFooter: null
+    });
+
+    // Reload tasks after successful assignment
+    modalRef.afterClose.subscribe((result) => {
+      if (result === true) {
+        // Assignment successful - tasks will auto-reload via store subscription
+        this.assignTask.emit(task);
+      }
+    });
   }
 }
