@@ -468,11 +468,16 @@ export class ContractCreationWizardComponent implements OnInit {
       // Upload files first (without contract ID)
       const files = this.uploadedFiles();
       const tempAttachments: FileAttachment[] = [];
+      const failedUploads: string[] = [];
 
       for (const uploadFile of files) {
         try {
           const file = uploadFile.originFileObj as File;
-          if (!file) continue;
+          if (!file) {
+            console.warn('[ContractCreationWizard]', 'No file object found for', uploadFile.name);
+            failedUploads.push(uploadFile.name);
+            continue;
+          }
 
           // Upload to temporary storage or directly to blueprint storage
           const attachment = await this.uploadService.uploadContractFile(
@@ -483,11 +488,26 @@ export class ContractCreationWizardComponent implements OnInit {
           tempAttachments.push(attachment);
         } catch (err) {
           console.error('[ContractCreationWizard]', 'Failed to upload file', uploadFile.name, err);
+          failedUploads.push(uploadFile.name);
         }
       }
 
+      // Check if any files were successfully uploaded
+      if (tempAttachments.length === 0) {
+        const errorMsg = failedUploads.length > 0 
+          ? `檔案上傳失敗: ${failedUploads.join(', ')}`
+          : '沒有檔案成功上傳，請重試';
+        this.message.error(errorMsg);
+        return;
+      }
+
+      // Show warning if some files failed
+      if (failedUploads.length > 0) {
+        this.message.warning(`部分檔案上傳失敗: ${failedUploads.join(', ')}`);
+      }
+
       this.fileAttachments.set(tempAttachments);
-      this.message.success('檔案上傳成功');
+      this.message.success(`成功上傳 ${tempAttachments.length} 個檔案`);
 
       // Move to parsing step
       this.nextStep();
