@@ -63,8 +63,9 @@ export class BlueprintMembersComponent implements OnInit {
   private readonly logger = inject(LoggerService);
   private readonly memberRepository: BlueprintMemberRepository = inject(BlueprintMemberRepository);
 
-  // Input: blueprint ID
+  // Input: blueprint ID and owner type (required for member validation)
   blueprintId = input.required<string>();
+  blueprintOwnerType = input.required<string>();  // 'user' or 'organization'
 
   // ✅ Modern Pattern: Use AsyncState for unified state management
   readonly membersState = createAsyncArrayState<BlueprintMember>([]);
@@ -74,7 +75,16 @@ export class BlueprintMembersComponent implements OnInit {
     {
       title: '成員 ID',
       index: 'accountId',
-      width: '250px'
+      width: '200px'
+    },
+    {
+      title: '成員類型',
+      index: 'memberType',
+      width: '100px',
+      format: (item: BlueprintMember) => {
+        const type = item.memberType;
+        return type === 'user' ? '用戶' : type === 'team' ? '團隊' : type === 'partner' ? '夥伴' : type;
+      }
     },
     {
       title: '角色',
@@ -173,11 +183,20 @@ export class BlueprintMembersComponent implements OnInit {
    */
   async addMember(): Promise<void> {
     const { MemberModalComponent } = await import('./member-modal.component');
-    this.modal.createStatic(MemberModalComponent, { blueprintId: this.blueprintId() }, { size: 'md' }).subscribe(result => {
-      if (result) {
-        this.loadMembers();
-      }
-    });
+    this.modal
+      .createStatic(
+        MemberModalComponent,
+        {
+          blueprintId: this.blueprintId(),
+          blueprintOwnerType: this.blueprintOwnerType()
+        },
+        { size: 'md' }
+      )
+      .subscribe(result => {
+        if (result) {
+          this.loadMembers();
+        }
+      });
   }
 
   /**
@@ -187,11 +206,21 @@ export class BlueprintMembersComponent implements OnInit {
   async editMember(record: any): Promise<void> {
     const member = record as BlueprintMember;
     const { MemberModalComponent } = await import('./member-modal.component');
-    this.modal.createStatic(MemberModalComponent, { blueprintId: this.blueprintId(), member }, { size: 'md' }).subscribe(result => {
-      if (result) {
-        this.loadMembers();
-      }
-    });
+    this.modal
+      .createStatic(
+        MemberModalComponent,
+        {
+          blueprintId: this.blueprintId(),
+          blueprintOwnerType: this.blueprintOwnerType(),
+          member
+        },
+        { size: 'md' }
+      )
+      .subscribe(result => {
+        if (result) {
+          this.loadMembers();
+        }
+      });
   }
 
   /**

@@ -376,8 +376,7 @@ export class BlueprintListComponent implements OnInit {
 
     const ownerLabels: Record<OwnerType, string> = {
       [OwnerType.USER]: '個人',
-      [OwnerType.ORGANIZATION]: '組織',
-      [OwnerType.TEAM]: '團隊'
+      [OwnerType.ORGANIZATION]: '組織'
     };
 
     if (blueprint.ownerType === OwnerType.ORGANIZATION) {
@@ -387,12 +386,8 @@ export class BlueprintListComponent implements OnInit {
       }
     }
 
-    if (blueprint.ownerType === OwnerType.TEAM) {
-      const team = this.workspaceContext.teams().find(t => t.id === blueprint.ownerId);
-      if (team?.name) {
-        return team.name;
-      }
-    }
+    // Teams cannot own blueprints - fallback to user
+    return ownerLabels[blueprint.ownerType] || '未知';
 
     const user = this.workspaceContext.currentUser();
     if (blueprint.ownerType === OwnerType.USER && user?.name) {

@@ -32,6 +32,7 @@ import { NzSliderModule } from 'ng-zorro-antd/slider';
 import { firstValueFrom } from 'rxjs';
 interface ModalData {
   blueprintId: string;
+  blueprintOwnerType: string;  // 'user' or 'organization' - required for assignee validation
   task?: Task;
   parentTask?: Task;
   mode: 'create' | 'edit' | 'view';
@@ -96,8 +97,18 @@ interface ModalData {
         <nz-form-label [nzSpan]="6">指派類型</nz-form-label>
         <nz-form-control [nzSpan]="14">
           <nz-radio-group formControlName="assigneeType">
-            <label nz-radio [nzValue]="AssigneeType.USER">用戶</label>
-            <label nz-radio [nzValue]="AssigneeType.TEAM">團隊</label>
+            @if (isAssigneeTypeAllowed(AssigneeType.USER)) {
+              <label nz-radio [nzValue]="AssigneeType.USER">用戶</label>
+            }
+            @if (isAssigneeTypeAllowed(AssigneeType.TEAM)) {
+              <label nz-radio [nzValue]="AssigneeType.TEAM">團隊</label>
+            }
+            @if (isAssigneeTypeAllowed(AssigneeType.PARTNER)) {
+              <label nz-radio [nzValue]="AssigneeType.PARTNER">夥伴</label>
+            }
+          </nz-radio-group>
+        </nz-form-control>
+      </nz-form-item>
             <label nz-radio [nzValue]="AssigneeType.PARTNER">夥伴</label>
           </nz-radio-group>
         </nz-form-control>
@@ -300,6 +311,9 @@ export class TaskModalComponent implements OnInit {
   autoCalculatedHours = signal(0);
   remainingBudget = signal<number | null>(null);
 
+  // Allowed assignee types based on blueprint owner
+  private allowedAssigneeTypes: AssigneeType[] = [];
+
   // Progress marks
   readonly progressMarks = {
     0: '0%',
@@ -308,6 +322,13 @@ export class TaskModalComponent implements OnInit {
     75: '75%',
     100: '100%'
   };
+
+  /**
+   * Check if assignee type is allowed based on blueprint owner type
+   */
+  isAssigneeTypeAllowed(type: AssigneeType): boolean {
+    return this.allowedAssigneeTypes.includes(type);
+  }
 
   // Currency formatter for input-number
   formatCurrency = (value: number): string => {
@@ -319,6 +340,10 @@ export class TaskModalComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    // Calculate allowed assignee types based on blueprint owner type
+    const ownerType = this.modalData.blueprintOwnerType as OwnerType;
+    this.allowedAssigneeTypes = getAllowedAssigneeTypes(ownerType);
+
     this.initForm();
     this.loadBlueprintMembers();
     this.loadTeamsAndPartners();

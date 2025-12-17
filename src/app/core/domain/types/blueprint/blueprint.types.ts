@@ -3,6 +3,21 @@ import { OwnerType } from './owner-type.enum';
 import { ModuleType } from '../module/module.types';
 
 /**
+ * Blueprint member type enumeration
+ * 藍圖成員類型列舉
+ *
+ * Defines the type of entity that is a member of a blueprint
+ */
+export enum BlueprintMemberType {
+  /** Individual user account */
+  USER = 'user',
+  /** Internal team (organization sub-account) */
+  TEAM = 'team',
+  /** External partner (organization sub-account) */
+  PARTNER = 'partner'
+}
+
+/**
  * Blueprint role enumeration (system roles)
  * 藍圖系統角色列舉
  */
@@ -72,14 +87,49 @@ export interface Blueprint {
 /**
  * Blueprint member interface
  * 藍圖成員介面
+ *
+ * Represents a member of a blueprint, which can be a user, team, or partner.
+ * Member type availability depends on blueprint owner:
+ * - User-owned blueprints: Only USER members allowed
+ * - Organization-owned blueprints: USER, TEAM, and PARTNER members allowed
  */
 export interface BlueprintMember {
   id: string;
   blueprintId: string;
+
+  /**
+   * Member type - determines what this member represents
+   * 成員類型 - 決定此成員代表什麼
+   */
+  memberType: BlueprintMemberType;
+
+  /**
+   * Account ID - references the user/team/partner entity
+   * 帳戶 ID - 參考用戶/團隊/夥伴實體
+   * - For USER: references user account ID
+   * - For TEAM: references team ID
+   * - For PARTNER: references partner ID
+   */
   accountId: string;
+
+  /**
+   * Display name of the member
+   * 成員顯示名稱
+   */
+  accountName?: string;
+
   role: BlueprintRole;
   businessRole?: BlueprintBusinessRole;
+
+  /**
+   * Is this member external to the organization?
+   * 此成員是否為組織外部成員？
+   * - USER members: Can be internal or external
+   * - TEAM members: Always internal (false)
+   * - PARTNER members: Always external (true)
+   */
   isExternal: boolean;
+
   permissions?: {
     canManageMembers?: boolean;
     canManageSettings?: boolean;
@@ -139,4 +189,78 @@ export interface BlueprintQueryOptions {
   status?: BlueprintStatus;
   isPublic?: boolean;
   includeDeleted?: boolean;
+}
+
+// ============================================================================
+// Validation Utility Functions
+// ============================================================================
+
+/**
+ * Validate if a member type is allowed for a given blueprint owner type
+ * 驗證成員類型是否適用於指定的藍圖擁有者類型
+ *
+ * Rules:
+ * - User-owned blueprints: Only USER members allowed
+ * - Organization-owned blueprints: USER, TEAM, and PARTNER members allowed
+ *
+ * @param ownerType - The blueprint owner type
+ * @param memberType - The member type to validate
+ * @returns true if the member type is allowed for the owner type
+ */
+export function isValidMemberTypeForOwner(ownerType: OwnerType, memberType: BlueprintMemberType): boolean {
+  switch (ownerType) {
+    case OwnerType.USER:
+      // User-owned blueprints can only have USER members (collaborators)
+      return memberType === BlueprintMemberType.USER;
+
+    case OwnerType.ORGANIZATION:
+      // Organization-owned blueprints can have all member types
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+/**
+ * Get allowed member types for a blueprint owner type
+ * 取得藍圖擁有者類型允許的成員類型
+ *
+ * @param ownerType - The blueprint owner type
+ * @returns Array of allowed member types
+ */
+export function getAllowedMemberTypes(ownerType: OwnerType): BlueprintMemberType[] {
+  switch (ownerType) {
+    case OwnerType.USER:
+      return [BlueprintMemberType.USER];
+
+    case OwnerType.ORGANIZATION:
+      return [BlueprintMemberType.USER, BlueprintMemberType.TEAM, BlueprintMemberType.PARTNER];
+
+    default:
+      return [];
+  }
+}
+
+/**
+ * Validate if an assignee type is allowed for a given blueprint owner type
+ * 驗證指派對象類型是否適用於指定的藍圖擁有者類型
+ *
+ * This is used for task assignment validation.
+ * Rules match the blueprint member type rules.
+ *
+ * @param ownerType - The blueprint owner type
+ * @param assigneeType - The assignee type to validate
+ * @returns true if the assignee type is allowed for the owner type
+ */
+export function isValidAssigneeTypeForOwner(ownerType: OwnerType, assigneeType: 'user' | 'team' | 'partner'): boolean {
+  // Map assignee type to member type for validation
+  const memberTypeMap: Record<string, BlueprintMemberType> = {
+    user: BlueprintMemberType.USER,
+    team: BlueprintMemberType.TEAM,
+    partner: BlueprintMemberType.PARTNER
+  };
+
+  const memberType = memberTypeMap[assigneeType];
+  return memberType ? isValidMemberTypeForOwner(ownerType, memberType) : false;
 }

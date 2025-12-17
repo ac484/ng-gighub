@@ -76,9 +76,11 @@ export class BlueprintService {
 
       // ✅ Auto-add creator as member with MAINTAINER role
       try {
-        await this.memberRepository.addMember(blueprint.id, {
+        await this.memberRepository.addMember(blueprint.id, blueprint.ownerType, {
           accountId: request.createdBy,
           blueprintId: blueprint.id,
+          memberType: 'user' as any,  // Creator is always a user
+          accountName: undefined,  // Will be populated later if needed
           role: BlueprintRole.MAINTAINER,
           isExternal: false,
           grantedBy: request.createdBy,
@@ -167,9 +169,13 @@ export class BlueprintService {
     }
   }
 
-  async addMember(blueprintId: string, member: Parameters<BlueprintMemberRepository['addMember']>[1]): Promise<void> {
+  async addMember(
+    blueprintId: string, 
+    blueprintOwnerType: OwnerType,
+    member: Omit<Parameters<BlueprintMemberRepository['addMember']>[2], 'id' | 'grantedAt'>
+  ): Promise<void> {
     try {
-      await this.memberRepository.addMember(blueprintId, member);
+      await this.memberRepository.addMember(blueprintId, blueprintOwnerType, member);
       this.logger.info('[BlueprintService]', `Member added to ${blueprintId}`);
     } catch (error) {
       this.logger.error('[BlueprintService]', 'Failed to add member', error as Error);
