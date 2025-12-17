@@ -1,0 +1,76 @@
+---
+# Security Rules Configuration
+# 基於 mcp-servers.yml 的安全規則
+
+version: '1.0'
+
+security:
+  secrets:
+    required:
+      - COPILOT_MCP_CONTEXT7
+      - GITHUB_TOKEN
+      - SUPABASE_ACCESS_TOKEN
+      - REDIS_URL
+  
+  # Memory 配置
+  # WEB GitHub Copilot Agent 運行路徑
+  # 注意: WEB 環境下使用相對於倉庫根目錄的路徑
+  memory:
+    file-path: '.github/copilot/memory.jsonl'
+    # Runner 環境路徑: /home/runner/work/gighub-master/gighub-master/.github/copilot/memory.jsonl
+    # WEB 環境路徑: .github/copilot/memory.jsonl (相對路徑)
+  
+  # Redis 配置說明
+  # 用於儲存開發經驗讓 GitHub Copilot Agent 能累積經驗
+  # 注意: 去蟲與架構相關經驗會儲存於此
+  redis:
+    purpose: 'development-experience-storage'
+    features:
+      - 'bug-tracking'
+      - 'architecture-patterns'
+
+  permissions:
+    mcp-servers:
+      context7:
+        allowed-tools:
+          - get-library-docs
+          - resolve-library-id
+      github:
+        allowed-tools:
+          - '*'
+      supabase:
+        allowed-tools:
+          - '*'
+      redis:
+        allowed-tools:
+          - '*'
+      memory:
+        allowed-tools:
+          - '*'
+      sequential-thinking:
+        allowed-tools:
+          - '*'
+      software-planning-tool:
+        allowed-tools:
+          - '*'
+      everything:
+        allowed-tools:
+          - '*'
+      filesystem:
+        allowed-tools:
+          - '*'
+      git:
+        allowed-tools:
+          - '*'
+      time:
+        allowed-tools:
+          - '*'
+      fetch:
+        allowed-tools:
+          - '*'
+      puppeteer:
+        allowed-tools:
+          - '*'
+      playwright:
+        allowed-tools:
+          - '*'

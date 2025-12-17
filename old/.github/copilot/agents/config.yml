@@ -1,0 +1,24 @@
+---
+# Agent Configuration
+# 基於 mcp-servers.yml 的基礎代理配置
+
+version: '1.0'
+
+agents:
+  default:
+    mcp-servers:
+      - context7
+      - github
+      - supabase
+      - redis
+      - memory
+      - sequential-thinking
+      - software-planning-tool
+      - everything
+      - filesystem
+      - git
+      - time
+      - fetch
+      - puppeteer
+      - playwright
+    enabled: true

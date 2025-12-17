@@ -1,0 +1,312 @@
+# GitHub Copilot Agent 自動觸發規則
+# 優先級: 🎯 高 - 定義 Agent 何時自動使用 MCP 工具
+# 適用環境: GitHub Copilot Chat (Web)
+
+triggers:
+  
+  # ==========================================
+  # 🎯 Context7 MCP 智慧觸發規則
+  # ==========================================
+  
+  context7_search:
+    enabled: true
+    description: "當遇到不確定的 API、版本、語法時自動查證"
+    
+    # 情境 1: 有絕對把握 → 不觸發 Context7
+    skip_conditions:
+      - name: "確定的 API 簽名"
+        patterns:
+          - "Angular 核心 API (Component, Injectable, NgModule)"
+          - "TypeScript 基礎語法"
+          - "JavaScript 原生方法"
+        confidence_level: "high"
+        action: "直接開發，無需查證"
+        
+      - name: "熟悉的套件"
+        packages:
+          - "@angular/core"
+          - "@angular/common"
+          - "rxjs/operators"
+          - "typescript"
+        version_check: false
+        action: "使用已知知識庫"
+        
+    # 情境 2: 沒有絕對把握 → 必須觸發 Context7
+    auto_trigger_conditions:
+      
+      # 條件 1: 不確定函式參數
+      - name: "API 參數不確定"
+        trigger_keywords:
+          - "function signature"
+          - "parameters order"
+          - "arguments type"
+          - "method overload"
+        patterns:
+          - '\.(\w+)\('                      # 任何函式呼叫
+          - 'new \w+\('                      # 建構子
+        confidence_threshold: 0.7            # 信心度 < 70% 就觸發
+        mcp_action:
+          tool: "context7"
+          query_template: "查詢 {package_name} {api_name} 的正確參數順序和型別定義"
+          sources:
+            - "official_docs"
+            - "npm_registry"
+            - "typescript_definitions"
+            
+      # 條件 2: 版本差異疑慮
+      - name: "版本相容性問題"
+        trigger_keywords:
+          - "version"
+          - "deprecated"
+          - "breaking change"
+          - "migration"
+          - "upgrade"
+        patterns:
+          - '@angular/.*@\d+'                # Angular 版本號
+          - 'ng-zorro-antd.*\d+'             # NG-ZORRO 版本
+        mcp_action:
+          tool: "context7"
+          query_template: "驗證 {package_name}@{version} 的 API 相容性和變更記錄"
+          sources:
+            - "changelog"
+            - "migration_guide"
+            - "github_releases"
+            
+      # 條件 3: 新框架特性
+      - name: "新語法或特性"
+        trigger_keywords:
+          - "Angular 20"
+          - "Angular 19"
+          - "@if"
+          - "@for"
+          - "@switch"
+          - "@defer"
+          - "control flow"
+          - "signal"
+          - "inject()"
+        confidence_threshold: 0.8
+        mcp_action:
+          tool: "context7"
+          query_template: "查詢 Angular {version} {feature_name} 的官方用法和最佳實踐"
+          sources:
+            - "angular.dev"
+            - "official_blog"
+            - "github_examples"
+            
+      # 條件 4: 第三方套件 API
+      - name: "不熟悉的套件"
+        trigger_packages:
+          - "ng-zorro-antd"                  # NG-ZORRO API 查證
+          - "@delon/*"                       # NG-ALAIN API 查證
+          - "ngx-*"                          # 任何 ngx- 套件
+          - "primeng"
+          - "rxjs"                           # RxJS 操作符
+        exclude_common:                      # 排除常用的
+          - "map"
+          - "filter"
+          - "tap"
+          - "catchError"
+        mcp_action:
+          tool: "context7"
+          query_template: "查詢 {package_name} {component_or_api} 的完整使用範例和 API 文件"
+          sources:
+            - "package_docs"
+            - "npm_readme"
+            - "stackblitz_examples"
+            
+      # 條件 5: 錯誤訊息出現
+      - name: "編譯或執行錯誤"
+        trigger_patterns:
+          - 'Error:'
+          - 'TypeError:'
+          - 'NG\d{4}:'                       # Angular 錯誤代碼
+          - 'Cannot find'
+          - 'is not assignable'
+        auto_execute: true                   # 🔥 自動執行
+        mcp_action:
+          tool: "context7"
+          query_template: "搜尋錯誤 '{error_message}' 的官方解決方案和根本原因"
+          sources:
+            - "angular_errors"
+            - "stackoverflow"
+            - "github_issues"
+            
+      # 條件 6: TypeScript 型別問題
+      - name: "型別定義不明確"
+        trigger_keywords:
+          - "type"
+          - "interface"
+          - "generic"
+          - "Union"
+          - "as"
+          - "unknown"
+        patterns:
+          - '<[A-Z]\w*>'                     # 泛型
+          - ':\s*\w+\s*\|'                   # Union Type
+        mcp_action:
+          tool: "context7"
+          query_template: "查詢 {type_name} 的正確型別定義和使用方式"
+          sources:
+            - "typescript_handbook"
+            - "type_definitions"
+  
+  # ==========================================
+  # 📁 檔案操作自動觸發
+  # ==========================================
+  
+  on_file_save:
+    enabled: true
+    file_patterns:
+      - "**/*.ts"
+      - "**/*.component.html"
+      - "**/*.service.ts"
+      - "**/*.module.ts"
+      
+    actions:
+      - name: "語法檢查"
+        priority: 1
+        steps:
+          - "檢查是否使用 *ngIf, *ngFor (舊語法)"
+          - "如果是 → 自動建議改為 @if, @for"
+          
+      - name: "Import 優化"
+        priority: 2
+        conditions:
+          - "有未使用的 import"
+          - "import 順序混亂"
+        steps:
+          - "移除未使用的 import"
+          - "按照 Angular Style Guide 排序"
+          
+  # ==========================================
+  # 💬 關鍵字觸發
+  # ==========================================
+  
+  on_keyword:
+    enabled: true
+    
+    keywords:
+      - trigger: "// TODO:"
+        mcp_tools: ["context7"]
+        action:
+          - "分析 TODO 內容"
+          - "如果涉及新 API → 使用 Context7 查證"
+          - "產生實作建議"
+          
+      - trigger: "// FIXME:"
+        mcp_tools: ["context7"]
+        action:
+          - "分析問題"
+          - "使用 Context7 搜尋解決方案"
+          - "提供修復步驟"
+          
+      - trigger: "// HELP:"
+        mcp_tools: ["context7"]
+        auto_execute: true
+        action:
+          - "立即使用 Context7 搜尋相關文件"
+          - "提供詳細解答"
+          
+  # ==========================================
+  # 🔍 程式碼補全觸發
+  # ==========================================
+  
+  on_code_completion:
+    enabled: true
+    
+    conditions:
+      # 當輸入套件名稱時
+      - trigger_pattern: 'import .* from ["''](@angular|ng-zorro|@delon)'
+        mcp_action:
+          tool: "context7"
+          action: "驗證 import 路徑正確性"
+          
+      # 當使用元件選擇器時
+      - trigger_pattern: '<nz-|<st-'
+        mcp_action:
+          tool: "context7"
+          action: "查詢元件完整屬性列表"
+          
+      # 當使用 RxJS 操作符時  
+      - trigger_pattern: '\.pipe\('
+        mcp_action:
+          tool: "context7"
+          action: "建議適合的操作符組合"
+          
+  # ==========================================
+  # 🚨 錯誤自動處理
+  # ==========================================
+  
+  on_error:
+    enabled: true
+    auto_execute: true                       # 🔥 遇到錯誤自動執行
+    
+    error_patterns:
+      - pattern: "NG0303"                    # 未知屬性
+        mcp_action:
+          tool: "context7"
+          query: "Angular 未知屬性錯誤解決方案"
+          
+      - pattern: "NG2700"                    # 控制流語法錯誤
+        mcp_action:
+          tool: "context7"
+          query: "Angular 20 控制流語法正確用法"
+          
+      - pattern: "Cannot find module"
+        mcp_action:
+          tool: "context7"
+          query: "套件安裝和路徑配置"
+          
+  # ==========================================
+  # 🎨 UI 元件使用觸發
+  # ==========================================
+  
+  on_ui_component:
+    enabled: true
+    
+    components:
+      - name: "nz-table"
+        trigger_on_use: true
+        mcp_action:
+          tool: "context7"
+          query: "NG-ZORRO nz-table 完整 API 和使用範例"
+          
+      - name: "nz-form"
+        trigger_on_use: true
+        mcp_action:
+          tool: "context7"
+          query: "NG-ZORRO 表單驗證和響應式表單最佳實踐"
+          
+      - name: "st-"
+        trigger_on_use: true
+        mcp_action:
+          tool: "context7"
+          query: "NG-ALAIN simple-table 配置和自訂"
+
+# ==========================================
+# ⚙️ 全域設定
+# ==========================================
+
+settings:
+  # Context7 查詢優先級
+  context7_priority: "high"
+  
+  # 信心度閾值 (低於此值自動觸發 Context7)
+  confidence_threshold: 0.75
+  
+  # 快取設定
+  cache:
+    enabled: true
+    ttl: 3600                                # 快取 1 小時
+    
+  # 速率限制
+  rate_limit:
+    max_queries_per_minute: 10
+    
+  # 查詢來源優先順序
+  source_priority:
+    - "official_docs"                        # 官方文件最優先
+    - "npm_registry"                         # NPM 官方頁面
+    - "github_repo"                          # GitHub 倉庫
+    - "stackoverflow"                        # Stack Overflow
+    - "blog_posts"                           # 技術部落格 (最後)

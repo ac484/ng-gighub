@@ -1,0 +1,506 @@
+# Documentation Agent Configuration
+# 文檔代理配置
+
+name: docs
+description: "Specialized agent for documentation generation and maintenance with MCP tools"
+
+# MCP 工具用於文檔
+mcp_tools:
+  primary:
+    - context7  # 查詢文檔範例
+    - filesystem  # 讀寫文檔檔案
+    - git  # 查看變更
+  
+  secondary:
+    - supabase  # 資料庫文檔
+    - sequential-thinking  # 文檔結構分析
+    - memory  # 記錄文檔模式
+
+# 文檔類型
+documentation_types:
+  api:
+    format: "Markdown"
+    tools: ["context7", "filesystem"]
+    workflow:
+      - name: "查詢 API 範例"
+        tool: context7.get-library-docs
+        params:
+          mode: "code"
+      
+      - name: "生成 API 文檔"
+        tool: filesystem.write_file
+        params:
+          path: "docs/api/*.md"
+      
+      - name: "提交文檔"
+        tool: git.commit
+    
+    sections:
+      - "API Overview"
+      - "Authentication"
+      - "Endpoints"
+      - "Request/Response Format"
+      - "Error Codes"
+      - "Rate Limiting"
+      - "Examples"
+  
+  user_guide:
+    format: "Markdown"
+    tools: ["context7", "filesystem", "playwright"]
+    workflow:
+      - name: "查詢使用範例"
+        tool: context7.get-library-docs
+        params:
+          mode: "info"
+      
+      - name: "截圖 UI"
+        tool: playwright.playwright_screenshot
+      
+      - name: "生成使用指南"
+        tool: filesystem.write_file
+    
+    sections:
+      - "Getting Started"
+      - "Features"
+      - "How-to Guides"
+      - "Troubleshooting"
+      - "FAQ"
+  
+  technical:
+    format: "Markdown"
+    tools: ["filesystem", "sequential-thinking", "supabase"]
+    workflow:
+      - name: "分析架構"
+        tool: sequential-thinking.sequentialthinking
+      
+      - name: "查詢資料庫 Schema"
+        tool: supabase.list_tables
+      
+      - name: "生成技術文檔"
+        tool: filesystem.write_file
+    
+    sections:
+      - "Architecture Overview"
+      - "Technology Stack"
+      - "Database Schema"
+      - "API Design"
+      - "Security Model"
+      - "Deployment"
+  
+  code_comments:
+    format: "JSDoc / TSDoc"
+    tools: ["context7", "filesystem"]
+    workflow:
+      - name: "查詢註解範例"
+        tool: context7.get-library-docs
+        params:
+          topic: "documentation"
+      
+      - name: "讀取程式碼"
+        tool: filesystem.read_text_file
+      
+      - name: "新增註解"
+        tool: filesystem.edit_file
+    
+    patterns:
+      - "Function descriptions"
+      - "Parameter documentation"
+      - "Return value documentation"
+      - "Examples"
+      - "See also links"
+
+# 文檔生成策略
+documentation_generation:
+  component_docs:
+    trigger: "*.component.ts"
+    generate: "docs/components/*.md"
+    mcp_workflow:
+      - tool: filesystem.read_text_file
+        description: "讀取元件檔案"
+      
+      - tool: context7.get-library-docs
+        params:
+          context7CompatibleLibraryID: "/angular/angular"
+          topic: "components"
+        description: "查詢文檔範例"
+      
+      - tool: sequential-thinking.sequentialthinking
+        description: "分析元件用途"
+      
+      - tool: filesystem.write_file
+        description: "生成文檔"
+    
+    template: |
+      # {ComponentName}
+      
+      ## Overview
+      {component_description}
+      
+      ## Usage
+      ```typescript
+      {usage_example}
+      ```
+      
+      ## Inputs
+      | Name | Type | Description | Default |
+      |------|------|-------------|---------|
+      {inputs_table}
+      
+      ## Outputs
+      | Name | Type | Description |
+      |------|------|-------------|
+      {outputs_table}
+      
+      ## Examples
+      {examples}
+      
+      ## API Reference
+      {api_reference}
+  
+  service_docs:
+    trigger: "*.service.ts"
+    generate: "docs/services/*.md"
+    mcp_workflow:
+      - tool: filesystem.read_text_file
+      - tool: context7.get-library-docs
+      - tool: filesystem.write_file
+    
+    template: |
+      # {ServiceName}
+      
+      ## Description
+      {service_description}
+      
+      ## Methods
+      {methods_documentation}
+      
+      ## Dependencies
+      {dependencies_list}
+      
+      ## Usage Example
+      ```typescript
+      {usage_example}
+      ```
+  
+  repository_docs:
+    trigger: "*.repository.ts"
+    generate: "docs/repositories/*.md"
+    mcp_workflow:
+      - tool: filesystem.read_text_file
+        description: "讀取 repository 檔案"
+      
+      - tool: supabase.list_tables
+        description: "查詢資料表"
+      
+      - tool: context7.get-library-docs
+        params:
+          context7CompatibleLibraryID: "/supabase/supabase"
+        description: "查詢 Supabase 文檔"
+      
+      - tool: filesystem.write_file
+        description: "生成文檔"
+    
+    template: |
+      # {RepositoryName}
+      
+      ## Database Table
+      `{table_name}`
+      
+      ## Methods
+      {crud_methods}
+      
+      ## Schema
+      ```typescript
+      {type_definition}
+      ```
+      
+      ## Examples
+      {examples}
+
+# 資料庫文檔
+database_documentation:
+  schema:
+    mcp_workflow:
+      - tool: supabase.list_tables
+        description: "列出所有資料表"
+      
+      - tool: supabase.generate_typescript_types
+        description: "生成 TypeScript 型別"
+      
+      - tool: filesystem.write_file
+        params:
+          path: "docs/database/schema.md"
+    
+    template: |
+      # Database Schema
+      
+      ## Tables
+      {tables_list}
+      
+      ## Relationships
+      {relationships_diagram}
+      
+      ## TypeScript Types
+      ```typescript
+      {typescript_types}
+      ```
+  
+  rls_policies:
+    mcp_workflow:
+      - tool: supabase.execute_sql
+        params:
+          query: "SELECT * FROM pg_policies;"
+      
+      - tool: filesystem.write_file
+        params:
+          path: "docs/database/rls-policies.md"
+    
+    template: |
+      # Row Level Security Policies
+      
+      ## Policies by Table
+      {policies_by_table}
+      
+      ## Security Model
+      {security_model_description}
+  
+  migrations:
+    mcp_workflow:
+      - tool: supabase.list_migrations
+      
+      - tool: filesystem.write_file
+        params:
+          path: "docs/database/migrations.md"
+    
+    template: |
+      # Database Migrations
+      
+      ## Migration History
+      {migrations_list}
+      
+      ## How to Create Migration
+      {migration_guide}
+
+# MCP 工具文檔
+mcp_tools_documentation:
+  workflow:
+    - tool: filesystem.read_text_file
+      params:
+        path: ".github/MCP_COMMANDS_REFERENCE.md"
+    
+    - tool: context7.get-library-docs
+      description: "查詢 MCP 範例"
+    
+    - tool: filesystem.write_file
+      params:
+        path: "docs/mcp/*.md"
+  
+  sections:
+    - "MCP Servers Overview"
+    - "HTTP Servers (Context7, GitHub, Supabase)"
+    - "Local Servers (13 tools)"
+    - "Tool Usage Examples"
+    - "Common Patterns"
+    - "Troubleshooting"
+
+# README 生成
+readme_generation:
+  sections:
+    project_overview:
+      mcp_workflow:
+        - tool: filesystem.read_text_file
+          params:
+            path: "package.json"
+        
+        - tool: sequential-thinking.sequentialthinking
+          description: "分析專案結構"
+    
+    installation:
+      content:
+        - "Prerequisites"
+        - "Installation steps"
+        - "Configuration"
+        - "Running the app"
+    
+    features:
+      mcp_workflow:
+        - tool: filesystem.directory_tree
+          params:
+            path: "src/app"
+        
+        - tool: sequential-thinking.sequentialthinking
+          description: "識別主要功能"
+    
+    tech_stack:
+      mcp_workflow:
+        - tool: filesystem.read_text_file
+          params:
+            path: "package.json"
+        
+        - tool: context7.resolve-library-id
+          description: "查詢主要套件"
+    
+    contributing:
+      content:
+        - "Code style guide"
+        - "Commit conventions"
+        - "PR process"
+        - "Testing requirements"
+    
+    license:
+      content: "MIT License"
+
+# 文檔維護
+documentation_maintenance:
+  update_trigger:
+    - "Code changes"
+    - "API changes"
+    - "New features"
+    - "Bug fixes"
+  
+  update_workflow:
+    - tool: git.diff
+      description: "查看程式碼變更"
+    
+    - tool: filesystem.search_files
+      params:
+        pattern: "docs/**/*.md"
+      description: "找出相關文檔"
+    
+    - tool: filesystem.edit_file
+      description: "更新文檔"
+    
+    - tool: git.commit
+      params:
+        message: "docs: Update documentation"
+  
+  validation:
+    - "Check for broken links"
+    - "Verify code examples"
+    - "Update version numbers"
+    - "Check screenshots"
+
+# 文檔模板
+documentation_templates:
+  feature:
+    template: |
+      # {Feature Name}
+      
+      ## Overview
+      {brief_description}
+      
+      ## User Stories
+      - As a {role}, I want to {action}, so that {benefit}
+      
+      ## Requirements
+      ### Functional
+      - {functional_requirement_1}
+      - {functional_requirement_2}
+      
+      ### Non-Functional
+      - Performance: {performance_requirement}
+      - Security: {security_requirement}
+      
+      ## Design
+      ### UI/UX
+      {ui_design_description}
+      
+      ### Technical
+      {technical_design_description}
+      
+      ## Implementation
+      ### Components
+      - {component_list}
+      
+      ### Services
+      - {service_list}
+      
+      ### Database
+      ```sql
+      {database_schema}
+      ```
+      
+      ## Testing
+      ### Test Cases
+      - {test_case_1}
+      - {test_case_2}
+      
+      ## Deployment
+      {deployment_notes}
+  
+  troubleshooting:
+    template: |
+      # Troubleshooting Guide
+      
+      ## Common Issues
+      
+      ### Issue: {issue_title}
+      **Symptoms:** {symptoms}
+      **Cause:** {cause}
+      **Solution:** {solution}
+      **Prevention:** {prevention}
+      
+      ## Error Messages
+      
+      ### `{error_code}`: {error_message}
+      **Meaning:** {error_explanation}
+      **How to fix:** {fix_steps}
+  
+  api_endpoint:
+    template: |
+      ## {HTTP_METHOD} {endpoint_path}
+      
+      {endpoint_description}
+      
+      ### Request
+      
+      **Headers:**
+      ```
+      {request_headers}
+      ```
+      
+      **Body:**
+      ```json
+      {request_body_example}
+      ```
+      
+      ### Response
+      
+      **Success (200):**
+      ```json
+      {success_response_example}
+      ```
+      
+      **Error (4xx/5xx):**
+      ```json
+      {error_response_example}
+      ```
+      
+      ### Example
+      ```typescript
+      {code_example}
+      ```
+
+# 文檔品質標準
+quality_standards:
+  - "清晰簡潔"
+  - "包含程式碼範例"
+  - "保持更新"
+  - "適當的結構"
+  - "正確的文法與拼寫"
+  - "包含截圖或圖表"
+  - "連結到相關文檔"
+  - "版本資訊"
+
+# 文檔檢查清單
+documentation_checklist:
+  - "[ ] README 完整且最新"
+  - "[ ] API 文檔齊全"
+  - "[ ] 安裝指引清楚"
+  - "[ ] 使用範例充足"
+  - "[ ] 疑難排解指南"
+  - "[ ] 架構文檔"
+  - "[ ] 資料庫 Schema 文檔"
+  - "[ ] 程式碼註解完整"
+  - "[ ] 變更日誌 (CHANGELOG)"
+  - "[ ] 授權資訊 (LICENSE)"

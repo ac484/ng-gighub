@@ -1,0 +1,392 @@
+# MCP Tools Agent Configuration
+# MCP 工具專用代理配置
+#
+# 此檔案定義如何有效使用所有 16 個 MCP 伺服器
+
+name: mcp
+description: "Specialized agent for MCP tool usage and integration"
+
+# 完整 MCP 工具清單
+mcp_servers:
+  # HTTP 伺服器 (3 個)
+  http:
+    context7:
+      tools:
+        - resolve-library-id
+        - get-library-docs
+      use_cases:
+        - "查詢 Angular 20 最新文檔"
+        - "取得 ng-alain 20 API 參考"
+        - "搜尋 ng-zorro-antd 20 元件"
+        - "Supabase 2.86 SDK 文檔"
+      
+    github:
+      toolsets:
+        - actions  # GitHub Actions 工作流程
+        - issues   # Issues 管理
+        - pull_requests  # PR 操作
+        - repositories  # 倉庫操作
+        - code  # 程式碼搜尋
+        - releases  # 發布管理
+      use_cases:
+        - "管理 GitHub Actions workflows"
+        - "建立與更新 Issues/PRs"
+        - "搜尋程式碼與倉庫"
+        - "取得工作流程日誌"
+    
+    supabase:
+      tools:
+        - list_tables
+        - list_extensions
+        - list_migrations
+        - apply_migration
+        - execute_sql
+        - get_logs
+        - get_advisors
+        - get_project_url
+        - get_publishable_keys
+        - generate_typescript_types
+        - list_edge_functions
+        - get_edge_function
+        - deploy_edge_function
+        - create_branch
+        - list_branches
+        - delete_branch
+        - merge_branch
+        - reset_branch
+        - rebase_branch
+      use_cases:
+        - "資料庫 Schema 管理"
+        - "執行 SQL 查詢與遷移"
+        - "Edge Functions 部署"
+        - "分支開發與合併"
+        - "安全性與效能檢查"
+  
+  # 本地伺服器 (13 個)
+  local:
+    postgres:
+      tool: query
+      use_cases:
+        - "直接 PostgreSQL 查詢 (唯讀)"
+        - "複雜資料分析"
+        - "Schema 檢查"
+    
+    redis:
+      tools:
+        - set
+        - get
+        - delete
+        - list
+      use_cases:
+        - "快取操作"
+        - "Session 管理"
+        - "暫存資料"
+    
+    git:
+      tools:
+        - status
+        - diff
+        - log
+        - commit
+        - push
+        - clone
+        - branch
+      use_cases:
+        - "版本控制操作"
+        - "查看變更歷史"
+        - "分支管理"
+    
+    playwright:
+      categories:
+        navigation:
+          - playwright_navigate
+          - playwright_go_back
+          - playwright_go_forward
+        interaction:
+          - playwright_click
+          - playwright_fill
+          - playwright_select
+          - playwright_hover
+          - playwright_press_key
+          - playwright_drag
+          - playwright_upload_file
+        inspection:
+          - playwright_screenshot
+          - playwright_get_visible_text
+          - playwright_get_visible_html
+          - playwright_console_logs
+        evaluation:
+          - playwright_evaluate
+        http:
+          - playwright_get
+          - playwright_post
+          - playwright_put
+          - playwright_patch
+          - playwright_delete
+          - playwright_expect_response
+          - playwright_assert_response
+        configuration:
+          - playwright_resize
+          - playwright_custom_user_agent
+        codegen:
+          - start_codegen_session
+          - end_codegen_session
+          - get_codegen_session
+          - clear_codegen_session
+        utility:
+          - playwright_close
+          - playwright_save_as_pdf
+          - playwright_click_and_switch_tab
+      use_cases:
+        - "瀏覽器自動化測試"
+        - "UI 截圖與驗證"
+        - "表單填寫與互動"
+        - "HTTP 請求測試"
+        - "測試程式碼錄製"
+    
+    puppeteer:
+      tools:
+        - puppeteer_navigate
+        - puppeteer_screenshot
+        - puppeteer_click
+        - puppeteer_fill
+        - puppeteer_select
+        - puppeteer_hover
+        - puppeteer_evaluate
+      use_cases:
+        - "Chrome/Chromium 自動化"
+        - "截圖與 PDF 生成"
+        - "網頁爬蟲"
+    
+    memory:
+      operations:
+        create:
+          - create_entities
+          - create_relations
+          - add_observations
+        read:
+          - read_graph
+          - search_nodes
+          - open_nodes
+        delete:
+          - delete_entities
+          - delete_observations
+          - delete_relations
+      use_cases:
+        - "知識圖譜管理"
+        - "持久化記憶儲存"
+        - "實體關係追蹤"
+    
+    sequential-thinking:
+      tool: sequentialthinking
+      parameters:
+        - thought  # 當前思考步驟
+        - nextThoughtNeeded  # 是否需要更多思考
+        - thoughtNumber  # 思考編號
+        - totalThoughts  # 預估總思考數
+        - isRevision  # 是否為修正
+        - revisesThought  # 修正哪個思考
+        - branchFromThought  # 分支起點
+        - branchId  # 分支 ID
+        - needsMoreThoughts  # 是否需要更多思考
+      use_cases:
+        - "複雜問題分析"
+        - "多步驟推理"
+        - "架構設計決策"
+        - "bug 分析與修復"
+    
+    software-planning-tool:
+      tools:
+        - start_planning
+        - save_plan
+        - add_todo
+        - remove_todo
+        - get_todos
+        - update_todo_status
+      use_cases:
+        - "功能實作規劃"
+        - "任務分解與追蹤"
+        - "專案管理"
+    
+    everything:
+      tools:
+        - echo
+        - add
+        - longRunningOperation
+        - printEnv
+        - sampleLLM
+        - getTinyImage
+        - annotatedMessage
+        - getResourceReference
+        - getResourceLinks
+        - structuredContent
+        - zip
+      use_cases:
+        - "多用途工具"
+        - "環境變數檢查"
+        - "資源處理"
+    
+    filesystem:
+      operations:
+        read:
+          - read_text_file
+          - read_media_file
+          - read_multiple_files
+          - get_file_info
+        write:
+          - write_file
+          - edit_file
+          - create_directory
+        search:
+          - list_directory
+          - list_directory_with_sizes
+          - directory_tree
+          - search_files
+        utility:
+          - move_file
+          - list_allowed_directories
+      use_cases:
+        - "檔案讀寫操作"
+        - "目錄管理"
+        - "檔案搜尋"
+    
+    time:
+      tools:
+        - get_current_time
+        - convert_timezone
+      use_cases:
+        - "時間戳記取得"
+        - "時區轉換"
+    
+    fetch:
+      tool: fetch
+      use_cases:
+        - "HTTP 請求"
+        - "網頁內容抓取"
+        - "API 呼叫"
+
+# MCP 工具使用策略
+usage_strategies:
+  documentation_query:
+    description: "查詢程式庫文檔"
+    workflow:
+      - tool: context7.resolve-library-id
+        params:
+          libraryName: "{library_name}"
+      - tool: context7.get-library-docs
+        params:
+          context7CompatibleLibraryID: "{resolved_id}"
+          topic: "{specific_topic}"
+          mode: "code"
+    
+  database_operation:
+    description: "資料庫操作"
+    workflow:
+      - tool: supabase.list_tables
+        description: "列出所有資料表"
+      - tool: supabase.execute_sql
+        params:
+          query: "{sql_query}"
+      - tool: supabase.get_advisors
+        params:
+          type: "security"
+        description: "檢查安全性"
+    
+  browser_automation:
+    description: "瀏覽器自動化"
+    workflow:
+      - tool: playwright.playwright_navigate
+        params:
+          url: "{target_url}"
+      - tool: playwright.playwright_screenshot
+        params:
+          name: "{screenshot_name}"
+      - tool: playwright.playwright_get_visible_text
+        description: "取得頁面文字"
+    
+  development_planning:
+    description: "開發計畫"
+    workflow:
+      - tool: sequential-thinking.sequentialthinking
+        description: "分析需求"
+      - tool: software-planning-tool.start_planning
+        params:
+          goal: "{feature_goal}"
+      - tool: software-planning-tool.add_todo
+        params:
+          title: "{task_title}"
+          description: "{task_description}"
+          complexity: "{1-10}"
+
+# 工具組合模式
+tool_combinations:
+  # Context7 + Supabase: 查詢文檔後操作資料庫
+  docs_to_implementation:
+    - context7.get-library-docs  # 取得 Supabase SDK 文檔
+    - supabase.execute_sql  # 執行資料庫操作
+  
+  # Sequential-Thinking + Planning: 分析後規劃
+  analyze_and_plan:
+    - sequential-thinking.sequentialthinking  # 分析問題
+    - software-planning-tool.start_planning  # 建立計畫
+    - software-planning-tool.add_todo  # 新增任務
+  
+  # Playwright + Memory: 測試並記錄
+  test_and_remember:
+    - playwright.playwright_navigate  # 執行測試
+    - playwright.playwright_screenshot  # 截圖
+    - memory.create_entities  # 記錄結果
+  
+  # Git + Filesystem: 檔案操作與版本控制
+  file_and_commit:
+    - filesystem.write_file  # 寫入檔案
+    - git.status  # 檢查狀態
+    - git.commit  # 提交變更
+    - git.push  # 推送到遠端
+
+# 最佳實踐
+best_practices:
+  context7:
+    - "Always call resolve-library-id before get-library-docs"
+    - "Use specific topics for targeted documentation"
+    - "Set mode='code' for API examples, mode='info' for concepts"
+  
+  supabase:
+    - "Check advisors after schema changes"
+    - "Use execute_sql for one-off queries"
+    - "Use apply_migration for schema changes"
+    - "Test on branches before merging to production"
+  
+  sequential-thinking:
+    - "Start with estimated totalThoughts"
+    - "Adjust totalThoughts as needed"
+    - "Mark revisions with isRevision=true"
+    - "Continue until nextThoughtNeeded=false"
+  
+  playwright:
+    - "Use playwright_close to release resources"
+    - "Set appropriate timeout values"
+    - "Use selectors that are stable"
+    - "Take screenshots for debugging"
+
+# 疑難排解
+troubleshooting:
+  context7_not_found:
+    issue: "Library not found"
+    solution: "Check library name spelling, try variations"
+  
+  supabase_permission_denied:
+    issue: "Permission denied"
+    solution: "Verify SUPABASE_MCP_TOKEN has correct permissions"
+  
+  playwright_timeout:
+    issue: "Navigation timeout"
+    solution: "Increase timeout or check network connectivity"
+  
+  git_conflict:
+    issue: "Merge conflict"
+    solution: "Use git.status to check conflicts, resolve manually"
+  
+  memory_not_persisted:
+    issue: "Memory not saved"
+    solution: "Verify MCP_MEMORY_FILE_PATH is writable"
