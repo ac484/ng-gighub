@@ -17,14 +17,14 @@
 
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Team, Partner } from '@core';
 import { BlueprintMemberRepository } from '@core/blueprint/repositories/blueprint-member.repository';
+import { PartnerRepository } from '@core/data-access/repositories/shared/partner.repository';
+import { TeamRepository } from '@core/data-access/repositories/shared/team.repository';
 import { FirebaseService } from '@core/services/firebase.service';
 import { TaskStore } from '@core/state/stores/task.store';
 import { BlueprintMember, BlueprintRole } from '@core/types/blueprint/blueprint.types';
 import { Task, TaskStatus, TaskPriority, CreateTaskRequest, UpdateTaskRequest, AssigneeType } from '@core/types/task';
-import { Team, Partner } from '@core';
-import { TeamRepository } from '@core/data-access/repositories/shared/team.repository';
-import { PartnerRepository } from '@core/data-access/repositories/shared/partner.repository';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
@@ -343,15 +343,15 @@ export class TaskModalComponent implements OnInit {
       // For now, we'll need to get organization ID from a different source
       // This is a limitation that will need to be addressed with proper organization context
       // For the MVP, we'll load teams/partners when available
-      
+
       // TODO: Implement proper organization context service
       // For now, skip loading teams and partners if we can't determine organization
       console.warn('Organization context not available - teams/partners not loaded');
-      
+
       // Placeholder: In future, get from OrganizationContextService or similar
       // const organizationId = this.organizationContext.getCurrentOrganizationId();
       // if (!organizationId) return;
-      
+
       // Load teams
       // this.loadingTeams.set(true);
       // const teams = await firstValueFrom(this.teamRepo.findByOrganization(organizationId));
