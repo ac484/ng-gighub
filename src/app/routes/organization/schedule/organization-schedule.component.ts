@@ -35,7 +35,7 @@ interface ScheduleEvent {
 
     <nz-card [nzBordered]="false">
       <nz-calendar
-        [(ngModel)]="selectedDate"
+        [(ngModel)]="selectedDateValue"
         [(nzMode)]="mode"
         [nzDateCell]="dateCellTpl"
         (nzSelectChange)="onDateSelect($event)"
@@ -105,23 +105,14 @@ interface ScheduleEvent {
           <nz-form-item>
             <nz-form-label [nzRequired]="true">事件標題</nz-form-label>
             <nz-form-control>
-              <input
-                nz-input
-                [(ngModel)]="editingEvent().title"
-                name="title"
-                placeholder="輸入事件標題"
-              />
+              <input nz-input [(ngModel)]="editingEvent().title" name="title" placeholder="輸入事件標題" />
             </nz-form-control>
           </nz-form-item>
 
           <nz-form-item>
             <nz-form-label [nzRequired]="true">事件類型</nz-form-label>
             <nz-form-control>
-              <nz-select
-                [(ngModel)]="editingEvent().type"
-                name="type"
-                nzPlaceHolder="選擇事件類型"
-              >
+              <nz-select [(ngModel)]="editingEvent().type" name="type" nzPlaceHolder="選擇事件類型">
                 <nz-option nzValue="meeting" nzLabel="會議"></nz-option>
                 <nz-option nzValue="task" nzLabel="任務"></nz-option>
                 <nz-option nzValue="milestone" nzLabel="里程碑"></nz-option>
@@ -133,12 +124,7 @@ interface ScheduleEvent {
           <nz-form-item>
             <nz-form-label [nzRequired]="true">日期</nz-form-label>
             <nz-form-control>
-              <nz-date-picker
-                [(ngModel)]="editingEvent().date"
-                name="date"
-                nzPlaceHolder="選擇日期"
-                class="w-full"
-              ></nz-date-picker>
+              <nz-date-picker [(ngModel)]="editingEvent().date" name="date" nzPlaceHolder="選擇日期" class="w-full"></nz-date-picker>
             </nz-form-control>
           </nz-form-item>
 
@@ -231,6 +217,7 @@ export class OrganizationScheduleComponent implements OnInit {
   saving = signal(false);
   modalVisible = signal(false);
   selectedDate = new Date();
+  selectedDateValue = new Date(); // For template binding
   mode: 'month' | 'year' = 'month';
   events = signal<ScheduleEvent[]>([]);
   editingEvent = signal<Partial<ScheduleEvent>>({
@@ -243,10 +230,7 @@ export class OrganizationScheduleComponent implements OnInit {
   selectedDateEvents = computed(() => {
     const date = this.selectedDate;
     return this.events().filter(
-      e =>
-        e.date.getFullYear() === date.getFullYear() &&
-        e.date.getMonth() === date.getMonth() &&
-        e.date.getDate() === date.getDate()
+      e => e.date.getFullYear() === date.getFullYear() && e.date.getMonth() === date.getMonth() && e.date.getDate() === date.getDate()
     );
   });
 
@@ -286,15 +270,13 @@ export class OrganizationScheduleComponent implements OnInit {
 
   getEventsForDate(date: Date): ScheduleEvent[] {
     return this.events().filter(
-      e =>
-        e.date.getFullYear() === date.getFullYear() &&
-        e.date.getMonth() === date.getMonth() &&
-        e.date.getDate() === date.getDate()
+      e => e.date.getFullYear() === date.getFullYear() && e.date.getMonth() === date.getMonth() && e.date.getDate() === date.getDate()
     );
   }
 
   onDateSelect(date: Date): void {
     this.selectedDate = date;
+    this.selectedDateValue = date;
   }
 
   showAddModal(): void {
@@ -332,9 +314,7 @@ export class OrganizationScheduleComponent implements OnInit {
 
     setTimeout(() => {
       if (event.id) {
-        this.events.update(events =>
-          events.map(e => (e.id === event.id ? { ...e, ...event } as ScheduleEvent : e))
-        );
+        this.events.update(events => events.map(e => (e.id === event.id ? ({ ...e, ...event } as ScheduleEvent) : e)));
         this.message.success('已更新事件');
       } else {
         const newEvent: ScheduleEvent = {

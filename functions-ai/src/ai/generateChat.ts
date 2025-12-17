@@ -3,18 +3,11 @@
  * @description Generates chat responses using Google Gemini AI
  */
 
-import {onCall, HttpsError} from "firebase-functions/v2/https";
-import * as logger from "firebase-functions/logger";
-import {
-  getGenAIClient,
-  DEFAULT_CHAT_MODEL,
-  DEFAULT_GENERATION_CONFIG,
-} from "./client";
-import type {
-  AIGenerateChatRequest,
-  AIGenerateChatResponse,
-  AIChatMessage,
-} from "../types/ai.types";
+import * as logger from 'firebase-functions/logger';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
+
+import { getGenAIClient, DEFAULT_CHAT_MODEL, DEFAULT_GENERATION_CONFIG } from './client';
+import type { AIGenerateChatRequest, AIGenerateChatResponse, AIChatMessage } from '../types/ai.types';
 
 /**
  * AI Chat Generation Cloud Function
@@ -32,55 +25,43 @@ import type {
  * });
  * ```
  */
-export const generateChat = onCall<
-  AIGenerateChatRequest,
-  Promise<AIGenerateChatResponse>
->(
+export const generateChat = onCall<AIGenerateChatRequest, Promise<AIGenerateChatResponse>>(
   {
     // Security: Require authentication
     enforceAppCheck: false, // Set to true when App Check is enabled
     // Performance: Set memory and timeout
-    memory: "512MiB",
+    memory: '512MiB',
     timeoutSeconds: 60,
     // Region
-    region: "asia-east1",
+    region: 'asia-east1'
   },
-  async (request) => {
-    const {messages, maxTokens, temperature, blueprintId} = request.data;
+  async request => {
+    const { messages, maxTokens, temperature, blueprintId } = request.data;
 
     // Validate input
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      throw new HttpsError(
-        "invalid-argument",
-        "Messages array is required and must not be empty"
-      );
+      throw new HttpsError('invalid-argument', 'Messages array is required and must not be empty');
     }
 
     // Validate message format
     for (const msg of messages) {
       if (!msg.role || !msg.content) {
-        throw new HttpsError(
-          "invalid-argument",
-          "Each message must have role and content"
-        );
+        throw new HttpsError('invalid-argument', 'Each message must have role and content');
       }
-      if (msg.role !== "user" && msg.role !== "model") {
-        throw new HttpsError(
-          "invalid-argument",
-          "Message role must be 'user' or 'model'"
-        );
+      if (msg.role !== 'user' && msg.role !== 'model') {
+        throw new HttpsError('invalid-argument', "Message role must be 'user' or 'model'");
       }
     }
 
     // Check authentication
     if (!request.auth) {
-      throw new HttpsError("unauthenticated", "User must be authenticated");
+      throw new HttpsError('unauthenticated', 'User must be authenticated');
     }
 
-    logger.info("AI Chat Generation Request", {
+    logger.info('AI Chat Generation Request', {
       userId: request.auth.uid,
       blueprintId,
-      messageCount: messages.length,
+      messageCount: messages.length
     });
 
     try {
@@ -89,7 +70,7 @@ export const generateChat = onCall<
       // Convert messages to GenAI format
       const contents = messages.map((msg: AIChatMessage) => ({
         role: msg.role,
-        parts: [{text: msg.content}],
+        parts: [{ text: msg.content }]
       }));
 
       // Generate content
@@ -100,39 +81,38 @@ export const generateChat = onCall<
           maxOutputTokens: maxTokens || 1000,
           temperature: temperature ?? DEFAULT_GENERATION_CONFIG.temperature,
           topP: DEFAULT_GENERATION_CONFIG.topP,
-          topK: DEFAULT_GENERATION_CONFIG.topK,
-        },
+          topK: DEFAULT_GENERATION_CONFIG.topK
+        }
       });
 
       // Extract response text
-      const responseText = response.text || "";
-      const tokensUsed =
-        response.usageMetadata?.totalTokenCount || 0;
+      const responseText = response.text || '';
+      const tokensUsed = response.usageMetadata?.totalTokenCount || 0;
 
       const result: AIGenerateChatResponse = {
         response: responseText,
         tokensUsed,
         model: DEFAULT_CHAT_MODEL,
-        timestamp: Date.now(),
+        timestamp: Date.now()
       };
 
-      logger.info("AI Chat Generation Success", {
+      logger.info('AI Chat Generation Success', {
         userId: request.auth.uid,
         tokensUsed,
-        responseLength: responseText.length,
+        responseLength: responseText.length
       });
 
       return result;
     } catch (error) {
-      logger.error("AI Chat Generation Failed", {
+      logger.error('AI Chat Generation Failed', {
         userId: request.auth.uid,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
 
       if (error instanceof Error) {
-        throw new HttpsError("internal", error.message);
+        throw new HttpsError('internal', error.message);
       }
-      throw new HttpsError("internal", "Failed to generate chat response");
+      throw new HttpsError('internal', 'Failed to generate chat response');
     }
   }
 );

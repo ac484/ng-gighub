@@ -37,12 +37,7 @@ interface TodoItem {
 
     <nz-card [nzBordered]="false" class="todo-container">
       <!-- Filter tabs -->
-      <nz-segmented
-        [nzOptions]="filterOptions"
-        [(ngModel)]="currentFilter"
-        (ngModelChange)="onFilterChange()"
-        class="mb-lg"
-      ></nz-segmented>
+      <nz-segmented [nzOptions]="filterOptions" [(ngModel)]="currentFilterValue" (ngModelChange)="onFilterChange()" class="mb-lg"></nz-segmented>
 
       <!-- Stats cards -->
       <div nz-row [nzGutter]="16" class="mb-lg">
@@ -106,20 +101,12 @@ interface TodoItem {
 
             <nz-list-item-meta [nzAvatar]="priorityBadge">
               <ng-template #priorityBadge>
-                <nz-badge
-                  [nzStatus]="getPriorityStatus(item.priority)"
-                  [nzText]="getPriorityText(item.priority)"
-                ></nz-badge>
+                <nz-badge [nzStatus]="getPriorityStatus(item.priority)" [nzText]="getPriorityText(item.priority)"></nz-badge>
               </ng-template>
 
               <ng-template #nzTitle>
                 <div class="todo-title">
-                  <label
-                    nz-checkbox
-                    [(ngModel)]="item.completed"
-                    (ngModelChange)="toggleComplete(item)"
-                    class="mr-sm"
-                  ></label>
+                  <label nz-checkbox [(ngModel)]="item.completed" (ngModelChange)="toggleComplete(item)" class="mr-sm"></label>
                   <span [class.completed]="item.completed">{{ item.title }}</span>
                   @if (item.dueDate) {
                     <nz-tag [nzColor]="isOverdue(item) ? 'error' : 'default'" class="ml-sm">
@@ -136,9 +123,7 @@ interface TodoItem {
                 }
                 <div class="todo-meta">
                   <nz-tag [nzColor]="'blue'">{{ item.category }}</nz-tag>
-                  <span class="text-secondary">
-                    建立於 {{ item.createdAt | date: 'yyyy/MM/dd HH:mm' }}
-                  </span>
+                  <span class="text-secondary"> 建立於 {{ item.createdAt | date: 'yyyy/MM/dd HH:mm' }} </span>
                 </div>
               </ng-template>
             </nz-list-item-meta>
@@ -148,11 +133,7 @@ interface TodoItem {
 
       <!-- Empty state -->
       @if (filteredTodos().length === 0 && !loading()) {
-        <nz-empty
-          [nzNotFoundContent]="emptyContent"
-          [nzNotFoundImage]="'simple'"
-          class="mt-xl"
-        ></nz-empty>
+        <nz-empty [nzNotFoundContent]="emptyContent" [nzNotFoundImage]="'simple'" class="mt-xl"></nz-empty>
         <ng-template #emptyContent>
           <span>暫無待辦事項</span>
         </ng-template>
@@ -172,12 +153,7 @@ interface TodoItem {
           <nz-form-item>
             <nz-form-label [nzRequired]="true">標題</nz-form-label>
             <nz-form-control>
-              <input
-                nz-input
-                [(ngModel)]="editingTodo().title"
-                name="title"
-                placeholder="輸入待辦事項標題"
-              />
+              <input nz-input [(ngModel)]="editingTodo().title" name="title" placeholder="輸入待辦事項標題" />
             </nz-form-control>
           </nz-form-item>
 
@@ -197,11 +173,7 @@ interface TodoItem {
           <nz-form-item>
             <nz-form-label [nzRequired]="true">優先級</nz-form-label>
             <nz-form-control>
-              <nz-select
-                [(ngModel)]="editingTodo().priority"
-                name="priority"
-                nzPlaceHolder="選擇優先級"
-              >
+              <nz-select [(ngModel)]="editingTodo().priority" name="priority" nzPlaceHolder="選擇優先級">
                 <nz-option nzValue="high" nzLabel="高"></nz-option>
                 <nz-option nzValue="medium" nzLabel="中"></nz-option>
                 <nz-option nzValue="low" nzLabel="低"></nz-option>
@@ -212,11 +184,7 @@ interface TodoItem {
           <nz-form-item>
             <nz-form-label [nzRequired]="true">分類</nz-form-label>
             <nz-form-control>
-              <nz-select
-                [(ngModel)]="editingTodo().category"
-                name="category"
-                nzPlaceHolder="選擇分類"
-              >
+              <nz-select [(ngModel)]="editingTodo().category" name="category" nzPlaceHolder="選擇分類">
                 <nz-option nzValue="工作" nzLabel="工作"></nz-option>
                 <nz-option nzValue="個人" nzLabel="個人"></nz-option>
                 <nz-option nzValue="學習" nzLabel="學習"></nz-option>
@@ -297,6 +265,7 @@ export class UserTodoComponent implements OnInit {
   saving = signal(false);
   modalVisible = signal(false);
   currentFilter = signal<string>('全部');
+  currentFilterValue = '全部'; // For template binding
   todos = signal<TodoItem[]>([]);
   editingTodo = signal<Partial<TodoItem>>({
     title: '',
@@ -334,7 +303,7 @@ export class UserTodoComponent implements OnInit {
     return {
       total,
       pending: total - completed,
-      completed,
+      completed
     };
   });
 
@@ -343,9 +312,7 @@ export class UserTodoComponent implements OnInit {
     return total === 0 ? 0 : Math.round((completed / total) * 100);
   });
 
-  modalTitle = computed(() =>
-    this.editingTodo().id ? '編輯待辦' : '新增待辦'
-  );
+  modalTitle = computed(() => (this.editingTodo().id ? '編輯待辦' : '新增待辦'));
 
   ngOnInit(): void {
     this.loadTodos();
@@ -392,7 +359,7 @@ export class UserTodoComponent implements OnInit {
   }
 
   onFilterChange(): void {
-    // Filter is handled by computed signal
+    this.currentFilter.set(this.currentFilterValue);
   }
 
   showAddModal(): void {
@@ -438,9 +405,7 @@ export class UserTodoComponent implements OnInit {
     setTimeout(() => {
       if (todo.id) {
         // Update existing
-        this.todos.update(todos =>
-          todos.map(t => (t.id === todo.id ? { ...t, ...todo } as TodoItem : t))
-        );
+        this.todos.update(todos => todos.map(t => (t.id === todo.id ? ({ ...t, ...todo } as TodoItem) : t)));
         this.message.success('已更新待辦事項');
       } else {
         // Add new

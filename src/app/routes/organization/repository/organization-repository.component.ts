@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal, computed, inject, OnInit } from '@angular/core';
+import { STColumn } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { STColumn } from '@delon/abc/st';
 
 interface RepositoryItem {
   id: string;
@@ -41,7 +41,7 @@ interface RepositoryItem {
 
     <nz-card [nzBordered]="false">
       <!-- Filter tabs -->
-      <nz-radio-group [(ngModel)]="currentType()" (ngModelChange)="onTypeChange()" class="mb-lg">
+      <nz-radio-group [(ngModel)]="currentTypeValue" (ngModelChange)="onTypeChange()" class="mb-lg">
         <label nz-radio-button nzValue="all">全部</label>
         <label nz-radio-button nzValue="document">文檔</label>
         <label nz-radio-button nzValue="code">代碼</label>
@@ -50,12 +50,7 @@ interface RepositoryItem {
       </nz-radio-group>
 
       <!-- Table -->
-      <st
-        [data]="filteredItems()"
-        [columns]="columns"
-        [loading]="loading()"
-        [page]="{show: true, showSize: true}"
-      ></st>
+      <st [data]="filteredItems()" [columns]="columns" [loading]="loading()" [page]="{ show: true, showSize: true }"></st>
     </nz-card>
 
     <!-- Upload Modal -->
@@ -67,19 +62,12 @@ interface RepositoryItem {
       [nzOkLoading]="uploading()"
     >
       <ng-container *nzModalContent>
-        <nz-upload
-          nzType="drag"
-          [nzMultiple]="true"
-          [nzBeforeUpload]="beforeUpload"
-          class="upload-area"
-        >
+        <nz-upload nzType="drag" [nzMultiple]="true" [nzBeforeUpload]="beforeUpload" class="upload-area">
           <p class="ant-upload-drag-icon">
             <span nz-icon nzType="inbox" nzTheme="outline"></span>
           </p>
           <p class="ant-upload-text">點擊或拖曳檔案到此區域上傳</p>
-          <p class="ant-upload-hint">
-            支援單個或批次上傳，嚴禁上傳公司資料或其他敏感檔案
-          </p>
+          <p class="ant-upload-hint"> 支援單個或批次上傳，嚴禁上傳公司資料或其他敏感檔案 </p>
         </nz-upload>
       </ng-container>
     </nz-modal>
@@ -114,6 +102,7 @@ export class OrganizationRepositoryComponent implements OnInit {
   uploading = signal(false);
   uploadModalVisible = signal(false);
   currentType = signal<string>('all');
+  currentTypeValue = 'all'; // For template binding
   items = signal<RepositoryItem[]>([]);
 
   // Table columns
@@ -246,7 +235,7 @@ export class OrganizationRepositoryComponent implements OnInit {
   }
 
   onTypeChange(): void {
-    // Filter is handled by computed signal
+    this.currentType.set(this.currentTypeValue);
   }
 
   refresh(): void {

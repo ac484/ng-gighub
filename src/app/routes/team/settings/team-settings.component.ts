@@ -106,7 +106,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
         </nz-form-item>
 
         <nz-form-item>
-          <nz:form-label>通知設定</nz-form-label>
+          <nz-form-label>通知設定</nz-form-label>
           <nz-form-control>
             <label nz-checkbox formControlName="notifyOnTaskAssigned">
               任務分配時通知

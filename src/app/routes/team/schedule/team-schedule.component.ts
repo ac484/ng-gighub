@@ -34,11 +34,7 @@ interface TeamScheduleEvent {
     </ng-template>
 
     <nz-card [nzBordered]="false">
-      <nz-calendar
-        [(ngModel)]="selectedDate"
-        [nzDateCell]="dateCellTpl"
-        (nzSelectChange)="onDateSelect($event)"
-      ></nz-calendar>
+      <nz-calendar [(ngModel)]="selectedDate" [nzDateCell]="dateCellTpl" (nzSelectChange)="onDateSelect($event)"></nz-calendar>
 
       <ng-template #dateCellTpl let-date>
         <div class="date-cell">
@@ -107,23 +103,14 @@ interface TeamScheduleEvent {
           <nz-form-item>
             <nz-form-label [nzRequired]="true">排程標題</nz-form-label>
             <nz-form-control>
-              <input
-                nz-input
-                [(ngModel)]="editingEvent().title"
-                name="title"
-                placeholder="輸入排程標題"
-              />
+              <input nz-input [(ngModel)]="editingEvent().title" name="title" placeholder="輸入排程標題" />
             </nz-form-control>
           </nz-form-item>
 
           <nz-form-item>
             <nz-form-label [nzRequired]="true">類型</nz-form-label>
             <nz-form-control>
-              <nz-select
-                [(ngModel)]="editingEvent().type"
-                name="type"
-                nzPlaceHolder="選擇類型"
-              >
+              <nz-select [(ngModel)]="editingEvent().type" name="type" nzPlaceHolder="選擇類型">
                 <nz-option nzValue="standup" nzLabel="每日站會"></nz-option>
                 <nz-option nzValue="review" nzLabel="代碼審查"></nz-option>
                 <nz-option nzValue="planning" nzLabel="計劃會議"></nz-option>
@@ -135,12 +122,7 @@ interface TeamScheduleEvent {
           <nz-form-item>
             <nz-form-label [nzRequired]="true">日期</nz-form-label>
             <nz-form-control>
-              <nz-date-picker
-                [(ngModel)]="editingEvent().date"
-                name="date"
-                nzPlaceHolder="選擇日期"
-                class="w-full"
-              ></nz-date-picker>
+              <nz-date-picker [(ngModel)]="editingEvent().date" name="date" nzPlaceHolder="選擇日期" class="w-full"></nz-date-picker>
             </nz-form-control>
           </nz-form-item>
 
@@ -226,6 +208,7 @@ export class TeamScheduleComponent implements OnInit {
   saving = signal(false);
   modalVisible = signal(false);
   selectedDate = new Date();
+  selectedDateValue = new Date(); // For template binding
   events = signal<TeamScheduleEvent[]>([]);
   editingEvent = signal<Partial<TeamScheduleEvent>>({
     title: '',
@@ -238,10 +221,7 @@ export class TeamScheduleComponent implements OnInit {
   selectedDateEvents = computed(() => {
     const date = this.selectedDate;
     return this.events().filter(
-      e =>
-        e.date.getFullYear() === date.getFullYear() &&
-        e.date.getMonth() === date.getMonth() &&
-        e.date.getDate() === date.getDate()
+      e => e.date.getFullYear() === date.getFullYear() && e.date.getMonth() === date.getMonth() && e.date.getDate() === date.getDate()
     );
   });
 
@@ -283,15 +263,13 @@ export class TeamScheduleComponent implements OnInit {
 
   getEventsForDate(date: Date): TeamScheduleEvent[] {
     return this.events().filter(
-      e =>
-        e.date.getFullYear() === date.getFullYear() &&
-        e.date.getMonth() === date.getMonth() &&
-        e.date.getDate() === date.getDate()
+      e => e.date.getFullYear() === date.getFullYear() && e.date.getMonth() === date.getMonth() && e.date.getDate() === date.getDate()
     );
   }
 
   onDateSelect(date: Date): void {
     this.selectedDate = date;
+    this.selectedDateValue = date;
   }
 
   showAddModal(): void {
