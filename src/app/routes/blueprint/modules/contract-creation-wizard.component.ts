@@ -52,7 +52,7 @@ import { NzResultModule } from 'ng-zorro-antd/result';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
 import { NzUploadChangeParam, NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
 
-import { ParsedDataEditorComponent } from './parsed-data-editor.component';
+import { ContractVerificationComponent } from '@core/blueprint/modules/implementations/contract/components';
 
 /** Step indices - UPDATED for new 7-step flow */
 const STEP_UPLOAD = 0; // Upload files
@@ -67,7 +67,7 @@ const STEP_ACTIVE = 6; // Active
   selector: 'app-contract-creation-wizard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SHARED_IMPORTS, NzStepsModule, NzUploadModule, NzFormModule, NzResultModule, NzDescriptionsModule, ParsedDataEditorComponent],
+  imports: [SHARED_IMPORTS, NzStepsModule, NzUploadModule, NzFormModule, NzResultModule, NzDescriptionsModule, ContractVerificationComponent],
   template: `
     <!-- Steps Progress Indicator - UPDATED for 7-step flow -->
     <nz-steps [nzCurrent]="currentStep()" nzSize="small" class="mb-lg">
@@ -173,18 +173,17 @@ const STEP_ACTIVE = 6; // Active
           </div>
         }
 
-        <!-- Step 2: Edit Parsed Data ✨ NEW STEP -->
+        <!-- Step 2: Edit Parsed Data ✨ NEW STEP - Using ContractVerificationComponent -->
         @case (2) {
           <div class="step-content">
-            <h3>步驟 3：編輯解析資料</h3>
-            <p class="text-grey mb-md">請檢查 AI 解析的資料，並進行必要的修正</p>
+            <h3>步驟 3：確認並編輯合約資料</h3>
+            <p class="text-grey mb-md">請檢查 AI 解析的合約資料，並進行必要的修正</p>
 
             @if (parsedData()) {
-              <app-parsed-data-editor
+              <app-contract-verification
                 [parsedData]="parsedData()!"
-                [confidence]="parsingConfidence()"
-                (confirmed)="onParsedDataConfirmed($event)"
-                (cancelled)="cancel()"
+                (confirm)="onParsedDataConfirmed($event)"
+                (reject)="onParsedDataRejected()"
               />
             } @else {
               <nz-result nzStatus="warning" nzTitle="無解析資料" nzSubTitle="請重新上傳檔案或手動輸入">
@@ -584,9 +583,9 @@ export class ContractCreationWizardComponent implements OnInit {
   }
 
   /**
-   * NEW: Handle confirmed parsed data from editor
+   * NEW: Handle confirmed parsed data from ContractVerificationComponent
    */
-  async onParsedDataConfirmed(editedData: EnhancedContractParsingOutput): Promise<void> {
+  async onParsedDataConfirmed(editedData: any): Promise<void> {
     this.editedParsedData.set(editedData);
 
     // Move to contract creation step
@@ -594,6 +593,18 @@ export class ContractCreationWizardComponent implements OnInit {
 
     // Automatically create contract from edited data
     await this.createContractFromParsedData(editedData);
+  }
+
+  /**
+   * NEW: Handle rejection from ContractVerificationComponent
+   * Returns user to upload step to restart the process
+   */
+  onParsedDataRejected(): void {
+    this.message.info('已取消編輯，返回上傳步驟');
+    this.currentStep.set(STEP_UPLOAD);
+    this.parsedData.set(null);
+    this.editedParsedData.set(null);
+    this.uploadedFiles.set([]);
   }
 
   /**

@@ -169,8 +169,8 @@
                 formControlName="unitPrice"
                 [nzMin]="0"
                 [nzStep]="1000"
-                [nzFormatter]="value => 'NT$ ' + value"
-                [nzParser]="value => value!.replace('NT$ ', '')"
+                [nzFormatter]="priceFormatter"
+                [nzParser]="priceParser"
                 style="width: 100%"
               ></nz-input-number>
             </nz-form-control>

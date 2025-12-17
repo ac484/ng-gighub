@@ -241,8 +241,8 @@
             formControlName="totalAmount"
             [nzMin]="0"
             [nzStep]="1000"
-            [nzFormatter]="value => `NT$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-            [nzParser]="value => value.replace(/NT\$\s?|(,*)/g, '')"
+            [nzFormatter]="amountFormatter"
+            [nzParser]="amountParser"
             style="width: 100%"
             [nzDisabled]="readonly()"
           ></nz-input-number>

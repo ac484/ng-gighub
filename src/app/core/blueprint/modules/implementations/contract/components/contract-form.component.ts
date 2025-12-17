@@ -84,6 +84,16 @@ export class ContractFormComponent implements OnInit {
     return form ? form.valid : false;
   });
 
+  // Formatters and parsers for number inputs
+  amountFormatter = (value: number): string => {
+    return `NT$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+  amountParser = (value: string): number => {
+    const cleaned = value.replace(/NT\$\s?|,/g, '');
+    return cleaned ? parseFloat(cleaned) : 0;
+  };
+
   constructor() {
     // Watch for readonly changes
     effect(() => {

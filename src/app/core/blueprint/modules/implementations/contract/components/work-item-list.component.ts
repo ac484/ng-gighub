@@ -118,6 +118,19 @@ export class WorkItemListComponent {
   formMode = computed(() => this.editingItem() ? 'edit' : 'add');
   
   /** Form title based on mode */
+  
+  // ==================== FORMATTERS & PARSERS ====================
+  
+  /** Formatter for price input (add currency prefix and commas) */
+  priceFormatter = (value: number): string => {
+    return 'NT$ ' + value;
+  };
+
+  /** Parser for price input (remove currency prefix, return number) */
+  priceParser = (value: string): number => {
+    const cleaned = value.replace('NT$ ', '');
+    return cleaned ? parseFloat(cleaned) : 0;
+  };
   formTitle = computed(() => this.formMode() === 'edit' ? '編輯工項' : '新增工項');
 
   // ==================== LIFECYCLE ====================
