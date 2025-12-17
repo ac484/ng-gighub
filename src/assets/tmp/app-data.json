@@ -123,7 +123,7 @@
             "link": "/organization/schedule"
           },
           {
-            "text": "物料倉庫",
+            "text": "倉儲",
             "i18n": "menu.organization.repository",
             "icon": "anticon-gold",
             "link": "/organization/repository"

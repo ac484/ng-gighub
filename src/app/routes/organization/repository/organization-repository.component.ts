@@ -32,7 +32,7 @@ interface MaterialItem {
   imports: [SHARED_IMPORTS],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <page-header [title]="'物料倉庫'" [content]="headerContent">
+    <page-header [title]="'倉儲'" [content]="headerContent">
       <ng-template #extra>
         <button nz-button (click)="refresh()">
           <span nz-icon nzType="reload"></span>
@@ -52,7 +52,7 @@ interface MaterialItem {
     <ng-template #headerContent>
       <div class="header-desc">
         <span nz-icon nzType="gold" nzTheme="outline" class="mr-xs"></span>
-        管理多地點物料倉庫與庫存
+        管理多地點倉儲與庫存
       </div>
     </ng-template>
 
