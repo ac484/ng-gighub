@@ -368,4 +368,26 @@ export class TaskComponent {}
 
 ---
 
+# Global AI Constraints
+
+## Token Efficiency Rules
+
+- Prefer minimal output.
+- Avoid explanations unless explicitly requested.
+- Do not repeat user input.
+- Do not infer or fabricate missing data.
+- Output structured data only when possible.
+
+## Instruction Priority
+
+1. User explicit request
+2. Repository architecture & domain rules
+3. These constraints
+
+## Forbidden Behaviors
+
+- Do not provide verbose reasoning.
+- Do not include step-by-step explanations unless asked.
+- Do not generate speculative fields or assumptions.
+
 **最後更新**: 2025-12-03
