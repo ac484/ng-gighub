@@ -12,9 +12,10 @@
 import { Injectable, inject, signal } from '@angular/core';
 
 import type { ContractWorkItem } from '../models';
-import type { CreateContractWorkItemDto, UpdateContractWorkItemDto } from '../models/dtos';
+import type { CreateWorkItemDto, UpdateWorkItemDto } from '../models/dtos';
 import { ContractRepository } from '../repositories/contract.repository';
 import { ContractWorkItemRepository } from '../repositories/work-item.repository';
+import { firstValueFrom } from 'rxjs';
 
 /**
  * Work item progress information
@@ -67,7 +68,7 @@ export class ContractWorkItemsService {
   /**
    * Create a new work item
    */
-  async create(blueprintId: string, contractId: string, data: CreateContractWorkItemDto): Promise<ContractWorkItem> {
+  async create(blueprintId: string, contractId: string, data: CreateWorkItemDto): Promise<ContractWorkItem> {
     this._loading.set(true);
     this._error.set(null);
 
@@ -89,14 +90,8 @@ export class ContractWorkItemsService {
         throw new Error('Cannot add work items to active, completed, or terminated contracts');
       }
 
-      // Create work item
-      const workItemId = await this.workItemRepository.create(blueprintId, contractId, data);
-
-      // Fetch and return created work item
-      const workItem = await this.workItemRepository.findByIdOnce(blueprintId, contractId, workItemId);
-      if (!workItem) {
-        throw new Error('Failed to fetch created work item');
-      }
+      // Create work item (repository.create returns ContractWorkItem directly)
+      const workItem = await this.workItemRepository.create(blueprintId, contractId, data);
 
       return workItem;
     } catch (err) {
@@ -128,7 +123,8 @@ export class ContractWorkItemsService {
     this._error.set(null);
 
     try {
-      return await this.workItemRepository.findByContract(blueprintId, contractId);
+      // Convert Observable to Promise
+      return await firstValueFrom(this.workItemRepository.findByContract(blueprintId, contractId));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to list work items';
       this._error.set(message);
@@ -141,7 +137,7 @@ export class ContractWorkItemsService {
   /**
    * Update a work item
    */
-  async update(blueprintId: string, contractId: string, workItemId: string, data: UpdateContractWorkItemDto): Promise<ContractWorkItem> {
+  async update(blueprintId: string, contractId: string, workItemId: string, data: UpdateWorkItemDto): Promise<ContractWorkItem> {
     this._loading.set(true);
     this._error.set(null);
 
@@ -169,12 +165,7 @@ export class ContractWorkItemsService {
         }
       }
 
-      await this.workItemRepository.update(blueprintId, contractId, workItemId, data);
-
-      const workItem = await this.workItemRepository.findByIdOnce(blueprintId, contractId, workItemId);
-      if (!workItem) {
-        throw new Error('Failed to fetch updated work item');
-      }
+      const workItem = await this.workItemRepository.update(blueprintId, contractId, workItemId, data);
 
       return workItem;
     } catch (err) {
@@ -254,20 +245,22 @@ export class ContractWorkItemsService {
       if (completedAmount < 0) {
         throw new Error('Completed amount cannot be negative');
       }
-      if (completedAmount > workItem.totalAmount) {
+      if (completedAmount > workItem.totalPrice) {
         throw new Error('Completed amount cannot exceed total amount');
       }
 
       // Calculate completion percentage
-      const completionPercentage = workItem.totalAmount > 0 ? Math.round((completedAmount / workItem.totalAmount) * 100) : 0;
+      const completionPercentage = workItem.totalPrice > 0 ? Math.round((completedAmount / workItem.totalPrice) * 100) : 0;
 
       await this.workItemRepository.updateProgress(
         blueprintId,
         contractId,
         workItemId,
-        completedQuantity,
-        completedAmount,
-        completionPercentage
+        {
+          completedQuantity,
+          completedAmount,
+          completionPercentage
+        }
       );
 
       const updatedWorkItem = await this.workItemRepository.findByIdOnce(blueprintId, contractId, workItemId);
@@ -293,7 +286,7 @@ export class ContractWorkItemsService {
       completedQuantity: workItem.completedQuantity || 0,
       totalQuantity: workItem.quantity,
       completedAmount: workItem.completedAmount || 0,
-      totalAmount: workItem.totalAmount,
+      totalAmount: workItem.totalPrice,
       completionPercentage: workItem.completionPercentage || 0
     };
   }
@@ -399,7 +392,7 @@ export class ContractWorkItemsService {
    * Calculate total amount of work items
    */
   calculateTotalAmount(workItems: ContractWorkItem[]): number {
-    return workItems.reduce((sum, item) => sum + (item.totalAmount || 0), 0);
+    return workItems.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
   }
 
   /**
@@ -414,7 +407,8 @@ export class ContractWorkItemsService {
    */
   async getWorkItemStatistics(blueprintId: string, contractId: string): Promise<WorkItemStatistics> {
     try {
-      const workItems = await this.workItemRepository.findByContract(blueprintId, contractId);
+      // Convert Observable to Promise
+      const workItems = await firstValueFrom(this.workItemRepository.findByContract(blueprintId, contractId));
 
       const totalAmount = this.calculateTotalAmount(workItems);
       const completedAmount = this.calculateCompletedAmount(workItems);
@@ -454,7 +448,7 @@ export class ContractWorkItemsService {
   /**
    * Validate work item data
    */
-  validateWorkItemData(data: CreateContractWorkItemDto): WorkItemValidationResult {
+  validateWorkItemData(data: CreateWorkItemDto): WorkItemValidationResult {
     const errors: string[] = [];
 
     // Required fields
@@ -473,14 +467,6 @@ export class ContractWorkItemsService {
     // Price validation
     if (data.unitPrice === undefined || data.unitPrice < 0) {
       errors.push('Unit price must be non-negative');
-    }
-
-    // Total amount validation
-    if (data.quantity && data.unitPrice) {
-      const expectedTotal = data.quantity * data.unitPrice;
-      if (data.totalAmount && Math.abs(data.totalAmount - expectedTotal) > 0.01) {
-        errors.push('Total amount does not match quantity × unit price');
-      }
     }
 
     return { isValid: errors.length === 0, errors };
