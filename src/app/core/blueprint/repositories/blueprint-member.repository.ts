@@ -8,18 +8,22 @@ import {
   getDoc,
   getDocs,
   updateDoc,
+  where,
+  query,
   CollectionReference,
   DocumentReference,
   Timestamp
 } from '@angular/fire/firestore';
-import { BlueprintMember } from '@core';
-import { Observable, from, map } from 'rxjs';
+import { BlueprintMember, BlueprintMemberType, OwnerType, LoggerService } from '@core';
+import { isValidMemberTypeForOwner } from '@core/domain/utils';
+import { Observable, from, map, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BlueprintMemberRepository {
   private readonly firestore = inject(Firestore);
+  private readonly logger = inject(LoggerService);
 
   private getMembersCollectionRef(blueprintId: string): CollectionReference {
     return collection(this.firestore, 'blueprints', blueprintId, 'members');
@@ -37,26 +41,108 @@ export class BlueprintMemberRepository {
     };
   }
 
+  /**
+   * Find all members of a blueprint
+   * 查詢藍圖的所有成員
+   */
   findByBlueprint(blueprintId: string): Observable<BlueprintMember[]> {
     return from(getDocs(this.getMembersCollectionRef(blueprintId))).pipe(
       map(snapshot => snapshot.docs.map(docSnap => this.toMember(docSnap.data(), docSnap.id)))
     );
   }
 
-  async addMember(blueprintId: string, member: Omit<BlueprintMember, 'id' | 'grantedAt'>): Promise<BlueprintMember> {
-    const docRef = await addDoc(this.getMembersCollectionRef(blueprintId), {
-      ...member,
-      grantedAt: Timestamp.now()
-    });
-    const docSnap = await getDoc(docRef);
-    return this.toMember(docSnap.data(), docRef.id);
+  /**
+   * Find members by member type
+   * 依成員類型查詢成員
+   * 
+   * @param blueprintId - Blueprint ID
+   * @param memberType - Member type to filter by
+   */
+  findByMemberType(blueprintId: string, memberType: BlueprintMemberType): Observable<BlueprintMember[]> {
+    const q = query(
+      this.getMembersCollectionRef(blueprintId),
+      where('memberType', '==', memberType)
+    );
+    
+    return from(getDocs(q)).pipe(
+      map(snapshot => snapshot.docs.map(docSnap => this.toMember(docSnap.data(), docSnap.id)))
+    );
+  }
+
+  /**
+   * Add a member to a blueprint with validation
+   * 新增成員至藍圖（包含驗證）
+   * 
+   * @param blueprintId - Blueprint ID
+   * @param blueprintOwnerType - Blueprint owner type (for validation)
+   * @param member - Member data to add
+   * @returns Promise resolving to the created member
+   * @throws Error if member type is not allowed for the blueprint owner type
+   */
+  async addMember(
+    blueprintId: string,
+    blueprintOwnerType: OwnerType,
+    member: Omit<BlueprintMember, 'id' | 'grantedAt'>
+  ): Promise<BlueprintMember> {
+    // Validate member type is allowed for this owner type
+    if (!isValidMemberTypeForOwner(blueprintOwnerType, member.memberType)) {
+      const errorMsg = blueprintOwnerType === OwnerType.USER
+        ? '個人藍圖只能新增用戶成員'
+        : `不允許的成員類型：${member.memberType}`;
+      
+      this.logger.error(
+        '[BlueprintMemberRepository]',
+        'Invalid member type for owner',
+        new Error(errorMsg),
+        { blueprintId, blueprintOwnerType, memberType: member.memberType }
+      );
+      
+      throw new Error(errorMsg);
+    }
+
+    // Validate isExternal flag matches member type
+    const expectedExternal = member.memberType === BlueprintMemberType.PARTNER;
+    if (member.memberType === BlueprintMemberType.TEAM && member.isExternal) {
+      const errorMsg = '團隊成員不能標記為外部成員';
+      this.logger.error('[BlueprintMemberRepository]', errorMsg, new Error(errorMsg));
+      throw new Error(errorMsg);
+    }
+    
+    if (member.memberType === BlueprintMemberType.PARTNER && !member.isExternal) {
+      const errorMsg = '夥伴成員必須標記為外部成員';
+      this.logger.error('[BlueprintMemberRepository]', errorMsg, new Error(errorMsg));
+      throw new Error(errorMsg);
+    }
+
+    try {
+      const docRef = await addDoc(this.getMembersCollectionRef(blueprintId), {
+        ...member,
+        grantedAt: Timestamp.now()
+      });
+      
+      const docSnap = await getDoc(docRef);
+      return this.toMember(docSnap.data(), docRef.id);
+    } catch (error) {
+      this.logger.error('[BlueprintMemberRepository]', 'Failed to add member', error as Error);
+      throw error;
+    }
   }
 
   async updateMember(blueprintId: string, memberId: string, data: Partial<BlueprintMember>): Promise<void> {
-    await updateDoc(this.getMemberDocRef(blueprintId, memberId), data);
+    try {
+      await updateDoc(this.getMemberDocRef(blueprintId, memberId), data);
+    } catch (error) {
+      this.logger.error('[BlueprintMemberRepository]', 'Failed to update member', error as Error);
+      throw error;
+    }
   }
 
   async removeMember(blueprintId: string, memberId: string): Promise<void> {
-    await deleteDoc(this.getMemberDocRef(blueprintId, memberId));
+    try {
+      await deleteDoc(this.getMemberDocRef(blueprintId, memberId));
+    } catch (error) {
+      this.logger.error('[BlueprintMemberRepository]', 'Failed to remove member', error as Error);
+      throw error;
+    }
   }
 }
