@@ -16,6 +16,8 @@ export * from './shared/organization-member.repository';
 export * from './shared/organization-invitation.repository';
 export * from './shared/team.repository';
 export * from './shared/team-member.repository';
+export * from './shared/partner.repository';
+export * from './shared/partner-member.repository';
 export * from './shared/notification.repository';
 
 // Base repository classes

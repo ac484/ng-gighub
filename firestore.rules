@@ -296,6 +296,49 @@ service cloud.firestore {
     }
     
     // ==========================================
+    // Partners Collection Rules
+    // ==========================================
+    
+    match /partners/{partnerId} {
+      // Users can read partners in their organization
+      allow read: if isAuthenticated();
+      
+      // Users can create partners in their organization
+      allow create: if isAuthenticated()
+        && request.resource.data.organization_id is string
+        && request.resource.data.name is string
+        && request.resource.data.type in ['contractor', 'supplier', 'consultant', 'subcontractor'];
+      
+      // Users can update partners in their organization
+      allow update: if isAuthenticated()
+        && resource.data.organization_id == request.resource.data.organization_id;
+      
+      // Users can delete partners in their organization
+      allow delete: if isAuthenticated();
+    }
+    
+    // ==========================================
+    // Partner Members Collection Rules
+    // ==========================================
+    
+    match /partner_members/{memberId} {
+      // Users can read partner members
+      allow read: if isAuthenticated();
+      
+      // Users can create partner members
+      allow create: if isAuthenticated()
+        && request.resource.data.partner_id is string
+        && request.resource.data.user_id is string
+        && request.resource.data.role in ['admin', 'member'];
+      
+      // Users can update partner members (role changes)
+      allow update: if isAuthenticated();
+      
+      // Users can delete partner members
+      allow delete: if isAuthenticated();
+    }
+    
+    // ==========================================
     // Tasks Collection Rules (Top-Level)
     // ==========================================
     

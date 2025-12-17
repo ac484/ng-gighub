@@ -142,6 +142,12 @@
             "link": "/organization/teams"
           },
           {
+            "text": "夥伴管理",
+            "i18n": "menu.organization.partners",
+            "icon": "anticon-team",
+            "link": "/organization/partners"
+          },
+          {
             "text": "組織設定",
             "i18n": "menu.settings",
             "icon": "anticon-setting",

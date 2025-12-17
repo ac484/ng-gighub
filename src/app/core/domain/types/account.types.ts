@@ -180,6 +180,68 @@ export interface TeamMember {
 }
 
 // ============================================================================
+// Partner Types (夥伴類型)
+// ============================================================================
+
+/**
+ * 夥伴類型枚舉
+ * Partner type enumeration
+ *
+ * Defines the different types of external partners
+ */
+export enum PartnerType {
+  /** 承包商 | Contractor */
+  CONTRACTOR = 'contractor',
+  /** 供應商 | Supplier */
+  SUPPLIER = 'supplier',
+  /** 顧問 | Consultant */
+  CONSULTANT = 'consultant',
+  /** 次承包商 | Subcontractor */
+  SUBCONTRACTOR = 'subcontractor'
+}
+
+/**
+ * 夥伴角色枚舉
+ * Partner role enumeration
+ */
+export enum PartnerRole {
+  /** 管理員 | Admin */
+  ADMIN = 'admin',
+  /** 成員 | Member */
+  MEMBER = 'member'
+}
+
+/**
+ * Partner entity interface (simplified for Firebase)
+ * 夥伴實體介面（Firebase 簡化版）
+ *
+ * Used for managing external partners (contractors, suppliers, consultants)
+ */
+export interface Partner {
+  id: string;
+  organization_id: string;
+  name: string;
+  type: PartnerType;
+  company_name?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  description?: string | null;
+  created_at?: string;
+}
+
+/**
+ * PartnerMember entity interface
+ * 夥伴成員實體介面
+ */
+export interface PartnerMember {
+  id: string;
+  partner_id: string;
+  user_id: string; // Firebase Auth UID
+  role: PartnerRole;
+  joined_at?: string;
+}
+
+// ============================================================================
 // Bot Types (機器人類型)
 // ============================================================================
 
