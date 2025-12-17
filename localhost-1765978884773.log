@@ -1,0 +1,114 @@
+console-transport.ts:23 [INFO] Object
+debug_node.mjs:18311 Angular is running in development mode.
+index.esm2017.js:1498 App Check debug token: a0fe0414-6e29-4bb1-80e2-797248aebbb8. You will need to add it to your app's App Check settings in the Firebase console for it to work.
+www.googletagmanager.com/gtag/js?l=dataLayer&id=G-5KJJ3DD2G7:1   Failed to load resource: the server responded with a status of 403 (Forbidden)
+content-firebaseappcheck.googleapis.com/v1/projects/elite-chiller-455712-c4/apps/1:7807661688:web:5f96a5fe30b799f31d1f8d:exchangeDebugToken?key=AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI:1   Failed to load resource: the server responded with a status of 403 ()
+index.esm2017.js:78  [2025-12-17T13:40:23.205Z]  @firebase/auth: Auth (11.10.0): Error while retrieving App Check token: FirebaseError: AppCheck: Fetch server returned an HTTP error status. HTTP status: 403. (appCheck/fetch-status-error).
+defaultLogHandler @ index.esm2017.js:78
+root_effect_scheduler.mjs:3637  ERROR RuntimeError: NG0203: effect() can only be used within an injection context such as a constructor, a factory function, a field initializer, or a function used with `runInInjectionContext`. Find more at https://v20.angular.dev/errors/NG0203
+    at assertInInjectionContext (root_effect_scheduler.mjs:2418:15)
+    at effect (resource.mjs:143:9)
+    at _HeaderNotifyComponent.ngOnInit (notify.component.ts:41:5)
+    at callHookInternal (debug_node.mjs:860:14)
+    at callHook (debug_node.mjs:887:13)
+    at callHooks (debug_node.mjs:841:17)
+    at executeInitAndCheckHooks (debug_node.mjs:791:9)
+    at selectIndexInternal (debug_node.mjs:7189:17)
+    at Module.ɵɵadvance (debug_node.mjs:7172:5)
+    at LayoutBasicComponent_Template (basic.component.ts:58:61)
+handleError @ root_effect_scheduler.mjs:3637
+angular-fire.mjs:114  Calling Firebase APIs outside of an Injection context may destabilize your application leading to subtle change-detection and hydration bugs. Find more at https://github.com/angular/angularfire/blob/main/docs/zones.md
+warnOutsideInjectionContext @ angular-fire.mjs:114
+angular-fire.mjs:117  Firebase API called outside injection context: getDoc
+warnOutsideInjectionContext @ angular-fire.mjs:117
+menu-management.service.ts:66 [MenuManagementService] Config loaded: Object
+basic.component.ts:166 [LayoutBasicComponent] Menu config loaded, setting initial menu
+menu-management.service.ts:103 [MenuManagementService] Menu updated successfully: Object
+zone.js:165  Uncaught RuntimeError: NG0203: effect() can only be used within an injection context such as a constructor, a factory function, a field initializer, or a function used with `runInInjectionContext`. Find more at https://v20.angular.dev/errors/NG0203
+    at assertInInjectionContext (root_effect_scheduler.mjs:2418:15)
+    at effect (resource.mjs:143:9)
+    at _HeaderTaskComponent.ngOnInit (task.component.ts:91:5)
+    at callHookInternal (debug_node.mjs:860:14)
+    at callHook (debug_node.mjs:887:13)
+    at callHooks (debug_node.mjs:841:17)
+    at executeInitAndCheckHooks (debug_node.mjs:791:9)
+    at selectIndexInternal (debug_node.mjs:7189:17)
+    at Module.ɵɵadvance (debug_node.mjs:7172:5)
+    at LayoutBasicComponent_Template (basic.component.ts:58:61)
+console-transport.ts:23 [INFO] Object
+workspace-context.service.ts:79 [WorkspaceContextService] 👤 User authenticated: 7s.i@pm.me
+content-firebaseappcheck.googleapis.com/v1/projects/elite-chiller-455712-c4/apps/1:7807661688:web:5f96a5fe30b799f31d1f8d:exchangeDebugToken?key=AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI:1   Failed to load resource: the server responded with a status of 403 ()
+angular-fire.mjs:117  Firebase API called outside injection context: getDocs
+warnOutsideInjectionContext @ angular-fire.mjs:117
+console-transport.ts:23 [INFO] Object
+workspace-context.service.ts:94 [WorkspaceContextService] ✅ Organizations loaded: 0
+workspace-context.service.ts:319 [WorkspaceContextService] 🔄 Auto-restoring context...
+workspace-context.service.ts:477 [WorkspaceContextService] 💾 Restoring context from localStorage: {"type":"user","id":"HJBFUFruzyNxVz9IoAbNoSJBfcx2"}
+workspace-context.service.ts:483 [WorkspaceContextService] ✅ Context restored: Object
+angular-fire.mjs:117  Firebase API called outside injection context: getDocs
+warnOutsideInjectionContext @ angular-fire.mjs:117
+console-transport.ts:23 [INFO] Object
+console-transport.ts:23 [INFO] Object
+:4200/assets/outline/block.svg:1   Failed to load resource: the server responded with a status of 404 (Not Found)
+zone.js:165  Uncaught Error: [@ant-design/icons-angular]:the icon block-o does not exist or is not registered.
+    at IconNotFoundError (ant-design-icons-angular.mjs:90:10)
+    at ant-design-icons-angular.mjs:233:15
+    at map.js:7:37
+    at OperatorSubscriber2._this._next (OperatorSubscriber.js:15:21)
+    at Subscriber2.next (Subscriber.js:34:18)
+    at Subject.js:41:34
+    at errorContext (errorContext.js:19:9)
+    at Subject2.next (Subject.js:31:9)
+    at Object.next (share.js:46:58)
+    at ConsumerObserver2.next (Subscriber.js:96:33)
+zone.js:165  Uncaught Error: [@ant-design/icons-angular]:the icon block-o does not exist or is not registered.
+    at IconNotFoundError (ant-design-icons-angular.mjs:90:10)
+    at ant-design-icons-angular.mjs:233:15
+    at map.js:7:37
+    at OperatorSubscriber2._this._next (OperatorSubscriber.js:15:21)
+    at Subscriber2.next (Subscriber.js:34:18)
+    at Subject.js:41:34
+    at errorContext (errorContext.js:19:9)
+    at Subject2.next (Subject.js:31:9)
+    at Object.next (share.js:46:58)
+    at ConsumerObserver2.next (Subscriber.js:96:33)
+angular-fire.mjs:117  Firebase API called outside injection context: getDoc
+warnOutsideInjectionContext @ angular-fire.mjs:117
+console-transport.ts:23 [INFO] Object
+ng-zorro-antd-core-logger.mjs:26  [NG-ZORRO]: [NG-ZORRO]: <nz-tabset> is deprecated, please use <nz-tabs> instead.
+(匿名) @ ng-zorro-antd-core-logger.mjs:26
+console-transport.ts:23 [INFO] Object
+angular-fire.mjs:117  Firebase API called outside injection context: getDocs
+warnOutsideInjectionContext @ angular-fire.mjs:117
+browser.mjs:1628  Warning: The animation trigger "tabSwitchMotion" is attempting to animate the following not animatable properties: display
+(to check the list of all animatable properties visit https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_animated_properties)
+checkNonAnimatableInTimelines @ browser.mjs:1628
+console-transport.ts:23 [INFO] Object
+console-transport.ts:23 [INFO] Object
+angular-fire.mjs:117  Firebase API called outside injection context: getDocs
+warnOutsideInjectionContext @ angular-fire.mjs:117
+browser.mjs:1628  Warning: The animation trigger "tabSwitchMotion" is attempting to animate the following not animatable properties: display
+(to check the list of all animatable properties visit https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_animated_properties)
+checkNonAnimatableInTimelines @ browser.mjs:1628
+browser.mjs:1628  Warning: The animation trigger "tabSwitchMotion" is attempting to animate the following not animatable properties: display
+(to check the list of all animatable properties visit https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_animated_properties)
+checkNonAnimatableInTimelines @ browser.mjs:1628
+:4200/assets/outline/form.svg:1   Failed to load resource: the server responded with a status of 404 (Not Found)
+zone.js:165  Uncaught Error: [@ant-design/icons-angular]:the icon form-o does not exist or is not registered.
+    at IconNotFoundError (ant-design-icons-angular.mjs:90:10)
+    at ant-design-icons-angular.mjs:233:15
+    at map.js:7:37
+    at OperatorSubscriber2._this._next (OperatorSubscriber.js:15:21)
+    at Subscriber2.next (Subscriber.js:34:18)
+    at Subject.js:41:34
+    at errorContext (errorContext.js:19:9)
+    at Subject2.next (Subject.js:31:9)
+    at Object.next (share.js:46:58)
+    at ConsumerObserver2.next (Subscriber.js:96:33)
+contract-creation-wizard.component.ts:477  [ContractCreationWizard] No file object found for PO 4510250181 Rev A.pdf
+(匿名) @ contract-creation-wizard.component.ts:477
+contract-creation-wizard.component.ts:477  [ContractCreationWizard] No file object found for PO 4510250181 Rev A.pdf
+(匿名) @ contract-creation-wizard.component.ts:477
+content-firebaseappcheck.googleapis.com/v1/projects/elite-chiller-455712-c4/apps/1:7807661688:web:5f96a5fe30b799f31d1f8d:exchangeDebugToken?key=AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI:1   Failed to load resource: the server responded with a status of 403 ()
+contract-creation-wizard.component.ts:477  [ContractCreationWizard] No file object found for PO 4510250181 Rev A.pdf
+(匿名) @ contract-creation-wizard.component.ts:477

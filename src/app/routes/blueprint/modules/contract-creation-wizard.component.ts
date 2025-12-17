@@ -40,6 +40,7 @@ import {
 } from '@core/blueprint/modules/implementations/contract/services/contract-parsing.service';
 import { ContractStatusService } from '@core/blueprint/modules/implementations/contract/services/contract-status.service';
 import { ContractUploadService, UploadProgress } from '@core/blueprint/modules/implementations/contract/services/contract-upload.service';
+import { ContractWorkItemsService } from '@core/blueprint/modules/implementations/contract/services/contract-work-items.service';
 import {
   type EnhancedContractParsingOutput,
   toContractCreateRequest,
@@ -335,6 +336,7 @@ export class ContractCreationWizardComponent implements OnInit {
   private readonly creationService = inject(ContractCreationService);
   private readonly parsingService = inject(ContractParsingService);
   private readonly statusService = inject(ContractStatusService);
+  private readonly workItemService = inject(ContractWorkItemsService);
 
   // State signals
   currentStep = signal(STEP_UPLOAD);
@@ -466,11 +468,16 @@ export class ContractCreationWizardComponent implements OnInit {
       // Upload files first (without contract ID)
       const files = this.uploadedFiles();
       const tempAttachments: FileAttachment[] = [];
+      const failedUploads: string[] = [];
 
       for (const uploadFile of files) {
         try {
           const file = uploadFile.originFileObj as File;
-          if (!file) continue;
+          if (!file) {
+            console.warn('[ContractCreationWizard]', 'No file object found for', uploadFile.name);
+            failedUploads.push(uploadFile.name);
+            continue;
+          }
 
           // Upload to temporary storage or directly to blueprint storage
           const attachment = await this.uploadService.uploadContractFile(
@@ -481,11 +488,26 @@ export class ContractCreationWizardComponent implements OnInit {
           tempAttachments.push(attachment);
         } catch (err) {
           console.error('[ContractCreationWizard]', 'Failed to upload file', uploadFile.name, err);
+          failedUploads.push(uploadFile.name);
         }
       }
 
+      // Check if any files were successfully uploaded
+      if (tempAttachments.length === 0) {
+        const errorMsg = failedUploads.length > 0 
+          ? `檔案上傳失敗: ${failedUploads.join(', ')}`
+          : '沒有檔案成功上傳，請重試';
+        this.message.error(errorMsg);
+        return;
+      }
+
+      // Show warning if some files failed
+      if (failedUploads.length > 0) {
+        this.message.warning(`部分檔案上傳失敗: ${failedUploads.join(', ')}`);
+      }
+
       this.fileAttachments.set(tempAttachments);
-      this.message.success('檔案上傳成功');
+      this.message.success(`成功上傳 ${tempAttachments.length} 個檔案`);
 
       // Move to parsing step
       this.nextStep();
@@ -620,11 +642,9 @@ export class ContractCreationWizardComponent implements OnInit {
     try {
       const workItemDtos = toWorkItemCreateRequests(workItems);
 
-      // Note: This may require a batch create method in the service
-      // For now, we'll create them one by one
+      // Create work items one by one using the injected service
       for (const dto of workItemDtos) {
-        // await this.workItemService.create(this.blueprintId(), contractId, dto);
-        // TODO: Implement when WorkItemService is available
+        await this.workItemService.create(this.blueprintId(), contractId, dto);
       }
 
       this.message.success(`已建立 ${workItems.length} 個工項`);

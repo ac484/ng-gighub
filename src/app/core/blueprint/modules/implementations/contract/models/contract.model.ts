@@ -206,6 +206,18 @@ export interface ContractWorkItem {
 }
 
 /**
+ * Work Item Progress (工項進度)
+ */
+export interface WorkItemProgress {
+  /** Completed quantity */
+  completedQuantity: number;
+  /** Completed amount */
+  completedAmount: number;
+  /** Completion percentage (0-100) */
+  completionPercentage: number;
+}
+
+/**
  * Contract Status History Entry
  */
 export interface ContractStatusHistory {
