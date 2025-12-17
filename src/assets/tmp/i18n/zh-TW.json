@@ -19,6 +19,7 @@
   "menu.settings": "設定",
   "menu.organization.members": "組織成員",
   "menu.organization.teams": "團隊管理",
+  "menu.organization.partners": "夥伴管理",
   "menu.team.members": "團隊成員",
   "menu.exception": "異常頁",
   "menu.exception.not-permission": "403",
