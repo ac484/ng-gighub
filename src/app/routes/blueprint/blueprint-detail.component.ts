@@ -292,7 +292,10 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
           <nz-tab nzTitle="成員">
             <ng-template nz-tab>
               @if (blueprint()?.id) {
-                <app-blueprint-members [blueprintId]="blueprint()!.id" />
+                <app-blueprint-members 
+                  [blueprintId]="blueprint()!.id" 
+                  [blueprintOwnerType]="blueprint()!.ownerType" 
+                />
               }
             </ng-template>
           </nz-tab>
