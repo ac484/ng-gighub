@@ -7,3 +7,4 @@
 
 export * from './contract-form.component';
 export * from './contract-verification.component';
+export * from './work-item-list.component';

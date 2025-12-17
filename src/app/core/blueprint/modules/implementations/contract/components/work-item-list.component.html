@@ -1,0 +1,213 @@
+<!-- Work Item List Component Template -->
+
+<div class="work-item-list">
+  <!-- Header with Actions -->
+  <div class="list-header">
+    <div class="header-info">
+      <h4>工項清單</h4>
+      @if (showTotal()) {
+        <div class="summary">
+          <span class="item-count">共 {{ itemCount() }} 項</span>
+          <span class="total-amount">總金額: <strong>{{ totalAmount() | currency: 'TWD' }}</strong></span>
+        </div>
+      }
+    </div>
+    
+    @if (!readonly()) {
+      <div class="header-actions">
+        <button nz-button nzType="primary" (click)="addWorkItem()">
+          <span nz-icon nzType="plus"></span>
+          新增工項
+        </button>
+        @if (!isEmpty()) {
+          <button nz-button nzDanger (click)="clearAll()">
+            <span nz-icon nzType="delete"></span>
+            清空
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Empty State -->
+  @if (isEmpty()) {
+    <nz-empty
+      nzNotFoundContent="尚無工項"
+      [nzNotFoundFooter]="emptyFooter"
+    >
+      <ng-template #emptyFooter>
+        @if (!readonly()) {
+          <button nz-button nzType="primary" (click)="addWorkItem()">
+            <span nz-icon nzType="plus"></span>
+            新增第一個工項
+          </button>
+        }
+      </ng-template>
+    </nz-empty>
+  }
+
+  <!-- Work Items Table -->
+  @if (!isEmpty()) {
+    <nz-table
+      #workItemTable
+      [nzData]="items()"
+      [nzShowPagination]="false"
+      [nzSize]="'middle'"
+      [nzBordered]="true"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="40px">#</th>
+          <th>名稱</th>
+          <th nzWidth="100px">數量</th>
+          <th nzWidth="80px">單位</th>
+          <th nzWidth="120px">單價</th>
+          <th nzWidth="120px">金額</th>
+          @if (!readonly()) {
+            <th nzWidth="120px" nzAlign="center">操作</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items(); track $index) {
+          <tr>
+            <td>{{ $index + 1 }}</td>
+            <td>
+              <div class="item-name">
+                <strong>{{ item.name }}</strong>
+                @if (item.description) {
+                  <div class="item-description">{{ item.description }}</div>
+                }
+              </div>
+            </td>
+            <td nzAlign="right">{{ item.quantity | number: '1.2-2' }}</td>
+            <td>{{ item.unit }}</td>
+            <td nzAlign="right">{{ item.unitPrice | currency: 'TWD' }}</td>
+            <td nzAlign="right"><strong>{{ item.totalAmount | currency: 'TWD' }}</strong></td>
+            @if (!readonly()) {
+              <td nzAlign="center">
+                <button nz-button nzType="link" nzSize="small" (click)="editWorkItem(item)">
+                  <span nz-icon nzType="edit"></span>
+                  編輯
+                </button>
+                <nz-divider nzType="vertical"></nz-divider>
+                <button nz-button nzType="link" nzSize="small" nzDanger (click)="deleteWorkItem(item)">
+                  <span nz-icon nzType="delete"></span>
+                  刪除
+                </button>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  }
+
+  <!-- Edit/Add Form Modal -->
+  @if (showEditForm()) {
+    <nz-modal
+      [nzVisible]="showEditForm()"
+      [nzTitle]="formTitle()"
+      [nzWidth]="600"
+      (nzOnCancel)="cancelEditForm()"
+      [nzFooter]="modalFooter"
+    >
+      <ng-container *nzModalContent>
+        <form nz-form [formGroup]="editForm" nzLayout="vertical">
+          <!-- Work Item Name -->
+          <nz-form-item>
+            <nz-form-label nzRequired>工項名稱</nz-form-label>
+            <nz-form-control nzErrorTip="請輸入工項名稱（最多100字）">
+              <input nz-input formControlName="name" placeholder="例如：結構工程、室內裝修" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <!-- Description -->
+          <nz-form-item>
+            <nz-form-label>說明</nz-form-label>
+            <nz-form-control nzErrorTip="說明最多500字">
+              <textarea
+                nz-input
+                formControlName="description"
+                placeholder="工項說明（選填）"
+                [nzAutosize]="{ minRows: 2, maxRows: 4 }"
+              ></textarea>
+            </nz-form-control>
+          </nz-form-item>
+
+          <!-- Quantity and Unit -->
+          <nz-row [nzGutter]="16">
+            <nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>數量</nz-form-label>
+                <nz-form-control nzErrorTip="請輸入有效數量">
+                  <nz-input-number
+                    formControlName="quantity"
+                    [nzMin]="0.01"
+                    [nzStep]="1"
+                    [nzPrecision]="2"
+                    style="width: 100%"
+                  ></nz-input-number>
+                </nz-form-control>
+              </nz-form-item>
+            </nz-col>
+            <nz-col [nzSpan]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>單位</nz-form-label>
+                <nz-form-control nzErrorTip="請輸入單位">
+                  <input nz-input formControlName="unit" placeholder="例如：式、項、m²" />
+                </nz-form-control>
+              </nz-form-item>
+            </nz-col>
+          </nz-row>
+
+          <!-- Unit Price -->
+          <nz-form-item>
+            <nz-form-label nzRequired>單價</nz-form-label>
+            <nz-form-control nzErrorTip="請輸入有效單價">
+              <nz-input-number
+                formControlName="unitPrice"
+                [nzMin]="0"
+                [nzStep]="1000"
+                [nzFormatter]="value => 'NT$ ' + value"
+                [nzParser]="value => value!.replace('NT$ ', '')"
+                style="width: 100%"
+              ></nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+
+          <!-- Total Amount (Calculated) -->
+          <nz-form-item>
+            <nz-form-label>金額</nz-form-label>
+            <nz-form-control>
+              <div class="calculated-total">
+                <strong>{{ (editForm.get('quantity')?.value || 0) * (editForm.get('unitPrice')?.value || 0) | currency: 'TWD' }}</strong>
+                <span class="text-grey ml-sm">(自動計算)</span>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+
+          <!-- Notes -->
+          <nz-form-item>
+            <nz-form-label>備註</nz-form-label>
+            <nz-form-control nzErrorTip="備註最多500字">
+              <textarea
+                nz-input
+                formControlName="notes"
+                placeholder="其他備註（選填）"
+                [nzAutosize]="{ minRows: 2, maxRows: 4 }"
+              ></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </form>
+      </ng-container>
+
+      <ng-template #modalFooter>
+        <button nz-button nzType="default" (click)="cancelEditForm()">取消</button>
+        <button nz-button nzType="primary" (click)="saveWorkItem()">
+          {{ formMode() === 'edit' ? '更新' : '新增' }}
+        </button>
+      </ng-template>
+    </nz-modal>
+  }
+</div>
