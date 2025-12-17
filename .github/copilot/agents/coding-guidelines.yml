@@ -1,0 +1,355 @@
+# Coding Guidelines Agent Configuration
+# 程式碼規範代理配置
+
+name: coding-guidelines
+description: "Enforces project coding standards and best practices with MCP tools"
+
+# MCP 工具用於程式碼規範
+mcp_tools:
+  primary:
+    - context7  # 查詢最新標準
+    - filesystem  # 檢查程式碼
+    - sequential-thinking  # 分析規範
+  
+  secondary:
+    - git  # 查看變更
+    - memory  # 記錄規範模式
+
+# Angular 20 現代化規範
+angular_modern_standards:
+  components:
+    required:
+      - "使用 Standalone Components"
+      - "使用 Signals 管理狀態"
+      - "使用新控制流 (@if, @for, @switch)"
+      - "使用 input()/output() 函式"
+      - "使用 inject() DI"
+      - "OnPush 變更偵測"
+    
+    forbidden:
+      - "❌ NgModules (除非必要)"
+      - "❌ *ngIf, *ngFor, *ngSwitch"
+      - "❌ @Input(), @Output() 裝飾器 (Angular 19+)"
+      - "❌ constructor DI (優先 inject())"
+      - "❌ RxJS Subject (優先 Signals)"
+    
+    mcp_verification:
+      - tool: context7.get-library-docs
+        params:
+          context7CompatibleLibraryID: "/angular/angular"
+          topic: "standalone-components"
+      
+      - tool: filesystem.grep
+        params:
+          pattern: "NgModule|@NgModule"
+        description: "檢查是否使用 NgModules"
+      
+      - tool: filesystem.grep
+        params:
+          pattern: "\\*ngIf|\\*ngFor|\\*ngSwitch"
+        description: "檢查舊控制流語法"
+  
+  signals:
+    patterns:
+      state: "signal(initialValue)"
+      computed: "computed(() => expression)"
+      effect: "effect(() => { })"
+      readonly: "signal.asReadonly()"
+    
+    best_practices:
+      - "使用 signal() 管理可變狀態"
+      - "使用 computed() 處理衍生狀態"
+      - "使用 effect() 處理副作用"
+      - "暴露只讀 signals"
+      - "避免在 computed 中執行副作用"
+    
+    anti_patterns:
+      - "❌ 直接修改 signal 內部值"
+      - "❌ 在 computed 中修改 signals"
+      - "❌ 過度巢狀 computed"
+  
+  input_output:
+    modern_syntax:
+      input: "value = input.required<T>();"
+      optional_input: "value = input<T>(defaultValue);"
+      output: "event = output<T>();"
+      two_way: "value = model<T>(initialValue);"
+    
+    legacy_syntax:
+      input: "@Input() value!: T;"
+      output: "@Output() event = new EventEmitter<T>();"
+    
+    mcp_verification:
+      - tool: filesystem.grep
+        params:
+          pattern: "@Input\\(|@Output\\("
+        description: "檢查舊裝飾器語法"
+
+# TypeScript 嚴格模式規範
+typescript_standards:
+  strict_mode:
+    required:
+      - "strict: true"
+      - "noImplicitAny: true"
+      - "strictNullChecks: true"
+      - "strictFunctionTypes: true"
+    
+    forbidden:
+      - "❌ any 型別 (使用 unknown)"
+      - "❌ ! 非空斷言 (除非必要)"
+      - "❌ @ts-ignore"
+      - "❌ @ts-nocheck"
+  
+  naming:
+    conventions:
+      classes: "PascalCase"
+      interfaces: "PascalCase (無 I 前綴)"
+      types: "PascalCase"
+      functions: "camelCase"
+      variables: "camelCase"
+      constants: "UPPER_SNAKE_CASE"
+      files: "kebab-case"
+    
+    examples:
+      good:
+        - "class UserService"
+        - "interface User"
+        - "type UserId = string"
+        - "const getUser = () => {}"
+        - "let userName: string"
+        - "const API_URL = '...'"
+        - "user-profile.component.ts"
+      
+      bad:
+        - "class userService"
+        - "interface IUser"
+        - "type userId = string"
+        - "const GetUser = () => {}"
+        - "let UserName: string"
+        - "const apiUrl = '...'"
+        - "UserProfile.component.ts"
+
+# ng-alain 架構規範
+ng_alain_standards:
+  three_layer_architecture:
+    foundation:
+      - "Account (帳戶管理)"
+      - "Auth (認證)"
+      - "Organization (組織)"
+    
+    container:
+      - "Blueprint (藍圖)"
+      - "Permissions (權限)"
+      - "Events (事件)"
+    
+    business:
+      - "Tasks (任務)"
+      - "Logs (日誌)"
+      - "Quality (品質)"
+  
+  imports:
+    shared: "import { SHARED_IMPORTS } from '@shared';"
+    delon: "import { ... } from '@delon/abc';"
+    
+    pattern: |
+      @Component({
+        selector: 'app-example',
+        standalone: true,
+        imports: [SHARED_IMPORTS],
+        ...
+      })
+  
+  components:
+    st_table:
+      - "使用 STColumn[] 定義欄位"
+      - "使用 STData 定義資料"
+      - "使用 type: 'badge' 顯示狀態"
+      - "使用 buttons 定義操作"
+    
+    sf_form:
+      - "使用 SFSchema 定義表單"
+      - "使用 ui.widget 指定元件"
+      - "使用 required 陣列指定必填"
+      - "使用 (formSubmit) 處理提交"
+
+# Supabase 規範
+supabase_standards:
+  architecture:
+    pattern: "Repository Pattern"
+    layers:
+      - "Repository (資料存取)"
+      - "Store/Facade (狀態管理)"
+      - "Component (UI)"
+  
+  repository:
+    pattern: |
+      @Injectable({ providedIn: 'root' })
+      export class TaskRepository {
+        private supabase = inject(SupabaseService);
+        
+        async findAll(): Promise<Task[]> {
+          const { data, error } = await this.supabase.client
+            .from('tasks')
+            .select('*');
+          if (error) throw error;
+          return data || [];
+        }
+      }
+  
+  store:
+    pattern: |
+      @Injectable({ providedIn: 'root' })
+      export class TaskStore {
+        private repository = inject(TaskRepository);
+        
+        private _tasks = signal<Task[]>([]);
+        tasks = this._tasks.asReadonly();
+        
+        async loadTasks(): Promise<void> {
+          const tasks = await this.repository.findAll();
+          this._tasks.set(tasks);
+        }
+      }
+  
+  rls:
+    required: "所有資料表必須啟用 RLS"
+    patterns:
+      - "User isolation"
+      - "Role-based access"
+      - "Organization isolation"
+
+# 檔案命名規範
+file_naming:
+  angular:
+    component: "feature-name.component.ts"
+    service: "feature-name.service.ts"
+    guard: "feature-name.guard.ts"
+    repository: "feature-name.repository.ts"
+    store: "feature-name.store.ts"
+    model: "feature-name.model.ts"
+  
+  testing:
+    unit: "feature-name.spec.ts"
+    e2e: "feature-name.e2e-spec.ts"
+
+# 程式碼品質規範
+code_quality:
+  function_length:
+    max_lines: 50
+    recommendation: "保持函式簡短且專注"
+  
+  class_length:
+    max_lines: 300
+    recommendation: "考慮拆分成多個類別"
+  
+  complexity:
+    max_cyclomatic: 10
+    recommendation: "降低複雜度，抽取輔助函式"
+  
+  comments:
+    required:
+      - "Public API JSDoc"
+      - "複雜邏輯說明"
+      - "TODO/FIXME 標記"
+    
+    forbidden:
+      - "❌ 過時註解"
+      - "❌ 註解掉的程式碼"
+      - "❌ 顯而易見的註解"
+
+# 安全性規範
+security_standards:
+  input:
+    - "驗證所有使用者輸入"
+    - "使用 Angular 的 DomSanitizer"
+    - "避免 innerHTML"
+    - "使用 [textContent] 或 {{ }}"
+  
+  database:
+    - "使用參數化查詢"
+    - "啟用 RLS policies"
+    - "最小權限原則"
+    - "避免 SQL 字串拼接"
+  
+  secrets:
+    - "使用環境變數"
+    - "使用 GitHub Secrets"
+    - "不要硬編碼"
+    - "定期輪替"
+
+# 效能規範
+performance_standards:
+  change_detection:
+    - "使用 OnPush 策略"
+    - "使用 Signals 觸發變更"
+    - "避免頻繁的 detectChanges()"
+  
+  bundle_size:
+    - "Lazy loading 路由"
+    - "Tree shaking"
+    - "避免大型相依"
+  
+  rendering:
+    - "Virtual scrolling (大清單)"
+    - "trackBy (ngFor)"
+    - "Pure pipes"
+
+# MCP 驗證工具
+mcp_verification_tools:
+  check_modern_syntax:
+    workflow:
+      - tool: filesystem.grep
+        params:
+          pattern: "\\*ngIf|\\*ngFor|@Input\\(|@Output\\("
+      
+      - tool: sequential-thinking.sequentialthinking
+        description: "分析需要更新的檔案"
+  
+  check_naming:
+    workflow:
+      - tool: filesystem.list_directory
+      - tool: sequential-thinking.sequentialthinking
+        description: "檢查命名規範"
+  
+  check_architecture:
+    workflow:
+      - tool: filesystem.directory_tree
+      - tool: sequential-thinking.sequentialthinking
+        description: "驗證三層架構"
+  
+  check_security:
+    workflow:
+      - tool: filesystem.grep
+        params:
+          pattern: "innerHTML|password.*=|api[_-]?key.*="
+      
+      - tool: supabase.get_advisors
+        params:
+          type: "security"
+
+# 規範檢查清單
+standards_checklist:
+  angular:
+    - "[ ] 使用 Standalone Components"
+    - "[ ] 使用 Signals"
+    - "[ ] 使用新控制流"
+    - "[ ] 使用 inject()"
+    - "[ ] OnPush 策略"
+  
+  typescript:
+    - "[ ] 嚴格模式"
+    - "[ ] 無 any 型別"
+    - "[ ] 正確命名"
+    - "[ ] JSDoc 註解"
+  
+  architecture:
+    - "[ ] 三層架構"
+    - "[ ] Repository Pattern"
+    - "[ ] Store Pattern"
+    - "[ ] 關注點分離"
+  
+  security:
+    - "[ ] 輸入驗證"
+    - "[ ] RLS policies"
+    - "[ ] 無硬編碼 secrets"
+    - "[ ] 參數化查詢"

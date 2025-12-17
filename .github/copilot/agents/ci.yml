@@ -1,0 +1,333 @@
+# CI/CD Agent Configuration
+# CI/CD 代理配置
+
+name: ci
+description: "Specialized agent for CI/CD pipeline management with MCP tools"
+
+# MCP 工具用於 CI/CD
+mcp_tools:
+  primary:
+    - github  # GitHub Actions 管理
+    - git  # 版本控制
+    - filesystem  # 讀寫 workflow 檔案
+  
+  secondary:
+    - supabase  # 資料庫部署
+    - sequential-thinking  # 管線設計分析
+    - memory  # 記錄 CI/CD 模式
+
+# GitHub Actions 工具
+github_actions_tools:
+  workflows:
+    - list_workflows  # 列出所有 workflows
+    - get_workflow  # 取得特定 workflow
+    - list_workflow_runs  # 列出執行記錄
+    - get_workflow_run  # 取得執行詳情
+    - rerun_workflow_run  # 重新執行
+    - cancel_workflow_run  # 取消執行
+    - delete_workflow_run_logs  # 刪除日誌
+  
+  jobs:
+    - list_workflow_jobs  # 列出 jobs
+    - get_workflow_job  # 取得 job 詳情
+    - get_job_logs  # 取得 job 日誌
+    - summarize_job_log_failures  # 總結失敗原因
+  
+  artifacts:
+    - list_workflow_run_artifacts  # 列出 artifacts
+    - download_workflow_run_artifact  # 下載 artifact
+
+# CI/CD 管線階段
+pipeline_stages:
+  lint:
+    description: "程式碼檢查"
+    tools:
+      - "ESLint"
+      - "Stylelint"
+      - "Prettier"
+    mcp_workflow:
+      - tool: github.list_workflow_runs
+        params:
+          workflow_id: "ci.yml"
+          status: "completed"
+      
+      - tool: github.get_job_logs
+        description: "檢查 lint 失敗原因"
+      
+      - tool: github.summarize_job_log_failures
+        description: "總結問題"
+  
+  build:
+    description: "建置專案"
+    steps:
+      - "Install dependencies (yarn install)"
+      - "Build production (yarn build)"
+      - "Generate source maps (yarn analyze)"
+    mcp_workflow:
+      - tool: github.list_workflow_runs
+        params:
+          workflow_id: "ci.yml"
+      
+      - tool: github.get_workflow_run
+        description: "檢查建置狀態"
+      
+      - tool: github.get_job_logs
+        description: "取得建置日誌"
+  
+  test:
+    description: "執行測試"
+    steps:
+      - "Unit tests (yarn test)"
+      - "Integration tests"
+      - "E2E tests (yarn e2e)"
+      - "Coverage report (yarn test-coverage)"
+    mcp_workflow:
+      - tool: github.list_workflow_jobs
+        params:
+          run_id: "{run_id}"
+      
+      - tool: github.get_job_logs
+        params:
+          job_id: "{test_job_id}"
+      
+      - tool: github.summarize_job_log_failures
+        description: "分析測試失敗"
+  
+  deploy:
+    description: "部署應用程式"
+    environments:
+      - development
+      - staging
+      - production
+    mcp_workflow:
+      - tool: supabase.create_branch
+        description: "建立測試分支"
+      
+      - tool: supabase.list_branches
+        description: "列出所有分支"
+      
+      - tool: supabase.merge_branch
+        description: "合併到 production"
+
+# Workflow 檔案管理
+workflow_files:
+  ci_yml:
+    path: ".github/workflows/ci.yml"
+    triggers:
+      - push
+      - pull_request
+    jobs:
+      - lint
+      - build
+      - test
+    mcp_operations:
+      - tool: filesystem.read_text_file
+        params:
+          path: ".github/workflows/ci.yml"
+      
+      - tool: filesystem.edit_file
+        description: "更新 workflow"
+      
+      - tool: git.commit
+        params:
+          message: "Update CI workflow"
+  
+  copilot_setup_steps_yml:
+    path: ".github/workflows/copilot-setup-steps.yml"
+    purpose: "Copilot 環境設定"
+    mcp_operations:
+      - tool: filesystem.read_text_file
+      - tool: filesystem.edit_file
+  
+  deploy_yml:
+    path: ".github/workflows/deploy.yml"
+    triggers:
+      - release
+      - manual
+    environments:
+      - production
+    mcp_operations:
+      - tool: filesystem.read_text_file
+      - tool: filesystem.edit_file
+
+# 失敗處理
+failure_handling:
+  lint_failures:
+    detection:
+      - tool: github.get_job_logs
+        params:
+          job_id: "{lint_job_id}"
+    
+    analysis:
+      - tool: github.summarize_job_log_failures
+    
+    resolution:
+      - "執行 yarn lint --fix"
+      - "檢查 eslint.config.mjs"
+      - "檢查 stylelint.config.mjs"
+  
+  build_failures:
+    detection:
+      - tool: github.get_job_logs
+        params:
+          job_id: "{build_job_id}"
+    
+    analysis:
+      - tool: github.summarize_job_log_failures
+    
+    resolution:
+      - "檢查 TypeScript 錯誤"
+      - "驗證相依套件"
+      - "檢查 angular.json"
+  
+  test_failures:
+    detection:
+      - tool: github.get_job_logs
+        params:
+          job_id: "{test_job_id}"
+          return_content: true
+    
+    analysis:
+      - tool: github.summarize_job_log_failures
+      - tool: sequential-thinking.sequentialthinking
+        description: "分析失敗原因"
+    
+    resolution:
+      - "修復失敗的測試"
+      - "更新測試快照"
+      - "檢查 mock 設定"
+  
+  deployment_failures:
+    detection:
+      - tool: github.get_workflow_run
+        params:
+          run_id: "{run_id}"
+    
+    analysis:
+      - tool: github.summarize_run_log_failures
+    
+    resolution:
+      - "檢查環境變數"
+      - "驗證 secrets"
+      - "檢查 Supabase 連線"
+
+# Secrets 管理
+secrets_management:
+  required_secrets:
+    - COPILOT_MCP_CONTEXT7
+    - SUPABASE_PROJECT_REF
+    - SUPABASE_MCP_TOKEN
+    - POSTGRES_CONNECTION_STRING
+    - REDIS_CONNECTION_STRING
+    - MCP_MEMORY_FILE_PATH
+    - CI_TOKEN
+    - SURGE_LOGIN
+    - SURGE_TOKEN
+  
+  validation:
+    - tool: github.list_workflow_runs
+      description: "檢查 workflow 是否成功"
+    
+    - tool: github.get_workflow_run
+      description: "驗證 secrets 是否設定"
+
+# 分支策略
+branching_strategy:
+  main:
+    protection:
+      - "必須通過 CI"
+      - "必須 code review"
+      - "禁止直接 push"
+    deployment: "production"
+  
+  develop:
+    deployment: "staging"
+  
+  feature:
+    pattern: "feature/*"
+    deployment: "development"
+  
+  hotfix:
+    pattern: "hotfix/*"
+    deployment: "production"
+
+# 部署策略
+deployment_strategy:
+  development:
+    trigger: "Push to develop"
+    environment: "development"
+    supabase_branch: "develop"
+    mcp_workflow:
+      - tool: supabase.create_branch
+        params:
+          name: "develop"
+      
+      - tool: supabase.list_migrations
+        description: "檢查遷移"
+      
+      - tool: supabase.reset_branch
+        description: "重置開發環境"
+  
+  staging:
+    trigger: "PR to main"
+    environment: "staging"
+    supabase_branch: "staging"
+    mcp_workflow:
+      - tool: supabase.create_branch
+        params:
+          name: "staging"
+      
+      - tool: supabase.rebase_branch
+        description: "更新到最新"
+  
+  production:
+    trigger: "Release tag"
+    environment: "production"
+    approval: "required"
+    mcp_workflow:
+      - tool: supabase.list_branches
+        description: "檢查分支狀態"
+      
+      - tool: supabase.merge_branch
+        description: "合併到 production"
+      
+      - tool: supabase.get_advisors
+        params:
+          type: "security"
+        description: "安全性檢查"
+
+# 監控與通知
+monitoring:
+  workflow_status:
+    - tool: github.list_workflow_runs
+      params:
+        per_page: 10
+        status: "completed"
+    
+    - tool: github.get_workflow_run
+      description: "檢查最新執行"
+  
+  job_failures:
+    - tool: github.list_workflow_jobs
+      params:
+        filter: "latest"
+    
+    - tool: github.get_job_logs
+      params:
+        failed_only: true
+    
+    - tool: github.summarize_job_log_failures
+      description: "總結失敗原因"
+
+# CI/CD 最佳實踐
+best_practices:
+  - "快速失敗 (Fail Fast)"
+  - "並行執行 jobs"
+  - "快取相依套件"
+  - "使用 matrix strategy"
+  - "適當的 timeout 設定"
+  - "分離建置與部署"
+  - "使用環境變數"
+  - "保護敏感資訊"
+  - "記錄所有操作"
+  - "自動化測試"
