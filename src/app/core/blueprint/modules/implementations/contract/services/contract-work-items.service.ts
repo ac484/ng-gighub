@@ -10,12 +10,12 @@
  */
 
 import { Injectable, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 import type { ContractWorkItem } from '../models';
 import type { CreateWorkItemDto, UpdateWorkItemDto } from '../models/dtos';
 import { ContractRepository } from '../repositories/contract.repository';
 import { ContractWorkItemRepository } from '../repositories/work-item.repository';
-import { firstValueFrom } from 'rxjs';
 
 /**
  * Work item progress information
@@ -252,16 +252,11 @@ export class ContractWorkItemsService {
       // Calculate completion percentage
       const completionPercentage = workItem.totalPrice > 0 ? Math.round((completedAmount / workItem.totalPrice) * 100) : 0;
 
-      await this.workItemRepository.updateProgress(
-        blueprintId,
-        contractId,
-        workItemId,
-        {
-          completedQuantity,
-          completedAmount,
-          completionPercentage
-        }
-      );
+      await this.workItemRepository.updateProgress(blueprintId, contractId, workItemId, {
+        completedQuantity,
+        completedAmount,
+        completionPercentage
+      });
 
       const updatedWorkItem = await this.workItemRepository.findByIdOnce(blueprintId, contractId, workItemId);
       if (!updatedWorkItem) {

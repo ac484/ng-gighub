@@ -494,9 +494,7 @@ export class ContractCreationWizardComponent implements OnInit {
 
       // Check if any files were successfully uploaded
       if (tempAttachments.length === 0) {
-        const errorMsg = failedUploads.length > 0 
-          ? `檔案上傳失敗: ${failedUploads.join(', ')}`
-          : '沒有檔案成功上傳，請重試';
+        const errorMsg = failedUploads.length > 0 ? `檔案上傳失敗: ${failedUploads.join(', ')}` : '沒有檔案成功上傳，請重試';
         this.message.error(errorMsg);
         return;
       }
