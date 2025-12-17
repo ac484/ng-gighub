@@ -17,7 +17,8 @@
 
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Team, Partner } from '@core';
+import { Team, Partner, OwnerType, BlueprintMemberType } from '@core';
+import { getAllowedAssigneeTypes } from '@core/domain/utils';
 import { BlueprintMemberRepository } from '@core/blueprint/repositories/blueprint-member.repository';
 import { PartnerRepository } from '@core/data-access/repositories/shared/partner.repository';
 import { TeamRepository } from '@core/data-access/repositories/shared/team.repository';
@@ -106,10 +107,6 @@ interface ModalData {
             @if (isAssigneeTypeAllowed(AssigneeType.PARTNER)) {
               <label nz-radio [nzValue]="AssigneeType.PARTNER">夥伴</label>
             }
-          </nz-radio-group>
-        </nz-form-control>
-      </nz-form-item>
-            <label nz-radio [nzValue]="AssigneeType.PARTNER">夥伴</label>
           </nz-radio-group>
         </nz-form-control>
       </nz-form-item>
@@ -604,14 +601,20 @@ export class TaskModalComponent implements OnInit {
       const isAlreadyMember = existingMembers.some(m => m.accountId === creatorId);
 
       if (!isAlreadyMember) {
-        // Add creator as CONTRIBUTOR
-        await this.memberRepo.addMember(this.modalData.blueprintId, {
-          blueprintId: this.modalData.blueprintId,
-          accountId: creatorId,
-          role: BlueprintRole.CONTRIBUTOR,
-          isExternal: false,
-          grantedBy: creatorId
-        });
+        // Add creator as CONTRIBUTOR with USER member type
+        // Note: accountName will be populated by the backend or can be updated later
+        await this.memberRepo.addMember(
+          this.modalData.blueprintId,
+          this.modalData.blueprintOwnerType as OwnerType,
+          {
+            blueprintId: this.modalData.blueprintId,
+            accountId: creatorId,
+            memberType: BlueprintMemberType.USER,
+            role: BlueprintRole.CONTRIBUTOR,
+            isExternal: false,
+            grantedBy: creatorId
+          }
+        );
 
         // Reload members list
         await this.loadBlueprintMembers();

@@ -379,6 +379,15 @@ export class BlueprintListComponent implements OnInit {
       [OwnerType.ORGANIZATION]: '組織'
     };
 
+    // For user-owned blueprints, try to show user name
+    if (blueprint.ownerType === OwnerType.USER) {
+      const user = this.workspaceContext.currentUser();
+      if (user?.name && user.id === blueprint.ownerId) {
+        return user.name;
+      }
+    }
+
+    // For organization-owned blueprints, try to show organization name
     if (blueprint.ownerType === OwnerType.ORGANIZATION) {
       const organization = this.workspaceContext.organizations().find(org => org.id === blueprint.ownerId);
       if (organization?.name) {
@@ -386,15 +395,8 @@ export class BlueprintListComponent implements OnInit {
       }
     }
 
-    // Teams cannot own blueprints - fallback to user
+    // Fallback to generic label
     return ownerLabels[blueprint.ownerType] || '未知';
-
-    const user = this.workspaceContext.currentUser();
-    if (blueprint.ownerType === OwnerType.USER && user?.name) {
-      return user.name;
-    }
-
-    return ownerLabels[blueprint.ownerType] || blueprint.ownerType || '-';
   }
 
   private getResponsibleDisplay(blueprint: Blueprint): string {
