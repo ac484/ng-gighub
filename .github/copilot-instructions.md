@@ -1,6 +1,79 @@
 # GigHub - Copilot Instructions
 
-> **⚠️ 必讀**: 在開始任何工作前，請先閱讀統一代理文件
+---
+
+## 🚨 STOP - READ THIS FIRST 🚨
+
+### MANDATORY PRE-FLIGHT CHECKLIST ⚠️
+
+**BEFORE STARTING ANY TASK, YOU MUST COMPLETE THESE STEPS:**
+
+#### ✅ Step 1: Use Context7 (REQUIRED) 🔍
+**Action Required:**
+```typescript
+// You MUST execute these calls:
+1. resolve-library-id({ libraryName: "angular" }) // or relevant library
+2. get-library-docs({ context7CompatibleLibraryID: "/angular/angular", topic: "..." })
+3. Verify API signatures from official documentation
+```
+
+**Purpose**: Query official docs for Angular, ng-alain, ng-zorro-antd, Firebase, RxJS, TypeScript  
+**When**: EVERY task involving these technologies  
+**Validation**: ✅ I have used context7 to verify APIs and best practices
+
+---
+
+#### ✅ Step 2: Use Sequential Thinking (REQUIRED) 🧠
+**Action Required:**
+```typescript
+// You MUST call sequential-thinking tool to:
+1. Break down complex problems into verifiable steps
+2. Document reasoning and tradeoffs
+3. Identify risks and dependencies
+4. Evaluate technical alternatives
+```
+
+**Purpose**: Structured problem analysis and solution design  
+**When**: ALL tasks with >2 steps, architecture decisions, technical tradeoffs  
+**Validation**: ✅ I have used sequential-thinking to analyze this problem
+
+---
+
+#### ✅ Step 3: Use Software Planning Tool (REQUIRED) 📋
+**Action Required:**
+```typescript
+// You MUST execute:
+1. start_planning({ goal: "clear description of what needs to be done" })
+2. add_todo({ title, description, complexity }) // for each subtask
+3. update_todo_status() // as work progresses
+```
+
+**Purpose**: Create structured implementation plan with complexity scores  
+**When**: New features, major changes, multi-step tasks  
+**Validation**: ✅ I have used software-planning-tool to create an implementation plan
+
+---
+
+### 🎯 VERIFICATION CHECKPOINT
+
+**Before proceeding with ANY code changes, confirm:**
+
+- [ ] ✅ I have used **context7** to query official documentation
+- [ ] ✅ I have used **sequential-thinking** to analyze the problem
+- [ ] ✅ I have used **software-planning-tool** to create a plan
+- [ ] ✅ All decisions are backed by documentation, not assumptions
+- [ ] ✅ I understand the requirements completely
+
+**⚠️ CRITICAL WARNING**: Proceeding without completing this checklist will result in:
+- ❌ Incorrect code that doesn't meet requirements
+- ❌ Violations of project architecture standards
+- ❌ Code that will be rejected in review
+
+**If ANY checkbox above is unchecked, STOP NOW and complete the required steps.**
+
+---
+
+> **⚠️ 必讀**: After completing the checklist above, read the unified agent file for detailed standards
 
 ## 🎯 快速開始
 
