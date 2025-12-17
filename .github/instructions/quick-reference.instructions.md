@@ -402,6 +402,7 @@ element.innerHTML = userInput;
 ## 📚 更多資訊
 
 詳細說明請參考:
+- **Angular 完整指引**: `.github/instructions/angular.instructions.md`
 - **Angular 現代特性**: `.github/instructions/angular-modern-features.instructions.md`
 - **企業架構模式**: `.github/instructions/enterprise-angular-architecture.instructions.md`
 - **ng-alain 框架**: `.github/instructions/ng-alain-delon.instructions.md`
@@ -411,5 +412,5 @@ element.innerHTML = userInput;
 
 ---
 
-**版本**: 2025-12-16  
+**版本**: 2025-12-15  
 **適用於**: Angular 20.3.x, ng-alain 20.1.x, Firebase 20.0.1
