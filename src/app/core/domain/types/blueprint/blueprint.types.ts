@@ -192,75 +192,11 @@ export interface BlueprintQueryOptions {
 }
 
 // ============================================================================
-// Validation Utility Functions
+// Note: Validation utility functions have been moved to @core/domain/utils
+// Import from '@core/domain/utils' for validation functions:
+// - isValidMemberTypeForOwner()
+// - getAllowedMemberTypes()
+// - isValidAssigneeTypeForOwner()
+// - getAllowedAssigneeTypes()
+// - validateTaskAssignment()
 // ============================================================================
-
-/**
- * Validate if a member type is allowed for a given blueprint owner type
- * 驗證成員類型是否適用於指定的藍圖擁有者類型
- *
- * Rules:
- * - User-owned blueprints: Only USER members allowed
- * - Organization-owned blueprints: USER, TEAM, and PARTNER members allowed
- *
- * @param ownerType - The blueprint owner type
- * @param memberType - The member type to validate
- * @returns true if the member type is allowed for the owner type
- */
-export function isValidMemberTypeForOwner(ownerType: OwnerType, memberType: BlueprintMemberType): boolean {
-  switch (ownerType) {
-    case OwnerType.USER:
-      // User-owned blueprints can only have USER members (collaborators)
-      return memberType === BlueprintMemberType.USER;
-
-    case OwnerType.ORGANIZATION:
-      // Organization-owned blueprints can have all member types
-      return true;
-
-    default:
-      return false;
-  }
-}
-
-/**
- * Get allowed member types for a blueprint owner type
- * 取得藍圖擁有者類型允許的成員類型
- *
- * @param ownerType - The blueprint owner type
- * @returns Array of allowed member types
- */
-export function getAllowedMemberTypes(ownerType: OwnerType): BlueprintMemberType[] {
-  switch (ownerType) {
-    case OwnerType.USER:
-      return [BlueprintMemberType.USER];
-
-    case OwnerType.ORGANIZATION:
-      return [BlueprintMemberType.USER, BlueprintMemberType.TEAM, BlueprintMemberType.PARTNER];
-
-    default:
-      return [];
-  }
-}
-
-/**
- * Validate if an assignee type is allowed for a given blueprint owner type
- * 驗證指派對象類型是否適用於指定的藍圖擁有者類型
- *
- * This is used for task assignment validation.
- * Rules match the blueprint member type rules.
- *
- * @param ownerType - The blueprint owner type
- * @param assigneeType - The assignee type to validate
- * @returns true if the assignee type is allowed for the owner type
- */
-export function isValidAssigneeTypeForOwner(ownerType: OwnerType, assigneeType: 'user' | 'team' | 'partner'): boolean {
-  // Map assignee type to member type for validation
-  const memberTypeMap: Record<string, BlueprintMemberType> = {
-    user: BlueprintMemberType.USER,
-    team: BlueprintMemberType.TEAM,
-    partner: BlueprintMemberType.PARTNER
-  };
-
-  const memberType = memberTypeMap[assigneeType];
-  return memberType ? isValidMemberTypeForOwner(ownerType, memberType) : false;
-}
