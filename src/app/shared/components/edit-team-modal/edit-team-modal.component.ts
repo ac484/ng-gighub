@@ -13,7 +13,7 @@
  * @module shared/components
  */
 
-import { ChangeDetectionStrategy, Component, inject, signal, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Team, TeamStore } from '@core';
 import { NzButtonModule } from 'ng-zorro-antd/button';

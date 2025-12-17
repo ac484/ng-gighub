@@ -28,25 +28,17 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutModule } from '@angular/cdk/layout';
 import { ObserversModule } from '@angular/cdk/observers';
 import { OverlayModule } from '@angular/cdk/overlay';
-
 // Portal - 動態內容（動態渲染元件到 DOM）
 import { PlatformModule } from '@angular/cdk/platform';
 import { PortalModule } from '@angular/cdk/portal';
-
 // A11y - 可存取性（焦點管理、鍵盤導航、ARIA 屬性等）
-
 // Scrolling - 大量資料效能（虛擬滾動、無限滾動）
 import { ScrollingModule } from '@angular/cdk/scrolling';
-
 // Layout - RWD / Breakpoint（響應式佈局、斷點檢測）
-
 // Observers - DOM / Resize 感知（ResizeObserver、IntersectionObserver）
-
 // DragDrop - 拖放功能（已在專案中使用）
-
 // Tree - 樹狀結構（已在專案中使用）
 import { CdkTreeModule } from '@angular/cdk/tree';
-
 // Platform - 平台檢測（已在專案中使用）
 
 /**

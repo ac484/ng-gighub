@@ -13,28 +13,23 @@
  * 3. 考慮使用動態載入減少初始 bundle
  */
 
-// 導航相關圖標 (高頻使用)
+// All icons imported from a single source to avoid duplicate imports
 import {
+  // 導航相關圖標 (高頻使用)
   DashboardOutline,
   MenuFoldOutline,
   MenuUnfoldOutline,
   AppstoreOutline,
   RocketOutline,
-  ProjectOutline, // 新增：對應 anticon-project
-  GoldOutline // 新增：對應 anticon-gold
-} from '@ant-design/icons-angular/icons';
-
-// 用戶與權限相關
-import {
+  ProjectOutline,
+  GoldOutline,
+  // 用戶與權限相關
   UserOutline,
   TeamOutline,
   LogoutOutline,
   LockOutline,
-  UsergroupAddOutline // 新增：對應 anticon-usergroup-add
-} from '@ant-design/icons-angular/icons';
-
-// 操作相關圖標
-import {
+  UsergroupAddOutline,
+  // 操作相關圖標
   SettingOutline,
   ToolOutline,
   DownloadOutline,
@@ -42,11 +37,8 @@ import {
   FullscreenExitOutline,
   ScanOutline,
   PrinterOutline,
-  ShareAltOutline
-} from '@ant-design/icons-angular/icons';
-
-// 通訊與社交
-import {
+  ShareAltOutline,
+  // 通訊與社交
   MailOutline,
   MessageOutline,
   GlobalOutline,
@@ -55,34 +47,37 @@ import {
   AlipayCircleOutline,
   TaobaoCircleOutline,
   DingdingOutline,
-  TaobaoOutline
-} from '@ant-design/icons-angular/icons';
-
-// 數據與分析
-import { PieChartOutline, DatabaseOutline, HddOutline, CloudOutline, ApiOutline, ForkOutline } from '@ant-design/icons-angular/icons';
-
-// 裝置與硬體
-import { LaptopOutline, UsbOutline, CustomerServiceOutline, SoundOutline } from '@ant-design/icons-angular/icons';
-
-// 內容與文檔
-import { BookOutline, BorderLeftOutline, BorderRightOutline } from '@ant-design/icons-angular/icons';
-
-// 商務與金融
-import { PayCircleOutline, ShoppingCartOutline, TrophyOutline, CopyrightOutline } from '@ant-design/icons-angular/icons';
-
-// 互動與反饋
-import {
+  TaobaoOutline,
+  // 數據與分析
+  PieChartOutline,
+  DatabaseOutline,
+  HddOutline,
+  CloudOutline,
+  ApiOutline,
+  ForkOutline,
+  // 裝置與硬體
+  LaptopOutline,
+  UsbOutline,
+  CustomerServiceOutline,
+  SoundOutline,
+  // 內容與文檔
+  BookOutline,
+  BorderLeftOutline,
+  BorderRightOutline,
+  // 商務與金融
+  PayCircleOutline,
+  ShoppingCartOutline,
+  TrophyOutline,
+  CopyrightOutline,
+  // 互動與反饋
   LikeOutline,
   DislikeOutline,
   StarOutline,
   FrownOutline,
   ArrowDownOutline,
   ArrowLeftOutline,
-  ArrowRightOutline
-} from '@ant-design/icons-angular/icons';
-
-// 編輯與操作
-import {
+  ArrowRightOutline,
+  // 編輯與操作
   EditOutline,
   DeleteOutline,
   SaveOutline,
@@ -96,35 +91,45 @@ import {
   SwapOutline,
   ReloadOutline,
   ZoomInOutline,
-  ZoomOutOutline
+  ZoomOutOutline,
+  // 文件與內容
+  FileTextOutline,
+  PaperClipOutline,
+  PictureOutline,
+  UnorderedListOutline,
+  // 時間與狀態
+  ClockCircleOutline,
+  HistoryOutline,
+  PlayCircleOutline,
+  PauseCircleOutline,
+  // 通知與警告
+  NotificationOutline,
+  WarningOutline,
+  ExclamationCircleOutline,
+  // 建築與部署
+  ApartmentOutline,
+  ClusterOutline,
+  ContainerOutline,
+  DeploymentUnitOutline,
+  // 圖表與數據視覺化
+  BarChartOutline,
+  LineChartOutline,
+  RadarChartOutline,
+  FundOutline,
+  // 位置與導航
+  HomeOutline,
+  InboxOutline,
+  FlagOutline,
+  // 財務與交易
+  DollarOutline,
+  TransactionOutline,
+  // 用戶管理擴展
+  UserAddOutline,
+  UserDeleteOutline,
+  CrownOutline,
+  // 特效與動作
+  ThunderboltOutline
 } from '@ant-design/icons-angular/icons';
-
-// 文件與內容
-import { FileTextOutline, PaperClipOutline, PictureOutline, UnorderedListOutline } from '@ant-design/icons-angular/icons';
-
-// 時間與狀態
-import { ClockCircleOutline, HistoryOutline, PlayCircleOutline, PauseCircleOutline } from '@ant-design/icons-angular/icons';
-
-// 通知與警告
-import { NotificationOutline, WarningOutline, ExclamationCircleOutline } from '@ant-design/icons-angular/icons';
-
-// 建築與部署
-import { ApartmentOutline, ClusterOutline, ContainerOutline, DeploymentUnitOutline } from '@ant-design/icons-angular/icons';
-
-// 圖表與數據視覺化
-import { BarChartOutline, LineChartOutline, RadarChartOutline, FundOutline } from '@ant-design/icons-angular/icons';
-
-// 位置與導航
-import { HomeOutline, InboxOutline, FlagOutline } from '@ant-design/icons-angular/icons';
-
-// 財務與交易
-import { DollarOutline, TransactionOutline } from '@ant-design/icons-angular/icons';
-
-// 用戶管理擴展
-import { UserAddOutline, UserDeleteOutline, CrownOutline } from '@ant-design/icons-angular/icons';
-
-// 特效與動作
-import { ThunderboltOutline } from '@ant-design/icons-angular/icons';
 
 /**
  * 自動生成的圖標列表

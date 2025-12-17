@@ -1,8 +1,8 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
-import { LoggerService, Permission, PermissionLevel, SystemRole, BlueprintRole } from '@core';
+import { Injectable, inject } from '@angular/core';
+import { LoggerService, BlueprintRole } from '@core';
 import { BlueprintMemberRepository } from '@core/blueprint/repositories';
 import { FirebaseAuthService } from '@core/services/firebase-auth.service';
-import { Observable, from, map, of } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 
 /**
  * Permission Service

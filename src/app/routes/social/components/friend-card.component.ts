@@ -19,8 +19,8 @@ import { FriendRelation } from '@core/domain/models/friend.model';
 })
 export class FriendCardComponent {
   relation = input.required<FriendRelation>();
-  accept = output<string>();
-  remove = output<string>();
+  readonly accept = output<string>();
+  readonly remove = output<string>();
 
   // placeholder for template binding
   currentUserId = 'me';
