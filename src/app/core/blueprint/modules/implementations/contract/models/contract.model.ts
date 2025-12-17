@@ -286,6 +286,16 @@ export interface Contract {
   updatedBy?: string;
   /** Last update timestamp */
   updatedAt: Date;
+  
+  // Activation tracking
+  /** User who activated the contract */
+  activatedBy?: string;
+  /** Activation timestamp */
+  activatedAt?: Date;
+  
+  // File attachments (additional documents beyond original contract files)
+  /** Additional attachments (reports, photos, etc.) */
+  attachments?: FileAttachment[];
 }
 
 /**
