@@ -280,6 +280,8 @@ export class ContractDetailDrawerComponent implements OnInit {
   // Computed signals
   workItems = computed(() => {
     const contract = this.contract();
+    // Contract model has workItems property but it may not be populated from Firestore
+    // We need to load work items separately from the workItems subcollection
     return contract?.workItems || [];
   });
 

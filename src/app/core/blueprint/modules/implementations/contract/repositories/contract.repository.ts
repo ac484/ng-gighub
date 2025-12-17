@@ -29,7 +29,7 @@ import {
   docData
 } from '@angular/fire/firestore';
 import { LoggerService } from '@core';
-import { Observable, from, map, catchError, of } from 'rxjs';
+import { Observable, from, map, catchError, of, switchMap } from 'rxjs';
 
 import type {
   Contract,
@@ -182,6 +182,7 @@ export class ContractRepository {
 
   /**
    * Find contract by ID (Promise version)
+   * Also loads work items from subcollection
    */
   async findByIdOnce(blueprintId: string, contractId: string): Promise<Contract | null> {
     try {
@@ -192,7 +193,35 @@ export class ContractRepository {
         return null;
       }
 
-      return this.convertTimestamps(snapshot.data(), snapshot.id);
+      const contract = this.convertTimestamps(snapshot.data(), snapshot.id);
+
+      // Load work items from subcollection
+      const workItemsRef = collection(this.firestore, 'blueprints', blueprintId, 'contracts', contractId, 'workItems');
+      const workItemsSnapshot = await getDocs(workItemsRef);
+      
+      contract.workItems = workItemsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          contractId,
+          code: data['code'],
+          name: data['name'],
+          description: data['description'] || '',
+          category: data['category'],
+          unit: data['unit'],
+          quantity: data['quantity'],
+          unitPrice: data['unitPrice'],
+          totalPrice: data['totalPrice'],
+          linkedTaskIds: data['linkedTaskIds'] || [],
+          completedQuantity: data['completedQuantity'] || 0,
+          completedAmount: data['completedAmount'] || 0,
+          completionPercentage: data['completionPercentage'] || 0,
+          createdAt: data['createdAt'] instanceof Timestamp ? data['createdAt'].toDate() : new Date(data['createdAt']),
+          updatedAt: data['updatedAt'] instanceof Timestamp ? data['updatedAt'].toDate() : new Date(data['updatedAt'])
+        } as ContractWorkItem;
+      });
+
+      return contract;
     } catch (error) {
       this.logger.error('[ContractRepository]', 'findByIdOnce failed', error as Error);
       return null;
@@ -237,6 +266,7 @@ export class ContractRepository {
 
   /**
    * Find all contracts for a blueprint
+   * Also loads work items count for each contract
    */
   findByBlueprint(blueprintId: string, filters?: ContractFilters): Observable<Contract[]> {
     const contractsRef = this.getContractsCollection(blueprintId);
@@ -267,8 +297,38 @@ export class ContractRepository {
     const contractsQuery = query(contractsRef, ...constraints);
 
     return from(getDocs(contractsQuery)).pipe(
-      map(snapshot => {
+      map(async snapshot => {
         const contracts = snapshot.docs.map(docSnap => this.convertTimestamps(docSnap.data(), docSnap.id));
+
+        // Load work items for each contract
+        await Promise.all(
+          contracts.map(async contract => {
+            const workItemsRef = collection(this.firestore, 'blueprints', blueprintId, 'contracts', contract.id, 'workItems');
+            const workItemsSnapshot = await getDocs(workItemsRef);
+            
+            contract.workItems = workItemsSnapshot.docs.map(doc => {
+              const data = doc.data();
+              return {
+                id: doc.id,
+                contractId: contract.id,
+                code: data['code'],
+                name: data['name'],
+                description: data['description'] || '',
+                category: data['category'],
+                unit: data['unit'],
+                quantity: data['quantity'],
+                unitPrice: data['unitPrice'],
+                totalPrice: data['totalPrice'],
+                linkedTaskIds: data['linkedTaskIds'] || [],
+                completedQuantity: data['completedQuantity'] || 0,
+                completedAmount: data['completedAmount'] || 0,
+                completionPercentage: data['completionPercentage'] || 0,
+                createdAt: data['createdAt'] instanceof Timestamp ? data['createdAt'].toDate() : new Date(data['createdAt']),
+                updatedAt: data['updatedAt'] instanceof Timestamp ? data['updatedAt'].toDate() : new Date(data['updatedAt'])
+              } as ContractWorkItem;
+            });
+          })
+        );
 
         // Sort in-memory by createdAt desc (newest first)
         contracts.sort((a, b) => {
@@ -279,6 +339,10 @@ export class ContractRepository {
 
         return contracts;
       }),
+      // Flatten the promise into observable
+      map(promise => from(promise)),
+      // Unwrap the inner observable
+      switchMap(obs => obs),
       catchError(error => {
         this.logger.error('[ContractRepository]', 'findByBlueprint failed', error as Error);
         return of([]);

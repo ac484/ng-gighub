@@ -40,6 +40,7 @@ import {
 } from '@core/blueprint/modules/implementations/contract/services/contract-parsing.service';
 import { ContractStatusService } from '@core/blueprint/modules/implementations/contract/services/contract-status.service';
 import { ContractUploadService, UploadProgress } from '@core/blueprint/modules/implementations/contract/services/contract-upload.service';
+import { ContractWorkItemsService } from '@core/blueprint/modules/implementations/contract/services/contract-work-items.service';
 import {
   type EnhancedContractParsingOutput,
   toContractCreateRequest,
@@ -335,6 +336,7 @@ export class ContractCreationWizardComponent implements OnInit {
   private readonly creationService = inject(ContractCreationService);
   private readonly parsingService = inject(ContractParsingService);
   private readonly statusService = inject(ContractStatusService);
+  private readonly workItemService = inject(ContractWorkItemsService);
 
   // State signals
   currentStep = signal(STEP_UPLOAD);
@@ -620,11 +622,9 @@ export class ContractCreationWizardComponent implements OnInit {
     try {
       const workItemDtos = toWorkItemCreateRequests(workItems);
 
-      // Note: This may require a batch create method in the service
-      // For now, we'll create them one by one
+      // Create work items one by one using the injected service
       for (const dto of workItemDtos) {
-        // await this.workItemService.create(this.blueprintId(), contractId, dto);
-        // TODO: Implement when WorkItemService is available
+        await this.workItemService.create(this.blueprintId(), contractId, dto);
       }
 
       this.message.success(`已建立 ${workItems.length} 個工項`);
