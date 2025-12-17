@@ -54,7 +54,11 @@ import { SHARED_IMPORTS } from '@shared';
         style="flex: 1; display: flex; flex-direction: column; background: var(--component-background); border-radius: 8px; overflow: hidden; margin: 0 16px 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);"
       >
         <!-- Chat Messages -->
-        <div id="chatMessages" #chatMessages style="flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div
+          id="chatMessages"
+          #chatMessages
+          style="flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px;"
+        >
           @if (!hasHistory()) {
             <!-- Welcome Message -->
             <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="welcomeTemplate" />
