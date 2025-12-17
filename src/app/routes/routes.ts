@@ -31,6 +31,11 @@ export const routes: Routes = [
         loadChildren: () => import('./team/routes').then(m => m.routes),
         data: { title: '團隊管理' }
       },
+      {
+        path: 'partner',
+        loadChildren: () => import('./partner/routes').then(m => m.routes),
+        data: { title: '夥伴管理' }
+      },
       // Blueprint module - lazy loaded feature module
       {
         path: 'blueprints/user',

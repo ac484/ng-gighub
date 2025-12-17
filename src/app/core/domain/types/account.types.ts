@@ -22,8 +22,10 @@ export enum ContextType {
   USER = 'user',
   /** 組織上下文 | Organization context */
   ORGANIZATION = 'organization',
-  /** 團隊上下文 | Team context */
+  /** 團隊上下文 (內部) | Team context (internal) */
   TEAM = 'team',
+  /** 夥伴上下文 (外部) | Partner context (external) */
+  PARTNER = 'partner',
   /** 機器人上下文 | Bot context */
   BOT = 'bot'
 }

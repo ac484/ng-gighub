@@ -22,6 +22,7 @@ interface MenuConfig {
   user?: Menu[];
   organization?: Menu[];
   team?: Menu[];
+  partner?: Menu[];
   bot?: Menu[];
 }
 
@@ -116,6 +117,8 @@ export class MenuManagementService {
         return config.organization || [];
       case ContextType.TEAM:
         return config.team || [];
+      case ContextType.PARTNER:
+        return config.partner || [];
       case ContextType.BOT:
         return config.bot || [];
       default:

@@ -25,8 +25,8 @@
 
 import { Injectable, computed, inject, signal, effect } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ContextType, Account, Organization, Team, Bot, FirebaseAuthService } from '@core';
-import { OrganizationRepository, TeamRepository } from '@core/repositories';
+import { ContextType, Account, Organization, Team, Partner, Bot, FirebaseAuthService } from '@core';
+import { OrganizationRepository, TeamRepository, PartnerRepository } from '@core/repositories';
 import { SettingsService } from '@delon/theme';
 import { combineLatest, of, switchMap, map, shareReplay, catchError, BehaviorSubject } from 'rxjs';
 
@@ -39,6 +39,7 @@ interface UserData {
   user: Account | null;
   organizations: Organization[];
   teams: Team[];
+  partners: Partner[];
   bots: Bot[];
 }
 
@@ -49,6 +50,7 @@ export class WorkspaceContextService {
   private readonly firebaseAuth = inject(FirebaseAuthService);
   private readonly organizationRepo = inject(OrganizationRepository);
   private readonly teamRepo = inject(TeamRepository);
+  private readonly partnerRepo = inject(PartnerRepository);
   private readonly settingsService = inject(SettingsService);
 
   // ============================================================================
@@ -71,7 +73,7 @@ export class WorkspaceContextService {
     switchMap(([user]) => {
       if (!user) {
         console.log('[WorkspaceContextService] 👤 No user authenticated');
-        return of({ user: null, organizations: [], teams: [], bots: [] });
+        return of({ user: null, organizations: [], teams: [], partners: [], bots: [] });
       }
 
       console.log('[WorkspaceContextService] 👤 User authenticated:', user.email);
@@ -92,20 +94,24 @@ export class WorkspaceContextService {
           console.log('[WorkspaceContextService] ✅ Organizations loaded:', organizations.length);
 
           if (organizations.length === 0) {
-            return of({ user: account, organizations: [], teams: [], bots: [] });
+            return of({ user: account, organizations: [], teams: [], partners: [], bots: [] });
           }
 
-          // Load teams for all organizations in parallel
+          // Load teams and partners for all organizations in parallel
           const teamObservables = organizations.map(org => this.teamRepo.findByOrganization(org.id));
+          const partnerObservables = organizations.map(org => this.partnerRepo.findByOrganization(org.id));
 
-          return combineLatest(teamObservables).pipe(
-            map(teamArrays => {
+          return combineLatest([combineLatest(teamObservables), combineLatest(partnerObservables)]).pipe(
+            map(([teamArrays, partnerArrays]) => {
               const allTeams = teamArrays.flat();
+              const allPartners = partnerArrays.flat();
               console.log('[WorkspaceContextService] ✅ Teams loaded:', allTeams.length);
+              console.log('[WorkspaceContextService] ✅ Partners loaded:', allPartners.length);
               return {
                 user: account,
                 organizations,
                 teams: allTeams,
+                partners: allPartners,
                 bots: [] as Bot[] // Bots not yet implemented
               };
             })
@@ -114,7 +120,7 @@ export class WorkspaceContextService {
         catchError(error => {
           console.error('[WorkspaceContextService] ❌ Error loading user data:', error);
           // Return partial data on error (user info is still valid)
-          return of({ user: account, organizations: [], teams: [], bots: [] });
+          return of({ user: account, organizations: [], teams: [], partners: [], bots: [] });
         })
       );
     }),
@@ -130,7 +136,7 @@ export class WorkspaceContextService {
    * This is the Angular 20 recommended pattern: RxJS for async, Signals for sync
    */
   private readonly _userData = toSignal(this.userData$, {
-    initialValue: { user: null, organizations: [], teams: [], bots: [] }
+    initialValue: { user: null, organizations: [], teams: [], partners: [], bots: [] }
   });
 
   // Context state (sync, can be directly modified)
@@ -145,6 +151,7 @@ export class WorkspaceContextService {
   readonly currentUser = computed(() => this._userData().user);
   readonly organizations = computed(() => this._userData().organizations);
   readonly teams = computed(() => this._userData().teams);
+  readonly partners = computed(() => this._userData().partners);
   readonly bots = computed(() => this._userData().bots);
 
   readonly contextType = this._contextType.asReadonly();
@@ -184,6 +191,9 @@ export class WorkspaceContextService {
       case ContextType.TEAM:
         const team = this.teams().find(t => t.id === id);
         return team?.name || '團隊';
+      case ContextType.PARTNER:
+        const partner = this.partners().find(p => p.id === id);
+        return partner?.name || '夥伴';
       case ContextType.BOT:
         const bot = this.bots().find(b => b.id === id);
         return bot?.name || '機器人';
@@ -198,6 +208,7 @@ export class WorkspaceContextService {
       [ContextType.USER]: 'user',
       [ContextType.ORGANIZATION]: 'team',
       [ContextType.TEAM]: 'usergroup-add',
+      [ContextType.PARTNER]: 'solution',
       [ContextType.BOT]: 'robot'
     };
     return iconMap[this.contextType()] || 'user';
@@ -214,6 +225,23 @@ export class WorkspaceContextService {
       const orgId = team.organization_id;
       if (orgId && map.has(orgId)) {
         map.get(orgId)!.push(team);
+      }
+    });
+
+    return map;
+  });
+
+  /** Partners grouped by organization */
+  readonly partnersByOrganization = computed(() => {
+    const partners = this.partners();
+    const orgs = this.organizations();
+    const map = new Map<string, Partner[]>();
+
+    orgs.forEach(org => map.set(org.id, []));
+    partners.forEach(partner => {
+      const orgId = partner.organization_id;
+      if (orgId && map.has(orgId)) {
+        map.get(orgId)!.push(partner);
       }
     });
 
@@ -262,6 +290,13 @@ export class WorkspaceContextService {
           avatarUrl = parentOrg?.logo_url || avatarUrl;
           name = team.name;
         }
+      } else if (type === ContextType.PARTNER) {
+        const partner = this.partners().find(p => p.id === id);
+        if (partner) {
+          const parentOrg = this.organizations().find(o => o.id === partner.organization_id);
+          avatarUrl = parentOrg?.logo_url || avatarUrl;
+          name = partner.name;
+        }
       }
 
       // Sync to SettingsService (single source of truth for ng-alain)
@@ -309,6 +344,13 @@ export class WorkspaceContextService {
    */
   switchToTeam(teamId: string): void {
     this.switchContext(ContextType.TEAM, teamId);
+  }
+
+  /**
+   * Switch to partner context
+   */
+  switchToPartner(partnerId: string): void {
+    this.switchContext(ContextType.PARTNER, partnerId);
   }
 
   /**
@@ -382,6 +424,22 @@ export class WorkspaceContextService {
   }
 
   /**
+   * Add partner to the list
+   */
+  addPartner(partner: Partner): void {
+    console.log('[WorkspaceContextService] ⚠️ Partner added, reloading data...');
+    this.reloadData();
+  }
+
+  /**
+   * Remove partner from the list
+   */
+  removePartner(partnerId: string): void {
+    console.log('[WorkspaceContextService] ⚠️ Partner removed, reloading data...');
+    this.reloadData();
+  }
+
+  /**
    * Reload data from Firebase
    * Forces the userData$ pipeline to re-execute by emitting on reloadTrigger$
    */
@@ -395,6 +453,13 @@ export class WorkspaceContextService {
    */
   getTeamsForOrg(orgId: string): Team[] {
     return this.teamsByOrganization().get(orgId) || [];
+  }
+
+  /**
+   * Get partners for a specific organization
+   */
+  getPartnersForOrg(orgId: string): Partner[] {
+    return this.partnersByOrganization().get(orgId) || [];
   }
 
   // ============================================================================

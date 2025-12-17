@@ -82,6 +82,7 @@ export const SHARED_ZORRO_MODULES = [
   NzPopoverModule,
   NzProgressModule,
   NzRadioModule,
+  NzResultModule,
   NzSelectModule,
   NzSpaceModule,
   NzSpinModule,

@@ -203,6 +203,47 @@
         ]
       }
     ],
+    "partner": [
+      {
+        "text": "夥伴導航",
+        "i18n": "menu.partner",
+        "group": true,
+        "hideInBreadcrumb": true,
+        "children": [
+          {
+            "text": "夥伴工作臺",
+            "i18n": "menu.dashboard",
+            "icon": "anticon-dashboard",
+            "link": "/dashboard/partner",
+            "badge": 0
+          },
+          {
+            "text": "夥伴排程",
+            "i18n": "menu.partner.schedule",
+            "icon": "anticon-calendar",
+            "link": "/partner/schedule"
+          },
+          {
+            "text": "夥伴成員",
+            "i18n": "menu.partner.members",
+            "icon": "anticon-team",
+            "link": "/partner/members"
+          },
+          {
+            "text": "夥伴設定",
+            "i18n": "menu.partner.settings",
+            "icon": "anticon-setting",
+            "link": "/partner/settings"
+          },
+          {
+            "text": "AI 助理",
+            "i18n": "menu.ai_assistant",
+            "icon": "anticon-robot",
+            "link": "/ai-assistant"
+          }
+        ]
+      }
+    ],
     "bot": [
       {
         "text": "機器人導航",
