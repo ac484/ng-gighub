@@ -21,7 +21,10 @@ import { BlueprintMemberRepository } from '@core/blueprint/repositories/blueprin
 import { FirebaseService } from '@core/services/firebase.service';
 import { TaskStore } from '@core/state/stores/task.store';
 import { BlueprintMember, BlueprintRole } from '@core/types/blueprint/blueprint.types';
-import { Task, TaskStatus, TaskPriority, CreateTaskRequest, UpdateTaskRequest } from '@core/types/task';
+import { Task, TaskStatus, TaskPriority, CreateTaskRequest, UpdateTaskRequest, AssigneeType } from '@core/types/task';
+import { Team, Partner } from '@core';
+import { TeamRepository } from '@core/data-access/repositories/shared/team.repository';
+import { PartnerRepository } from '@core/data-access/repositories/shared/partner.repository';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
@@ -88,24 +91,80 @@ interface ModalData {
         </nz-form-control>
       </nz-form-item>
 
-      <!-- Assignee (Member Selector) -->
+      <!-- Assignment Type Selector -->
       <nz-form-item>
-        <nz-form-label [nzSpan]="6">負責人</nz-form-label>
+        <nz-form-label [nzSpan]="6">指派類型</nz-form-label>
         <nz-form-control [nzSpan]="14">
-          <nz-select
-            formControlName="assigneeId"
-            nzPlaceHolder="選擇負責人"
-            nzShowSearch
-            nzAllowClear
-            style="width: 100%;"
-            [nzLoading]="loadingMembers()"
-          >
-            @for (member of blueprintMembers(); track member.id) {
-              <nz-option [nzValue]="member.accountId" [nzLabel]="member.accountId"></nz-option>
-            }
-          </nz-select>
+          <nz-radio-group formControlName="assigneeType">
+            <label nz-radio [nzValue]="AssigneeType.USER">用戶</label>
+            <label nz-radio [nzValue]="AssigneeType.TEAM">團隊</label>
+            <label nz-radio [nzValue]="AssigneeType.PARTNER">夥伴</label>
+          </nz-radio-group>
         </nz-form-control>
       </nz-form-item>
+
+      <!-- Assignee Selector - User -->
+      @if (form.get('assigneeType')?.value === AssigneeType.USER) {
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6">負責人</nz-form-label>
+          <nz-form-control [nzSpan]="14">
+            <nz-select
+              formControlName="assigneeId"
+              nzPlaceHolder="選擇負責人"
+              nzShowSearch
+              nzAllowClear
+              style="width: 100%;"
+              [nzLoading]="loadingMembers()"
+            >
+              @for (member of blueprintMembers(); track member.id) {
+                <nz-option [nzValue]="member.accountId" [nzLabel]="member.accountId"></nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      }
+
+      <!-- Assignee Selector - Team -->
+      @if (form.get('assigneeType')?.value === AssigneeType.TEAM) {
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6">指派團隊</nz-form-label>
+          <nz-form-control [nzSpan]="14">
+            <nz-select
+              formControlName="assigneeTeamId"
+              nzPlaceHolder="選擇團隊"
+              nzShowSearch
+              nzAllowClear
+              style="width: 100%;"
+              [nzLoading]="loadingTeams()"
+            >
+              @for (team of teams(); track team.id) {
+                <nz-option [nzValue]="team.id" [nzLabel]="team.name"></nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      }
+
+      <!-- Assignee Selector - Partner -->
+      @if (form.get('assigneeType')?.value === AssigneeType.PARTNER) {
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6">指派夥伴</nz-form-label>
+          <nz-form-control [nzSpan]="14">
+            <nz-select
+              formControlName="assigneePartnerId"
+              nzPlaceHolder="選擇夥伴"
+              nzShowSearch
+              nzAllowClear
+              style="width: 100%;"
+              [nzLoading]="loadingPartners()"
+            >
+              @for (partner of partners(); track partner.id) {
+                <nz-option [nzValue]="partner.id" [nzLabel]="partner.name + ' (' + partner.type + ')'"></nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      }
 
       <!-- Start Date -->
       <nz-form-item>
@@ -215,6 +274,8 @@ export class TaskModalComponent implements OnInit {
   private message = inject(NzMessageService);
   private taskStore = inject(TaskStore);
   private memberRepo = inject(BlueprintMemberRepository);
+  private teamRepo = inject(TeamRepository);
+  private partnerRepo = inject(PartnerRepository);
   private firebaseService = inject(FirebaseService);
 
   // Modal data injected
@@ -223,6 +284,7 @@ export class TaskModalComponent implements OnInit {
   // Make enums available to template
   readonly TaskStatus = TaskStatus;
   readonly TaskPriority = TaskPriority;
+  readonly AssigneeType = AssigneeType;
 
   // Form
   form!: FormGroup;
@@ -230,7 +292,11 @@ export class TaskModalComponent implements OnInit {
   // State
   submitting = signal(false);
   blueprintMembers = signal<BlueprintMember[]>([]);
+  teams = signal<Team[]>([]);
+  partners = signal<Partner[]>([]);
   loadingMembers = signal(false);
+  loadingTeams = signal(false);
+  loadingPartners = signal(false);
   autoCalculatedHours = signal(0);
   remainingBudget = signal<number | null>(null);
 
@@ -255,6 +321,7 @@ export class TaskModalComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadBlueprintMembers();
+    this.loadTeamsAndPartners();
     this.calculateRemainingBudget();
   }
 
@@ -271,6 +338,39 @@ export class TaskModalComponent implements OnInit {
     }
   }
 
+  private async loadTeamsAndPartners(): Promise<void> {
+    try {
+      // For now, we'll need to get organization ID from a different source
+      // This is a limitation that will need to be addressed with proper organization context
+      // For the MVP, we'll load teams/partners when available
+      
+      // TODO: Implement proper organization context service
+      // For now, skip loading teams and partners if we can't determine organization
+      console.warn('Organization context not available - teams/partners not loaded');
+      
+      // Placeholder: In future, get from OrganizationContextService or similar
+      // const organizationId = this.organizationContext.getCurrentOrganizationId();
+      // if (!organizationId) return;
+      
+      // Load teams
+      // this.loadingTeams.set(true);
+      // const teams = await firstValueFrom(this.teamRepo.findByOrganization(organizationId));
+      // this.teams.set(teams);
+      // this.loadingTeams.set(false);
+
+      // Load partners
+      // this.loadingPartners.set(true);
+      // const partners = await firstValueFrom(this.partnerRepo.findByOrganization(organizationId));
+      // this.partners.set(partners);
+      // this.loadingPartners.set(false);
+    } catch (error) {
+      console.error('Failed to load teams/partners:', error);
+      this.message.warning('載入團隊和夥伴清單失敗');
+      this.loadingTeams.set(false);
+      this.loadingPartners.set(false);
+    }
+  }
+
   private initForm(): void {
     const task = this.modalData.task;
     const isView = this.modalData.mode === 'view';
@@ -280,7 +380,10 @@ export class TaskModalComponent implements OnInit {
       description: [{ value: task?.description || '', disabled: isView }, [Validators.maxLength(1000)]],
       status: [{ value: task?.status || TaskStatus.PENDING, disabled: isView || this.modalData.mode === 'create' }],
       priority: [{ value: task?.priority || TaskPriority.MEDIUM, disabled: isView }],
+      assigneeType: [{ value: task?.assigneeType || AssigneeType.USER, disabled: isView }],
       assigneeId: [{ value: task?.assigneeId || null, disabled: isView }],
+      assigneeTeamId: [{ value: task?.assigneeTeamId || null, disabled: isView }],
+      assigneePartnerId: [{ value: task?.assigneePartnerId || null, disabled: isView }],
       startDate: [{ value: task?.startDate ? new Date(task.startDate as any) : null, disabled: isView }],
       dueDate: [{ value: task?.dueDate ? new Date(task.dueDate as any) : null, disabled: isView }],
       estimatedHours: [{ value: task?.estimatedHours || null, disabled: isView }],
@@ -401,13 +504,28 @@ export class TaskModalComponent implements OnInit {
   }
 
   private async createTask(formValue: any): Promise<void> {
-    const assigneeId = formValue.assigneeId;
+    const assigneeType = formValue.assigneeType || AssigneeType.USER;
 
-    // Get assignee name from members list
+    // Get assignee details based on type
     let assigneeName: string | undefined;
-    if (assigneeId) {
+    let assigneeId: string | undefined;
+    let assigneeTeamName: string | undefined;
+    let assigneeTeamId: string | undefined;
+    let assigneePartnerName: string | undefined;
+    let assigneePartnerId: string | undefined;
+
+    if (assigneeType === AssigneeType.USER && formValue.assigneeId) {
+      assigneeId = formValue.assigneeId;
       const assignee = this.blueprintMembers().find(m => m.accountId === assigneeId);
       assigneeName = assignee?.accountId; // TODO: Get actual name from user profile
+    } else if (assigneeType === AssigneeType.TEAM && formValue.assigneeTeamId) {
+      assigneeTeamId = formValue.assigneeTeamId;
+      const team = this.teams().find(t => t.id === assigneeTeamId);
+      assigneeTeamName = team?.name;
+    } else if (assigneeType === AssigneeType.PARTNER && formValue.assigneePartnerId) {
+      assigneePartnerId = formValue.assigneePartnerId;
+      const partner = this.partners().find(p => p.id === assigneePartnerId);
+      assigneePartnerName = partner?.name;
     }
 
     // Get current user ID from Firebase Auth
@@ -420,8 +538,13 @@ export class TaskModalComponent implements OnInit {
       title: formValue.title,
       description: formValue.description,
       priority: formValue.priority || TaskPriority.MEDIUM,
+      assigneeType: assigneeType,
       assigneeName: assigneeName,
-      assigneeId: assigneeId || undefined,
+      assigneeId: assigneeId,
+      assigneeTeamName: assigneeTeamName,
+      assigneeTeamId: assigneeTeamId,
+      assigneePartnerName: assigneePartnerName,
+      assigneePartnerId: assigneePartnerId,
       startDate: formValue.startDate || undefined,
       dueDate: formValue.dueDate || undefined,
       estimatedHours: formValue.estimatedHours || undefined,
@@ -480,13 +603,28 @@ export class TaskModalComponent implements OnInit {
       throw new Error('Task ID not found');
     }
 
-    const assigneeId = formValue.assigneeId;
+    const assigneeType = formValue.assigneeType || AssigneeType.USER;
 
-    // Get assignee name from members list
+    // Get assignee details based on type
     let assigneeName: string | undefined;
-    if (assigneeId) {
+    let assigneeId: string | undefined;
+    let assigneeTeamName: string | undefined;
+    let assigneeTeamId: string | undefined;
+    let assigneePartnerName: string | undefined;
+    let assigneePartnerId: string | undefined;
+
+    if (assigneeType === AssigneeType.USER && formValue.assigneeId) {
+      assigneeId = formValue.assigneeId;
       const assignee = this.blueprintMembers().find(m => m.accountId === assigneeId);
       assigneeName = assignee?.accountId; // TODO: Get actual name from user profile
+    } else if (assigneeType === AssigneeType.TEAM && formValue.assigneeTeamId) {
+      assigneeTeamId = formValue.assigneeTeamId;
+      const team = this.teams().find(t => t.id === assigneeTeamId);
+      assigneeTeamName = team?.name;
+    } else if (assigneeType === AssigneeType.PARTNER && formValue.assigneePartnerId) {
+      assigneePartnerId = formValue.assigneePartnerId;
+      const partner = this.partners().find(p => p.id === assigneePartnerId);
+      assigneePartnerName = partner?.name;
     }
 
     // Get current user ID from Firebase Auth
@@ -500,8 +638,13 @@ export class TaskModalComponent implements OnInit {
       description: formValue.description,
       status: formValue.status,
       priority: formValue.priority,
+      assigneeType: assigneeType,
       assigneeName: assigneeName,
-      assigneeId: assigneeId || undefined,
+      assigneeId: assigneeId,
+      assigneeTeamName: assigneeTeamName,
+      assigneeTeamId: assigneeTeamId,
+      assigneePartnerName: assigneePartnerName,
+      assigneePartnerId: assigneePartnerId,
       startDate: formValue.startDate || undefined,
       dueDate: formValue.dueDate || undefined,
       estimatedHours: formValue.estimatedHours || undefined,

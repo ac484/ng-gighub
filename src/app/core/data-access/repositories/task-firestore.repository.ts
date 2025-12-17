@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { collection, query, where, orderBy, limit as firestoreLimit, Timestamp, DocumentData } from '@angular/fire/firestore';
-import { Task, TaskStatus, CreateTaskRequest, UpdateTaskRequest, TaskQueryOptions } from '@core/types/task/task.types';
+import { Task, TaskStatus, CreateTaskRequest, UpdateTaskRequest, TaskQueryOptions, AssigneeType } from '@core/types/task/task.types';
 
 import { FirestoreBaseRepository } from './base/firestore-base.repository';
 
@@ -34,7 +34,13 @@ export class TaskFirestoreRepository extends FirestoreBaseRepository<Task> {
       title: data['title'],
       description: data['description'],
       status: this.mapStatus(data['status']),
+      assigneeType: data['assignee_type'] || data['assigneeType'],
       assigneeId: data['assignee_id'] || data['assigneeId'],
+      assigneeName: data['assignee_name'] || data['assigneeName'],
+      assigneeTeamId: data['assignee_team_id'] || data['assigneeTeamId'],
+      assigneeTeamName: data['assignee_team_name'] || data['assigneeTeamName'],
+      assigneePartnerId: data['assignee_partner_id'] || data['assigneePartnerId'],
+      assigneePartnerName: data['assignee_partner_name'] || data['assigneePartnerName'],
       creatorId: data['creator_id'] || data['creatorId'],
       dueDate: data['due_date'] ? this.toDate(data['due_date']) : undefined,
       createdAt: this.toDate(data['created_at']),
@@ -57,7 +63,13 @@ export class TaskFirestoreRepository extends FirestoreBaseRepository<Task> {
     if (task.title) doc['title'] = task.title;
     if (task.description !== undefined) doc['description'] = task.description;
     if (task.status) doc['status'] = task.status.toUpperCase();
+    if (task.assigneeType !== undefined) doc['assignee_type'] = task.assigneeType;
     if (task.assigneeId !== undefined) doc['assignee_id'] = task.assigneeId;
+    if (task.assigneeName !== undefined) doc['assignee_name'] = task.assigneeName;
+    if (task.assigneeTeamId !== undefined) doc['assignee_team_id'] = task.assigneeTeamId;
+    if (task.assigneeTeamName !== undefined) doc['assignee_team_name'] = task.assigneeTeamName;
+    if (task.assigneePartnerId !== undefined) doc['assignee_partner_id'] = task.assigneePartnerId;
+    if (task.assigneePartnerName !== undefined) doc['assignee_partner_name'] = task.assigneePartnerName;
     if (task.creatorId) doc['creator_id'] = task.creatorId;
     if (task.dueDate !== undefined) {
       doc['due_date'] = task.dueDate ? Timestamp.fromDate(task.dueDate) : null;

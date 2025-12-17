@@ -19,13 +19,14 @@
 import { Component, input, output, inject, ViewChild, signal, computed } from '@angular/core';
 import { PlusSquareOutline, MinusSquareOutline } from '@ant-design/icons-angular/icons';
 import { TaskStore } from '@core/state/stores/task.store';
-import { Task, TaskStatus, TaskPriority, TaskTreeNode } from '@core/types/task';
+import { Task, TaskStatus, TaskPriority, TaskTreeNode, AssigneeType } from '@core/types/task';
 import { buildTaskHierarchy } from '@core/utils/task-hierarchy.util';
 import { STColumn, STComponent, STData } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 import { provideNzIconsPatch } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
-
+import { NzModalService } from 'ng-zorro-antd/modal';
+import { TaskAssignModalComponent } from '../components/task-assign-modal/task-assign-modal.component';
 /**
  * Flat node for table display with hierarchy info
  * 用於表格顯示的扁平節點（含階層資訊）
@@ -37,6 +38,8 @@ interface TaskTableNode extends STData {
   priority: TaskPriority;
   progress: number;
   assigneeName?: string;
+  assigneeDisplay?: string; // Combined display for user/team/partner
+  assigneeType?: string;
   dueDate?: Date;
   createdAt: Date;
   level: number; // Depth in hierarchy
@@ -167,6 +170,7 @@ interface TaskTableNode extends STData {
 export class TaskListViewComponent {
   private taskStore = inject(TaskStore);
   private message = inject(NzMessageService);
+  private modal = inject(NzModalService);
 
   @ViewChild('stTable') stTable?: STComponent;
 
@@ -177,6 +181,7 @@ export class TaskListViewComponent {
   readonly editTask = output<Task>();
   readonly deleteTask = output<Task>();
   readonly createChildTask = output<Task>();
+  readonly assignTask = output<Task>();
 
   // State
   expandedNodeIds = signal<Set<string>>(new Set());
@@ -206,6 +211,28 @@ export class TaskListViewComponent {
   });
 
   /**
+   * Get display text for assignee based on type
+   * 根據類型取得指派對象的顯示文字
+   */
+  private getAssigneeDisplay(task: Task): string {
+    if (!task.assigneeType) {
+      // Legacy: fallback to assigneeName
+      return task.assigneeName || '未分配';
+    }
+
+    switch (task.assigneeType) {
+      case AssigneeType.USER:
+        return task.assigneeName ? `👤 ${task.assigneeName}` : '未分配';
+      case AssigneeType.TEAM:
+        return task.assigneeTeamName ? `👥 ${task.assigneeTeamName}` : '未分配團隊';
+      case AssigneeType.PARTNER:
+        return task.assigneePartnerName ? `🤝 ${task.assigneePartnerName}` : '未分配夥伴';
+      default:
+        return '未分配';
+    }
+  }
+
+  /**
    * Flatten tree nodes for table display, respecting expand/collapse state
    * 扁平化樹狀節點用於表格顯示，遵循展開/收合狀態
    */
@@ -223,6 +250,8 @@ export class TaskListViewComponent {
         priority: node.task.priority,
         progress: node.task.progress ?? 0,
         assigneeName: node.task.assigneeName,
+        assigneeDisplay: this.getAssigneeDisplay(node.task),
+        assigneeType: node.task.assigneeType,
         dueDate: node.task.dueDate,
         createdAt: node.task.createdAt,
         level,
@@ -287,8 +316,8 @@ export class TaskListViewComponent {
     },
     {
       title: '負責人',
-      index: 'assigneeName',
-      width: 120,
+      index: 'assigneeDisplay',
+      width: 150,
       default: '未分配'
     },
     {
@@ -308,8 +337,13 @@ export class TaskListViewComponent {
     },
     {
       title: '操作',
-      width: 220,
+      width: 280,
       buttons: [
+        {
+          text: '指派',
+          icon: 'user',
+          click: (record: TaskTableNode) => this.openAssignModal(record.task)
+        },
         {
           text: '編輯',
           icon: 'edit',
@@ -394,5 +428,30 @@ export class TaskListViewComponent {
   onTableChange(event: any): void {
     // Handle table events (sort, filter, etc.)
     console.log('Table change:', event);
+  }
+
+  /**
+   * Open assign modal
+   * 開啟指派模態框
+   */
+  openAssignModal(task: Task): void {
+    const modalRef = this.modal.create({
+      nzTitle: '指派任務',
+      nzContent: TaskAssignModalComponent,
+      nzWidth: 600,
+      nzData: {
+        blueprintId: this.blueprintId(),
+        task: task
+      },
+      nzFooter: null
+    });
+
+    // Reload tasks after successful assignment
+    modalRef.afterClose.subscribe((result) => {
+      if (result === true) {
+        // Assignment successful - tasks will auto-reload via store subscription
+        this.assignTask.emit(task);
+      }
+    });
   }
 }
