@@ -1,0 +1,1 @@
+# Component Theming Guide placeholder
