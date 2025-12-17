@@ -32,17 +32,6 @@ import { combineLatest, of, switchMap, map, shareReplay, catchError, BehaviorSub
 
 const STORAGE_KEY = 'workspace_context';
 
-/**
- * User data structure containing all async-loaded data
- */
-interface UserData {
-  user: Account | null;
-  organizations: Organization[];
-  teams: Team[];
-  partners: Partner[];
-  bots: Bot[];
-}
-
 @Injectable({
   providedIn: 'root'
 })
@@ -185,18 +174,22 @@ export class WorkspaceContextService {
     }
 
     switch (type) {
-      case ContextType.ORGANIZATION:
+      case ContextType.ORGANIZATION: {
         const org = this.organizations().find(o => o.id === id);
         return org?.name || '組織';
-      case ContextType.TEAM:
+      }
+      case ContextType.TEAM: {
         const team = this.teams().find(t => t.id === id);
         return team?.name || '團隊';
-      case ContextType.PARTNER:
+      }
+      case ContextType.PARTNER: {
         const partner = this.partners().find(p => p.id === id);
         return partner?.name || '夥伴';
-      case ContextType.BOT:
+      }
+      case ContextType.BOT: {
         const bot = this.bots().find(b => b.id === id);
         return bot?.name || '機器人';
+      }
       default:
         return '個人帳戶';
     }
@@ -402,7 +395,7 @@ export class WorkspaceContextService {
   /**
    * Remove organization from the list
    */
-  removeOrganization(orgId: string): void {
+  removeOrganization(_orgId: string): void {
     console.log('[WorkspaceContextService] ⚠️ Organization removed, reloading data...');
     this.reloadData();
   }
@@ -410,7 +403,7 @@ export class WorkspaceContextService {
   /**
    * Add team to the list
    */
-  addTeam(team: Team): void {
+  addTeam(_team: Team): void {
     console.log('[WorkspaceContextService] ⚠️ Team added, reloading data...');
     this.reloadData();
   }
@@ -418,7 +411,7 @@ export class WorkspaceContextService {
   /**
    * Remove team from the list
    */
-  removeTeam(teamId: string): void {
+  removeTeam(_teamId: string): void {
     console.log('[WorkspaceContextService] ⚠️ Team removed, reloading data...');
     this.reloadData();
   }
@@ -426,7 +419,7 @@ export class WorkspaceContextService {
   /**
    * Add partner to the list
    */
-  addPartner(partner: Partner): void {
+  addPartner(_partner: Partner): void {
     console.log('[WorkspaceContextService] ⚠️ Partner added, reloading data...');
     this.reloadData();
   }
@@ -434,7 +427,7 @@ export class WorkspaceContextService {
   /**
    * Remove partner from the list
    */
-  removePartner(partnerId: string): void {
+  removePartner(_partnerId: string): void {
     console.log('[WorkspaceContextService] ⚠️ Partner removed, reloading data...');
     this.reloadData();
   }

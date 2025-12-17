@@ -615,11 +615,11 @@ export class OrganizationRepositoryComponent implements OnInit {
     this.message.success('已刪除物料');
   }
 
-  editLocation(location: WarehouseLocation): void {
+  editLocation(_location: WarehouseLocation): void {
     this.message.info('編輯地點功能開發中');
   }
 
-  deleteLocation(location: WarehouseLocation): void {
+  deleteLocation(_location: WarehouseLocation): void {
     this.message.info('刪除地點功能開發中');
   }
 
