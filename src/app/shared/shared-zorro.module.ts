@@ -41,7 +41,11 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 
 // 低頻使用模組 - 按需導入 (不包含在 SHARED_IMPORTS)
+import { NzCalendarModule } from 'ng-zorro-antd/calendar';
+import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { NzSegmentedModule } from 'ng-zorro-antd/segmented';
 import { NzTimePickerModule } from 'ng-zorro-antd/time-picker';
+import { NzTimelineModule } from 'ng-zorro-antd/timeline';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzUploadModule } from 'ng-zorro-antd/upload';
 
@@ -85,7 +89,13 @@ export const SHARED_ZORRO_MODULES = [
   NzSwitchModule,
   NzTableModule,
   NzTagModule,
-  NzUploadModule
+  NzUploadModule,
+  // New modules for todo/schedule features
+  NzCalendarModule,
+  NzEmptyModule,
+  NzSegmentedModule,
+  NzTimePickerModule,
+  NzTimelineModule
 ];
 
 /**
