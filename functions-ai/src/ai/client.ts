@@ -10,16 +10,19 @@ import * as logger from "firebase-functions/logger";
  * Get the GenAI client instance
  * Uses API key from environment variable
  *
- * @returns {GoogleGenAI} Configured GenAI client
+ * @return {GoogleGenAI} Configured GenAI client
  * @throws {Error} If API key is not configured
  */
 export function getGenAIClient(): GoogleGenAI {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    logger.error("GEMINI_API_KEY environment variable is not set");
+    logger.error(
+      "GEMINI_API_KEY environment variable is not set"
+    );
     throw new Error(
-      "GEMINI_API_KEY is not configured. Please set it in Firebase Functions config."
+      "GEMINI_API_KEY is not configured. " +
+      "Please set it in Firebase Functions config."
     );
   }
 

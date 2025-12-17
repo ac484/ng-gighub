@@ -1,6 +1,7 @@
 /**
  * @fileOverview Contract Document Parsing Cloud Function
- * @description Extracts structured data from contract documents using Google Gemini AI
+ * @description Extracts structured data from contract documents
+ * using Google Gemini AI
  */
 
 import {onCall, HttpsError} from "firebase-functions/v2/https";
@@ -19,48 +20,55 @@ import type {
 /**
  * System prompt for contract parsing
  */
-const PARSING_SYSTEM_PROMPT = `You are an expert financial analyst for construction projects.
-Analyze the provided document and extract the following information:
-
-1. **Engagement Name**: The official title of the project or contract.
-2. **Client Name**: The customer or entity for whom the work is being done.
-3. **Total Value (Subtotal)**: The total value before tax.
-4. **Tax**: The total tax amount. If not specified, this can be omitted.
-5. **Total Value with Tax**: The grand total including tax. If not specified, this can be omitted.
-6. **Work Breakdown Structure (Tasks)**: A detailed list of all work items.
-
-For each task item, provide:
-- id: A unique identifier (can be sequential like "task-1", "task-2", etc.)
-- title: The description of the work item
-- quantity: The quantity of units
-- unitPrice: The price per unit
-- value: The total value (quantity × unitPrice)
-- discount: Any discount applied (if not specified, use 0)
-- lastUpdated: Current date in ISO format
-- completedQuantity: Default to 0
-- subTasks: An empty array for now
-
-Respond ONLY with valid JSON in the following format (no markdown, no code blocks):
-{
-  "name": "Project Name",
-  "client": "Client Name",
-  "totalValue": 1000000,
-  "tax": 50000,
-  "totalValueWithTax": 1050000,
-  "tasks": [
-    {
-      "id": "task-1",
-      "title": "Task description",
-      "quantity": 100,
-      "unitPrice": 1000,
-      "value": 100000,
-      "discount": 0,
-      "lastUpdated": "2025-12-17T00:00:00.000Z",
-      "completedQuantity": 0,
-      "subTasks": []
-    }
-  ]
-}`;
+const PARSING_SYSTEM_PROMPT =
+  "You are an expert financial analyst for " +
+  "construction projects.\n" +
+  "Analyze the provided document and extract the following " +
+  "information:\n\n" +
+  "1. **Engagement Name**: The official title of the project or " +
+  "contract.\n" +
+  "2. **Client Name**: The customer or entity for whom the work is " +
+  "being done.\n" +
+  "3. **Total Value (Subtotal)**: The total value before tax.\n" +
+  "4. **Tax**: The total tax amount. If not specified, this can be " +
+  "omitted.\n" +
+  "5. **Total Value with Tax**: The grand total including tax. If not " +
+  "specified, this can be omitted.\n" +
+  "6. **Work Breakdown Structure (Tasks)**: A detailed list of all " +
+  "work items.\n\n" +
+  "For each task item, provide:\n" +
+  "- id: A unique identifier (can be sequential like \"task-1\", " +
+  "\"task-2\", etc.)\n" +
+  "- title: The description of the work item\n" +
+  "- quantity: The quantity of units\n" +
+  "- unitPrice: The price per unit\n" +
+  "- value: The total value (quantity × unitPrice)\n" +
+  "- discount: Any discount applied (if not specified, use 0)\n" +
+  "- lastUpdated: Current date in ISO format\n" +
+  "- completedQuantity: Default to 0\n" +
+  "- subTasks: An empty array for now\n\n" +
+  "Respond ONLY with valid JSON in the following format " +
+  "(no markdown, no code blocks):\n" +
+  "{\n" +
+  "  \"name\": \"Project Name\",\n" +
+  "  \"client\": \"Client Name\",\n" +
+  "  \"totalValue\": 1000000,\n" +
+  "  \"tax\": 50000,\n" +
+  "  \"totalValueWithTax\": 1050000,\n" +
+  "  \"tasks\": [\n" +
+  "    {\n" +
+  "      \"id\": \"task-1\",\n" +
+  "      \"title\": \"Task description\",\n" +
+  "      \"quantity\": 100,\n" +
+  "      \"unitPrice\": 1000,\n" +
+  "      \"value\": 100000,\n" +
+  "      \"discount\": 0,\n" +
+  "      \"lastUpdated\": \"2025-12-17T00:00:00.000Z\",\n" +
+  "      \"completedQuantity\": 0,\n" +
+  "      \"subTasks\": []\n" +
+  "    }\n" +
+  "  ]\n" +
+  "}";
 
 /**
  * Contract Parsing Cloud Function
@@ -144,7 +152,9 @@ export const parseContract = onCall<
         // Get file data URI
         const fileDataUri = file.dataUri || file.url;
         if (!fileDataUri) {
-          throw new Error(`File ${file.name} has no dataUri or url`);
+          throw new Error(
+            "File " + file.name + " has no dataUri or url"
+          );
         }
 
         // Generate content with vision model
@@ -155,7 +165,7 @@ export const parseContract = onCall<
               role: "user",
               parts: [
                 {text: PARSING_SYSTEM_PROMPT},
-                {text: `\n\nDocument for analysis:`},
+                {text: "\n\nDocument for analysis:"},
                 {
                   inlineData: {
                     mimeType: file.mimeType,
@@ -188,9 +198,15 @@ export const parseContract = onCall<
             requestId,
             fileIndex: i + 1,
             response: resultText.substring(0, 500),
-            error: parseError instanceof Error ? parseError.message : "Unknown",
+            error:
+              parseError instanceof Error ?
+                parseError.message :
+                "Unknown",
           });
-          throw new Error(`Failed to parse AI response: ${resultText.substring(0, 100)}...`);
+          const preview = resultText.substring(0, 100);
+          throw new Error(
+            "Failed to parse AI response: " + preview + "..."
+          );
         }
 
         // Aggregate results
@@ -237,7 +253,10 @@ export const parseContract = onCall<
       return {
         success: false,
         requestId,
-        errorMessage: error instanceof Error ? error.message : "Failed to parse contract",
+        errorMessage:
+          error instanceof Error ?
+            error.message :
+            "Failed to parse contract",
       };
     }
   }
