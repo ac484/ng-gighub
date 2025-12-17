@@ -12,9 +12,9 @@
  * @module routes/organization/partners
  */
 
-import { ChangeDetectionStrategy, Component, inject, signal, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Partner, PartnerStore, PartnerType } from '@core';
+import { PartnerStore, PartnerType } from '@core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';

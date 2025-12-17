@@ -17,8 +17,7 @@
 
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Team, Partner, OwnerType } from '@core';
-import { getAllowedAssigneeTypes } from '@core/domain/utils';
+import { Team, Partner } from '@core';
 import { BlueprintMemberRepository } from '@core/blueprint/repositories/blueprint-member.repository';
 import { PartnerRepository } from '@core/data-access/repositories/shared/partner.repository';
 import { TeamRepository } from '@core/data-access/repositories/shared/team.repository';

@@ -22,15 +22,12 @@ import { ContainerDashboardComponent } from './container/container-dashboard.com
 import { BlueprintMembersComponent } from './members/blueprint-members.component';
 import { AcceptanceModuleViewComponent } from './modules/acceptance-module-view.component';
 import { CloudModuleViewComponent } from './modules/cloud-module-view.component';
-import { CommunicationModuleViewComponent } from './modules/communication-module-view.component';
 import { ContractModuleViewComponent } from './modules/contract-module-view.component';
 import { FinanceModuleViewComponent } from './modules/finance-module-view.component';
 import { IssuesModuleViewComponent } from './modules/issues-module-view.component';
 import { LogModuleViewComponent } from './modules/log-module-view.component';
-import { MaterialModuleViewComponent } from './modules/material-module-view.component';
 import { QaModuleViewComponent } from './modules/qa-module-view.component';
 import { SafetyModuleViewComponent } from './modules/safety-module-view.component';
-import { SharedModuleViewComponent } from './modules/shared-module-view.component';
 import { WarrantyModuleViewComponent } from './modules/warranty-module-view.component';
 import { WorkflowModuleViewComponent } from './modules/workflow-module-view.component';
 
@@ -79,12 +76,9 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
     QaModuleViewComponent,
     AcceptanceModuleViewComponent,
     FinanceModuleViewComponent,
-    MaterialModuleViewComponent,
     SafetyModuleViewComponent,
-    CommunicationModuleViewComponent,
     CloudModuleViewComponent,
     IssuesModuleViewComponent,
-    SharedModuleViewComponent,
     ContractModuleViewComponent,
     WarrantyModuleViewComponent
   ],
@@ -348,29 +342,11 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
             </ng-template>
           </nz-tab>
 
-          <!-- Material Domain Tab -->
-          <nz-tab nzTitle="材料">
-            <ng-template nz-tab>
-              @if (blueprint()?.id) {
-                <app-material-module-view [blueprintId]="blueprint()!.id" />
-              }
-            </ng-template>
-          </nz-tab>
-
           <!-- Safety Domain Tab -->
           <nz-tab nzTitle="安全">
             <ng-template nz-tab>
               @if (blueprint()?.id) {
                 <app-safety-module-view [blueprintId]="blueprint()!.id" />
-              }
-            </ng-template>
-          </nz-tab>
-
-          <!-- Communication Domain Tab -->
-          <nz-tab nzTitle="通訊">
-            <ng-template nz-tab>
-              @if (blueprint()?.id) {
-                <app-communication-module-view [blueprintId]="blueprint()!.id" />
               }
             </ng-template>
           </nz-tab>
@@ -389,15 +365,6 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
             <ng-template nz-tab>
               @if (blueprint()?.id) {
                 <app-issues-module-view [blueprintId]="blueprint()!.id" />
-              }
-            </ng-template>
-          </nz-tab>
-
-          <!-- Shared Domain Tab -->
-          <nz-tab nzTitle="共享">
-            <ng-template nz-tab>
-              @if (blueprint()?.id) {
-                <app-shared-module-view [blueprintId]="blueprint()!.id" />
               }
             </ng-template>
           </nz-tab>
