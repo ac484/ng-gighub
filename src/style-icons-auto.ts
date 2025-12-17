@@ -20,7 +20,8 @@ import {
   MenuUnfoldOutline,
   AppstoreOutline,
   RocketOutline,
-  ProjectOutline // 新增：對應 anticon-project
+  ProjectOutline, // 新增：對應 anticon-project
+  GoldOutline // 新增：對應 anticon-gold
 } from '@ant-design/icons-angular/icons';
 
 // 用戶與權限相關
@@ -142,6 +143,7 @@ export const ICONS_AUTO = [
   AppstoreOutline,
   RocketOutline,
   ProjectOutline, // 新增
+  GoldOutline,
 
   // 用戶與權限 (User & Auth)
   UserOutline,
