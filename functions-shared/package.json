@@ -1,5 +1,5 @@
 {
-  "name": "functions",
+  "name": "functions-scheduler",
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",

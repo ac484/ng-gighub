@@ -122,5 +122,9 @@
       "npm run lint:style"
     ]
   },
-  "packageManager": "yarn@4.9.2"
+  "packageManager": "yarn@4.9.2",
+    "workspaces": [
+    "functions",
+    "functions-*"
+  ]
 }

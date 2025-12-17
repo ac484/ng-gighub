@@ -1,5 +1,5 @@
 {
-  "name": "functions",
+  "name": "functions-firestore",
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",
