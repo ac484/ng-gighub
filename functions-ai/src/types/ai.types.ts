@@ -36,7 +36,7 @@ export interface AIGenerateTextResponse {
  */
 export interface AIChatMessage {
   /** Role: user or model */
-  role: "user" | "model";
+  role: 'user' | 'model';
   /** Message content */
   content: string;
 }

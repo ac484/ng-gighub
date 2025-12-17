@@ -28,6 +28,7 @@
   "menu.settings": "设置",
   "menu.organization.members": "成员管理",
   "menu.organization.teams": "团队管理",
+  "menu.organization.partners": "合作伙伴管理",
   "menu.team.members": "团队成员",
   "menu.exception": "异常页",
   "menu.exception.not-permission": "403",

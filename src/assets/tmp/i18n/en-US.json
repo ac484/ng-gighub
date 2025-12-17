@@ -19,6 +19,7 @@
   "menu.settings": "Settings",
   "menu.organization.members": "Member Management",
   "menu.organization.teams": "Team Management",
+  "menu.organization.partners": "Partner Management",
   "menu.team.members": "Team Members",
   "menu.exception": "Exception",
   "menu.exception.not-permission": "403",
