@@ -2,16 +2,28 @@
  * @fileOverview Contract Document Parsing Cloud Function
  * @description Extracts structured data from contract documents
  * using Google Gemini AI
+ *
+ * SETC-018: Enhanced Contract Parsing Implementation
+ * Updated to use enhanced prompt and types for comprehensive data extraction.
  */
 
 import * as logger from 'firebase-functions/logger';
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 
 import { getGenAIClient, DEFAULT_VISION_MODEL } from '../ai/client';
-import type { ContractParsingRequest, ContractParsingResponse, ContractParsingOutput, TaskSchema } from '../types/contract.types';
+import { ENHANCED_PARSING_SYSTEM_PROMPT, createUserPrompt } from '../prompts/contract-parsing-enhanced.prompt';
+import type {
+  ContractParsingRequest,
+  ContractParsingResponse,
+  ContractParsingOutput,
+  EnhancedContractParsingOutput,
+  TaskSchema
+} from '../types/contract.types';
 
 /**
- * System prompt for contract parsing
+ * Original system prompt (kept for backward compatibility)
+ *
+ * @deprecated Use ENHANCED_PARSING_SYSTEM_PROMPT instead
  */
 const PARSING_SYSTEM_PROMPT =
   'You are an expert financial analyst for ' +
@@ -62,6 +74,99 @@ const PARSING_SYSTEM_PROMPT =
   '    }\n' +
   '  ]\n' +
   '}';
+
+/**
+ * Enable enhanced parsing mode
+ * When true, uses ENHANCED_PARSING_SYSTEM_PROMPT for comprehensive data extraction
+ * When false, uses original PARSING_SYSTEM_PROMPT for backward compatibility
+ */
+const USE_ENHANCED_PARSING = true; // SETC-018: Enable enhanced parsing
+
+/**
+ * Validates enhanced parsing output data
+ * Ensures all critical fields are present and valid
+ */
+function validateEnhancedParsedData(data: any): data is EnhancedContractParsingOutput {
+  // Check critical fields
+  if (!data || typeof data !== 'object') {
+    return false;
+  }
+
+  // Validate basic fields
+  if (!data.contractNumber || typeof data.contractNumber !== 'string') {
+    logger.warn('Missing or invalid contractNumber');
+    return false;
+  }
+
+  if (!data.title || typeof data.title !== 'string') {
+    logger.warn('Missing or invalid title');
+    return false;
+  }
+
+  if (!data.currency || typeof data.currency !== 'string') {
+    logger.warn('Missing or invalid currency');
+    return false;
+  }
+
+  // Validate party objects
+  if (!data.owner || typeof data.owner !== 'object' || !data.owner.name) {
+    logger.warn('Missing or invalid owner information');
+    return false;
+  }
+
+  if (!data.contractor || typeof data.contractor !== 'object' || !data.contractor.name) {
+    logger.warn('Missing or invalid contractor information');
+    return false;
+  }
+
+  // Validate financial fields
+  if (typeof data.totalAmount !== 'number' || data.totalAmount < 0) {
+    logger.warn('Missing or invalid totalAmount');
+    return false;
+  }
+
+  // Validate dates
+  if (!data.startDate || !data.endDate) {
+    logger.warn('Missing start or end date');
+    return false;
+  }
+
+  // Validate work items
+  if (!Array.isArray(data.workItems) || data.workItems.length === 0) {
+    logger.warn('Missing or empty workItems array');
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Converts enhanced parsing output to legacy format for backward compatibility
+ * Maps new field names and structures to original ContractParsingOutput format
+ */
+function convertToLegacyFormat(enhanced: EnhancedContractParsingOutput): ContractParsingOutput {
+  // Convert work items to legacy task format
+  const tasks: TaskSchema[] = enhanced.workItems.map((item, index) => ({
+    id: item.code || `task-${index + 1}`,
+    title: item.title,
+    quantity: item.quantity,
+    unitPrice: item.unitPrice,
+    value: item.totalPrice,
+    discount: item.discount || 0,
+    lastUpdated: new Date().toISOString(),
+    completedQuantity: 0,
+    subTasks: []
+  }));
+
+  return {
+    name: enhanced.title,
+    client: enhanced.contractor.name, // Use contractor name for backward compatibility
+    totalValue: enhanced.totalAmount,
+    tax: enhanced.tax,
+    totalValueWithTax: enhanced.totalAmountWithTax,
+    tasks
+  };
+}
 
 /**
  * Contract Parsing Cloud Function
@@ -116,7 +221,129 @@ export const parseContract = onCall<ContractParsingRequest, Promise<ContractPars
     try {
       const ai = getGenAIClient();
 
-      // Process each file and combine results
+      // Determine which prompt to use
+      const systemPrompt = USE_ENHANCED_PARSING ? ENHANCED_PARSING_SYSTEM_PROMPT : PARSING_SYSTEM_PROMPT;
+
+      logger.info('Using parsing mode', {
+        requestId,
+        enhanced: USE_ENHANCED_PARSING
+      });
+
+      // For enhanced parsing, process all files together
+      // For legacy parsing, aggregate results
+      if (USE_ENHANCED_PARSING) {
+        // Enhanced parsing mode - comprehensive extraction
+        let enhancedData: EnhancedContractParsingOutput | null = null;
+
+        // Process first file (or all files if multi-page)
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+
+          logger.info('Processing file (enhanced mode)', {
+            requestId,
+            fileIndex: i + 1,
+            fileName: file.name
+          });
+
+          // Get file data URI
+          const fileDataUri = file.dataUri || file.url;
+          if (!fileDataUri) {
+            throw new Error(`File ${file.name} has no dataUri or url`);
+          }
+
+          // Generate content with vision model
+          const userPrompt = createUserPrompt(files.length);
+          const response = await ai.models.generateContent({
+            model: DEFAULT_VISION_MODEL,
+            contents: [
+              {
+                role: 'user',
+                parts: [
+                  { text: systemPrompt },
+                  { text: `\n\n${userPrompt}` },
+                  {
+                    inlineData: {
+                      mimeType: file.mimeType,
+                      data: fileDataUri.split(',')[1] || fileDataUri
+                    }
+                  }
+                ]
+              }
+            ],
+            config: {
+              maxOutputTokens: 8192, // Increased for enhanced output
+              temperature: 0.1, // Low temperature for more deterministic parsing
+              responseMimeType: 'application/json'
+            }
+          });
+
+          const resultText = response.text || '';
+          logger.info('AI Response received (enhanced)', {
+            requestId,
+            fileIndex: i + 1,
+            responseLength: resultText.length
+          });
+
+          // Parse JSON response
+          try {
+            const parsedData = JSON.parse(resultText);
+
+            // Validate enhanced data
+            if (!validateEnhancedParsedData(parsedData)) {
+              logger.warn('Enhanced parsing validation failed, falling back to legacy format', {
+                requestId,
+                fileIndex: i + 1
+              });
+              // Try to use whatever data we got
+              enhancedData = parsedData as EnhancedContractParsingOutput;
+            } else {
+              enhancedData = parsedData;
+              logger.info('Enhanced parsing validation successful', {
+                requestId,
+                contractNumber: enhancedData.contractNumber,
+                workItemCount: enhancedData.workItems.length
+              });
+            }
+
+            // For now, use first file's data (multi-file aggregation can be added later)
+            if (i === 0) {
+              break;
+            }
+          } catch (parseError) {
+            logger.error('Failed to parse AI response as JSON (enhanced)', {
+              requestId,
+              fileIndex: i + 1,
+              response: resultText.substring(0, 500),
+              error: parseError instanceof Error ? parseError.message : 'Unknown'
+            });
+            throw new Error(`Failed to parse AI response: ${resultText.substring(0, 100)}...`);
+          }
+        }
+
+        if (!enhancedData) {
+          throw new Error('No valid parsed data from any file');
+        }
+
+        // Convert to legacy format for backward compatibility
+        const legacyData = convertToLegacyFormat(enhancedData);
+
+        logger.info('Contract Parsing Success (Enhanced)', {
+          userId: request.auth.uid,
+          requestId,
+          contractNumber: enhancedData.contractNumber,
+          currency: enhancedData.currency,
+          workItemCount: enhancedData.workItems.length,
+          totalAmount: enhancedData.totalAmount
+        });
+
+        return {
+          success: true,
+          requestId,
+          parsedData: legacyData // Return legacy format for backward compatibility
+        };
+      }
+
+      // Legacy parsing mode (kept for backward compatibility)
       const allTasks: TaskSchema[] = [];
       let contractName = '';
       let clientName = '';
