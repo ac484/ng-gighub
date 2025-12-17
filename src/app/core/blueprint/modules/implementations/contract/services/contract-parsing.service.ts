@@ -145,7 +145,7 @@ export class ContractParsingService {
       const parseContractFn = httpsCallable<
         { blueprintId: string; contractId: string; requestId: string; files: FileAttachment[] },
         ParsingResult
-      >(this.functions, 'parseContractDocument');
+      >(this.functions, 'contract-parseContract');
 
       const result = await parseContractFn({
         blueprintId,
