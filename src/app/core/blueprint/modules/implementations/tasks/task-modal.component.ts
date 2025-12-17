@@ -17,14 +17,15 @@
 
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Team, Partner, OwnerType, BlueprintMemberType } from '@core';
+import { getAllowedAssigneeTypes } from '@core/domain/utils';
 import { BlueprintMemberRepository } from '@core/blueprint/repositories/blueprint-member.repository';
+import { PartnerRepository } from '@core/data-access/repositories/shared/partner.repository';
+import { TeamRepository } from '@core/data-access/repositories/shared/team.repository';
 import { FirebaseService } from '@core/services/firebase.service';
 import { TaskStore } from '@core/state/stores/task.store';
 import { BlueprintMember, BlueprintRole } from '@core/types/blueprint/blueprint.types';
 import { Task, TaskStatus, TaskPriority, CreateTaskRequest, UpdateTaskRequest, AssigneeType } from '@core/types/task';
-import { Team, Partner } from '@core';
-import { TeamRepository } from '@core/data-access/repositories/shared/team.repository';
-import { PartnerRepository } from '@core/data-access/repositories/shared/partner.repository';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
@@ -32,6 +33,7 @@ import { NzSliderModule } from 'ng-zorro-antd/slider';
 import { firstValueFrom } from 'rxjs';
 interface ModalData {
   blueprintId: string;
+  blueprintOwnerType: string;  // 'user' or 'organization' - required for assignee validation
   task?: Task;
   parentTask?: Task;
   mode: 'create' | 'edit' | 'view';
@@ -96,9 +98,15 @@ interface ModalData {
         <nz-form-label [nzSpan]="6">指派類型</nz-form-label>
         <nz-form-control [nzSpan]="14">
           <nz-radio-group formControlName="assigneeType">
-            <label nz-radio [nzValue]="AssigneeType.USER">用戶</label>
-            <label nz-radio [nzValue]="AssigneeType.TEAM">團隊</label>
-            <label nz-radio [nzValue]="AssigneeType.PARTNER">夥伴</label>
+            @if (isAssigneeTypeAllowed(AssigneeType.USER)) {
+              <label nz-radio [nzValue]="AssigneeType.USER">用戶</label>
+            }
+            @if (isAssigneeTypeAllowed(AssigneeType.TEAM)) {
+              <label nz-radio [nzValue]="AssigneeType.TEAM">團隊</label>
+            }
+            @if (isAssigneeTypeAllowed(AssigneeType.PARTNER)) {
+              <label nz-radio [nzValue]="AssigneeType.PARTNER">夥伴</label>
+            }
           </nz-radio-group>
         </nz-form-control>
       </nz-form-item>
@@ -300,6 +308,9 @@ export class TaskModalComponent implements OnInit {
   autoCalculatedHours = signal(0);
   remainingBudget = signal<number | null>(null);
 
+  // Allowed assignee types based on blueprint owner
+  private allowedAssigneeTypes: AssigneeType[] = [];
+
   // Progress marks
   readonly progressMarks = {
     0: '0%',
@@ -308,6 +319,13 @@ export class TaskModalComponent implements OnInit {
     75: '75%',
     100: '100%'
   };
+
+  /**
+   * Check if assignee type is allowed based on blueprint owner type
+   */
+  isAssigneeTypeAllowed(type: AssigneeType): boolean {
+    return this.allowedAssigneeTypes.includes(type);
+  }
 
   // Currency formatter for input-number
   formatCurrency = (value: number): string => {
@@ -319,6 +337,10 @@ export class TaskModalComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    // Calculate allowed assignee types based on blueprint owner type
+    const ownerType = this.modalData.blueprintOwnerType as OwnerType;
+    this.allowedAssigneeTypes = getAllowedAssigneeTypes(ownerType);
+
     this.initForm();
     this.loadBlueprintMembers();
     this.loadTeamsAndPartners();
@@ -343,15 +365,15 @@ export class TaskModalComponent implements OnInit {
       // For now, we'll need to get organization ID from a different source
       // This is a limitation that will need to be addressed with proper organization context
       // For the MVP, we'll load teams/partners when available
-      
+
       // TODO: Implement proper organization context service
       // For now, skip loading teams and partners if we can't determine organization
       console.warn('Organization context not available - teams/partners not loaded');
-      
+
       // Placeholder: In future, get from OrganizationContextService or similar
       // const organizationId = this.organizationContext.getCurrentOrganizationId();
       // if (!organizationId) return;
-      
+
       // Load teams
       // this.loadingTeams.set(true);
       // const teams = await firstValueFrom(this.teamRepo.findByOrganization(organizationId));
@@ -579,14 +601,20 @@ export class TaskModalComponent implements OnInit {
       const isAlreadyMember = existingMembers.some(m => m.accountId === creatorId);
 
       if (!isAlreadyMember) {
-        // Add creator as CONTRIBUTOR
-        await this.memberRepo.addMember(this.modalData.blueprintId, {
-          blueprintId: this.modalData.blueprintId,
-          accountId: creatorId,
-          role: BlueprintRole.CONTRIBUTOR,
-          isExternal: false,
-          grantedBy: creatorId
-        });
+        // Add creator as CONTRIBUTOR with USER member type
+        // Note: accountName will be populated by the backend or can be updated later
+        await this.memberRepo.addMember(
+          this.modalData.blueprintId,
+          this.modalData.blueprintOwnerType as OwnerType,
+          {
+            blueprintId: this.modalData.blueprintId,
+            accountId: creatorId,
+            memberType: BlueprintMemberType.USER,
+            role: BlueprintRole.CONTRIBUTOR,
+            isExternal: false,
+            grantedBy: creatorId
+          }
+        );
 
         // Reload members list
         await this.loadBlueprintMembers();

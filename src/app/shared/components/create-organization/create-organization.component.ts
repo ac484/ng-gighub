@@ -12,7 +12,7 @@
 
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Organization, FirebaseAuthService } from '@core';
+import { FirebaseAuthService } from '@core';
 import { OrganizationRepository } from '@core/repositories';
 import { WorkspaceContextService } from '@shared';
 import { NzButtonModule } from 'ng-zorro-antd/button';

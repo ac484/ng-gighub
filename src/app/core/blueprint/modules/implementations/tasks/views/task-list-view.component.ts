@@ -26,6 +26,7 @@ import { SHARED_IMPORTS } from '@shared';
 import { provideNzIconsPatch } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
+
 import { TaskAssignModalComponent } from '../components/task-assign-modal/task-assign-modal.component';
 /**
  * Flat node for table display with hierarchy info
@@ -447,7 +448,7 @@ export class TaskListViewComponent {
     });
 
     // Reload tasks after successful assignment
-    modalRef.afterClose.subscribe((result) => {
+    modalRef.afterClose.subscribe(result => {
       if (result === true) {
         // Assignment successful - tasks will auto-reload via store subscription
         this.assignTask.emit(task);

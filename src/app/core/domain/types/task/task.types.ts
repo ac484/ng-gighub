@@ -43,14 +43,24 @@ export enum TaskPriority {
  * Assignee type enum
  * 指派對象類型列舉
  *
- * Defines who the task can be assigned to
+ * Defines who the task can be assigned to.
+ * 
+ * IMPORTANT: Task assignment is scoped to blueprint membership.
+ * A task may only be assigned to users, teams, or partners that are valid members 
+ * of the blueprint, and the allowed assignee types are determined by the blueprint's owner:
+ * 
+ * - User-owned blueprints: Only USER assignees allowed (members must be USER type)
+ * - Organization-owned blueprints: USER, TEAM, and PARTNER assignees allowed
+ * 
+ * @see BlueprintMemberType for corresponding member types
+ * @see isValidAssigneeTypeForOwner for validation logic
  */
 export enum AssigneeType {
   /** Individual user */
   USER = 'user',
-  /** Internal team */
+  /** Internal team (organization sub-account) */
   TEAM = 'team',
-  /** External partner */
+  /** External partner (organization sub-account) */
   PARTNER = 'partner'
 }
 

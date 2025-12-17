@@ -376,10 +376,18 @@ export class BlueprintListComponent implements OnInit {
 
     const ownerLabels: Record<OwnerType, string> = {
       [OwnerType.USER]: '個人',
-      [OwnerType.ORGANIZATION]: '組織',
-      [OwnerType.TEAM]: '團隊'
+      [OwnerType.ORGANIZATION]: '組織'
     };
 
+    // For user-owned blueprints, try to show user name
+    if (blueprint.ownerType === OwnerType.USER) {
+      const user = this.workspaceContext.currentUser();
+      if (user?.name && user.id === blueprint.ownerId) {
+        return user.name;
+      }
+    }
+
+    // For organization-owned blueprints, try to show organization name
     if (blueprint.ownerType === OwnerType.ORGANIZATION) {
       const organization = this.workspaceContext.organizations().find(org => org.id === blueprint.ownerId);
       if (organization?.name) {
@@ -387,19 +395,8 @@ export class BlueprintListComponent implements OnInit {
       }
     }
 
-    if (blueprint.ownerType === OwnerType.TEAM) {
-      const team = this.workspaceContext.teams().find(t => t.id === blueprint.ownerId);
-      if (team?.name) {
-        return team.name;
-      }
-    }
-
-    const user = this.workspaceContext.currentUser();
-    if (blueprint.ownerType === OwnerType.USER && user?.name) {
-      return user.name;
-    }
-
-    return ownerLabels[blueprint.ownerType] || blueprint.ownerType || '-';
+    // Fallback to generic label
+    return ownerLabels[blueprint.ownerType] || '未知';
   }
 
   private getResponsibleDisplay(blueprint: Blueprint): string {

@@ -7,6 +7,7 @@ import {
   getDoc,
   getDocs,
   deleteDoc,
+  updateDoc,
   query,
   where,
   CollectionReference,
@@ -174,6 +175,33 @@ export class PartnerMemberRepository {
       console.log('[PartnerMemberRepository] ✅ Member removed:', memberId);
     } catch (error: any) {
       this.logger.error('[PartnerMemberRepository]', 'removeMember failed', error as Error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update member role
+   * 更新成員角色
+   *
+   * Modern implementation using Firestore updateDoc instead of delete+add pattern.
+   * This preserves the member ID and joined_at timestamp while updating the role.
+   *
+   * @param memberId Member ID
+   * @param newRole New partner role
+   * @returns Promise<void>
+   */
+  async updateRole(memberId: string, newRole: PartnerRole): Promise<void> {
+    try {
+      await updateDoc(this.getDocRef(memberId), { role: newRole });
+      console.log('[PartnerMemberRepository] ✅ Member role updated:', memberId, 'to', newRole);
+    } catch (error: any) {
+      this.logger.error('[PartnerMemberRepository]', 'updateRole failed', error as Error);
+      console.error('[PartnerMemberRepository] Error details:', {
+        code: error.code,
+        message: error.message,
+        memberId,
+        newRole
+      });
       throw error;
     }
   }

@@ -13,14 +13,14 @@
 
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Team, Partner } from '@core';
 import { BlueprintMemberRepository } from '@core/blueprint/repositories/blueprint-member.repository';
+import { PartnerRepository } from '@core/data-access/repositories/shared/partner.repository';
+import { TeamRepository } from '@core/data-access/repositories/shared/team.repository';
 import { FirebaseService } from '@core/services/firebase.service';
 import { TaskStore } from '@core/state/stores/task.store';
 import { BlueprintMember } from '@core/types/blueprint/blueprint.types';
 import { Task, AssigneeType } from '@core/types/task';
-import { Team, Partner } from '@core';
-import { TeamRepository } from '@core/data-access/repositories/shared/team.repository';
-import { PartnerRepository } from '@core/data-access/repositories/shared/partner.repository';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
@@ -39,12 +39,12 @@ interface ModalData {
     <form nz-form [formGroup]="form" (ngSubmit)="submit()">
       <!-- Current Assignment Info -->
       @if (task()) {
-        <nz-alert 
-          nzType="info" 
-          nzShowIcon 
+        <nz-alert
+          nzType="info"
+          nzShowIcon
           [nzMessage]="'當前任務: ' + task()!.title"
           [nzDescription]="getCurrentAssignmentDescription()"
-          style="margin-bottom: 16px;" 
+          style="margin-bottom: 16px;"
         />
       }
 
@@ -74,19 +74,16 @@ interface ModalData {
         <nz-form-item>
           <nz-form-label [nzSpan]="6" nzRequired>指派用戶</nz-form-label>
           <nz-form-control [nzSpan]="14" nzErrorTip="請選擇用戶">
-            <nz-select 
-              formControlName="assigneeId" 
-              nzPlaceHolder="選擇用戶" 
+            <nz-select
+              formControlName="assigneeId"
+              nzPlaceHolder="選擇用戶"
               nzShowSearch
               nzAllowClear
               style="width: 100%;"
               [nzLoading]="loadingMembers()"
             >
               @for (member of members(); track member.accountId) {
-                <nz-option 
-                  [nzValue]="member.accountId" 
-                  [nzLabel]="member.accountId"
-                >
+                <nz-option [nzValue]="member.accountId" [nzLabel]="member.accountId">
                   <span nz-icon nzType="user" nzTheme="outline"></span>
                   {{ member.accountId }}
                   <nz-tag [nzColor]="getRoleColor(member.role)" style="margin-left: 8px;">
@@ -104,19 +101,16 @@ interface ModalData {
         <nz-form-item>
           <nz-form-label [nzSpan]="6" nzRequired>指派團隊</nz-form-label>
           <nz-form-control [nzSpan]="14" nzErrorTip="請選擇團隊">
-            <nz-select 
-              formControlName="assigneeTeamId" 
-              nzPlaceHolder="選擇團隊" 
+            <nz-select
+              formControlName="assigneeTeamId"
+              nzPlaceHolder="選擇團隊"
               nzShowSearch
               nzAllowClear
               style="width: 100%;"
               [nzLoading]="loadingTeams()"
             >
               @for (team of teams(); track team.id) {
-                <nz-option 
-                  [nzValue]="team.id" 
-                  [nzLabel]="team.name"
-                >
+                <nz-option [nzValue]="team.id" [nzLabel]="team.name">
                   <span nz-icon nzType="team" nzTheme="outline"></span>
                   {{ team.name }}
                   @if (team.description) {
@@ -134,19 +128,16 @@ interface ModalData {
         <nz-form-item>
           <nz-form-label [nzSpan]="6" nzRequired>指派夥伴</nz-form-label>
           <nz-form-control [nzSpan]="14" nzErrorTip="請選擇夥伴">
-            <nz-select 
-              formControlName="assigneePartnerId" 
-              nzPlaceHolder="選擇夥伴" 
+            <nz-select
+              formControlName="assigneePartnerId"
+              nzPlaceHolder="選擇夥伴"
               nzShowSearch
               nzAllowClear
               style="width: 100%;"
               [nzLoading]="loadingPartners()"
             >
               @for (partner of partners(); track partner.id) {
-                <nz-option 
-                  [nzValue]="partner.id" 
-                  [nzLabel]="partner.name"
-                >
+                <nz-option [nzValue]="partner.id" [nzLabel]="partner.name">
                   <span nz-icon nzType="solution" nzTheme="outline"></span>
                   {{ partner.name }}
                   @if (partner.company_name) {
@@ -163,10 +154,10 @@ interface ModalData {
       <nz-form-item>
         <nz-form-label [nzSpan]="6">指派備註</nz-form-label>
         <nz-form-control [nzSpan]="14">
-          <textarea 
-            nz-input 
-            formControlName="note" 
-            [nzAutosize]="{ minRows: 2, maxRows: 4 }" 
+          <textarea
+            nz-input
+            formControlName="note"
+            [nzAutosize]="{ minRows: 2, maxRows: 4 }"
             placeholder="可選：指派原因或特別說明"
           ></textarea>
         </nz-form-control>
@@ -174,12 +165,8 @@ interface ModalData {
 
       <!-- Form Actions -->
       <div class="modal-footer">
-        <button nz-button nzType="default" (click)="cancel()" type="button">
-          取消
-        </button>
-        <button nz-button nzType="primary" [nzLoading]="submitting()" [disabled]="!form.valid" type="submit">
-          確認指派
-        </button>
+        <button nz-button nzType="default" (click)="cancel()" type="button"> 取消 </button>
+        <button nz-button nzType="primary" [nzLoading]="submitting()" [disabled]="!form.valid" type="submit"> 確認指派 </button>
       </div>
     </form>
   `,
@@ -405,7 +392,7 @@ export class TaskAssignModalComponent implements OnInit {
     try {
       const formValue = this.form.value;
       const task = this.task()!;
-      
+
       // Prepare update data based on assignee type
       const updateData: any = {
         assigneeType: formValue.assigneeType
@@ -449,8 +436,8 @@ export class TaskAssignModalComponent implements OnInit {
 
       // Update task
       await this.taskStore.updateTask(
-        this.modalData.blueprintId, 
-        task.id!, 
+        this.modalData.blueprintId,
+        task.id!,
         updateData,
         'current-user' // TODO: Get actual current user ID from auth service
       );
