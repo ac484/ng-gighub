@@ -8,6 +8,7 @@ import { BlueprintService } from '@core/blueprint/services';
 import { SHARED_IMPORTS, createAsyncState } from '@shared';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzResultModule } from 'ng-zorro-antd/result';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
@@ -66,6 +67,7 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
     NzSpaceModule,
     NzTabsModule,
     NzTagModule,
+    NzFormModule,
     DatePipe,
     AuditLogsComponent,
     BlueprintMembersComponent,
@@ -415,16 +417,94 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
           <!-- Settings Tab -->
           <nz-tab nzTitle="設定">
             <ng-template nz-tab>
-              <nz-card nzTitle="藍圖設定">
-                <p class="mb-md text-grey">管理藍圖的基本資訊和模組配置</p>
-                <nz-space [nzSize]="'middle'">
-                  <button *nzSpaceItem nz-button nzType="primary" (click)="edit()">
+              <!-- 基本資訊設定 -->
+              <nz-card nzTitle="基本資訊" class="mb-md">
+                <nz-descriptions [nzColumn]="2" nzBordered>
+                  <nz-descriptions-item nzTitle="藍圖名稱">{{ blueprint()?.name }}</nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="藍圖代碼">{{ blueprint()?.slug || '-' }}</nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="狀態">
+                    <nz-tag [nzColor]="getStatusColor(blueprint()?.status ?? '')">{{ getStatusText(blueprint()?.status ?? '') }}</nz-tag>
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="創建日期">{{ blueprint()?.createdAt | date: 'yyyy-MM-dd' }}</nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="描述" [nzSpan]="2">{{ blueprint()?.description || '無描述' }}</nz-descriptions-item>
+                </nz-descriptions>
+                <div style="margin-top: 16px;">
+                  <button nz-button nzType="primary" (click)="edit()">
                     <span nz-icon nzType="edit"></span>
-                    編輯藍圖資訊
+                    編輯基本資訊
                   </button>
-                  <button *nzSpaceItem nz-button (click)="configureModules()">
-                    <span nz-icon nzType="appstore"></span>
-                    配置模組
+                </div>
+              </nz-card>
+
+              <!-- 模組配置 -->
+              <nz-card nzTitle="模組配置" class="mb-md">
+                <p style="color: #666; margin-bottom: 16px;">啟用或停用各功能模組</p>
+                <nz-row [nzGutter]="[16, 16]">
+                  @for (module of moduleList; track module.key) {
+                    <nz-col [nzSpan]="8">
+                      <nz-card nzSize="small" [nzHoverable]="true">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                          <div>
+                            <span nz-icon [nzType]="module.icon" style="margin-right: 8px;"></span>
+                            <span>{{ module.name }}</span>
+                          </div>
+                          <nz-switch
+                            [ngModel]="isModuleEnabled(module.key)"
+                            (ngModelChange)="toggleModule(module.key, $event)"
+                            nzSize="small"
+                          ></nz-switch>
+                        </div>
+                      </nz-card>
+                    </nz-col>
+                  }
+                </nz-row>
+                <div style="margin-top: 16px;">
+                  <button nz-button (click)="configureModules()">
+                    <span nz-icon nzType="setting"></span>
+                    進階模組設定
+                  </button>
+                </div>
+              </nz-card>
+
+              <!-- 通知設定 -->
+              <nz-card nzTitle="通知設定" class="mb-md">
+                <form nz-form nzLayout="vertical">
+                  <nz-form-item>
+                    <nz-form-label>電子郵件通知</nz-form-label>
+                    <nz-form-control>
+                      <nz-switch
+                        [ngModel]="true"
+                        (ngModelChange)="onNotificationChange('email', $event)"
+                        [ngModelOptions]="{ standalone: true }"
+                      ></nz-switch>
+                      <span style="margin-left: 8px; color: #666;">接收藍圖相關的電子郵件通知</span>
+                    </nz-form-control>
+                  </nz-form-item>
+                  <nz-form-item>
+                    <nz-form-label>即將到期提醒</nz-form-label>
+                    <nz-form-control>
+                      <nz-switch
+                        [ngModel]="true"
+                        (ngModelChange)="onNotificationChange('deadline', $event)"
+                        [ngModelOptions]="{ standalone: true }"
+                      ></nz-switch>
+                      <span style="margin-left: 8px; color: #666;">接收任務和保固到期提醒</span>
+                    </nz-form-control>
+                  </nz-form-item>
+                </form>
+              </nz-card>
+
+              <!-- 危險操作區 -->
+              <nz-card nzTitle="危險區域">
+                <nz-alert nzType="warning" nzMessage="以下操作不可逆，請謹慎操作" nzShowIcon class="mb-md"> </nz-alert>
+                <nz-space>
+                  <button *nzSpaceItem nz-button nzDanger (click)="archiveBlueprint()">
+                    <span nz-icon nzType="inbox"></span>
+                    封存藍圖
+                  </button>
+                  <button *nzSpaceItem nz-button nzDanger nzType="primary" (click)="deleteBlueprint()">
+                    <span nz-icon nzType="delete"></span>
+                    刪除藍圖
                   </button>
                 </nz-space>
               </nz-card>
@@ -731,5 +811,84 @@ export class BlueprintDetailComponent implements OnInit {
    */
   onTabChange(index: number): void {
     this.logger.debug('[BlueprintDetailComponent]', `Tab changed to index: ${index}`);
+  }
+
+  /**
+   * Get status color for tag
+   * 取得狀態標籤顏色
+   */
+  getStatusColor(status: string | undefined): string {
+    if (!status) return 'default';
+    const colorMap: Record<string, string> = {
+      draft: 'default',
+      active: 'success',
+      archived: 'warning',
+      completed: 'processing'
+    };
+    return colorMap[status] || 'default';
+  }
+
+  /**
+   * Module list for settings
+   * 設定頁面的模組列表
+   */
+  moduleList = [
+    { key: 'tasks', name: '任務管理', icon: 'check-square' },
+    { key: 'log', name: '日誌域', icon: 'file-text' },
+    { key: 'workflow', name: '流程域', icon: 'apartment' },
+    { key: 'qa', name: '品質控管', icon: 'safety-certificate' },
+    { key: 'acceptance', name: '驗收域', icon: 'check-circle' },
+    { key: 'finance', name: '財務域', icon: 'dollar' },
+    { key: 'material', name: '材料域', icon: 'inbox' },
+    { key: 'safety', name: '安全域', icon: 'safety' },
+    { key: 'communication', name: '通訊域', icon: 'message' },
+    { key: 'cloud', name: '雲端域', icon: 'cloud' },
+    { key: 'warranty', name: '保固域', icon: 'safety-certificate' },
+    { key: 'issues', name: '問題追蹤', icon: 'warning' }
+  ];
+
+  /**
+   * Check if module is enabled
+   * 檢查模組是否啟用
+   */
+  isModuleEnabled(moduleKey: string): boolean {
+    const bp = this.blueprint();
+    if (!bp?.enabledModules) return false;
+    // Check if the string value exists in the enabled modules
+    return bp.enabledModules.some(m => m === moduleKey);
+  }
+
+  /**
+   * Toggle module enabled state
+   * 切換模組啟用狀態
+   */
+  toggleModule(moduleKey: string, enabled: boolean): void {
+    this.message.info(`${enabled ? '啟用' : '停用'}模組：${moduleKey}`);
+    // TODO: Update blueprint enabled modules
+  }
+
+  /**
+   * Handle notification setting change
+   * 處理通知設定變更
+   */
+  onNotificationChange(type: string, enabled: boolean): void {
+    this.message.info(`${enabled ? '啟用' : '停用'}${type === 'email' ? '電子郵件' : '到期提醒'}通知`);
+    // TODO: Save notification settings
+  }
+
+  /**
+   * Archive blueprint
+   * 封存藍圖
+   */
+  archiveBlueprint(): void {
+    this.message.info('封存功能待實作');
+  }
+
+  /**
+   * Delete blueprint
+   * 刪除藍圖
+   */
+  deleteBlueprint(): void {
+    this.message.info('刪除功能待實作');
   }
 }

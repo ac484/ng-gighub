@@ -8,255 +8,187 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
+import { NzTimelineModule } from 'ng-zorro-antd/timeline';
 
 /**
  * Container Dashboard Component
  *
- * Provides a comprehensive overview of the Blueprint Container Layer status,
- * including modules, events, resources, and lifecycle information.
+ * Firebase 適用的容器監控儀表板
  *
  * Features:
- * - Real-time container status monitoring
- * - Module registry overview
- * - Event bus statistics
- * - Resource provider status
- * - Lifecycle manager state
- * - Quick navigation to detailed views
+ * - Firebase 連線狀態監控
+ * - Firestore 資料同步狀態
+ * - Authentication 狀態
+ * - Storage 使用量
+ * - 模組載入狀態
+ * - 事件日誌
  *
- * @version 1.0.0
+ * @version 2.0.0
  * @since Angular 20.3.0
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-container-dashboard',
   standalone: true,
-  imports: [SHARED_IMPORTS, NzStatisticModule, NzCardModule, NzGridModule, NzBadgeModule, NzButtonModule, NzIconModule, NzAlertModule],
+  imports: [
+    SHARED_IMPORTS,
+    NzStatisticModule,
+    NzCardModule,
+    NzGridModule,
+    NzBadgeModule,
+    NzButtonModule,
+    NzIconModule,
+    NzAlertModule,
+    NzProgressModule,
+    NzTimelineModule
+  ],
   template: `
-    <page-header [title]="'容器儀表板'" [breadcrumb]="breadcrumb">
-      <ng-template #breadcrumb>
-        <nz-breadcrumb>
-          <nz-breadcrumb-item>
-            <a [routerLink]="['../../']">藍圖管理</a>
-          </nz-breadcrumb-item>
-          <nz-breadcrumb-item>
-            <a [routerLink]="['../']">藍圖詳情</a>
-          </nz-breadcrumb-item>
-          <nz-breadcrumb-item>容器儀表板</nz-breadcrumb-item>
-        </nz-breadcrumb>
+    <!-- Firebase 連線狀態 -->
+    <nz-card nzTitle="Firebase 服務狀態" [nzExtra]="statusExtra" class="mb-md">
+      <ng-template #statusExtra>
+        <button nz-button nzType="primary" (click)="refreshStatus()">
+          <span nz-icon nzType="reload"></span>
+          重新整理
+        </button>
       </ng-template>
-    </page-header>
 
-    <div class="container-dashboard">
-      <!-- Container Status Card -->
-      <nz-card nzTitle="容器狀態" [nzExtra]="statusExtra" class="mb-md">
-        <ng-template #statusExtra>
-          <button nz-button nzType="primary" (click)="refreshStatus()">
-            <span nz-icon nzType="reload"></span>
-            重新整理
-          </button>
-        </ng-template>
-
-        @if (containerLoading()) {
-          <nz-alert nzType="info" nzMessage="正在載入容器狀態..." nzShowIcon class="mb-md" />
-        } @else if (containerError()) {
-          <nz-alert nzType="error" [nzMessage]="'載入失敗'" [nzDescription]="containerError()" nzShowIcon class="mb-md" />
-        } @else {
-          <div nz-row [nzGutter]="16">
-            <div nz-col [nzSpan]="6">
-              <nz-statistic [nzValue]="containerStatus().status" nzTitle="運行狀態" [nzValueStyle]="getStatusStyle()">
-                <ng-template #nzPrefix>
-                  <span nz-icon [nzType]="getStatusIcon()"></span>
-                </ng-template>
-              </nz-statistic>
-            </div>
-            <div nz-col [nzSpan]="6">
-              <nz-statistic [nzValue]="containerStatus().uptime" nzTitle="運行時間" nzSuffix="秒">
-                <ng-template #nzPrefix>
-                  <span nz-icon nzType="clock-circle"></span>
-                </ng-template>
-              </nz-statistic>
-            </div>
-            <div nz-col [nzSpan]="6">
-              <nz-statistic [nzValue]="containerStatus().moduleCount" nzTitle="已載入模組">
-                <ng-template #nzPrefix>
-                  <span nz-icon nzType="appstore"></span>
-                </ng-template>
-              </nz-statistic>
-            </div>
-            <div nz-col [nzSpan]="6">
-              <nz-statistic [nzValue]="containerStatus().eventCount" nzTitle="事件處理數">
-                <ng-template #nzPrefix>
-                  <span nz-icon nzType="thunderbolt"></span>
-                </ng-template>
-              </nz-statistic>
-            </div>
-          </div>
-        }
-      </nz-card>
-
-      <!-- Quick Navigation Cards -->
-      <div nz-row [nzGutter]="[16, 16]">
-        <!-- Event Bus Monitor Card -->
-        <div nz-col [nzSpan]="12">
-          <nz-card nzTitle="事件總線監控" [nzHoverable]="true" class="dashboard-card" (click)="navigateToEventBus()">
-            <div class="card-content">
-              <div class="card-icon">
-                <span nz-icon nzType="radar-chart" nzTheme="outline"></span>
-              </div>
-              <div class="card-stats">
-                <nz-statistic [nzValue]="eventBusStats().totalEvents" nzTitle="總事件數" />
-                <nz-statistic [nzValue]="eventBusStats().subscriberCount" nzTitle="訂閱者數量" />
-              </div>
-            </div>
-            <div class="card-footer">
-              <a>查看詳細監控 <span nz-icon nzType="arrow-right"></span></a>
-            </div>
-          </nz-card>
+      @if (loading()) {
+        <div style="text-align: center; padding: 24px;">
+          <nz-spin nzSimple></nz-spin>
         </div>
+      } @else {
+        <nz-row [nzGutter]="[16, 16]">
+          <!-- Firestore 狀態 -->
+          <nz-col [nzXs]="12" [nzSm]="6">
+            <nz-card nzSize="small" [nzHoverable]="true">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <nz-badge [nzStatus]="firebaseStatus().firestore ? 'success' : 'error'"></nz-badge>
+                <div>
+                  <div style="font-weight: 500;">Firestore</div>
+                  <div style="color: #666; font-size: 12px;">
+                    {{ firebaseStatus().firestore ? '已連線' : '未連線' }}
+                  </div>
+                </div>
+              </div>
+            </nz-card>
+          </nz-col>
 
-        <!-- Module Registry Card -->
-        <div nz-col [nzSpan]="12">
-          <nz-card nzTitle="模組註冊表" [nzHoverable]="true" class="dashboard-card" (click)="navigateToModuleRegistry()">
-            <div class="card-content">
-              <div class="card-icon">
-                <span nz-icon nzType="appstore" nzTheme="outline"></span>
+          <!-- Authentication 狀態 -->
+          <nz-col [nzXs]="12" [nzSm]="6">
+            <nz-card nzSize="small" [nzHoverable]="true">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <nz-badge [nzStatus]="firebaseStatus().auth ? 'success' : 'warning'"></nz-badge>
+                <div>
+                  <div style="font-weight: 500;">Authentication</div>
+                  <div style="color: #666; font-size: 12px;">
+                    {{ firebaseStatus().auth ? '已登入' : '未登入' }}
+                  </div>
+                </div>
               </div>
-              <div class="card-stats">
-                <nz-statistic [nzValue]="moduleStats().totalModules" nzTitle="註冊模組" />
-                <nz-statistic [nzValue]="moduleStats().activeModules" nzTitle="運行中" />
-              </div>
-            </div>
-            <div class="card-footer">
-              <a>管理模組 <span nz-icon nzType="arrow-right"></span></a>
-            </div>
-          </nz-card>
-        </div>
+            </nz-card>
+          </nz-col>
 
-        <!-- Lifecycle Manager Card -->
-        <div nz-col [nzSpan]="12">
-          <nz-card nzTitle="生命週期管理器" [nzHoverable]="true" class="dashboard-card" (click)="navigateToLifecycle()">
-            <div class="card-content">
-              <div class="card-icon">
-                <span nz-icon nzType="deployment-unit" nzTheme="outline"></span>
+          <!-- Storage 狀態 -->
+          <nz-col [nzXs]="12" [nzSm]="6">
+            <nz-card nzSize="small" [nzHoverable]="true">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <nz-badge [nzStatus]="firebaseStatus().storage ? 'success' : 'error'"></nz-badge>
+                <div>
+                  <div style="font-weight: 500;">Storage</div>
+                  <div style="color: #666; font-size: 12px;">
+                    {{ firebaseStatus().storage ? '可用' : '不可用' }}
+                  </div>
+                </div>
               </div>
-              <div class="card-stats">
-                <nz-statistic [nzValue]="lifecycleStats().currentPhase" nzTitle="當前階段" />
-                <nz-statistic [nzValue]="lifecycleStats().transitionCount" nzTitle="狀態轉換" />
-              </div>
-            </div>
-            <div class="card-footer">
-              <a>查看狀態機 <span nz-icon nzType="arrow-right"></span></a>
-            </div>
-          </nz-card>
-        </div>
+            </nz-card>
+          </nz-col>
 
-        <!-- Resource Provider Card -->
-        <div nz-col [nzSpan]="12">
-          <nz-card nzTitle="資源提供者" [nzHoverable]="true" class="dashboard-card" (click)="navigateToResources()">
-            <div class="card-content">
-              <div class="card-icon">
-                <span nz-icon nzType="database" nzTheme="outline"></span>
+          <!-- Realtime 狀態 -->
+          <nz-col [nzXs]="12" [nzSm]="6">
+            <nz-card nzSize="small" [nzHoverable]="true">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <nz-badge [nzStatus]="firebaseStatus().realtime ? 'success' : 'default'"></nz-badge>
+                <div>
+                  <div style="font-weight: 500;">Realtime</div>
+                  <div style="color: #666; font-size: 12px;">
+                    {{ firebaseStatus().realtime ? '同步中' : '離線' }}
+                  </div>
+                </div>
               </div>
-              <div class="card-stats">
-                <nz-statistic [nzValue]="resourceStats().totalResources" nzTitle="總資源數" />
-                <nz-statistic [nzValue]="resourceStats().healthyResources" nzTitle="健康資源" />
-              </div>
-            </div>
-            <div class="card-footer">
-              <a>資源監控 <span nz-icon nzType="arrow-right"></span></a>
-            </div>
-          </nz-card>
-        </div>
+            </nz-card>
+          </nz-col>
+        </nz-row>
+      }
+    </nz-card>
 
-        <!-- Shared Context Card -->
-        <div nz-col [nzSpan]="12">
-          <nz-card nzTitle="共享上下文" [nzHoverable]="true" class="dashboard-card" (click)="navigateToContext()">
-            <div class="card-content">
-              <div class="card-icon">
-                <span nz-icon nzType="cluster" nzTheme="outline"></span>
-              </div>
-              <div class="card-stats">
-                <nz-statistic [nzValue]="contextStats().dataSize" nzTitle="資料大小" nzSuffix="KB" />
-                <nz-statistic [nzValue]="contextStats().serviceCount" nzTitle="服務數量" />
-              </div>
-            </div>
-            <div class="card-footer">
-              <a>檢查上下文 <span nz-icon nzType="arrow-right"></span></a>
-            </div>
-          </nz-card>
-        </div>
+    <!-- 資源使用情況 -->
+    <nz-row [nzGutter]="[16, 16]" class="mb-md">
+      <nz-col [nzXs]="24" [nzSm]="12">
+        <nz-card nzTitle="Firestore 使用量" nzSize="small">
+          <nz-statistic [nzValue]="resourceStats().firestoreReads" nzTitle="今日讀取次數"></nz-statistic>
+          <nz-progress [nzPercent]="resourceStats().firestoreUsagePercent" nzSize="small" style="margin-top: 12px;"></nz-progress>
+          <div style="color: #666; font-size: 12px; margin-top: 8px;"> 配額使用：{{ resourceStats().firestoreUsagePercent }}% </div>
+        </nz-card>
+      </nz-col>
+      <nz-col [nzXs]="24" [nzSm]="12">
+        <nz-card nzTitle="Storage 使用量" nzSize="small">
+          <nz-statistic [nzValue]="resourceStats().storageUsedMB" nzTitle="已用空間" nzSuffix="MB"></nz-statistic>
+          <nz-progress [nzPercent]="resourceStats().storageUsagePercent" nzSize="small" style="margin-top: 12px;"></nz-progress>
+          <div style="color: #666; font-size: 12px; margin-top: 8px;"> 總容量：{{ resourceStats().storageTotalMB }} MB </div>
+        </nz-card>
+      </nz-col>
+    </nz-row>
 
-        <!-- Performance Metrics Card -->
-        <div nz-col [nzSpan]="12">
-          <nz-card nzTitle="效能指標" [nzHoverable]="true" class="dashboard-card">
-            <div class="card-content">
-              <div class="card-icon">
-                <span nz-icon nzType="dashboard" nzTheme="outline"></span>
-              </div>
-              <div class="card-stats">
-                <nz-statistic [nzValue]="performanceStats().avgEventTime" nzTitle="平均事件處理" nzSuffix="ms" />
-                <nz-statistic [nzValue]="performanceStats().memoryUsage" nzTitle="記憶體使用" nzSuffix="MB" />
-              </div>
-            </div>
-            <div class="card-footer">
-              <span>即時效能監控</span>
-            </div>
-          </nz-card>
-        </div>
-      </div>
-    </div>
+    <!-- 模組與事件 -->
+    <nz-row [nzGutter]="[16, 16]">
+      <!-- 模組載入狀態 -->
+      <nz-col [nzXs]="24" [nzSm]="12">
+        <nz-card nzTitle="模組載入狀態" nzSize="small">
+          <nz-row [nzGutter]="[8, 8]">
+            @for (module of moduleStatus(); track module.name) {
+              <nz-col [nzSpan]="12">
+                <div
+                  style="display: flex; align-items: center; justify-content: space-between; padding: 8px; background: #fafafa; border-radius: 4px;"
+                >
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span nz-icon [nzType]="module.icon" style="font-size: 16px;"></span>
+                    <span>{{ module.name }}</span>
+                  </div>
+                  <nz-badge [nzStatus]="module.loaded ? 'success' : 'default'" [nzText]="module.loaded ? '已載入' : '未載入'"></nz-badge>
+                </div>
+              </nz-col>
+            }
+          </nz-row>
+        </nz-card>
+      </nz-col>
+
+      <!-- 最近事件 -->
+      <nz-col [nzXs]="24" [nzSm]="12">
+        <nz-card nzTitle="最近事件" nzSize="small">
+          @if (recentEvents().length === 0) {
+            <div style="text-align: center; padding: 24px; color: #999;"> 暫無事件記錄 </div>
+          } @else {
+            <nz-timeline>
+              @for (event of recentEvents(); track event.id) {
+                <nz-timeline-item [nzColor]="getEventColor(event.type)">
+                  <div style="display: flex; justify-content: space-between;">
+                    <span>{{ event.message }}</span>
+                    <span style="color: #999; font-size: 12px;">{{ event.timestamp | date: 'HH:mm:ss' }}</span>
+                  </div>
+                </nz-timeline-item>
+              }
+            </nz-timeline>
+          }
+        </nz-card>
+      </nz-col>
+    </nz-row>
   `,
   styles: [
     `
       :host {
         display: block;
-      }
-
-      .container-dashboard {
-        padding: 0;
-      }
-
-      .dashboard-card {
-        cursor: pointer;
-        transition: all 0.3s ease;
-        height: 100%;
-      }
-
-      .dashboard-card:hover {
-        transform: translateY(-2px);
-      }
-
-      .card-content {
-        display: flex;
-        align-items: center;
-        gap: 24px;
-        margin-bottom: 16px;
-      }
-
-      .card-icon {
-        font-size: 48px;
-        line-height: 1;
-      }
-
-      .card-stats {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      .card-footer {
-        padding-top: 12px;
-        border-top: 1px solid;
-        text-align: right;
-      }
-
-      .card-footer a {
-        transition: color 0.3s ease;
-      }
-
-      .card-footer a:hover {
       }
 
       .mb-md {
@@ -270,116 +202,93 @@ export class ContainerDashboardComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly logger = inject(LoggerService);
 
-  // Loading and error states
-  containerLoading = signal(false);
-  containerError = signal<string | null>(null);
+  // 狀態
+  loading = signal(false);
 
-  // Container status
-  containerStatus = signal({
-    status: 'RUNNING',
-    uptime: 0,
-    moduleCount: 0,
-    eventCount: 0
+  // Firebase 連線狀態
+  firebaseStatus = signal({
+    firestore: true,
+    auth: true,
+    storage: true,
+    realtime: true
   });
 
-  // Component stats
-  eventBusStats = signal({
-    totalEvents: 0,
-    subscriberCount: 0
-  });
-
-  moduleStats = signal({
-    totalModules: 0,
-    activeModules: 0
-  });
-
-  lifecycleStats = signal({
-    currentPhase: 'READY',
-    transitionCount: 0
-  });
-
+  // 資源使用統計
   resourceStats = signal({
-    totalResources: 0,
-    healthyResources: 0
+    firestoreReads: 0,
+    firestoreUsagePercent: 0,
+    storageUsedMB: 0,
+    storageTotalMB: 1024,
+    storageUsagePercent: 0
   });
 
-  contextStats = signal({
-    dataSize: 0,
-    serviceCount: 0
-  });
+  // 模組狀態
+  moduleStatus = signal<Array<{ name: string; icon: string; loaded: boolean }>>([]);
 
-  performanceStats = signal({
-    avgEventTime: 0,
-    memoryUsage: 0
-  });
+  // 最近事件
+  recentEvents = signal<Array<{ id: string; type: string; message: string; timestamp: Date }>>([]);
 
   ngOnInit(): void {
-    this.loadContainerStatus();
+    this.loadStatus();
   }
 
   /**
-   * Load container status and statistics
+   * 載入狀態資料
    */
-  private async loadContainerStatus(): Promise<void> {
-    this.containerLoading.set(true);
-    this.containerError.set(null);
+  private async loadStatus(): Promise<void> {
+    this.loading.set(true);
 
     try {
-      // TODO: Replace with actual container service calls
-      // Simulated data for now
       await this.simulateDataLoad();
-
-      this.logger.info('[ContainerDashboard]', 'Container status loaded successfully');
+      this.logger.info('[ContainerDashboard]', 'Status loaded successfully');
     } catch (error) {
-      this.containerError.set(error instanceof Error ? error.message : 'Unknown error');
-      this.logger.error('[ContainerDashboard]', 'Failed to load container status', error as Error);
+      this.logger.error('[ContainerDashboard]', 'Failed to load status', error as Error);
     } finally {
-      this.containerLoading.set(false);
+      this.loading.set(false);
     }
   }
 
   /**
-   * Simulate data loading (to be replaced with real service calls)
+   * 模擬資料載入
    */
   private async simulateDataLoad(): Promise<void> {
     return new Promise(resolve => {
       setTimeout(() => {
-        this.containerStatus.set({
-          status: 'RUNNING',
-          uptime: 3600,
-          moduleCount: 8,
-          eventCount: 1234
+        // Firebase 狀態
+        this.firebaseStatus.set({
+          firestore: true,
+          auth: true,
+          storage: true,
+          realtime: true
         });
 
-        this.eventBusStats.set({
-          totalEvents: 1234,
-          subscriberCount: 42
-        });
-
-        this.moduleStats.set({
-          totalModules: 8,
-          activeModules: 8
-        });
-
-        this.lifecycleStats.set({
-          currentPhase: 'READY',
-          transitionCount: 16
-        });
-
+        // 資源統計
         this.resourceStats.set({
-          totalResources: 5,
-          healthyResources: 5
+          firestoreReads: 1234,
+          firestoreUsagePercent: 12,
+          storageUsedMB: 256,
+          storageTotalMB: 1024,
+          storageUsagePercent: 25
         });
 
-        this.contextStats.set({
-          dataSize: 128,
-          serviceCount: 12
-        });
+        // 模組狀態
+        this.moduleStatus.set([
+          { name: '任務', icon: 'check-square', loaded: true },
+          { name: '日誌', icon: 'file-text', loaded: true },
+          { name: '財務', icon: 'dollar', loaded: true },
+          { name: '品質', icon: 'safety-certificate', loaded: true },
+          { name: '安全', icon: 'safety', loaded: true },
+          { name: '材料', icon: 'inbox', loaded: true },
+          { name: '驗收', icon: 'check-circle', loaded: true },
+          { name: '雲端', icon: 'cloud', loaded: true }
+        ]);
 
-        this.performanceStats.set({
-          avgEventTime: 0.15,
-          memoryUsage: 45.6
-        });
+        // 最近事件
+        this.recentEvents.set([
+          { id: '1', type: 'info', message: '模組載入完成', timestamp: new Date() },
+          { id: '2', type: 'success', message: 'Firestore 同步成功', timestamp: new Date(Date.now() - 60000) },
+          { id: '3', type: 'info', message: '使用者登入', timestamp: new Date(Date.now() - 120000) }
+        ]);
 
         resolve();
       }, 500);
@@ -387,68 +296,22 @@ export class ContainerDashboardComponent implements OnInit {
   }
 
   /**
-   * Refresh container status
+   * 重新整理狀態
    */
   refreshStatus(): void {
-    this.loadContainerStatus();
+    this.loadStatus();
   }
 
   /**
-   * Get status icon based on container status
+   * 取得事件顏色
    */
-  getStatusIcon(): string {
-    const status = this.containerStatus().status;
-    switch (status) {
-      case 'RUNNING':
-        return 'check-circle';
-      case 'STOPPED':
-        return 'pause-circle';
-      case 'ERROR':
-        return 'close-circle';
-      default:
-        return 'question-circle';
-    }
-  }
-
-  /**
-   * Get status style based on container status
-   */
-  getStatusStyle(): Record<string, string> {
-    return {};
-  }
-
-  /**
-   * Navigate to Event Bus monitor
-   */
-  navigateToEventBus(): void {
-    this.router.navigate(['event-bus'], { relativeTo: this.route });
-  }
-
-  /**
-   * Navigate to Module Registry
-   */
-  navigateToModuleRegistry(): void {
-    this.router.navigate(['modules'], { relativeTo: this.route });
-  }
-
-  /**
-   * Navigate to Lifecycle Manager
-   */
-  navigateToLifecycle(): void {
-    this.router.navigate(['lifecycle'], { relativeTo: this.route });
-  }
-
-  /**
-   * Navigate to Resource Provider
-   */
-  navigateToResources(): void {
-    this.router.navigate(['resources'], { relativeTo: this.route });
-  }
-
-  /**
-   * Navigate to Shared Context
-   */
-  navigateToContext(): void {
-    this.router.navigate(['context'], { relativeTo: this.route });
+  getEventColor(type: string): string {
+    const colorMap: Record<string, string> = {
+      info: 'blue',
+      success: 'green',
+      warning: 'orange',
+      error: 'red'
+    };
+    return colorMap[type] || 'blue';
   }
 }
