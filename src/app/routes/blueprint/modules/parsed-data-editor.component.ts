@@ -18,18 +18,17 @@
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import type { EnhancedContractParsingOutput } from '@core/blueprint/modules/implementations/contract/utils/enhanced-parsing-converter';
 import { SHARED_IMPORTS } from '@shared';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
-import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzMessageService } from 'ng-zorro-antd/message';
-
-import type { EnhancedContractParsingOutput } from '@core/blueprint/modules/implementations/contract/utils/enhanced-parsing-converter';
 
 @Component({
   selector: 'app-parsed-data-editor',
@@ -52,7 +51,7 @@ import type { EnhancedContractParsingOutput } from '@core/blueprint/modules/impl
       @if (parsedData()) {
         <nz-alert
           nzType="info"
-          [nzMessage]="'AI 解析信心度: ' + ((confidence() * 100).toFixed(0)) + '%'"
+          [nzMessage]="'AI 解析信心度: ' + (confidence() * 100).toFixed(0) + '%'"
           [nzDescription]="getConfidenceDescription()"
           nzShowIcon
           class="mb-md"
@@ -90,12 +89,7 @@ import type { EnhancedContractParsingOutput } from '@core/blueprint/modules/impl
         <nz-form-item>
           <nz-form-label>描述</nz-form-label>
           <nz-form-control>
-            <textarea
-              nz-input
-              formControlName="description"
-              [nzAutosize]="{ minRows: 2, maxRows: 4 }"
-              placeholder="合約描述"
-            ></textarea>
+            <textarea nz-input formControlName="description" [nzAutosize]="{ minRows: 2, maxRows: 4 }" placeholder="合約描述"></textarea>
           </nz-form-control>
         </nz-form-item>
 
@@ -305,9 +299,7 @@ import type { EnhancedContractParsingOutput } from '@core/blueprint/modules/impl
         <div class="editor-actions mt-lg">
           <button nz-button nzType="default" (click)="onCancel()">取消</button>
           <button nz-button nzType="default" (click)="onReset()" class="ml-sm">重置</button>
-          <button nz-button nzType="primary" (click)="onConfirm()" [disabled]="editorForm.invalid" class="ml-sm">
-            確認並建立合約
-          </button>
+          <button nz-button nzType="primary" (click)="onConfirm()" [disabled]="editorForm.invalid" class="ml-sm"> 確認並建立合約 </button>
         </div>
       </form>
     </div>

@@ -17,19 +17,18 @@
  */
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, output, signal, computed } from '@angular/core';
+import type { Contract, ContractStatus } from '@core/blueprint/modules/implementations/contract/models';
 import { SHARED_IMPORTS } from '@shared';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzTabsModule } from 'ng-zorro-antd/tabs';
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
-import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
-
-import type { Contract, ContractStatus } from '@core/blueprint/modules/implementations/contract/models';
+import { NzStatisticModule } from 'ng-zorro-antd/statistic';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
+import { NzTagModule } from 'ng-zorro-antd/tag';
 
 @Component({
   selector: 'app-contract-detail-drawer',
@@ -95,21 +94,15 @@ import type { Contract, ContractStatus } from '@core/blueprint/modules/implement
 
             @if (contract()!.parsedData) {
               <nz-divider nzText="AI 解析資訊" nzOrientation="left"></nz-divider>
-              
-              <nz-alert
-                nzType="info"
-                nzMessage="此合約由 AI 自動解析"
-                [nzDescription]="parsingDescription"
-                nzShowIcon
-                class="mb-md"
-              >
+
+              <nz-alert nzType="info" nzMessage="此合約由 AI 自動解析" [nzDescription]="parsingDescription" nzShowIcon class="mb-md">
                 <ng-template #parsingDescription>
                   <p>解析引擎: {{ contract()!.parsedData!.parsingEngine }}</p>
                   <p>解析時間: {{ contract()!.parsedData!.parsedAt | date: 'yyyy-MM-dd HH:mm' }}</p>
                   <p>信心度:</p>
-                  <nz-progress 
-                    [nzPercent]="(contract()!.parsedData!.confidence || 0) * 100" 
-                    [nzShowInfo]="true" 
+                  <nz-progress
+                    [nzPercent]="(contract()!.parsedData!.confidence || 0) * 100"
+                    [nzShowInfo]="true"
                     nzSize="small"
                   ></nz-progress>
                 </ng-template>
@@ -191,11 +184,7 @@ import type { Contract, ContractStatus } from '@core/blueprint/modules/implement
                       <td>{{ item.unitPrice | number: '1.0-0' }}</td>
                       <td>{{ item.totalPrice | number: '1.0-0' }}</td>
                       <td>
-                        <nz-progress 
-                          [nzPercent]="item.completionPercentage" 
-                          nzSize="small" 
-                          [nzShowInfo]="false"
-                        ></nz-progress>
+                        <nz-progress [nzPercent]="item.completionPercentage" nzSize="small" [nzShowInfo]="false"></nz-progress>
                       </td>
                     </tr>
                   }
@@ -346,7 +335,7 @@ export class ContractDetailDrawerComponent implements OnInit {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;
   }
 
   onEdit(): void {

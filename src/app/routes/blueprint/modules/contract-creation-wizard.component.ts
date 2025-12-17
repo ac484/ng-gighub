@@ -2,20 +2,22 @@
  * Contract Creation Wizard Component
  * 合約建立流程精靈元件
  *
- * ✨ UPDATED: New workflow (2025-12-17)
- * 
+ * ✨ UPDATED: New 7-step workflow (2025-12-17)
+ *
  * NEW FLOW:
- * 1. 合約上傳（PDF / 圖檔）【手動】
+ * 1. 上傳合約（PDF / 圖檔）【手動】
  * 2. 合約解析（OCR / AI 解析條款、金額、工項）【自動】
- * 3. 解析結果編輯（確認/修正 AI 解析資料）【手動】✨ NEW STEP
+ * 3. 編輯資料（確認/修正 AI 解析資料）【手動】✨ NEW STEP
  * 4. 合約建檔（從編輯後的資料建立合約）【自動】
- * 5. 合約狀態：待生效
- * 6. 合約生效（僅「已生效合約」可建立任務）【手動】
+ * 5. 確認資料（檢查合約資料無誤）【手動】
+ * 6. 待生效（提交合約待生效）【自動】
+ * 7. 已生效（合約生效，可建立任務）【手動】
  *
  * Changes from old flow:
  * - Parsing happens BEFORE contract creation (step 2 vs old step 3)
  * - NEW: Parsed data editing step allows user to review/edit AI results (step 3)
  * - Contract creation happens FROM edited parsed data (step 4 vs old step 2)
+ * - Confirmation step preserved for final review (step 5)
  *
  * ✅ Modern Angular 20 patterns:
  * - Standalone Component
@@ -38,10 +40,10 @@ import {
 } from '@core/blueprint/modules/implementations/contract/services/contract-parsing.service';
 import { ContractStatusService } from '@core/blueprint/modules/implementations/contract/services/contract-status.service';
 import { ContractUploadService, UploadProgress } from '@core/blueprint/modules/implementations/contract/services/contract-upload.service';
-import { 
-  type EnhancedContractParsingOutput, 
-  toContractCreateRequest, 
-  toWorkItemCreateRequests 
+import {
+  type EnhancedContractParsingOutput,
+  toContractCreateRequest,
+  toWorkItemCreateRequests
 } from '@core/blueprint/modules/implementations/contract/utils/enhanced-parsing-converter';
 import { SHARED_IMPORTS } from '@shared';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
@@ -53,36 +55,30 @@ import { NzUploadChangeParam, NzUploadFile, NzUploadModule } from 'ng-zorro-antd
 
 import { ParsedDataEditorComponent } from './parsed-data-editor.component';
 
-/** Step indices - UPDATED for new flow */
-const STEP_UPLOAD = 0;          // Upload files
-const STEP_PARSING = 1;         // AI parsing
-const STEP_EDIT = 2;            // Edit parsed data ✨ NEW
-const STEP_CREATE = 3;          // Create contract from edited data
-const STEP_PENDING = 4;         // Pending activation
-const STEP_ACTIVE = 5;          // Active
+/** Step indices - UPDATED for new 7-step flow */
+const STEP_UPLOAD = 0; // Upload files
+const STEP_PARSING = 1; // AI parsing
+const STEP_EDIT = 2; // Edit parsed data ✨ NEW
+const STEP_CREATE = 3; // Create contract from edited data
+const STEP_CONFIRM = 4; // Confirm contract data ✨ RESTORED
+const STEP_PENDING = 5; // Pending activation
+const STEP_ACTIVE = 6; // Active
 
 @Component({
   selector: 'app-contract-creation-wizard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    SHARED_IMPORTS, 
-    NzStepsModule, 
-    NzUploadModule, 
-    NzFormModule, 
-    NzResultModule, 
-    NzDescriptionsModule,
-    ParsedDataEditorComponent
-  ],
+  imports: [SHARED_IMPORTS, NzStepsModule, NzUploadModule, NzFormModule, NzResultModule, NzDescriptionsModule, ParsedDataEditorComponent],
   template: `
-    <!-- Steps Progress Indicator - UPDATED for new flow -->
+    <!-- Steps Progress Indicator - UPDATED for 7-step flow -->
     <nz-steps [nzCurrent]="currentStep()" nzSize="small" class="mb-lg">
       <nz-step nzTitle="上傳合約" nzIcon="upload" [nzStatus]="getStepStatus(0)"></nz-step>
       <nz-step nzTitle="合約解析" nzIcon="scan" [nzStatus]="getStepStatus(1)"></nz-step>
       <nz-step nzTitle="編輯資料" nzIcon="edit" [nzStatus]="getStepStatus(2)"></nz-step>
-      <nz-step nzTitle="建立合約" nzIcon="form" [nzStatus]="getStepStatus(3)"></nz-step>
-      <nz-step nzTitle="待生效" nzIcon="clock-circle" [nzStatus]="getStepStatus(4)"></nz-step>
-      <nz-step nzTitle="已生效" nzIcon="check" [nzStatus]="getStepStatus(5)"></nz-step>
+      <nz-step nzTitle="合約建檔" nzIcon="form" [nzStatus]="getStepStatus(3)"></nz-step>
+      <nz-step nzTitle="確認資料" nzIcon="check-circle" [nzStatus]="getStepStatus(4)"></nz-step>
+      <nz-step nzTitle="待生效" nzIcon="clock-circle" [nzStatus]="getStepStatus(5)"></nz-step>
+      <nz-step nzTitle="已生效" nzIcon="check" [nzStatus]="getStepStatus(6)"></nz-step>
     </nz-steps>
 
     <!-- Step Content -->
@@ -116,7 +112,14 @@ const STEP_ACTIVE = 5;          // Active
             <div class="step-actions mt-lg">
               <button nz-button nzType="default" (click)="cancel()">取消</button>
               <button nz-button nzType="default" (click)="skipToManualEntry()" class="ml-sm">手動輸入</button>
-              <button nz-button nzType="primary" (click)="uploadAndParse()" [disabled]="uploadedFiles().length === 0" [nzLoading]="uploading()" class="ml-sm">
+              <button
+                nz-button
+                nzType="primary"
+                (click)="uploadAndParse()"
+                [disabled]="uploadedFiles().length === 0"
+                [nzLoading]="uploading()"
+                class="ml-sm"
+              >
                 上傳並解析
               </button>
             </div>
@@ -195,13 +198,13 @@ const STEP_ACTIVE = 5;          // Active
           </div>
         }
 
-        <!-- Step 3: Create Contract -->
+        <!-- Step 3: Create Contract from Edited Data -->
         @case (3) {
           <div class="step-content text-center">
-            <h3>步驟 4：建立合約</h3>
+            <h3>步驟 4：合約建檔</h3>
 
             @if (creating()) {
-              <nz-result nzStatus="info" nzTitle="正在建立合約..." nzSubTitle="請稍候">
+              <nz-result nzStatus="info" nzTitle="正在建立合約..." nzSubTitle="從編輯後的資料建立合約記錄">
                 <div nz-result-extra>
                   <nz-spin nzSimple nzSize="large"></nz-spin>
                 </div>
@@ -209,6 +212,7 @@ const STEP_ACTIVE = 5;          // Active
             } @else if (createdContract()) {
               <nz-result nzStatus="success" nzTitle="合約建立成功" [nzSubTitle]="'合約編號：' + createdContract()!.contractNumber">
                 <div nz-result-extra>
+                  <p class="mb-md">合約已成功建立，請確認資料</p>
                   <button nz-button nzType="primary" (click)="nextStep()">繼續</button>
                 </div>
               </nz-result>
@@ -222,31 +226,12 @@ const STEP_ACTIVE = 5;          // Active
             }
           </div>
         }
-                    </div>
-                  </nz-result>
-                }
-                @default {
-                  <nz-spin nzSimple nzSize="large"></nz-spin>
-                  <p class="mt-md">正在準備解析...</p>
-                }
-              }
-            } @else if (!hasUploadedFiles()) {
-              <nz-result nzStatus="info" nzTitle="無需解析" nzSubTitle="未上傳合約文件，將跳過解析步驟">
-                <div nz-result-extra>
-                  <button nz-button nzType="primary" (click)="skipParsing()">繼續</button>
-                </div>
-              </nz-result>
-            } @else {
-              <nz-spin nzSimple nzSize="large"></nz-spin>
-              <p class="mt-md">正在啟動解析服務...</p>
-            }
-          </div>
-        }
 
-        <!-- Step 3: Confirm -->
-        @case (3) {
+        <!-- Step 4: Confirm Data -->
+        @case (4) {
           <div class="step-content">
-            <h3>步驟 4：確認合約資料</h3>
+            <h3>步驟 5：確認合約資料</h3>
+            <p class="text-grey mb-md">請確認合約資料無誤後提交待生效</p>
 
             @if (createdContract()) {
               <nz-descriptions nzTitle="合約摘要" nzBordered [nzColumn]="2">
@@ -268,50 +253,18 @@ const STEP_ACTIVE = 5;          // Active
                 >
               </nz-descriptions>
 
-              @if (createdContract()!.parsedData && createdContract()!.parsedData!.needsVerification) {
-                <nz-divider nzText="AI 解析結果" nzOrientation="left"></nz-divider>
-                <nz-alert
-                  nzType="info"
-                  nzMessage="AI 解析資料需要確認"
-                  nzDescription="以下資料由 AI 自動解析，請確認或修正後繼續。"
-                  nzShowIcon
-                  class="mb-md"
-                ></nz-alert>
-
-                <nz-descriptions nzBordered [nzColumn]="2">
-                  @if (createdContract()!.parsedData!.extractedData.contractNumber) {
-                    <nz-descriptions-item nzTitle="解析：合約編號">{{
-                      createdContract()!.parsedData!.extractedData.contractNumber
-                    }}</nz-descriptions-item>
-                  }
-                  @if (createdContract()!.parsedData!.extractedData.totalAmount) {
-                    <nz-descriptions-item nzTitle="解析：金額">{{
-                      createdContract()!.parsedData!.extractedData.totalAmount | number
-                    }}</nz-descriptions-item>
-                  }
-                  <nz-descriptions-item nzTitle="解析信心度">
-                    <nz-progress
-                      [nzPercent]="(createdContract()!.parsedData!.confidence || 0) * 100"
-                      [nzShowInfo]="true"
-                      nzSize="small"
-                    ></nz-progress>
-                  </nz-descriptions-item>
-                  <nz-descriptions-item nzTitle="解析引擎">{{ createdContract()!.parsedData!.parsingEngine }}</nz-descriptions-item>
-                </nz-descriptions>
-              }
+              <div class="step-actions mt-lg">
+                <button nz-button nzType="default" (click)="prevStep()">返回編輯</button>
+                <button nz-button nzType="primary" (click)="confirmAndSubmitForActivation()" [nzLoading]="submitting()" class="ml-sm">
+                  確認並提交待生效
+                </button>
+              </div>
             }
-
-            <div class="step-actions mt-lg">
-              <button nz-button nzType="default" (click)="cancel()">取消</button>
-              <button nz-button nzType="primary" (click)="confirmAndSubmitForActivation()" [nzLoading]="submitting()" class="ml-sm">
-                確認並提交待生效
-              </button>
-            </div>
           </div>
         }
 
-        <!-- Step 4: Pending Activation -->
-        @case (4) {
+        <!-- Step 5: Pending Activation -->
+        @case (5) {
           <div class="step-content text-center">
             <nz-result nzStatus="info" nzTitle="合約已提交待生效" [nzSubTitle]="'合約編號：' + (createdContract()?.contractNumber || '')">
               <div nz-result-extra>
@@ -327,8 +280,8 @@ const STEP_ACTIVE = 5;          // Active
           </div>
         }
 
-        <!-- Step 5: Active -->
-        @case (5) {
+        <!-- Step 6: Active -->
+        @case (6) {
           <div class="step-content text-center">
             <nz-result
               nzStatus="success"
@@ -390,7 +343,7 @@ export class ContractCreationWizardComponent implements OnInit {
   parsingProgress = signal<ParsingProgress | null>(null);
   createdContract = signal<Contract | null>(null);
   fileAttachments = signal<FileAttachment[]>([]);
-  
+
   // NEW: Parsed data signals for new workflow
   parsedData = signal<EnhancedContractParsingOutput | null>(null);
   parsingConfidence = signal<number>(0);
@@ -521,7 +474,7 @@ export class ContractCreationWizardComponent implements OnInit {
 
           // Upload to temporary storage or directly to blueprint storage
           const attachment = await this.uploadService.uploadContractFile(
-            this.blueprintId(), 
+            this.blueprintId(),
             'temp', // Temporary ID, will be replaced when contract is created
             file
           );
@@ -560,7 +513,7 @@ export class ContractCreationWizardComponent implements OnInit {
     try {
       // Call parsing service with file IDs
       const fileIds = attachments.map(f => f.id);
-      
+
       // Note: This may require updating the ContractParsingService to support parsing without contract ID
       // For now, we'll simulate the parsing flow
       const result = await this.parsingService.requestParsing({
@@ -615,10 +568,10 @@ export class ContractCreationWizardComponent implements OnInit {
    */
   async onParsedDataConfirmed(editedData: EnhancedContractParsingOutput): Promise<void> {
     this.editedParsedData.set(editedData);
-    
+
     // Move to contract creation step
     this.nextStep();
-    
+
     // Automatically create contract from edited data
     await this.createContractFromParsedData(editedData);
   }
@@ -632,8 +585,8 @@ export class ContractCreationWizardComponent implements OnInit {
     try {
       // Convert parsed data to CreateContractDto using the converter
       const createDto = toContractCreateRequest(
-        parsedData, 
-        this.blueprintId(), 
+        parsedData,
+        this.blueprintId(),
         'current-user' // TODO: Get from auth service
       );
 
@@ -647,8 +600,8 @@ export class ContractCreationWizardComponent implements OnInit {
         await this.createWorkItemsFromParsedData(contract.id, parsedData.workItems);
       }
 
-      // Auto-advance to next step after short delay
-      setTimeout(() => this.nextStep(), 1500);
+      // Do NOT auto-advance - let user click "繼續" button to review contract
+      // User will manually click button to go to confirmation step
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '建立合約失敗';
       this.message.error(errorMessage);
@@ -664,14 +617,14 @@ export class ContractCreationWizardComponent implements OnInit {
   private async createWorkItemsFromParsedData(contractId: string, workItems: any[]): Promise<void> {
     try {
       const workItemDtos = toWorkItemCreateRequests(workItems, contractId);
-      
+
       // Note: This may require a batch create method in the service
       // For now, we'll create them one by one
       for (const dto of workItemDtos) {
         // await this.workItemService.create(this.blueprintId(), contractId, dto);
         // TODO: Implement when WorkItemService is available
       }
-      
+
       this.message.success(`已建立 ${workItems.length} 個工項`);
     } catch (err) {
       console.error('[ContractCreationWizard]', 'createWorkItemsFromParsedData failed', err);
@@ -695,14 +648,6 @@ export class ContractCreationWizardComponent implements OnInit {
     const editedData = this.editedParsedData();
     if (editedData) {
       await this.createContractFromParsedData(editedData);
-    }
-  }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '建立合約失敗';
-      this.message.error(errorMessage);
-      console.error('[ContractCreationWizard]', 'createDraftAndParse failed', err);
-    } finally {
-      this.creating.set(false);
     }
   }
 

@@ -34,11 +34,11 @@ import { ContractModalComponent } from './contract-modal.component';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    SHARED_IMPORTS, 
-    NzStatisticModule, 
-    NzEmptyModule, 
-    NzBadgeModule, 
-    NzTagModule, 
+    SHARED_IMPORTS,
+    NzStatisticModule,
+    NzEmptyModule,
+    NzBadgeModule,
+    NzTagModule,
     NzDrawerModule,
     ContractCreationWizardComponent,
     ContractDetailDrawerComponent
@@ -356,7 +356,7 @@ export class ContractModuleViewComponent implements OnInit {
    */
   viewContract(contract: Contract): void {
     this.selectedContract.set(contract);
-    
+
     const drawerRef = this.drawerService.create<ContractDetailDrawerComponent, { contract: Contract }>({
       nzTitle: `合約詳情: ${contract.contractNumber}`,
       nzContent: ContractDetailDrawerComponent,
