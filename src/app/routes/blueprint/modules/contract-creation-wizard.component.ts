@@ -2,13 +2,20 @@
  * Contract Creation Wizard Component
  * 合約建立流程精靈元件
  *
- * Implements the 6-step contract creation workflow:
+ * ✨ UPDATED: New workflow (2025-12-17)
+ * 
+ * NEW FLOW:
  * 1. 合約上傳（PDF / 圖檔）【手動】
- * 2. 合約建檔（基本資料、業主、承商）【手動】
- * 3. 合約解析（OCR / AI 解析條款、金額、工項）【自動】
- * 4. 合約確認（確認解析結果或人工補齊）【手動】
+ * 2. 合約解析（OCR / AI 解析條款、金額、工項）【自動】
+ * 3. 解析結果編輯（確認/修正 AI 解析資料）【手動】✨ NEW STEP
+ * 4. 合約建檔（從編輯後的資料建立合約）【自動】
  * 5. 合約狀態：待生效
  * 6. 合約生效（僅「已生效合約」可建立任務）【手動】
+ *
+ * Changes from old flow:
+ * - Parsing happens BEFORE contract creation (step 2 vs old step 3)
+ * - NEW: Parsed data editing step allows user to review/edit AI results (step 3)
+ * - Contract creation happens FROM edited parsed data (step 4 vs old step 2)
  *
  * ✅ Modern Angular 20 patterns:
  * - Standalone Component
@@ -31,6 +38,11 @@ import {
 } from '@core/blueprint/modules/implementations/contract/services/contract-parsing.service';
 import { ContractStatusService } from '@core/blueprint/modules/implementations/contract/services/contract-status.service';
 import { ContractUploadService, UploadProgress } from '@core/blueprint/modules/implementations/contract/services/contract-upload.service';
+import { 
+  type EnhancedContractParsingOutput, 
+  toContractCreateRequest, 
+  toWorkItemCreateRequests 
+} from '@core/blueprint/modules/implementations/contract/utils/enhanced-parsing-converter';
 import { SHARED_IMPORTS } from '@shared';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -39,22 +51,36 @@ import { NzResultModule } from 'ng-zorro-antd/result';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
 import { NzUploadChangeParam, NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
 
-/** Step indices */
-const STEP_UPLOAD = 0;
-const STEP_ACTIVE = 5;
+import { ParsedDataEditorComponent } from './parsed-data-editor.component';
+
+/** Step indices - UPDATED for new flow */
+const STEP_UPLOAD = 0;          // Upload files
+const STEP_PARSING = 1;         // AI parsing
+const STEP_EDIT = 2;            // Edit parsed data ✨ NEW
+const STEP_CREATE = 3;          // Create contract from edited data
+const STEP_PENDING = 4;         // Pending activation
+const STEP_ACTIVE = 5;          // Active
 
 @Component({
   selector: 'app-contract-creation-wizard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SHARED_IMPORTS, NzStepsModule, NzUploadModule, NzFormModule, NzResultModule, NzDescriptionsModule],
+  imports: [
+    SHARED_IMPORTS, 
+    NzStepsModule, 
+    NzUploadModule, 
+    NzFormModule, 
+    NzResultModule, 
+    NzDescriptionsModule,
+    ParsedDataEditorComponent
+  ],
   template: `
-    <!-- Steps Progress Indicator -->
+    <!-- Steps Progress Indicator - UPDATED for new flow -->
     <nz-steps [nzCurrent]="currentStep()" nzSize="small" class="mb-lg">
       <nz-step nzTitle="上傳合約" nzIcon="upload" [nzStatus]="getStepStatus(0)"></nz-step>
-      <nz-step nzTitle="合約建檔" nzIcon="form" [nzStatus]="getStepStatus(1)"></nz-step>
-      <nz-step nzTitle="合約解析" nzIcon="scan" [nzStatus]="getStepStatus(2)"></nz-step>
-      <nz-step nzTitle="確認資料" nzIcon="check-circle" [nzStatus]="getStepStatus(3)"></nz-step>
+      <nz-step nzTitle="合約解析" nzIcon="scan" [nzStatus]="getStepStatus(1)"></nz-step>
+      <nz-step nzTitle="編輯資料" nzIcon="edit" [nzStatus]="getStepStatus(2)"></nz-step>
+      <nz-step nzTitle="建立合約" nzIcon="form" [nzStatus]="getStepStatus(3)"></nz-step>
       <nz-step nzTitle="待生效" nzIcon="clock-circle" [nzStatus]="getStepStatus(4)"></nz-step>
       <nz-step nzTitle="已生效" nzIcon="check" [nzStatus]="getStepStatus(5)"></nz-step>
     </nz-steps>
@@ -89,180 +115,18 @@ const STEP_ACTIVE = 5;
 
             <div class="step-actions mt-lg">
               <button nz-button nzType="default" (click)="cancel()">取消</button>
-              <button nz-button nzType="default" (click)="skipUpload()" class="ml-sm">跳過上傳</button>
-              <button nz-button nzType="primary" (click)="nextStep()" [disabled]="uploadedFiles().length === 0" class="ml-sm">
-                下一步
+              <button nz-button nzType="default" (click)="skipToManualEntry()" class="ml-sm">手動輸入</button>
+              <button nz-button nzType="primary" (click)="uploadAndParse()" [disabled]="uploadedFiles().length === 0" [nzLoading]="uploading()" class="ml-sm">
+                上傳並解析
               </button>
             </div>
           </div>
         }
 
-        <!-- Step 1: Form -->
+        <!-- Step 1: Parsing -->
         @case (1) {
-          <div class="step-content">
-            <h3>步驟 2：填寫合約資訊</h3>
-
-            <form nz-form [formGroup]="contractForm" nzLayout="vertical">
-              <nz-divider nzText="基本資訊" nzOrientation="left"></nz-divider>
-
-              <nz-row [nzGutter]="16">
-                <nz-col [nzSpan]="12">
-                  <nz-form-item>
-                    <nz-form-label nzRequired>合約名稱</nz-form-label>
-                    <nz-form-control nzErrorTip="請輸入合約名稱（至少 5 個字元）">
-                      <input nz-input formControlName="title" placeholder="輸入合約名稱" />
-                    </nz-form-control>
-                  </nz-form-item>
-                </nz-col>
-                <nz-col [nzSpan]="12">
-                  <nz-form-item>
-                    <nz-form-label nzRequired>合約金額</nz-form-label>
-                    <nz-form-control nzErrorTip="請輸入合約金額">
-                      <nz-input-number
-                        formControlName="totalAmount"
-                        [nzMin]="1"
-                        [nzStep]="1000"
-                        style="width: 100%"
-                        [nzFormatter]="currencyFormatter"
-                        [nzParser]="currencyParser"
-                      ></nz-input-number>
-                    </nz-form-control>
-                  </nz-form-item>
-                </nz-col>
-              </nz-row>
-
-              <nz-row [nzGutter]="16">
-                <nz-col [nzSpan]="12">
-                  <nz-form-item>
-                    <nz-form-label nzRequired>開始日期</nz-form-label>
-                    <nz-form-control nzErrorTip="請選擇開始日期">
-                      <nz-date-picker formControlName="startDate" style="width: 100%"></nz-date-picker>
-                    </nz-form-control>
-                  </nz-form-item>
-                </nz-col>
-                <nz-col [nzSpan]="12">
-                  <nz-form-item>
-                    <nz-form-label nzRequired>結束日期</nz-form-label>
-                    <nz-form-control nzErrorTip="請選擇結束日期">
-                      <nz-date-picker formControlName="endDate" style="width: 100%"></nz-date-picker>
-                    </nz-form-control>
-                  </nz-form-item>
-                </nz-col>
-              </nz-row>
-
-              <nz-form-item>
-                <nz-form-label>描述</nz-form-label>
-                <nz-form-control>
-                  <textarea
-                    nz-input
-                    formControlName="description"
-                    [nzAutosize]="{ minRows: 2, maxRows: 4 }"
-                    placeholder="合約描述"
-                  ></textarea>
-                </nz-form-control>
-              </nz-form-item>
-
-              <nz-divider nzText="業主資訊" nzOrientation="left"></nz-divider>
-
-              <nz-row [nzGutter]="16">
-                <nz-col [nzSpan]="12">
-                  <nz-form-item>
-                    <nz-form-label nzRequired>業主名稱</nz-form-label>
-                    <nz-form-control nzErrorTip="請輸入業主名稱">
-                      <input nz-input formControlName="ownerName" placeholder="業主公司名稱" />
-                    </nz-form-control>
-                  </nz-form-item>
-                </nz-col>
-                <nz-col [nzSpan]="12">
-                  <nz-form-item>
-                    <nz-form-label nzRequired>聯絡人</nz-form-label>
-                    <nz-form-control nzErrorTip="請輸入聯絡人">
-                      <input nz-input formControlName="ownerContactPerson" placeholder="業主聯絡人姓名" />
-                    </nz-form-control>
-                  </nz-form-item>
-                </nz-col>
-              </nz-row>
-
-              <nz-row [nzGutter]="16">
-                <nz-col [nzSpan]="12">
-                  <nz-form-item>
-                    <nz-form-label nzRequired>電話</nz-form-label>
-                    <nz-form-control nzErrorTip="請輸入電話">
-                      <input nz-input formControlName="ownerPhone" placeholder="業主聯絡電話" />
-                    </nz-form-control>
-                  </nz-form-item>
-                </nz-col>
-                <nz-col [nzSpan]="12">
-                  <nz-form-item>
-                    <nz-form-label nzRequired>電子郵件</nz-form-label>
-                    <nz-form-control nzErrorTip="請輸入有效的電子郵件">
-                      <input nz-input formControlName="ownerEmail" placeholder="業主電子郵件" type="email" />
-                    </nz-form-control>
-                  </nz-form-item>
-                </nz-col>
-              </nz-row>
-
-              <nz-divider nzText="承商資訊" nzOrientation="left"></nz-divider>
-
-              <nz-row [nzGutter]="16">
-                <nz-col [nzSpan]="12">
-                  <nz-form-item>
-                    <nz-form-label nzRequired>承商名稱</nz-form-label>
-                    <nz-form-control nzErrorTip="請輸入承商名稱">
-                      <input nz-input formControlName="contractorName" placeholder="承商公司名稱" />
-                    </nz-form-control>
-                  </nz-form-item>
-                </nz-col>
-                <nz-col [nzSpan]="12">
-                  <nz-form-item>
-                    <nz-form-label nzRequired>聯絡人</nz-form-label>
-                    <nz-form-control nzErrorTip="請輸入聯絡人">
-                      <input nz-input formControlName="contractorContactPerson" placeholder="承商聯絡人姓名" />
-                    </nz-form-control>
-                  </nz-form-item>
-                </nz-col>
-              </nz-row>
-
-              <nz-row [nzGutter]="16">
-                <nz-col [nzSpan]="12">
-                  <nz-form-item>
-                    <nz-form-label nzRequired>電話</nz-form-label>
-                    <nz-form-control nzErrorTip="請輸入電話">
-                      <input nz-input formControlName="contractorPhone" placeholder="承商聯絡電話" />
-                    </nz-form-control>
-                  </nz-form-item>
-                </nz-col>
-                <nz-col [nzSpan]="12">
-                  <nz-form-item>
-                    <nz-form-label nzRequired>電子郵件</nz-form-label>
-                    <nz-form-control nzErrorTip="請輸入有效的電子郵件">
-                      <input nz-input formControlName="contractorEmail" placeholder="承商電子郵件" type="email" />
-                    </nz-form-control>
-                  </nz-form-item>
-                </nz-col>
-              </nz-row>
-            </form>
-
-            <div class="step-actions mt-lg">
-              <button nz-button nzType="default" (click)="prevStep()">上一步</button>
-              <button
-                nz-button
-                nzType="primary"
-                (click)="createDraftAndParse()"
-                [nzLoading]="creating()"
-                [disabled]="contractForm.invalid"
-                class="ml-sm"
-              >
-                建立草稿並解析
-              </button>
-            </div>
-          </div>
-        }
-
-        <!-- Step 2: Parsing -->
-        @case (2) {
           <div class="step-content text-center">
-            <h3>步驟 3：合約解析中</h3>
+            <h3>步驟 2：合約解析中</h3>
 
             @if (parsingProgress()) {
               @switch (parsingProgress()!.status) {
@@ -281,9 +145,9 @@ const STEP_ACTIVE = 5;
                   </nz-result>
                 }
                 @case ('completed') {
-                  <nz-result nzStatus="success" nzTitle="解析完成" nzSubTitle="合約內容已成功解析，請確認結果">
+                  <nz-result nzStatus="success" nzTitle="解析完成" nzSubTitle="合約內容已成功解析，請檢視並編輯資料">
                     <div nz-result-extra>
-                      <button nz-button nzType="primary" (click)="nextStep()">查看解析結果</button>
+                      <button nz-button nzType="primary" (click)="nextStep()">檢視解析結果</button>
                     </div>
                   </nz-result>
                 }
@@ -291,7 +155,73 @@ const STEP_ACTIVE = 5;
                   <nz-result nzStatus="error" nzTitle="解析失敗" [nzSubTitle]="parsingProgress()!.message || '無法解析合約內容'">
                     <div nz-result-extra>
                       <button nz-button nzType="default" (click)="retryParsing()">重試</button>
-                      <button nz-button nzType="primary" (click)="skipParsing()" class="ml-sm">跳過解析</button>
+                      <button nz-button nzType="primary" (click)="skipToManualEntry()" class="ml-sm">手動輸入</button>
+                    </div>
+                  </nz-result>
+                }
+                @default {
+                  <nz-spin nzSimple nzSize="large"></nz-spin>
+                  <p class="mt-md">正在準備解析...</p>
+                }
+              }
+            } @else {
+              <nz-spin nzSimple nzSize="large"></nz-spin>
+              <p class="mt-md">正在啟動解析服務...</p>
+            }
+          </div>
+        }
+
+        <!-- Step 2: Edit Parsed Data ✨ NEW STEP -->
+        @case (2) {
+          <div class="step-content">
+            <h3>步驟 3：編輯解析資料</h3>
+            <p class="text-grey mb-md">請檢查 AI 解析的資料，並進行必要的修正</p>
+
+            @if (parsedData()) {
+              <app-parsed-data-editor
+                [parsedData]="parsedData()!"
+                [confidence]="parsingConfidence()"
+                (confirmed)="onParsedDataConfirmed($event)"
+                (cancelled)="cancel()"
+              />
+            } @else {
+              <nz-result nzStatus="warning" nzTitle="無解析資料" nzSubTitle="請重新上傳檔案或手動輸入">
+                <div nz-result-extra>
+                  <button nz-button nzType="default" (click)="prevStep()">返回上傳</button>
+                  <button nz-button nzType="primary" (click)="skipToManualEntry()" class="ml-sm">手動輸入</button>
+                </div>
+              </nz-result>
+            }
+          </div>
+        }
+
+        <!-- Step 3: Create Contract -->
+        @case (3) {
+          <div class="step-content text-center">
+            <h3>步驟 4：建立合約</h3>
+
+            @if (creating()) {
+              <nz-result nzStatus="info" nzTitle="正在建立合約..." nzSubTitle="請稍候">
+                <div nz-result-extra>
+                  <nz-spin nzSimple nzSize="large"></nz-spin>
+                </div>
+              </nz-result>
+            } @else if (createdContract()) {
+              <nz-result nzStatus="success" nzTitle="合約建立成功" [nzSubTitle]="'合約編號：' + createdContract()!.contractNumber">
+                <div nz-result-extra>
+                  <button nz-button nzType="primary" (click)="nextStep()">繼續</button>
+                </div>
+              </nz-result>
+            } @else {
+              <nz-result nzStatus="error" nzTitle="建立失敗" nzSubTitle="請重試或聯繫管理員">
+                <div nz-result-extra>
+                  <button nz-button nzType="default" (click)="prevStep()">返回編輯</button>
+                  <button nz-button nzType="primary" (click)="retryContractCreation()" class="ml-sm">重試</button>
+                </div>
+              </nz-result>
+            }
+          </div>
+        }
                     </div>
                   </nz-result>
                 }
