@@ -138,7 +138,7 @@ export class PartnerStore {
   readonly partnersByType = computed(() => {
     const partners = this._partners();
     const grouped = new Map<string, Partner[]>();
-    
+
     partners.forEach(partner => {
       const type = partner.type;
       if (!grouped.has(type)) {
@@ -146,7 +146,7 @@ export class PartnerStore {
       }
       grouped.get(type)!.push(partner);
     });
-    
+
     return grouped;
   });
 

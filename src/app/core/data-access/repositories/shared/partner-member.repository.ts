@@ -187,11 +187,7 @@ export class PartnerMemberRepository {
    * @returns Promise<boolean>
    */
   async isMember(partnerId: string, userId: string): Promise<boolean> {
-    const q = query(
-      this.getCollectionRef(),
-      where('partner_id', '==', partnerId),
-      where('user_id', '==', userId)
-    );
+    const q = query(this.getCollectionRef(), where('partner_id', '==', partnerId), where('user_id', '==', userId));
 
     try {
       const snapshot = await getDocs(q);
