@@ -12,8 +12,7 @@
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal, computed, effect, ViewContainerRef } from '@angular/core';
 import type { Contract, ContractStatus, ContractStatistics } from '@core/blueprint/modules/implementations/contract/models';
-import { ContractCreationService } from '@core/blueprint/modules/implementations/contract/services/contract-creation.service';
-import { ContractManagementService } from '@core/blueprint/modules/implementations/contract/services/contract-management.service';
+import { ContractFacade } from '@core/blueprint/modules/implementations/contract/facades';
 import { STColumn, STChange } from '@delon/abc/st';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS } from '@shared';
@@ -167,8 +166,7 @@ import { ContractModalComponent } from './contract-modal.component';
 export class ContractModuleViewComponent implements OnInit {
   blueprintId = input.required<string>();
 
-  private readonly managementService = inject(ContractManagementService);
-  private readonly creationService = inject(ContractCreationService);
+  private readonly facade = inject(ContractFacade);
   private readonly message = inject(NzMessageService);
   private readonly modal = inject(NzModalService);
   private readonly modalHelper = inject(ModalHelper);
@@ -296,7 +294,9 @@ export class ContractModuleViewComponent implements OnInit {
 
     this.loading.set(true);
     try {
-      const contractList = await this.managementService.list(blueprintId);
+      await this.facade.loadContracts();
+      // Get contracts from facade store (need to copy to make it mutable)
+      const contractList = [...this.facade.contracts()];
       this.contracts.set(contractList);
     } catch (error) {
       this.message.error('載入合約列表失敗');
@@ -441,7 +441,7 @@ export class ContractModuleViewComponent implements OnInit {
    */
   async deleteContract(contract: Contract): Promise<void> {
     try {
-      await this.managementService.delete(this.blueprintId(), contract.id);
+      await this.facade.deleteContract(contract.id);
       this.message.success(`合約 ${contract.contractNumber} 已刪除`);
       await this.loadContracts();
     } catch (error) {
