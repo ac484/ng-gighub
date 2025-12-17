@@ -19,7 +19,7 @@
 import { Component, input, output, inject, ViewChild, signal, computed } from '@angular/core';
 import { PlusSquareOutline, MinusSquareOutline } from '@ant-design/icons-angular/icons';
 import { TaskStore } from '@core/state/stores/task.store';
-import { Task, TaskStatus, TaskPriority, TaskTreeNode } from '@core/types/task';
+import { Task, TaskStatus, TaskPriority, TaskTreeNode, AssigneeType } from '@core/types/task';
 import { buildTaskHierarchy } from '@core/utils/task-hierarchy.util';
 import { STColumn, STComponent, STData } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
@@ -37,6 +37,8 @@ interface TaskTableNode extends STData {
   priority: TaskPriority;
   progress: number;
   assigneeName?: string;
+  assigneeDisplay?: string; // Combined display for user/team/partner
+  assigneeType?: string;
   dueDate?: Date;
   createdAt: Date;
   level: number; // Depth in hierarchy
@@ -206,6 +208,28 @@ export class TaskListViewComponent {
   });
 
   /**
+   * Get display text for assignee based on type
+   * 根據類型取得指派對象的顯示文字
+   */
+  private getAssigneeDisplay(task: Task): string {
+    if (!task.assigneeType) {
+      // Legacy: fallback to assigneeName
+      return task.assigneeName || '未分配';
+    }
+
+    switch (task.assigneeType) {
+      case AssigneeType.USER:
+        return task.assigneeName ? `👤 ${task.assigneeName}` : '未分配';
+      case AssigneeType.TEAM:
+        return task.assigneeTeamName ? `👥 ${task.assigneeTeamName}` : '未分配團隊';
+      case AssigneeType.PARTNER:
+        return task.assigneePartnerName ? `🤝 ${task.assigneePartnerName}` : '未分配夥伴';
+      default:
+        return '未分配';
+    }
+  }
+
+  /**
    * Flatten tree nodes for table display, respecting expand/collapse state
    * 扁平化樹狀節點用於表格顯示，遵循展開/收合狀態
    */
@@ -223,6 +247,8 @@ export class TaskListViewComponent {
         priority: node.task.priority,
         progress: node.task.progress ?? 0,
         assigneeName: node.task.assigneeName,
+        assigneeDisplay: this.getAssigneeDisplay(node.task),
+        assigneeType: node.task.assigneeType,
         dueDate: node.task.dueDate,
         createdAt: node.task.createdAt,
         level,
@@ -287,8 +313,8 @@ export class TaskListViewComponent {
     },
     {
       title: '負責人',
-      index: 'assigneeName',
-      width: 120,
+      index: 'assigneeDisplay',
+      width: 150,
       default: '未分配'
     },
     {
