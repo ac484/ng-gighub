@@ -1,1156 +1,794 @@
-# 優化後的 Blueprint 模組架構
+# GigHub 專案結構文檔
 
-## 核心理念
-- **領域驅動設計 (DDD)**:按業務領域劃分模組
-- **三層架構**:領域 → 模組 → 子模組
-- **高內聚低耦合**:每個領域獨立管理其業務邏輯
-- **易於擴展**:新增功能只需在對應領域下添加模組
-
----
-
-## 完整目錄結構
-
-```
-app/
-├─ core/                                      # 核心基礎設施層
-│  ├─ blueprint/                              # Blueprint 核心系統
-│  │  ├─ config/                              # 系統配置
-│  │  │  ├─ blueprint-config.interface.ts     # Blueprint 配置介面
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  │
-│  │  ├─ container/                           # 容器管理 (依賴注入、生命週期)
-│  │  │  ├─ blueprint-container.interface.ts  # 容器介面
-│  │  │  ├─ blueprint-container.ts            # 容器實作
-│  │  │  ├─ lifecycle-manager.interface.ts    # 生命週期管理介面
-│  │  │  ├─ lifecycle-manager.ts              # 生命週期管理器
-│  │  │  ├─ module-registry.interface.ts      # 模組註冊介面
-│  │  │  ├─ module-registry.ts                # 模組註冊器
-│  │  │  ├─ resource-provider.interface.ts    # 資源提供者介面
-│  │  │  ├─ resource-provider.ts              # 資源提供者實作
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  │
-│  │  ├─ context/                             # 上下文管理 (共享狀態、租戶資訊)
-│  │  │  ├─ execution-context.interface.ts    # 執行上下文介面
-│  │  │  ├─ shared-context.ts                 # 共享上下文
-│  │  │  ├─ tenant-info.interface.ts          # 租戶資訊介面
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  │
-│  │  ├─ events/                              # 事件系統 (事件匯流排、發布訂閱)
-│  │  │  ├─ models/                           # 事件模型
-│  │  │  │  ├─ blueprint-event.model.ts       # Blueprint 事件模型
-│  │  │  │  ├─ event-log-entry.model.ts       # 事件日誌模型
-│  │  │  │  ├─ event-priority.enum.ts         # 事件優先級枚舉
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ types/                            # 事件類型定義
-│  │  │  │  ├─ system-event-type.enum.ts      # 系統事件類型
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ event-bus.interface.ts            # 事件匯流排介面
-│  │  │  ├─ event-bus.ts                      # 事件匯流排實作
-│  │  │  ├─ enhanced-event-bus.service.ts     # 增強型事件匯流排服務
-│  │  │  ├─ event-types.ts                    # 事件類型常數
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  │
-│  │  ├─ modules/                             # 模組基礎設施
-│  │  │  ├─ base/                             # 模組基礎類別
-│  │  │  ├─ module.interface.ts               # 模組介面定義
-│  │  │  ├─ module-status.enum.ts             # 模組狀態枚舉
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  │
-│  │  ├─ models/                              # Blueprint 核心模型
-│  │  │  ├─ module-connection.interface.ts    # 模組連接介面
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  │
-│  │  ├─ repositories/                        # Blueprint 資料存取層
-│  │  │  ├─ blueprint.repository.ts           # Blueprint 倉儲
-│  │  │  ├─ blueprint-module.repository.ts    # Blueprint 模組倉儲
-│  │  │  ├─ blueprint-member.repository.ts    # Blueprint 成員倉儲
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  │
-│  │  ├─ services/                            # Blueprint 核心服務
-│  │  │  ├─ blueprint.service.ts              # Blueprint 主服務
-│  │  │  ├─ validation.service.ts             # 驗證服務
-│  │  │  ├─ dependency-validator.service.ts   # 依賴驗證服務
-│  │  │  ├─ blueprint-validation-schemas.ts   # 驗證規則
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  │
-│  │  ├─ workflow/                            # Blueprint 工作流編排
-│  │  │  ├─ handlers/                         # 工作流處理器
-│  │  │  │  ├─ task-completed.handler.ts      # 任務完成處理器
-│  │  │  │  ├─ log-created.handler.ts         # 日誌建立處理器
-│  │  │  │  ├─ qc-passed.handler.ts           # 品檢通過處理器
-│  │  │  │  ├─ qc-failed.handler.ts           # 品檢失敗處理器
-│  │  │  │  ├─ acceptance-finalized.handler.ts # 驗收完成處理器
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ models/                           # 工作流模型
-│  │  │  │  ├─ workflow-config.model.ts       # 工作流配置模型
-│  │  │  │  ├─ workflow-context.model.ts      # 工作流上下文模型
-│  │  │  │  ├─ workflow-handler.model.ts      # 工作流處理器模型
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ setc-workflow-orchestrator.interface.ts # 工作流編排器介面
-│  │  │  ├─ setc-workflow-orchestrator.service.ts   # 工作流編排器服務
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  │
-│  │  └─ index.ts                             # Blueprint 系統統一匯出
-│  │
-│  ├─ data-access/                            # 資料存取層 (統一資料庫操作)
-│  │  ├─ ai/                                  # AI 資料存取
-│  │  │  ├─ ai.repository.ts                  # AI 倉儲
-│  │  │  ├─ ai.types.ts                       # AI 類型定義
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  ├─ repositories/                        # 基礎倉儲
-│  │  │  ├─ base/                             # 倉儲基礎類別
-│  │  │  │  └─ firestore-base.repository.ts   # Firestore 基礎倉儲
-│  │  │  ├─ shared/                           # 共享倉儲
-│  │  │  │  ├─ account.repository.ts          # 帳戶倉儲
-│  │  │  │  ├─ organization.repository.ts     # 組織倉儲
-│  │  │  │  ├─ organization-member.repository.ts # 組織成員倉儲
-│  │  │  │  ├─ organization-invitation.repository.ts # 組織邀請倉儲
-│  │  │  │  ├─ team.repository.ts             # 團隊倉儲
-│  │  │  │  ├─ team-member.repository.ts      # 團隊成員倉儲
-│  │  │  │  ├─ friend.repository.ts           # 好友倉儲
-│  │  │  │  ├─ notification.repository.ts     # 通知倉儲
-│  │  │  │  ├─ notification-preferences.repository.ts # 通知偏好設定倉儲
-│  │  │  │  └─ fcm-token.repository.ts        # FCM Token 倉儲
-│  │  │  ├─ task-firestore.repository.ts      # 任務 Firestore 倉儲
-│  │  │  ├─ log-firestore.repository.ts       # 日誌 Firestore 倉儲
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  └─ index.ts                             # 資料存取層統一匯出
-│  │
-│  ├─ domain/                                 # 領域模型層 (業務實體定義)
-│  │  ├─ models/                              # 領域模型
-│  │  │  ├─ blueprint.model.ts                # Blueprint 模型
-│  │  │  ├─ blueprint-module.model.ts         # Blueprint 模組模型
-│  │  │  ├─ blueprint-config.model.ts         # Blueprint 配置模型
-│  │  │  ├─ friend.model.ts                   # 好友模型
-│  │  │  ├─ notification.model.ts             # 通知模型
-│  │  │  ├─ notification-preferences.model.ts # 通知偏好模型
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  ├─ types/                               # 領域類型定義
-│  │  │  ├─ blueprint/                        # Blueprint 類型
-│  │  │  │  ├─ blueprint.types.ts             # Blueprint 類型
-│  │  │  │  ├─ blueprint-status.enum.ts       # Blueprint 狀態枚舉
-│  │  │  │  └─ owner-type.enum.ts             # 擁有者類型枚舉
-│  │  │  ├─ module/                           # 模組類型
-│  │  │  │  ├─ module.types.ts                # 模組類型
-│  │  │  │  └─ module-state.enum.ts           # 模組狀態枚舉
-│  │  │  ├─ permission/                       # 權限類型
-│  │  │  │  ├─ permission.types.ts            # 權限類型
-│  │  │  │  ├─ permission-level.enum.ts       # 權限等級枚舉
-│  │  │  │  └─ role.enum.ts                   # 角色枚舉
-│  │  │  ├─ task/                             # 任務類型
-│  │  │  │  ├─ task.types.ts                  # 任務類型
-│  │  │  │  ├─ task-view.types.ts             # 任務視圖類型
-│  │  │  │  └─ task-quantity.types.ts         # 任務數量類型
-│  │  │  ├─ log/                              # 日誌類型
-│  │  │  │  ├─ log.types.ts                   # 日誌類型
-│  │  │  │  └─ log-task.types.ts              # 日誌任務類型
-│  │  │  ├─ workflow/                         # 工作流類型
-│  │  │  │  └─ workflow.types.ts              # 工作流類型
-│  │  │  ├─ events/                           # 事件類型
-│  │  │  │  ├─ event.types.ts                 # 事件類型
-│  │  │  │  └─ event-type.enum.ts             # 事件類型枚舉
-│  │  │  ├─ storage/                          # 儲存類型
-│  │  │  │  └─ storage.types.ts               # 儲存類型
-│  │  │  ├─ quality-control/                  # 品質控制類型
-│  │  │  │  └─ quality-control.types.ts       # 品質控制類型
-│  │  │  ├─ configuration/                    # 配置類型
-│  │  │  │  └─ configuration.types.ts         # 配置類型
-│  │  │  ├─ account.types.ts                  # 帳戶類型
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  └─ index.ts                             # 領域層統一匯出
-│  │
-│  ├─ infrastructure/                         # 基礎設施層 (外部服務整合)
-│  │  ├─ storage/                             # 檔案儲存服務
-│  │  │  ├─ storage.repository.ts             # 儲存倉儲介面
-│  │  │  ├─ firebase-storage.repository.ts    # Firebase 儲存實作
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  └─ index.ts                             # 基礎設施層統一匯出
-│  │
-│  ├─ services/                               # 核心服務層
-│  │  ├─ ai/                                  # AI 服務
-│  │  │  ├─ ai.service.ts                     # AI 服務
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  ├─ logger/                              # 日誌服務
-│  │  │  ├─ logger.service.ts                 # 日誌服務
-│  │  │  ├─ log-transport.interface.ts        # 日誌傳輸介面
-│  │  │  ├─ console-transport.ts              # 控制台傳輸
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  ├─ firebase.service.ts                  # Firebase 服務
-│  │  ├─ firebase-auth.service.ts             # Firebase 認證服務
-│  │  ├─ firebase-analytics.service.ts        # Firebase 分析服務
-│  │  ├─ push-messaging.service.ts            # 推送訊息服務
-│  │  ├─ friend.service.ts                    # 好友服務
-│  │  ├─ error-tracking.service.ts            # 錯誤追蹤服務
-│  │  ├─ performance-monitoring.service.ts    # 效能監控服務
-│  │  ├─ notification-analytics.service.ts    # 通知分析服務
-│  │  └─ index.ts                             # 統一匯出
-│  │
-│  ├─ state/                                  # 全域狀態管理
-│  │  ├─ stores/                              # 狀態儲存
-│  │  │  ├─ task.store.ts                     # 任務狀態
-│  │  │  ├─ log.store.ts                      # 日誌狀態
-│  │  │  ├─ construction-log.store.ts         # 施工日誌狀態
-│  │  │  ├─ friend.store.ts                   # 好友狀態
-│  │  │  ├─ team.store.ts                     # 團隊狀態
-│  │  │  ├─ notification.store.ts             # 通知狀態
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  └─ index.ts                             # 狀態管理統一匯出
-│  │
-│  ├─ facades/                                # 外觀模式服務 (簡化複雜操作)
-│  │  ├─ ai/                                  # AI 外觀
-│  │  │  ├─ ai.store.ts                       # AI 狀態儲存
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  └─ index.ts                             # 外觀層統一匯出
-│  │
-│  ├─ errors/                                 # 自訂錯誤類型
-│  │  ├─ blueprint-error.ts                   # Blueprint 錯誤
-│  │  ├─ module-not-found-error.ts            # 模組未找到錯誤
-│  │  ├─ permission-denied-error.ts           # 權限拒絕錯誤
-│  │  ├─ validation-error.ts                  # 驗證錯誤
-│  │  └─ index.ts                             # 統一匯出
-│  │
-│  ├─ net/                                    # 網路層 (HTTP 攔截器)
-│  │  ├─ default.interceptor.ts               # 預設攔截器
-│  │  ├─ refresh-token.ts                     # Token 刷新
-│  │  ├─ helper.ts                            # HTTP 輔助工具
-│  │  └─ index.ts                             # 統一匯出
-│  │
-│  ├─ i18n/                                   # 國際化服務
-│  │  └─ i18n.service.ts                      # 國際化服務
-│  │
-│  ├─ utils/                                  # 工具函數
-│  │  └─ task-hierarchy.util.ts               # 任務層級工具
-│  │
-│  ├─ startup/                                # 應用啟動服務
-│  │  └─ startup.service.ts                   # 啟動服務
-│  │
-│  ├─ start-page.guard.ts                     # 起始頁守衛
-│  └─ index.ts                                # 核心層統一匯出
-│
-├─ domains/                                   # 業務領域層 (按業務劃分)
-│  │
-│  ├─ shared-domain/                          # 共享領域 (跨領域共用功能)
-│  │  ├─ cloud-module/                        # 雲端儲存模組
-│  │  │  ├─ submodules/                       # 子模組
-│  │  │  │  ├─ file-management/               # 檔案管理子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ file-upload.service.ts   # 檔案上傳服務
-│  │  │  │  │  │  ├─ file-download.service.ts # 檔案下載服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  ├─ models/                     # 模型
-│  │  │  │  │  │  ├─ file-metadata.model.ts   # 檔案元資料模型
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 檔案管理統一匯出
-│  │  │  │  └─ storage-management/            # 儲存空間管理子模組
-│  │  │  │      ├─ services/                  # 服務層
-│  │  │  │      │  ├─ quota-management.service.ts # 配額管理服務
-│  │  │  │      │  └─ index.ts                # 統一匯出
-│  │  │  │      └─ index.ts                   # 儲存管理統一匯出
-│  │  │  ├─ models/                           # 雲端模組模型
-│  │  │  │  ├─ cloud.model.ts                 # 雲端模型
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ repositories/                     # 倉儲層
-│  │  │  │  ├─ cloud.repository.ts            # 雲端倉儲
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ services/                         # 核心服務
-│  │  │  │  ├─ cloud-storage.service.ts       # 雲端儲存服務
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ cloud.module.ts                   # 雲端模組定義
-│  │  │  ├─ module.metadata.ts                # 模組元資料
-│  │  │  ├─ index.ts                          # 統一匯出
-│  │  │  └─ README.md                         # 模組說明文件
-│  │  │
-│  │  ├─ communication-module/                # 溝通協作模組
-│  │  │  ├─ submodules/                       # 子模組
-│  │  │  │  ├─ notifications/                 # 通知子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ push-notification.service.ts # 推送通知服務
-│  │  │  │  │  │  ├─ system-notification.service.ts # 系統通知服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 通知統一匯出
-│  │  │  │  ├─ messaging/                     # 訊息子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ group-message.service.ts # 群組訊息服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 訊息統一匯出
-│  │  │  │  └─ reminders/                     # 提醒子模組
-│  │  │  │      ├─ services/                  # 服務層
-│  │  │  │      │  ├─ task-reminder.service.ts # 任務提醒服務
-│  │  │  │      │  └─ index.ts                # 統一匯出
-│  │  │  │      └─ index.ts                   # 提醒統一匯出
-│  │  │  ├─ models/                           # 溝通模組模型
-│  │  │  │  ├─ communication.model.ts         # 溝通模型
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ repositories/                     # 倉儲層
-│  │  │  │  ├─ communication.repository.ts    # 溝通倉儲
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ communication.module.ts           # 溝通模組定義
-│  │  │  ├─ module.metadata.ts                # 模組元資料
-│  │  │  ├─ index.ts                          # 統一匯出
-│  │  │  └─ README.md                         # 模組說明文件
-│  │  │
-│  │  ├─ audit-logs-module/                   # 稽核日誌模組
-│  │  │  ├─ submodules/                       # 子模組
-│  │  │  │  ├─ system-logs/                   # 系統日誌子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  └─ system-log.service.ts    # 系統日誌服務
-│  │  │  │  │  └─ index.ts                    # 系統日誌統一匯出
-│  │  │  │  ├─ user-activity-logs/            # 使用者活動日誌子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  └─ user-activity.service.ts # 使用者活動服務
-│  │  │  │  │  └─ index.ts                    # 活動日誌統一匯出
-│  │  │  │  └─ compliance-logs/               # 合規日誌子模組
-│  │  │  │      ├─ services/                  # 服務層
-│  │  │  │      │  └─ compliance.service.ts   # 合規服務
-│  │  │  │      └─ index.ts                   # 合規日誌統一匯出
-│  │  │  ├─ models/                           # 稽核模組模型
-│  │  │  │  ├─ audit-log.model.ts             # 稽核日誌模型
-│  │  │  │  ├─ audit-log.types.ts             # 稽核日誌類型
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ repositories/                     # 倉儲層
-│  │  │  │  ├─ audit-log.repository.ts        # 稽核日誌倉儲
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ services/                         # 核心服務
-│  │  │  │  ├─ audit-logs.service.ts          # 稽核日誌服務
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ components/                       # UI 元件
-│  │  │  │  └─ audit-logs.component.ts        # 稽核日誌元件
-│  │  │  ├─ config/                           # 模組配置
-│  │  │  │  └─ audit-logs.config.ts           # 稽核日誌配置
-│  │  │  ├─ exports/                          # 模組匯出 API
-│  │  │  │  └─ audit-logs-api.exports.ts      # API 匯出定義
-│  │  │  ├─ audit-logs.module.ts              # 稽核日誌模組定義
-│  │  │  ├─ module.metadata.ts                # 模組元資料
-│  │  │  ├─ index.ts                          # 統一匯出
-│  │  │  └─ README.md                         # 模組說明文件
-│  │  │
-│  │  └─ workflow-module/                     # 工作流模組
-│  │      ├─ submodules/                      # 子模組
-│  │      │  ├─ approval-workflows/           # 審批工作流子模組
-│  │      │  │  ├─ services/                  # 服務層
-│  │      │  │  │  ├─ approval.service.ts     # 審批服務
-│  │      │  │  │  └─ index.ts                # 統一匯出
-│  │      │  │  └─ index.ts                   # 審批工作流統一匯出
-│  │      │  ├─ automation-workflows/         # 自動化工作流子模組
-│  │      │  │  ├─ services/                  # 服務層
-│  │      │  │  │  ├─ automation.service.ts   # 自動化服務
-│  │      │  │  │  └─ index.ts                # 統一匯出
-│  │      │  │  └─ index.ts                   # 自動化統一匯出
-│  │      │  └─ custom-workflows/             # 自訂工作流子模組
-│  │      │      ├─ services/                 # 服務層
-│  │      │      │  ├─ custom-workflow.service.ts # 自訂工作流服務
-│  │      │      │  ├─ template.service.ts    # 範本服務
-│  │      │      │  └─ index.ts               # 統一匯出
-│  │      │      └─ index.ts                  # 自訂工作流統一匯出
-│  │      ├─ models/                          # 工作流模組模型
-│  │      │  ├─ workflow.model.ts             # 工作流模型
-│  │      │  └─ index.ts                      # 統一匯出
-│  │      ├─ repositories/                    # 倉儲層
-│  │      │  ├─ workflow.repository.ts        # 工作流倉儲
-│  │      │  └─ index.ts                      # 統一匯出
-│  │      ├─ services/                        # 核心服務
-│  │      │  ├─ state-machine.service.ts      # 狀態機服務
-│  │      │  └─ index.ts                      # 統一匯出
-│  │      ├─ workflow.module.ts               # 工作流模組定義
-│  │      ├─ module.metadata.ts               # 模組元資料
-│  │      ├─ index.ts                         # 統一匯出
-│  │      └─ README.md                        # 模組說明文件
-│  │
-│  ├─ project-management-domain/              # 專案管理領域
-│  │  ├─ tasks-module/                        # 任務管理模組
-│  │  │  ├─ submodules/                       # 子模組
-│  │  │  │  ├─ task-planning/                 # 任務規劃子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ task-creation.service.ts # 任務建立服務
-│  │  │  │  │  │  ├─ task-scheduling.service.ts # 任務排程服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 任務規劃統一匯出
-│  │  │  │  ├─ task-execution/                # 任務執行子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ task-assignment.service.ts # 任務分配服務
-│  │  │  │  │  │  ├─ task-progress.service.ts # 任務進度服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 任務執行統一匯出
-│  │  │  │  └─ task-visualization/            # 任務視覺化子模組
-│  │  │  │      ├─ views/                     # 視圖層
-│  │  │  │      │  ├─ task-list-view.component.ts # 列表視圖
-│  │  │  │      │  ├─ task-kanban-view.component.ts # 看板視圖
-│  │  │  │      │  ├─ task-gantt-view.component.ts # 甘特圖視圖
-│  │  │  │      │  ├─ task-timeline-view.component.ts # 時間軸視圖
-│  │  │  │      │  ├─ task-tree-view.component.ts # 樹狀視圖
-│  │  │  │      │  └─ index.ts                # 統一匯出
-│  │  │  │      └─ index.ts                   # 視覺化統一匯出
-│  │  │  ├─ components/                       # UI 元件
-│  │  │  │  ├─ task-context-menu/             # 任務右鍵選單
-│  │  │  │  │  ├─ task-context-menu.component.ts # 選單元件
-│  │  │  │  │  ├─ task-context-menu.component.html # 選單模板
-│  │  │  │  │  ├─ task-context-menu.component.less # 選單樣式
-│  │  │  │  │  └─ index.ts                    # 統一匯出
-│  │  │  │  └─ index.ts                       # 元件統一匯出
-│  │  │  ├─ services/                         # 核心服務
-│  │  │  │  ├─ tasks.service.ts               # 任務服務
-│  │  │  │  ├─ task-context-menu.service.ts   # 選單服務
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ repositories/                     # 倉儲層
-│  │  │  │  ├─ tasks.repository.ts            # 任務倉儲
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ types/                            # 類型定義
-│  │  │  │  ├─ task-context-menu.types.ts     # 選單類型
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ tasks.component.ts                # 任務主元件
-│  │  │  ├─ task-modal.component.ts           # 任務對話框元件
-│  │  │  ├─ tasks.routes.ts                   # 任務路由
-│  │  │  ├─ tasks.module.ts                   # 任務模組定義
-│  │  │  ├─ module.metadata.ts                # 模組元資料
-│  │  │  ├─ index.ts                          # 統一匯出
-│  │  │  └─ README.md                         # 模組說明文件
-│  │  │
-│  │  └─ log-module/                          # 日誌記錄模組
-│  │      ├─ submodules/                      # 子模組
-│  │      │  ├─ activity-tracking/            # 活動追蹤子模組
-│  │      │  │  ├─ services/                  # 服務層
-│  │      │  │  │  ├─ activity-log.service.ts # 活動日誌服務
-│  │      │  │  │  └─ index.ts                # 統一匯出
-│  │      │  │  └─ index.ts                   # 活動追蹤統一匯出
-│  │      │  ├─ change-tracking/              # 變更追蹤子模組
-│  │      │  │  ├─ services/                  # 服務層
-│  │      │  │  │  ├─ change-history.service.ts # 變更歷史服務
-│  │      │  │  │  └─ index.ts                # 統一匯出
-│  │      │  │  └─ index.ts                   # 變更追蹤統一匯出
-│  │      │  ├─ collaboration/                # 協作子模組
-│  │      │  │  ├─ services/                  # 服務層
-│  │      │  │  │  ├─ comment.service.ts      # 評論服務
-│  │      │  │  │  ├─ attachment.service.ts   # 附件服務
-│  │      │  │  │  └─ index.ts                # 統一匯出
-│  │      │  │  └─ index.ts                   # 協作統一匯出
-│  │      │  └─ system-events/                # 系統事件子模組
-│  │      │      ├─ services/                 # 服務層
-│  │      │      │  ├─ system-event.service.ts # 系統事件服務
-│  │      │      │  └─ index.ts               # 統一匯出
-│  │      │      └─ index.ts                  # 系統事件統一匯出
-│  │      ├─ models/                          # 日誌模組模型
-│  │      │  ├─ activity-log.model.ts         # 活動日誌模型
-│  │      │  └─ index.ts                      # 統一匯出
-│  │      ├─ repositories/                    # 倉儲層
-│  │      │  ├─ log.repository.ts             # 日誌倉儲
-│  │      │  └─ index.ts                      # 統一匯出
-│  │      ├─ log.module.ts                    # 日誌模組定義
-│  │      ├─ module.metadata.ts               # 模組元資料
-│  │      ├─ index.ts                         # 統一匯出
-│  │      └─ README.md                        # 模組說明文件
-│  │
-│  ├─ construction-domain/                    # 營建工程領域
-│  │  ├─ contract-module/                     # 合約管理模組
-│  │  │  ├─ submodules/                       # 子模組
-│  │  │  │  ├─ contract-lifecycle/            # 合約生命週期子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ contract-creation.service.ts # 合約建立服務
-│  │  │  │  │  │  ├─ contract-lifecycle.service.ts # 合約生命週期服務
-│  │  │  │  │  │  ├─ contract-status.service.ts # 合約狀態服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 生命週期統一匯出
-│  │  │  │  ├─ work-items/                    # 工項管理子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ contract-work-items.service.ts # 工項服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  ├─ repositories/               # 倉儲層
-│  │  │  │  │  │  ├─ work-item.repository.ts  # 工項倉儲
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 工項統一匯出
-│  │  │  │  └─ document-management/           # 文件管理子模組
-│  │  │  │      ├─ services/                  # 服務層
-│  │  │  │      │  ├─ contract-upload.service.ts # 合約上傳服務
-│  │  │  │      │  └─ index.ts                # 統一匯出
-│  │  │  │      └─ index.ts                   # 文件管理統一匯出
-│  │  │  ├─ models/                           # 合約模組模型
-│  │  │  │  ├─ contract.model.ts              # 合約模型
-│  │  │  │  ├─ dtos.ts                        # 資料傳輸物件
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ repositories/                     # 倉儲層
-│  │  │  │  ├─ contract.repository.ts         # 合約倉儲
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ services/                         # 核心服務
-│  │  │  │  ├─ contract-management.service.ts # 合約管理服務
-│  │  │  │  ├─ contract-event.service.ts      # 合約事件服務
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ config/                           # 模組配置
-│  │  │  │  ├─ contract.config.ts             # 合約配置
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ exports/                          # 模組匯出 API
-│  │  │  │  ├─ contract-api.interface.ts      # API 介面定義
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ contract.module.ts                # 合約模組定義
-│  │  │  ├─ module.metadata.ts                # 模組元資料
-│  │  │  ├─ index.ts                          # 統一匯出
-│  │  │  └─ README.md                         # 模組說明文件
-│  │  │
-│  │  ├─ acceptance-module/                   # 驗收管理模組
-│  │  │  ├─ submodules/                       # 子模組
-│  │  │  │  ├─ inspection-process/            # 檢驗流程子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ preliminary.service.ts   # 初驗服務
-│  │  │  │  │  │  ├─ review.service.ts        # 複驗服務
-│  │  │  │  │  │  ├─ re-inspection.service.ts # 會驗服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 檢驗流程統一匯出
-│  │  │  │  ├─ acceptance-request/            # 驗收申請子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ request.service.ts       # 申請服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 驗收申請統一匯出
-│  │  │  │  └─ final-acceptance/              # 結案驗收子模組
-│  │  │  │      ├─ services/                  # 服務層
-│  │  │  │      │  ├─ conclusion.service.ts   # 結案服務
-│  │  │  │      │  └─ index.ts                # 統一匯出
-│  │  │  │      └─ index.ts                   # 結案驗收統一匯出
-│  │  │  ├─ models/                           # 驗收模組模型
-│  │  │  │  ├─ acceptance.model.ts            # 驗收模型
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ repositories/                     # 倉儲層
-│  │  │  │  ├─ acceptance.repository.ts       # 驗收倉儲
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ acceptance.module.ts              # 驗收模組定義
-│  │  │  ├─ module.metadata.ts                # 模組元資料
-│  │  │  ├─ index.ts                          # 統一匯出
-│  │  │  └─ README.md                         # 模組說明文件
-│  │  │
-│  │  ├─ material-module/                     # 材料管理模組
-│  │  │  ├─ submodules/                       # 子模組
-│  │  │  │  ├─ inventory-management/          # 庫存管理子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ inventory.service.ts     # 庫存服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 庫存管理統一匯出
-│  │  │  │  ├─ material-tracking/             # 材料追蹤子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ consumption.service.ts   # 消耗追蹤服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 材料追蹤統一匯出
-│  │  │  │  ├─ equipment-management/          # 設備管理子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ equipment.service.ts     # 設備服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 設備管理統一匯出
-│  │  │  │  └─ material-issues/               # 材料問題子模組
-│  │  │  │      ├─ services/                  # 服務層
-│  │  │  │      │  ├─ material-issue.service.ts # 材料問題服務
-│  │  │  │      │  └─ index.ts                # 統一匯出
-│  │  │  │      └─ index.ts                   # 材料問題統一匯出
-│  │  │  ├─ models/                           # 材料模組模型
-│  │  │  │  ├─ material.model.ts              # 材料模型
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ repositories/                     # 倉儲層
-│  │  │  │  ├─ material.repository.ts         # 材料倉儲
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ services/                         # 核心服務
-│  │  │  │  ├─ material-management.service.ts # 材料管理服務
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ material.module.ts                # 材料模組定義
-│  │  │  ├─ module.metadata.ts                # 模組元資料
-│  │  │  ├─ index.ts                          # 統一匯出
-│  │  │  └─ README.md                         # 模組說明文件
-│  │  │
-│  │  ├─ warranty-module/                     # 保固管理模組
-│  │  │  ├─ submodules/                       # 子模組
-│  │  │  │  ├─ warranty-period/               # 保固期管理子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ warranty-period.service.ts # 保固期服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 保固期統一匯出
-│  │  │  │  ├─ defect-management/             # 瑕疵管理子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ warranty-defect.service.ts # 瑕疵服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  ├─ repositories/               # 倉儲層
-│  │  │  │  │  │  ├─ warranty-defect.repository.ts # 瑕疵倉儲
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  ├─ models/                     # 模型
-│  │  │  │  │  │  ├─ warranty-defect.model.ts # 瑕疵模型
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 瑕疵管理統一匯出
-│  │  │  │  └─ repair-management/             # 修繕管理子模組
-│  │  │  │      ├─ services/                  # 服務層
-│  │  │  │      │  ├─ warranty-repair.service.ts # 修繕服務
-│  │  │  │      │  └─ index.ts                # 統一匯出
-│  │  │  │      ├─ repositories/              # 倉儲層
-│  │  │  │      │  ├─ warranty-repair.repository.ts # 修繕倉儲
-│  │  │  │      │  └─ index.ts                # 統一匯出
-│  │  │  │      ├─ models/                    # 模型
-│  │  │  │      │  ├─ warranty-repair.model.ts # 修繕模型
-│  │  │  │      │  └─ index.ts                # 統一匯出
-│  │  │  │      └─ index.ts                   # 修繕管理統一匯出
-│  │  │  ├─ models/                           # 保固模組模型
-│  │  │  │  ├─ warranty.model.ts              # 保固模型
-│  │  │  │  ├─ warranty-status-machine.ts     # 保固狀態機
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ repositories/                     # 倉儲層
-│  │  │  │  ├─ warranty.repository.ts         # 保固倉儲
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ services/                         # 核心服務
-│  │  │  │  ├─ warranty-event-handlers.ts     # 保固事件處理器
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ config/                           # 模組配置
-│  │  │  │  └─ warranty.config.ts             # 保固配置
-│  │  │  ├─ exports/                          # 模組匯出 API
-│  │  │  │  └─ warranty.api.ts                # API 定義
-│  │  │  ├─ warranty.module.ts                # 保固模組定義
-│  │  │  ├─ module.metadata.ts                # 模組元資料
-│  │  │  ├─ index.ts                          # 統一匯出
-│  │  │  └─ README.md                         # 模組說明文件
-│  │  │
-│  │  ├─ climate-module/                      # 氣象資訊模組
-│  │  │  ├─ submodules/                       # 子模組
-│  │  │  │  ├─ weather-forecast/              # 天氣預報子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ cwb-weather.service.ts   # 中央氣象局天氣服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  ├─ models/                     # 模型
-│  │  │  │  │  │  ├─ weather-forecast.model.ts # 天氣預報模型
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 天氣預報統一匯出
-│  │  │  │  └─ weather-cache/                 # 天氣快取子模組
-│  │  │  │      ├─ services/                  # 服務層
-│  │  │  │      │  ├─ climate-cache.service.ts # 氣象快取服務
-│  │  │  │      │  └─ index.ts                # 統一匯出
-│  │  │  │      └─ index.ts                   # 天氣快取統一匯出
-│  │  │  ├─ models/                           # 氣象模組模型
-│  │  │  │  ├─ cwb-api-response.model.ts      # 氣象局 API 回應模型
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ repositories/                     # 倉儲層
-│  │  │  │  ├─ climate.repository.ts          # 氣象倉儲
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ config/                           # 模組配置
-│  │  │  │  ├─ climate.config.ts              # 氣象配置
-│  │  │  │  ├─ cwb-api.constants.ts           # 氣象局 API 常數
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ examples/                         # 使用範例
-│  │  │  │  └─ usage-example.ts               # 使用範例程式碼
-│  │  │  ├─ exports/                          # 模組匯出 API
-│  │  │  │  └─ climate-api.exports.ts         # API 匯出定義
-│  │  │  ├─ climate.module.ts                 # 氣象模組定義
-│  │  │  ├─ index.ts                          # 統一匯出
-│  │  │  └─ README.md                         # 模組說明文件
-│  │  │
-│  │  └─ safety-module/                       # 安全衛生管理模組
-│  │      ├─ submodules/                      # 子模組
-│  │      │  ├─ safety-inspection/            # 安全檢查子模組
-│  │      │  │  ├─ services/                  # 服務層
-│  │      │  │  │  ├─ safety-inspection.service.ts # 安全檢查服務
-│  │      │  │  │  └─ index.ts                # 統一匯出
-│  │      │  │  ├─ models/                    # 模型
-│  │      │  │  │  ├─ safety-inspection.model.ts # 安全檢查模型
-│  │      │  │  │  └─ index.ts                # 統一匯出
-│  │      │  │  └─ index.ts                   # 安全檢查統一匯出
-│  │      │  ├─ incident-management/          # 事故管理子模組
-│  │      │  │  ├─ services/                  # 服務層
-│  │      │  │  │  ├─ incident-report.service.ts # 事故報告服務
-│  │      │  │  │  └─ index.ts                # 統一匯出
-│  │      │  │  └─ index.ts                   # 事故管理統一匯出
-│  │      │  ├─ risk-assessment/              # 風險評估子模組
-│  │      │  │  ├─ services/                  # 服務層
-│  │      │  │  │  ├─ risk-assessment.service.ts # 風險評估服務
-│  │      │  │  │  └─ index.ts                # 統一匯出
-│  │      │  │  └─ index.ts                   # 風險評估統一匯出
-│  │      │  └─ safety-training/              # 安全訓練子模組
-│  │      │      ├─ services/                 # 服務層
-│  │      │      │  ├─ safety-training.service.ts # 安全訓練服務
-│  │      │      │  └─ index.ts               # 統一匯出
-│  │      │      └─ index.ts                  # 安全訓練統一匯出
-│  │      ├─ repositories/                    # 倉儲層
-│  │      │  ├─ safety.repository.ts          # 安全倉儲
-│  │      │  └─ index.ts                      # 統一匯出
-│  │      ├─ safety.module.ts                 # 安全模組定義
-│  │      ├─ module.metadata.ts               # 模組元資料
-│  │      ├─ index.ts                         # 統一匯出
-│  │      └─ README.md                        # 模組說明文件
-│  │
-│  ├─ quality-assurance-domain/               # 品質保證領域
-│  │  ├─ qa-module/                           # 品質管理模組
-│  │  │  ├─ submodules/                       # 子模組
-│  │  │  │  ├─ inspection/                    # 檢驗子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ inspection.service.ts    # 檢驗服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 檢驗統一匯出
-│  │  │  │  ├─ defect-tracking/               # 缺陷追蹤子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ defect.service.ts        # 缺陷服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 缺陷追蹤統一匯出
-│  │  │  │  ├─ quality-checklist/             # 品質檢查清單子模組
-│  │  │  │  │  ├─ services/                   # 服務層
-│  │  │  │  │  │  ├─ checklist.service.ts     # 檢查清單服務
-│  │  │  │  │  │  └─ index.ts                 # 統一匯出
-│  │  │  │  │  └─ index.ts                    # 檢查清單統一匯出
-│  │  │  │  └─ quality-reporting/             # 品質報告子模組
-│  │  │  │      ├─ services/                  # 服務層
-│  │  │  │      │  ├─ report.service.ts       # 報告服務
-│  │  │  │      │  └─ index.ts                # 統一匯出
-│  │  │  │      └─ index.ts                   # 品質報告統一匯出
-│  │  │  ├─ models/                           # 品質模組模型
-│  │  │  │  ├─ qa.model.ts                    # 品質模型
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ repositories/                     # 倉儲層
-│  │  │  │  ├─ qa.repository.ts               # 品質倉儲
-│  │  │  │  └─ index.ts                       # 統一匯出
-│  │  │  ├─ qa.module.ts                      # 品質模組定義
-│  │  │  ├─ module.metadata.ts                # 模組元資料
-│  │  │  ├─ index.ts                          # 統一匯出
-│  │  │  └─ README.md                         # 模組說明文件
-│  │  │
-│  │  └─ issue-module/                        # 問題追蹤模組
-│  │      ├─ submodules/                      # 子模組
-│  │      │  ├─ issue-lifecycle/              # 問題生命週期子模組
-│  │      │  │  ├─ services/                  # 服務層
-│  │      │  │  │  ├─ issue-creation.service.ts # 問題建立服務
-│  │      │  │  │  ├─ issue-lifecycle.service.ts # 問題生命週期服務
-│  │      │  │  │  └─ index.ts                # 統一匯出
-│  │      │  │  └─ index.ts                   # 生命週期統一匯出
-│  │      │  ├─ issue-resolution/             # 問題解決子模組
-│  │      │  │  ├─ services/                  # 服務層
-│  │      │  │  │  ├─ issue-resolution.service.ts # 問題解決服務
-│  │      │  │  │  └─ index.ts                # 統一匯出
-│  │      │  │  └─ index.ts                   # 問題解決統一匯出
-│  │      │  └─ issue-verification/           # 問題驗證子模組
-│  │      │      ├─ services/                 # 服務層
-│  │      │      │  ├─ issue-verification.service.ts # 問題驗證服務
-│  │      │      │  └─ index.ts               # 統一匯出
-│  │      │      └─ index.ts                  # 問題驗證統一匯出
-│  │      ├─ models/                          # 問題模組模型
-│  │      │  ├─ issue.model.ts                # 問題模型
-│  │      │  └─ index.ts                      # 統一匯出
-│  │      ├─ repositories/                    # 倉儲層
-│  │      │  ├─ issue.repository.ts           # 問題倉儲
-│  │      │  └─ index.ts                      # 統一匯出
-│  │      ├─ services/                        # 核心服務
-│  │      │  ├─ issue-management.service.ts   # 問題管理服務
-│  │      │  ├─ issue-event.service.ts        # 問題事件服務
-│  │      │  └─ index.ts                      # 統一匯出
-│  │      ├─ config/                          # 模組配置
-│  │      │  ├─ issue.config.ts               # 問題配置
-│  │      │  └─ index.ts                      # 統一匯出
-│  │      ├─ exports/                         # 模組匯出 API
-│  │      │  ├─ issue-api.exports.ts          # API 匯出定義
-│  │      │  └─ index.ts                      # 統一匯出
-│  │      ├─ issue.module.ts                  # 問題模組定義
-│  │      ├─ module.metadata.ts               # 模組元資料
-│  │      ├─ index.ts                         # 統一匯出
-│  │      └─ README.md                        # 模組說明文件
-│  │
-│  └─ financial-domain/                       # 財務管理領域
-│      ├─ finance-module/                     # 財務管理模組
-│      │  ├─ submodules/                      # 子模組
-│      │  │  ├─ invoice-management/           # 發票管理子模組
-│      │  │  │  ├─ services/                  # 服務層
-│      │  │  │  │  ├─ invoice.service.ts      # 發票服務
-│      │  │  │  │  ├─ invoice-generation.service.ts # 發票生成服務
-│      │  │  │  │  ├─ invoice-approval.service.ts # 發票審批服務
-│      │  │  │  │  └─ index.ts                # 統一匯出
-│      │  │  │  ├─ models/                    # 模型
-│      │  │  │  │  ├─ invoice.model.ts        # 發票模型
-│      │  │  │  │  ├─ invoice-status-machine.ts # 發票狀態機
-│      │  │  │  │  ├─ invoice-service.interface.ts # 發票服務介面
-│      │  │  │  │  └─ index.ts                # 統一匯出
-│      │  │  │  └─ index.ts                   # 發票管理統一匯出
-│      │  │  ├─ payment-management/           # 付款管理子模組
-│      │  │  │  ├─ services/                  # 服務層
-│      │  │  │  │  ├─ payment.service.ts      # 付款服務
-│      │  │  │  │  ├─ payment-generation.service.ts # 付款生成服務
-│      │  │  │  │  ├─ payment-approval.service.ts # 付款審批服務
-│      │  │  │  │  ├─ payment-status-tracking.service.ts # 付款狀態追蹤服務
-│      │  │  │  │  └─ index.ts                # 統一匯出
-│      │  │  │  └─ index.ts                   # 付款管理統一匯出
-│      │  │  ├─ budget-management/            # 預算管理子模組
-│      │  │  │  ├─ services/                  # 服務層
-│      │  │  │  │  ├─ budget.service.ts       # 預算服務
-│      │  │  │  │  └─ index.ts                # 統一匯出
-│      │  │  │  └─ index.ts                   # 預算管理統一匯出
-│      │  │  ├─ cost-management/              # 成本管理子模組
-│      │  │  │  ├─ services/                  # 服務層
-│      │  │  │  │  ├─ cost-management.service.ts # 成本管理服務
-│      │  │  │  │  └─ index.ts                # 統一匯出
-│      │  │  │  └─ index.ts                   # 成本管理統一匯出
-│      │  │  ├─ financial-reporting/          # 財務報表子模組
-│      │  │  │  ├─ services/                  # 服務層
-│      │  │  │  │  ├─ financial-report.service.ts # 財務報表服務
-│      │  │  │  │  └─ index.ts                # 統一匯出
-│      │  │  │  └─ index.ts                   # 財務報表統一匯出
-│      │  │  └─ accounting-ledger/            # 會計分類帳子模組
-│      │  │      ├─ services/                 # 服務層
-│      │  │      │  ├─ ledger.service.ts      # 分類帳服務
-│      │  │      │  └─ index.ts               # 統一匯出
-│      │  │      └─ index.ts                  # 會計分類帳統一匯出
-│      │  ├─ models/                          # 財務模組模型
-│      │  │  ├─ finance.model.ts              # 財務模型
-│      │  │  ├─ financial-summary.model.ts    # 財務摘要模型
-│      │  │  └─ index.ts                      # 統一匯出
-│      │  ├─ repositories/                    # 倉儲層
-│      │  │  ├─ finance.repository.ts         # 財務倉儲
-│      │  │  └─ index.ts                      # 統一匯出
-│      │  ├─ finance.module.ts                # 財務模組定義
-│      │  ├─ module.metadata.ts               # 模組元資料
-│      │  ├─ index.ts                         # 統一匯出
-│      │  └─ README.md                        # 模組說明文件
-│      │
-│      └─ index.ts                            # 財務領域統一匯出
-│
-├─ layout/                                    # 佈局層 (應用介面框架)
-│  ├─ basic/                                  # 基礎佈局
-│  │  ├─ widgets/                             # 小工具元件
-│  │  │  ├─ clear-storage.component.ts        # 清除儲存小工具
-│  │  │  ├─ context-switcher.component.ts     # 上下文切換小工具
-│  │  │  ├─ fullscreen.component.ts           # 全螢幕小工具
-│  │  │  ├─ i18n.component.ts                 # 國際化小工具
-│  │  │  ├─ icon.component.ts                 # 圖示小工具
-│  │  │  ├─ notify.component.ts               # 通知小工具
-│  │  │  ├─ rtl.component.ts                  # RTL 小工具
-│  │  │  ├─ search.component.ts               # 搜尋小工具
-│  │  │  ├─ task.component.ts                 # 任務小工具
-│  │  │  └─ user.component.ts                 # 使用者小工具
-│  │  ├─ basic.component.ts                   # 基礎佈局元件
-│  │  └─ README.md                            # 佈局說明文件
-│  ├─ blank/                                  # 空白佈局
-│  │  ├─ blank.component.ts                   # 空白佈局元件
-│  │  └─ README.md                            # 佈局說明文件
-│  ├─ passport/                               # 認證佈局
-│  │  ├─ passport.component.ts                # 認證佈局元件
-│  │  └─ passport.component.less              # 認證佈局樣式
-│  └─ index.ts                                # 佈局層統一匯出
-│
-├─ routes/                                    # 路由層 (頁面路由配置)
-│  ├─ ai-assistant/                           # AI 助理頁面
-│  │  ├─ ai-assistant.component.ts            # AI 助理元件
-│  │  ├─ ai-assistant.component.html          # AI 助理模板
-│  │  └─ ai-assistant.component.less          # AI 助理樣式
-│  │
-│  ├─ blueprint/                              # Blueprint 管理頁面
-│  │  ├─ components/                          # 元件
-│  │  │  ├─ connection-layer.component.ts     # 連線層元件
-│  │  │  ├─ validation-alerts.component.ts    # 驗證警告元件
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  ├─ construction-log/                    # 施工日誌頁面
-│  │  │  ├─ construction-log.component.ts     # 施工日誌元件
-│  │  │  ├─ construction-log-modal.component.ts # 施工日誌對話框
-│  │  │  ├─ index.ts                          # 統一匯出
-│  │  │  └─ README.md                         # 說明文件
-│  │  ├─ container/                           # 容器管理頁面
-│  │  │  ├─ container-dashboard.component.ts  # 容器儀表板
-│  │  │  └─ event-bus-monitor.component.ts    # 事件匯流排監控
-│  │  ├─ finance/                             # 財務管理頁面
-│  │  │  ├─ finance-dashboard.component.ts    # 財務儀表板
-│  │  │  ├─ finance-dashboard.component.html  # 財務儀表板模板
-│  │  │  ├─ invoice-list.component.ts         # 發票列表
-│  │  │  ├─ approval-dialog.component.ts      # 審批對話框
-│  │  │  ├─ routes.ts                         # 財務路由
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  ├─ members/                             # 成員管理頁面
-│  │  │  ├─ blueprint-members.component.ts    # Blueprint 成員列表
-│  │  │  └─ member-modal.component.ts         # 成員對話框
-│  │  ├─ modules/                             # 模組視圖頁面
-│  │  │  ├─ acceptance-module-view.component.ts # 驗收模組視圖
-│  │  │  ├─ cloud-module-view.component.ts    # 雲端模組視圖
-│  │  │  ├─ communication-module-view.component.ts # 溝通模組視圖
-│  │  │  ├─ contract-module-view.component.ts # 合約模組視圖
-│  │  │  ├─ contract-modal.component.ts       # 合約對話框
-│  │  │  ├─ finance-module-view.component.ts  # 財務模組視圖
-│  │  │  ├─ issues-module-view.component.ts   # 問題模組視圖
-│  │  │  ├─ issue-modal.component.ts          # 問題對話框
-│  │  │  ├─ log-module-view.component.ts      # 日誌模組視圖
-│  │  │  ├─ material-module-view.component.ts # 材料模組視圖
-│  │  │  ├─ qa-module-view.component.ts       # 品質模組視圖
-│  │  │  ├─ safety-module-view.component.ts   # 安全模組視圖
-│  │  │  ├─ shared-module-view.component.ts   # 共享模組視圖
-│  │  │  ├─ warranty-module-view.component.ts # 保固模組視圖
-│  │  │  └─ workflow-module-view.component.ts # 工作流模組視圖
-│  │  ├─ warranty/                            # 保固管理頁面
-│  │  │  ├─ warranty-list.component.ts        # 保固列表
-│  │  │  ├─ warranty-defect-list.component.ts # 保固瑕疵列表
-│  │  │  └─ routes.ts                         # 保固路由
-│  │  ├─ blueprint-designer.component.ts      # Blueprint 設計器
-│  │  ├─ blueprint-detail.component.ts        # Blueprint 詳情
-│  │  ├─ blueprint-list.component.ts          # Blueprint 列表
-│  │  ├─ blueprint-modal.component.ts         # Blueprint 對話框
-│  │  └─ routes.ts                            # Blueprint 路由
-│  │
-│  ├─ dashboard/                              # 儀表板頁面
-│  │  └─ (dashboard 相關元件)                 # 儀表板元件
-│  │
-│  ├─ exception/                              # 異常頁面
-│  │  ├─ exception.component.ts               # 異常元件
-│  │  ├─ trigger.component.ts                 # 觸發元件
-│  │  └─ routes.ts                            # 異常路由
-│  │
-│  ├─ explore/                                # 探索頁面
-│  │  ├─ components/                          # 元件
-│  │  │  ├─ search-bar.component.ts           # 搜尋列元件
-│  │  │  ├─ filter-panel.component.ts         # 篩選面板元件
-│  │  │  ├─ result-grid.component.ts          # 結果網格元件
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  ├─ models/                              # 模型
-│  │  │  ├─ search-result.model.ts            # 搜尋結果模型
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  ├─ services/                            # 服務
-│  │  │  ├─ explore-search.facade.ts          # 搜尋外觀服務
-│  │  │  ├─ search-cache.service.ts           # 搜尋快取服務
-│  │  │  └─ index.ts                          # 統一匯出
-│  │  ├─ explore-page.component.ts            # 探索頁面元件
-│  │  └─ routes.ts                            # 探索路由
-│  │
-│  ├─ module-manager/                         # 模組管理器頁面
-│  │  ├─ components/                          # 元件
-│  │  │  ├─ module-card.component.ts          # 模組卡片元件
-│  │  │  ├─ module-config-form.component.ts   # 模組配置表單元件
-│  │  │  ├─ module-dependency-graph.component.ts # 模組依賴圖元件
-│  │  │  └─ module-status-badge.component.ts  # 模組狀態徽章元件
-│  │  ├─ module-manager.component.ts          # 模組管理器元件
-│  │  ├─ module-manager.service.ts            # 模組管理器服務
-│  │  ├─ module-manager.routes.ts             # 模組管理器路由
-│  │  └─ index.ts                             # 統一匯出
-│  │
-│  ├─ monitoring/                             # 監控頁面
-│  │  ├─ monitoring-dashboard.component.ts    # 監控儀表板
-│  │  └─ routes.ts                            # 監控路由
-│  │
-│  ├─ organization/                           # 組織管理頁面
-│  │  ├─ members/                             # 成員管理
-│  │  │  └─ organization-members.component.ts # 組織成員元件
-│  │  ├─ settings/                            # 組織設定
-│  │  │  └─ organization-settings.component.ts # 組織設定元件
-│  │  ├─ teams/                               # 團隊管理
-│  │  │  ├─ organization-teams.component.ts   # 組織團隊元件
-│  │  │  └─ team-modal.component.ts           # 團隊對話框元件
-│  │  └─ routes.ts                            # 組織路由
-│  │
-│  ├─ passport/                               # 認證頁面
-│  │  ├─ login/                               # 登入頁面
-│  │  │  ├─ login.component.ts                # 登入元件
-│  │  │  ├─ login.component.html              # 登入模板
-│  │  │  └─ login.component.less              # 登入樣式
-│  │  ├─ register/                            # 註冊頁面
-│  │  │  ├─ register.component.ts             # 註冊元件
-│  │  │  ├─ register.component.html           # 註冊模板
-│  │  │  └─ register.component.less           # 註冊樣式
-│  │  ├─ register-result/                     # 註冊結果頁面
-│  │  │  ├─ register-result.component.ts      # 註冊結果元件
-│  │  │  └─ register-result.component.html    # 註冊結果模板
-│  │  ├─ lock/                                # 鎖定頁面
-│  │  │  ├─ lock.component.ts                 # 鎖定元件
-│  │  │  ├─ lock.component.html               # 鎖定模板
-│  │  │  └─ lock.component.less               # 鎖定樣式
-│  │  ├─ callback.component.ts                # 回調元件
-│  │  └─ routes.ts                            # 認證路由
-│  │
-│  ├─ settings/                               # 設定頁面
-│  │  └─ notification-settings/               # 通知設定
-│  │      └─ notification-settings.component.ts # 通知設定元件
-│  │
-│  ├─ social/                                 # 社交頁面
-│  │  ├─ components/                          # 元件
-│  │  │  └─ friend-card.component.ts          # 好友卡片元件
-│  │  ├─ pages/                               # 頁面
-│  │  │  └─ friends.page.ts                   # 好友頁面
-│  │  └─ routes/                              # 路由
-│  │      └─ friends.routes.ts                # 好友路由
-│  │
-│  ├─ team/                                   # 團隊管理頁面
-│  │  ├─ members/                             # 成員管理
-│  │  │  ├─ team-members.component.ts         # 團隊成員元件
-│  │  │  └─ team-member-modal.component.ts    # 團隊成員對話框
-│  │  └─ routes.ts                            # 團隊路由
-│  │
-│  ├─ user/                                   # 使用者頁面
-│  │  ├─ settings/                            # 使用者設定
-│  │  │  └─ settings.component.ts             # 設定元件
-│  │  └─ routes.ts                            # 使用者路由
-│  │
-│  └─ routes.ts                               # 全域路由配置
-│
-├─ shared/                                    # 共享模組層 (可重用元件和服務)
-│  ├─ cdk/                                    # CDK 模組
-│  │  ├─ shared-cdk.module.ts                 # CDK 共享模組
-│  │  ├─ index.ts                             # 統一匯出
-│  │  └─ README.md                            # CDK 說明文件
-│  ├─ cell-widget/                            # 單元格小工具
-│  │  └─ index.ts                             # 統一匯出
-│  ├─ components/                             # 共享元件
-│  │  ├─ breadcrumb/                          # 麵包屑元件
-│  │  │  └─ breadcrumb.component.ts           # 麵包屑元件
-│  │  ├─ create-organization/                 # 建立組織元件
-│  │  │  └─ create-organization.component.ts  # 建立組織元件
-│  │  ├─ create-team-modal/                   # 建立團隊對話框元件
-│  │  │  └─ create-team-modal.component.ts    # 建立團隊對話框元件
-│  │  ├─ edit-team-modal/                     # 編輯團隊對話框元件
-│  │  │  └─ edit-team-modal.component.ts      # 編輯團隊對話框元件
-│  │  └─ team-detail-drawer/                  # 團隊詳情抽屜元件
-│  │      ├─ team-detail-drawer.component.ts  # 團隊詳情抽屜元件
-│  │      └─ team-detail-drawer.component.html # 團隊詳情抽屜模板
-│  ├─ json-schema/                            # JSON Schema 表單
-│  │  ├─ test/                                # 測試
-│  │  │  └─ test.widget.ts                    # 測試小工具
-│  │  ├─ index.ts                             # 統一匯出
-│  │  └─ README.md                            # JSON Schema 說明文件
-│  ├─ services/                               # 共享服務
-│  │  ├─ permission/                          # 權限服務
-│  │  │  └─ permission.service.ts             # 權限服務
-│  │  ├─ breadcrumb.service.ts                # 麵包屑服務
-│  │  ├─ menu-management.service.ts           # 選單管理服務
-│  │  ├─ workspace-context.service.ts         # 工作區上下文服務
-│  │  └─ index.ts                             # 統一匯出
-│  ├─ st-widget/                              # 表格小工具
-│  │  ├─ index.ts                             # 統一匯出
-│  │  └─ README.md                            # 表格小工具說明文件
-│  ├─ utils/                                  # 共享工具函數
-│  │  ├─ async-state.ts                       # 非同步狀態工具
-│  │  └─ index.ts                             # 統一匯出
-│  ├─ shared-delon.module.ts                  # Delon 共享模組
-│  ├─ shared-zorro.module.ts                  # Zorro 共享模組
-│  ├─ shared-imports.ts                       # 共享匯入
-│  ├─ index.ts                                # 共享層統一匯出
-│  └─ README.md                               # 共享層說明文件
-│
-├─ app.component.ts                           # 根元件
-├─ app.config.ts                              # 應用配置
-└─ README.md                                  # 應用說明文件
+> **文檔目的**: 提供 GigHub 專案的完整架構與目錄結構導覽  
+> **目標讀者**: 開發者、架構師、Copilot Agent  
+> **版本**: 2.0.0  
+> **最後更新**: 2025-12-16
 
 ---
 
-## 架構設計原則
+## 📖 目錄
 
-### 1. 領域驅動設計 (Domain-Driven Design)
+1. [架構概覽](#架構概覽)
+2. [核心設計原則](#核心設計原則)
+3. [當前專案結構](#當前專案結構)
+4. [詳細目錄說明](#詳細目錄說明)
+5. [模組通訊機制](#模組通訊機制)
+6. [命名規範](#命名規範)
+7. [開發指南](#開發指南)
+
+---
+
+## 架構概覽
+
+### 架構理念
+
+GigHub 採用 **三層架構** + **Blueprint 模組化系統**，遵循 **領域驅動設計 (DDD)** 原則：
+
+```mermaid
+graph TD
+    A[UI Layer - routes/] --> B[Service Layer - core/services/]
+    B --> C[Repository Layer - core/data-access/]
+    C --> D[Firestore]
+    
+    E[Blueprint Container] --> F[Module Registry]
+    F --> G[Event Bus]
+    G --> H[Modules]
+    
+    style A fill:#e1f5ff
+    style B fill:#fff4e6
+    style C fill:#f3e5f5
+    style D fill:#ffebee
+    style E fill:#e8f5e9
+```
+
+### 技術棧
+
+| 層級 | 技術 | 版本 | 用途 |
+|------|------|------|------|
+| 前端框架 | Angular | 20.3.0 | Standalone Components + Signals |
+| UI 框架 | ng-alain | 20.1.0 | 企業級管理框架 |
+| UI 元件 | ng-zorro-antd | 20.3.1 | Ant Design for Angular |
+| 後端服務 | Firebase/Firestore | 20.0.1 | BaaS + NoSQL 資料庫 |
+| 狀態管理 | Angular Signals | 內建 | 響應式狀態管理 |
+| 類型系統 | TypeScript | 5.9 | ES2022 編譯目標 |
+| 套件管理 | Yarn | 4.9.2 | Berry (Plug'n'Play) |
+
+---
+
+## 核心設計原則
+
+### 🌟 奧卡姆剃刀定律基礎
+
+1. **KISS** (Keep It Simple, Stupid) - 簡單優於複雜
+2. **YAGNI** (You Aren't Gonna Need It) - 不做預設需求
+3. **MVP** (Minimum Viable Product) - 優先核心功能
+4. **SRP** (Single Responsibility Principle) - 單一職責
+5. **低耦合、高內聚** - 模組獨立、內部緊密
+6. **80/20 法則** - 聚焦關鍵 20%
+7. **可讀性 > 聰明** - 清晰程式碼勝於技巧
+
+### 🏗️ 三層架構嚴格分離
+
+```
+┌─────────────────────────────────────────┐
+│  UI 層 (routes/)                         │
+│  - 展示與使用者互動                      │
+│  - Standalone Components                 │
+│  - OnPush 變更檢測                      │
+└─────────────────────────────────────────┘
+              ↓ 只能呼叫
+┌─────────────────────────────────────────┐
+│  Service 層 (core/services/)             │
+│  - 業務邏輯協調                          │
+│  - 狀態管理 (Signals)                    │
+│  - 事件發送/訂閱                        │
+└─────────────────────────────────────────┘
+              ↓ 只能呼叫
+┌─────────────────────────────────────────┐
+│  Repository 層 (core/data-access/)       │
+│  - 資料存取抽象                          │
+│  - Firestore 操作封裝                    │
+│  - Query 優化                           │
+└─────────────────────────────────────────┘
+              ↓ 存取
+┌─────────────────────────────────────────┐
+│  Firestore (Cloud NoSQL Database)       │
+└─────────────────────────────────────────┘
+```
+
+**禁止行為**:
+- ❌ UI 直接呼叫 Repository
+- ❌ UI 直接操作 Firestore
+- ❌ Service 繞過 Repository
+
+### 📦 Repository 模式 (強制)
+
+所有 Firestore 操作必須透過 Repository：
+
 ```typescript
-domains/
-├─ shared-domain/          # 共享領域:跨業務通用功能
-├─ project-management-domain/  # 專案管理領域:任務、日誌
-├─ construction-domain/    # 營建工程領域:合約、材料、保固
-├─ quality-assurance-domain/   # 品質保證領域:QA、問題追蹤
-└─ financial-domain/       # 財務管理領域:發票、付款、預算
+// ✅ 正確: 透過 Repository
+@Injectable({ providedIn: 'root' })
+export class TaskRepository {
+  private firestore = inject(Firestore);
+  
+  findAll(): Observable<Task[]> {
+    const tasksCol = collection(this.firestore, 'tasks');
+    return collectionData(tasksCol, { idField: 'id' });
+  }
+}
+
+// ❌ 禁止: 元件直接操作 Firestore
+@Component({ ... })
+export class TaskComponent {
+  private firestore = inject(Firestore); // ❌ 禁止
+  
+  loadTasks() {
+    collectionData(collection(this.firestore, 'tasks')).subscribe(...); // ❌ 禁止
+  }
+}
 ```
 
-### 2. 三層模組結構 (領域 → 模組 → 子模組)
+### 📡 事件驅動架構
+
+所有模組事件透過 `BlueprintEventBus` 集中管理：
+
 ```typescript
-// 範例:財務領域 → 財務模組 → 發票管理子模組
-financial-domain/
-└─ finance-module/
-   └─ submodules/
-      └─ invoice-management/  # 子模組:專注單一職責
-         ├─ services/         # 服務層:業務邏輯
-         ├─ models/           # 模型層:資料結構
-         └─ index.ts          # 統一匯出
+// 事件命名規範: [module].[action]
+// 範例: task.created, log.updated, quality.deleted
+
+// 發送事件
+this.eventBus.emit({
+  type: 'task.created',
+  blueprintId: task.blueprintId,
+  timestamp: new Date(),
+  actor: this.userContext.currentUser()?.id,
+  data: { taskId, task }
+});
+
+// 訂閱事件
+this.eventBus.on('task.created')
+  .pipe(takeUntilDestroyed(this.destroyRef))
+  .subscribe(event => {
+    console.log('New task created:', event.data);
+  });
 ```
 
-### 3. 清晰的層級職責
+---
+
+## 當前專案結構
+
+### 📁 根目錄結構
+
 ```
-📦 領域 (Domain)
-  └─ 按業務劃分,如:財務、品質、營建
-  
-📦 模組 (Module)
-  └─ 領域內的功能集合,如:財務模組、合約模組
-  
-📦 子模組 (Submodule)
-  └─ 模組內的細分功能,如:發票管理、付款管理
+ng-gighub/
+├── .github/                    # GitHub 配置與 Copilot 指引
+│   ├── agents/                 # 統一開發代理
+│   ├── copilot/                # Copilot 配置與規則
+│   └── instructions/           # 開發指引文檔 (8 個專業指引)
+│
+├── docs/                       # 專案文檔
+│   ├── ARCHITECTURE.md         # 系統架構總覽
+│   ├── TREE.md                 # 專案結構文檔 (本文檔)
+│   ├── README.md               # 文檔導覽
+│   └── discussions/            # 詳細任務規劃 (69 個任務)
+│       ├── ⭐.md              # 核心開發規範
+│       ├── SETC-*.md           # 任務規劃文檔
+│       └── SUMMARY.md          # 進度總覽
+│
+├── functions*/                 # Firebase Cloud Functions (8 個)
+│   ├── functions-ai/           # AI 相關功能
+│   ├── functions-auth/         # 認證功能
+│   ├── functions-firestore/    # Firestore 觸發器
+│   └── ...                     # 其他雲函數
+│
+├── src/                        # 主要原始碼
+│   ├── app/                    # Angular 應用程式
+│   │   ├── core/               # 核心基礎設施層 ⭐
+│   │   ├── layout/             # 佈局層
+│   │   ├── routes/             # 路由層 (UI 元件) ⭐
+│   │   └── shared/             # 共享模組層
+│   │
+│   ├── assets/                 # 靜態資源
+│   ├── environments/           # 環境配置
+│   └── styles/                 # 全域樣式
+│
+├── public/                     # 公開資源
+├── scripts/                    # 建置腳本
+├── ⭐.md                      # 根目錄核心規範 (ARCHIVED)
+├── angular.json                # Angular 配置
+├── package.json                # 專案依賴
+├── tsconfig.json               # TypeScript 配置
+├── firebase.json               # Firebase 配置
+├── firestore.rules             # Firestore Security Rules
+└── yarn.lock                   # Yarn 鎖定檔
 ```
 
-### 4. 標準化的模組結構
-每個模組都遵循相同的結構:
+### 📊 結構統計
+
+| 類別 | 數量 | 說明 |
+|------|------|------|
+| Cloud Functions | 8 | AI, Auth, Analytics, FCM, Firestore, Event, Storage, Scheduler |
+| Core Services | 15+ | Blueprint, Firebase, AI, Logger, State, etc. |
+| Routes (Pages) | 10+ | Dashboard, Blueprint, Organization, Team, etc. |
+| Repositories | 20+ | Task, Log, Contract, Quality, etc. |
+| Shared Components | 30+ | Breadcrumb, Modals, Drawers, etc. |
+| Documentation Files | 80+ | SETC tasks, READMEs, Architecture docs |
+
+---
+
+## 詳細目錄說明
+
+### 1️⃣ Core Layer - 核心基礎設施層
+
+#### 目錄結構
+
 ```
-module-name/
-├─ submodules/              # 子模組目錄
-│  ├─ submodule-a/          # 子模組 A
-│  │  ├─ services/          # 服務層
-│  │  ├─ models/            # 模型層 (如需要)
-│  │  ├─ repositories/      # 倉儲層 (如需要)
-│  │  └─ index.ts           # 子模組統一匯出
-│  └─ submodule-b/          # 子模組 B
-├─ models/                  # 模組核心模型
-├─ repositories/            # 模組資料存取層
-├─ services/                # 模組核心服務
-├─ config/                  # 模組配置 (可選)
-├─ exports/                 # 模組對外 API (可選)
-├─ [module-name].module.ts  # 模組定義檔案
-├─ module.metadata.ts       # 模組元資料
-├─ index.ts                 # 模組統一匯出
-└─ README.md                # 模組說明文件
+src/app/core/
+├── blueprint/                              # Blueprint 核心系統 ⭐
+│   ├── config/                             # 系統配置
+│   │   ├── blueprint-config.interface.ts   # Blueprint 配置介面
+│   │   └── index.ts
+│   │
+│   ├── container/                          # 容器管理 (DI & 生命週期)
+│   │   ├── blueprint-container.interface.ts
+│   │   ├── blueprint-container.ts
+│   │   ├── lifecycle-manager.ts
+│   │   ├── module-registry.ts              # 模組註冊器
+│   │   ├── resource-provider.ts
+│   │   └── index.ts
+│   │
+│   ├── context/                            # 上下文管理 (共享狀態)
+│   │   ├── execution-context.interface.ts
+│   │   ├── shared-context.ts
+│   │   ├── tenant-info.interface.ts
+│   │   └── index.ts
+│   │
+│   ├── events/                             # 事件系統 (Event Bus)
+│   │   ├── models/
+│   │   │   ├── blueprint-event.model.ts
+│   │   │   ├── event-log-entry.model.ts
+│   │   │   ├── event-priority.enum.ts
+│   │   │   └── index.ts
+│   │   ├── types/
+│   │   │   ├── system-event-type.enum.ts
+│   │   │   └── index.ts
+│   │   ├── event-bus.interface.ts
+│   │   ├── event-bus.ts                    # 事件匯流排核心
+│   │   ├── enhanced-event-bus.service.ts
+│   │   └── index.ts
+│   │
+│   ├── modules/                            # 模組基礎設施
+│   │   ├── base/                           # 模組基礎類別
+│   │   ├── implementations/                # 模組實作 (未來遷移至 domains/)
+│   │   ├── module.interface.ts
+│   │   ├── module-status.enum.ts
+│   │   └── index.ts
+│   │
+│   ├── models/                             # Blueprint 核心模型
+│   │   ├── module-connection.interface.ts
+│   │   └── index.ts
+│   │
+│   ├── repositories/                       # Blueprint 資料存取層
+│   │   ├── blueprint.repository.ts
+│   │   ├── blueprint-module.repository.ts
+│   │   ├── blueprint-member.repository.ts
+│   │   └── index.ts
+│   │
+│   ├── services/                           # Blueprint 核心服務
+│   │   ├── blueprint.service.ts
+│   │   ├── validation.service.ts
+│   │   ├── dependency-validator.service.ts
+│   │   └── index.ts
+│   │
+│   ├── workflow/                           # 工作流編排
+│   │   ├── handlers/                       # 工作流處理器
+│   │   │   ├── task-completed.handler.ts
+│   │   │   ├── log-created.handler.ts
+│   │   │   ├── qc-passed.handler.ts
+│   │   │   └── index.ts
+│   │   ├── models/
+│   │   │   ├── workflow-config.model.ts
+│   │   │   ├── workflow-context.model.ts
+│   │   │   └── index.ts
+│   │   ├── setc-workflow-orchestrator.service.ts
+│   │   └── index.ts
+│   │
+│   └── index.ts
+│
+├── data-access/                            # 資料存取層 (Repository 模式)
+│   ├── ai/
+│   │   ├── ai.repository.ts
+│   │   ├── ai.types.ts
+│   │   └── index.ts
+│   │
+│   ├── repositories/
+│   │   ├── base/                           # 基礎 Repository
+│   │   │   └── firestore-base.repository.ts
+│   │   │
+│   │   ├── shared/                         # 共享 Repositories
+│   │   │   ├── account.repository.ts
+│   │   │   ├── organization.repository.ts
+│   │   │   ├── organization-member.repository.ts
+│   │   │   ├── organization-invitation.repository.ts
+│   │   │   ├── team.repository.ts
+│   │   │   ├── team-member.repository.ts
+│   │   │   ├── friend.repository.ts
+│   │   │   ├── notification.repository.ts
+│   │   │   ├── notification-preferences.repository.ts
+│   │   │   └── fcm-token.repository.ts
+│   │   │
+│   │   ├── task-firestore.repository.ts    # 任務 Repository
+│   │   ├── log-firestore.repository.ts     # 日誌 Repository
+│   │   └── index.ts
+│   │
+│   └── index.ts
+│
+├── domain/                                 # 領域模型層 (業務實體定義)
+│   ├── models/
+│   │   ├── blueprint.model.ts
+│   │   ├── blueprint-module.model.ts
+│   │   ├── blueprint-config.model.ts
+│   │   ├── friend.model.ts
+│   │   ├── notification.model.ts
+│   │   └── index.ts
+│   │
+│   ├── types/                              # 類型定義
+│   │   ├── blueprint/
+│   │   │   ├── blueprint.types.ts
+│   │   │   ├── blueprint-status.enum.ts
+│   │   │   └── owner-type.enum.ts
+│   │   ├── module/
+│   │   │   ├── module.types.ts
+│   │   │   └── module-state.enum.ts
+│   │   ├── permission/
+│   │   │   ├── permission.types.ts
+│   │   │   ├── permission-level.enum.ts
+│   │   │   └── role.enum.ts
+│   │   ├── task/
+│   │   │   ├── task.types.ts
+│   │   │   ├── task-view.types.ts
+│   │   │   └── task-quantity.types.ts
+│   │   ├── log/
+│   │   ├── workflow/
+│   │   ├── events/
+│   │   ├── storage/
+│   │   ├── quality-control/
+│   │   ├── configuration/
+│   │   ├── account.types.ts
+│   │   └── index.ts
+│   │
+│   └── index.ts
+│
+├── infrastructure/                         # 基礎設施層 (外部服務整合)
+│   ├── storage/
+│   │   ├── storage.repository.ts
+│   │   ├── firebase-storage.repository.ts
+│   │   └── index.ts
+│   └── index.ts
+│
+├── services/                               # 核心服務層
+│   ├── ai/
+│   │   ├── ai.service.ts
+│   │   └── index.ts
+│   ├── logger/
+│   │   ├── logger.service.ts
+│   │   ├── log-transport.interface.ts
+│   │   ├── console-transport.ts
+│   │   └── index.ts
+│   ├── layout/                             # 佈局服務
+│   ├── firebase.service.ts                 # Firebase 服務
+│   ├── firebase-auth.service.ts            # Firebase 認證
+│   ├── firebase-analytics.service.ts       # Firebase 分析
+│   ├── push-messaging.service.ts           # 推送訊息
+│   ├── friend.service.ts                   # 好友服務
+│   ├── error-tracking.service.ts           # 錯誤追蹤
+│   ├── performance-monitoring.service.ts   # 效能監控
+│   ├── notification-analytics.service.ts   # 通知分析
+│   └── index.ts
+│
+├── state/                                  # 全域狀態管理 (Signals)
+│   ├── stores/
+│   │   ├── task.store.ts
+│   │   ├── log.store.ts
+│   │   ├── construction-log.store.ts
+│   │   ├── friend.store.ts
+│   │   ├── team.store.ts
+│   │   ├── notification.store.ts
+│   │   └── index.ts
+│   └── index.ts
+│
+├── facades/                                # 外觀模式服務 (簡化複雜操作)
+│   ├── ai/
+│   │   ├── ai.store.ts
+│   │   └── index.ts
+│   └── index.ts
+│
+├── errors/                                 # 自訂錯誤類型
+│   ├── blueprint-error.ts
+│   ├── module-not-found-error.ts
+│   ├── permission-denied-error.ts
+│   ├── validation-error.ts
+│   └── index.ts
+│
+├── net/                                    # 網路層 (HTTP 攔截器)
+│   ├── default.interceptor.ts
+│   ├── refresh-token.ts
+│   ├── helper.ts
+│   └── index.ts
+│
+├── i18n/                                   # 國際化服務
+│   └── i18n.service.ts
+│
+├── utils/                                  # 工具函數
+│   └── task-hierarchy.util.ts
+│
+├── startup/                                # 應用啟動服務
+│   └── startup.service.ts
+│
+├── start-page.guard.ts                     # 起始頁守衛
+└── index.ts
 ```
 
-### 5. 核心層 (Core) 職責
+#### 職責說明
+
+| 子目錄 | 職責 | 核心文件 |
+|--------|------|----------|
+| `blueprint/` | Blueprint 核心系統，模組化架構基礎 | `container/`, `events/`, `workflow/` |
+| `data-access/` | 統一資料存取，Repository 模式實作 | `repositories/base/`, `repositories/shared/` |
+| `domain/` | 領域模型與類型定義，業務實體 | `models/`, `types/` |
+| `infrastructure/` | 外部服務整合 (Storage, 3rd-party APIs) | `storage/` |
+| `services/` | 核心業務服務 (Firebase, Logger, AI, etc.) | `firebase.service.ts`, `ai.service.ts` |
+| `state/` | 全域狀態管理，Signals-based Stores | `stores/task.store.ts`, `stores/log.store.ts` |
+| `facades/` | 外觀模式，簡化複雜服務組合 | `ai/ai.store.ts` |
+| `errors/` | 自訂錯誤類型，錯誤處理 | `blueprint-error.ts`, `validation-error.ts` |
+| `net/` | HTTP 攔截器，Token 管理 | `default.interceptor.ts` |
+| `i18n/` | 國際化與本地化 | `i18n.service.ts` |
+| `utils/` | 工具函數與輔助方法 | `task-hierarchy.util.ts` |
+| `startup/` | 應用啟動邏輯 | `startup.service.ts` |
+
+---
+
+### 2️⃣ Layout Layer - 佈局層
+
+#### 目錄結構
+
 ```
-core/
-├─ blueprint/          # Blueprint 系統核心
-├─ data-access/        # 統一資料存取
-├─ domain/             # 領域模型定義
-├─ infrastructure/     # 外部服務整合
-├─ services/           # 全域核心服務
-├─ state/              # 全域狀態管理
-└─ errors/             # 自訂錯誤類型
+src/app/layout/
+├── basic/                                  # 基礎佈局
+│   ├── widgets/                            # 佈局小工具
+│   │   ├── clear-storage.component.ts      # 清除儲存
+│   │   ├── context-switcher.component.ts   # 上下文切換
+│   │   ├── fullscreen.component.ts         # 全螢幕
+│   │   ├── i18n.component.ts               # 語言切換
+│   │   ├── icon.component.ts               # 圖示
+│   │   ├── notify.component.ts             # 通知中心
+│   │   ├── rtl.component.ts                # RTL 切換
+│   │   ├── search.component.ts             # 全域搜尋
+│   │   ├── task.component.ts               # 任務小工具
+│   │   └── user.component.ts               # 使用者選單
+│   ├── basic.component.ts                  # 基礎佈局元件
+│   └── README.md
+│
+├── blank/                                  # 空白佈局 (全螢幕頁面)
+│   ├── blank.component.ts
+│   └── README.md
+│
+├── passport/                               # 認證佈局 (登入/註冊)
+│   ├── passport.component.ts
+│   └── passport.component.less
+│
+└── index.ts
 ```
+
+#### 職責說明
+
+- **basic**: 標準管理介面佈局，包含側邊欄、頂部導覽、footer
+- **blank**: 全螢幕佈局，用於特殊頁面 (如 Blueprint Designer)
+- **passport**: 認證相關頁面佈局 (登入、註冊、忘記密碼)
+
+---
+
+### 3️⃣ Routes Layer - 路由層 (UI 元件)
+
+#### 目錄結構
+
+```
+src/app/routes/
+├── ai-assistant/                           # AI 助理頁面
+│   ├── ai-assistant.component.ts
+│   ├── ai-assistant.component.html
+│   └── ai-assistant.component.less
+│
+├── blueprint/                              # Blueprint 管理頁面
+│   ├── components/                         # 共享元件
+│   │   ├── connection-layer.component.ts
+│   │   ├── validation-alerts.component.ts
+│   │   └── index.ts
+│   │
+│   ├── construction-log/                   # 施工日誌
+│   │   ├── construction-log.component.ts
+│   │   ├── construction-log-modal.component.ts
+│   │   └── index.ts
+│   │
+│   ├── container/                          # 容器管理
+│   │   ├── container-dashboard.component.ts
+│   │   └── event-bus-monitor.component.ts
+│   │
+│   ├── finance/                            # 財務管理
+│   │   ├── finance-dashboard.component.ts
+│   │   ├── finance-dashboard.component.html
+│   │   ├── invoice-list.component.ts
+│   │   ├── approval-dialog.component.ts
+│   │   ├── routes.ts
+│   │   └── index.ts
+│   │
+│   ├── members/                            # 成員管理
+│   │   ├── blueprint-members.component.ts
+│   │   └── member-modal.component.ts
+│   │
+│   ├── modules/                            # 模組視圖
+│   │   ├── acceptance-module-view.component.ts
+│   │   ├── cloud-module-view.component.ts
+│   │   ├── communication-module-view.component.ts
+│   │   ├── contract-module-view.component.ts
+│   │   ├── contract-modal.component.ts
+│   │   ├── finance-module-view.component.ts
+│   │   ├── issues-module-view.component.ts
+│   │   ├── issue-modal.component.ts
+│   │   ├── log-module-view.component.ts
+│   │   ├── material-module-view.component.ts
+│   │   ├── qa-module-view.component.ts
+│   │   ├── safety-module-view.component.ts
+│   │   ├── shared-module-view.component.ts
+│   │   ├── warranty-module-view.component.ts
+│   │   └── workflow-module-view.component.ts
+│   │
+│   ├── warranty/                           # 保固管理
+│   │   ├── warranty-list.component.ts
+│   │   ├── warranty-defect-list.component.ts
+│   │   └── routes.ts
+│   │
+│   ├── blueprint-designer.component.ts     # Blueprint 設計器
+│   ├── blueprint-detail.component.ts       # Blueprint 詳情
+│   ├── blueprint-list.component.ts         # Blueprint 列表
+│   ├── blueprint-modal.component.ts        # Blueprint 對話框
+│   └── routes.ts
+│
+├── dashboard/                              # 儀表板
+│   └── (dashboard 相關元件)
+│
+├── exception/                              # 異常頁面 (404, 403, 500)
+│   ├── exception.component.ts
+│   ├── trigger.component.ts
+│   └── routes.ts
+│
+├── explore/                                # 探索頁面 (搜尋 Blueprints)
+│   ├── components/
+│   │   ├── search-bar.component.ts
+│   │   ├── filter-panel.component.ts
+│   │   ├── result-grid.component.ts
+│   │   └── index.ts
+│   ├── models/
+│   │   ├── search-result.model.ts
+│   │   └── index.ts
+│   ├── services/
+│   │   ├── explore-search.facade.ts
+│   │   ├── search-cache.service.ts
+│   │   └── index.ts
+│   ├── explore-page.component.ts
+│   └── routes.ts
+│
+├── module-manager/                         # 模組管理器
+│   ├── components/
+│   │   ├── module-card.component.ts
+│   │   ├── module-config-form.component.ts
+│   │   ├── module-dependency-graph.component.ts
+│   │   └── module-status-badge.component.ts
+│   ├── module-manager.component.ts
+│   ├── module-manager.service.ts
+│   ├── module-manager.routes.ts
+│   └── index.ts
+│
+├── monitoring/                             # 監控頁面
+│   ├── monitoring-dashboard.component.ts
+│   └── routes.ts
+│
+├── organization/                           # 組織管理
+│   ├── members/
+│   │   └── organization-members.component.ts
+│   ├── settings/
+│   │   └── organization-settings.component.ts
+│   ├── teams/
+│   │   ├── organization-teams.component.ts
+│   │   └── team-modal.component.ts
+│   └── routes.ts
+│
+├── passport/                               # 認證頁面
+│   ├── login/
+│   │   ├── login.component.ts
+│   │   ├── login.component.html
+│   │   └── login.component.less
+│   ├── register/
+│   │   ├── register.component.ts
+│   │   ├── register.component.html
+│   │   └── register.component.less
+│   ├── register-result/
+│   │   ├── register-result.component.ts
+│   │   └── register-result.component.html
+│   ├── lock/
+│   │   ├── lock.component.ts
+│   │   ├── lock.component.html
+│   │   └── lock.component.less
+│   ├── callback.component.ts
+│   └── routes.ts
+│
+├── settings/                               # 設定頁面
+│   └── notification-settings/
+│       └── notification-settings.component.ts
+│
+├── social/                                 # 社交功能
+│   ├── components/
+│   │   └── friend-card.component.ts
+│   ├── pages/
+│   │   └── friends.page.ts
+│   └── routes/
+│       └── friends.routes.ts
+│
+├── team/                                   # 團隊管理
+│   ├── members/
+│   │   ├── team-members.component.ts
+│   │   └── team-member-modal.component.ts
+│   └── routes.ts
+│
+├── user/                                   # 使用者設定
+│   ├── settings/
+│   │   └── settings.component.ts
+│   └── routes.ts
+│
+└── routes.ts                               # 全域路由配置
+```
+
+#### 職責說明
+
+| 路由模組 | 功能 | 核心元件 |
+|---------|------|----------|
+| `ai-assistant/` | AI 助理聊天介面 | ai-assistant.component |
+| `blueprint/` | Blueprint 管理核心 | blueprint-designer, blueprint-detail, blueprint-list |
+| `dashboard/` | 主儀表板 | dashboard.component |
+| `exception/` | 錯誤頁面 | 404, 403, 500 |
+| `explore/` | 探索與搜尋 | search-bar, filter-panel, result-grid |
+| `module-manager/` | 模組管理器 | module-card, module-config-form |
+| `monitoring/` | 系統監控 | monitoring-dashboard |
+| `organization/` | 組織管理 | organization-members, organization-settings |
+| `passport/` | 認證流程 | login, register, lock |
+| `settings/` | 系統設定 | notification-settings |
+| `social/` | 社交功能 | friends, friend-card |
+| `team/` | 團隊管理 | team-members, team-modal |
+| `user/` | 使用者設定 | user-settings |
+
+---
+
+### 4️⃣ Shared Layer - 共享模組層
+
+#### 目錄結構
+
+```
+src/app/shared/
+├── cdk/                                    # CDK 模組封裝
+│   ├── shared-cdk.module.ts
+│   ├── index.ts
+│   └── README.md
+│
+├── cell-widget/                            # 單元格小工具 (ST 表格)
+│   └── index.ts
+│
+├── components/                             # 共享元件
+│   ├── breadcrumb/
+│   │   └── breadcrumb.component.ts
+│   ├── create-organization/
+│   │   └── create-organization.component.ts
+│   ├── create-team-modal/
+│   │   └── create-team-modal.component.ts
+│   ├── edit-team-modal/
+│   │   └── edit-team-modal.component.ts
+│   └── team-detail-drawer/
+│       ├── team-detail-drawer.component.ts
+│       └── team-detail-drawer.component.html
+│
+├── json-schema/                            # JSON Schema 表單 (SF 動態表單)
+│   ├── test/
+│   │   └── test.widget.ts
+│   ├── index.ts
+│   └── README.md
+│
+├── services/                               # 共享服務
+│   ├── permission/
+│   │   └── permission.service.ts
+│   ├── breadcrumb.service.ts
+│   ├── menu-management.service.ts
+│   ├── workspace-context.service.ts
+│   └── index.ts
+│
+├── st-widget/                              # ST 表格小工具 (客製化列/操作)
+│   ├── index.ts
+│   └── README.md
+│
+├── utils/                                  # 共享工具函數
+│   ├── async-state.ts
+│   └── index.ts
+│
+├── shared-delon.module.ts                  # Delon 共享模組
+├── shared-zorro.module.ts                  # Zorro 共享模組
+├── shared-imports.ts                       # 統一匯入 (SHARED_IMPORTS)
+├── index.ts
+└── README.md
+```
+
+#### 職責說明
+
+- **cdk/**: Angular CDK 模組封裝與擴展
+- **components/**: 可重用 UI 元件 (Breadcrumb, Modals, Drawers)
+- **json-schema/**: SF 動態表單自訂小工具
+- **services/**: 共享業務服務 (Permission, Menu, Context)
+- **st-widget/**: ST 表格自訂列與操作小工具
+- **utils/**: 共享工具函數 (async-state, validators)
+- **shared-imports.ts**: 統一匯入常用模組 (減少重複 import)
 
 ---
 
 ## 模組通訊機制
 
 ### 事件驅動架構
+
+```mermaid
+graph LR
+    A[Task Module] -->|emit: task.created| B[BlueprintEventBus]
+    B -->|subscribe| C[Log Module]
+    B -->|subscribe| D[Quality Module]
+    B -->|subscribe| E[Finance Module]
+    
+    F[Contract Module] -->|emit: contract.completed| B
+    B -->|subscribe| G[Invoice Service]
+    
+    style B fill:#ff9800,color:#fff
+```
+
+### 事件命名規範
+
 ```typescript
-// 模組間透過事件匯流排通訊
-// 範例:合約完成後觸發財務模組
-contractModule.emit('contract:completed', contractData);
-financeModule.on('contract:completed', (data) => {
-  // 自動生成發票
-  invoiceService.generateInvoice(data);
-});
+// 格式: [module].[action]
+// 範例:
+- task.created
+- task.updated
+- task.deleted
+- task.completed
+- log.created
+- log.updated
+- quality.passed
+- quality.failed
+- contract.completed
+- invoice.generated
 ```
 
 ### 依賴注入
+
 ```typescript
 // 透過 Blueprint Container 管理模組依賴
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class FinanceModule {
-  constructor(
-    private contractApi: ContractModuleApi,  // 注入其他模組 API
-    private eventBus: EventBus
-  ) {}
+  private contractApi = inject(ContractModuleApi);  // 注入其他模組 API
+  private eventBus = inject(BlueprintEventBus);
+  
+  constructor() {
+    // 監聽合約完成事件，自動生成發票
+    this.eventBus.on('contract.completed')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => {
+        this.invoiceService.generateInvoice(event.data);
+      });
+  }
 }
-```
-
----
-
-## 如何擴展新模組
-
-### 1. 確定業務領域
-```
-問題:這個功能屬於哪個業務領域?
-- 如果是通用功能 → shared-domain/
-- 如果是專案相關 → project-management-domain/
-- 如果是營建相關 → construction-domain/
-- 如果是品質相關 → quality-assurance-domain/
-- 如果是財務相關 → financial-domain/
-```
-
-### 2. 建立模組結構
-```bash
-# 範例:在財務領域新增「成本管理模組」
-domains/financial-domain/cost-management-module/
-├─ submodules/
-│  ├─ cost-tracking/        # 成本追蹤子模組
-│  └─ cost-analysis/        # 成本分析子模組
-├─ models/
-├─ services/
-├─ cost-management.module.ts
-├─ module.metadata.ts
-├─ index.ts
-└─ README.md
-```
-
-### 3. 註冊模組到 Blueprint
-```typescript
-// 在 module.metadata.ts 定義模組資訊
-export const CostManagementModuleMetadata = {
-  id: 'cost-management',
-  name: '成本管理模組',
-  version: '1.0.0',
-  domain: 'financial-domain',
-  dependencies: ['finance-module', 'contract-module'],
-  exports: ['CostManagementApi']
-};
 ```
 
 ---
@@ -1158,53 +796,294 @@ export const CostManagementModuleMetadata = {
 ## 命名規範
 
 ### 檔案命名
-```
-模組定義: [module-name].module.ts
-服務類別: [service-name].service.ts
-倉儲類別: [repository-name].repository.ts
-模型類別: [model-name].model.ts
-介面定義: [interface-name].interface.ts
-列舉定義: [enum-name].enum.ts
-類型定義: [type-name].types.ts
+
+```typescript
+// 格式: [name].[type].ts
+module.ts              // 模組定義
+service.ts             // 服務類別
+repository.ts          // 倉儲類別
+model.ts               // 模型類別
+interface.ts           // 介面定義
+enum.ts                // 列舉定義
+types.ts               // 類型定義
+component.ts           // 元件 TypeScript
+component.html         // 元件模板
+component.less         // 元件樣式
+component.spec.ts      // 元件測試
 ```
 
 ### 目錄命名
-```
-使用 kebab-case (小寫加連字號)
+
+```bash
+# 使用 kebab-case (小寫加連字號)
 ✅ invoice-management/
 ✅ cost-tracking/
-❌ InvoiceManagement/
-❌ cost_tracking/
+✅ blueprint-designer/
+
+❌ InvoiceManagement/    # 禁止 PascalCase
+❌ cost_tracking/        # 禁止 snake_case
+❌ INVOICE-MANAGEMENT/   # 禁止全大寫
+```
+
+### 類別命名
+
+```typescript
+// 使用 PascalCase
+class TaskService { }           // ✅ 服務
+class TaskRepository { }        // ✅ Repository
+interface TaskModel { }         // ✅ 介面
+enum TaskStatus { }             // ✅ 列舉
+type TaskFilter = ...;          // ✅ 類型別名
+
+// 變數使用 camelCase
+const taskService = inject(TaskService);  // ✅
+let currentTask: Task;                    // ✅
+```
+
+---
+
+## 開發指南
+
+### 如何新增模組
+
+#### 步驟 1: 確定模組放置位置
+
+```bash
+# 共享功能 → shared/
+# 特定 Blueprint 功能 → core/blueprint/modules/implementations/
+# 未來架構 → domains/[domain-name]/[module-name]/
+```
+
+#### 步驟 2: 建立模組結構
+
+```bash
+# 範例: 新增「採購管理模組」
+mkdir -p src/app/core/blueprint/modules/implementations/procurement-module
+
+# 建立標準結構
+procurement-module/
+├── models/
+│   ├── procurement.model.ts
+│   └── index.ts
+├── repositories/
+│   ├── procurement.repository.ts
+│   └── index.ts
+├── services/
+│   ├── procurement.service.ts
+│   └── index.ts
+├── procurement.module.ts
+├── module.metadata.ts
+├── index.ts
+└── README.md
+```
+
+#### 步驟 3: 實作模組
+
+```typescript
+// procurement.module.ts
+import { Injectable } from '@angular/core';
+import { BaseModule } from '@core/blueprint/modules/base';
+
+@Injectable({ providedIn: 'root' })
+export class ProcurementModule extends BaseModule {
+  constructor() {
+    super();
+  }
+
+  async initialize(): Promise<void> {
+    // 初始化邏輯
+    console.log('Procurement Module initialized');
+  }
+
+  async dispose(): Promise<void> {
+    // 清理邏輯
+    console.log('Procurement Module disposed');
+  }
+}
+```
+
+#### 步驟 4: 註冊到 Blueprint
+
+```typescript
+// module.metadata.ts
+export const ProcurementModuleMetadata = {
+  id: 'procurement',
+  name: '採購管理模組',
+  version: '1.0.0',
+  category: 'construction-domain',
+  dependencies: ['contract-module', 'finance-module'],
+  exports: ['ProcurementApi']
+};
+```
+
+#### 步驟 5: 更新 Module Registry
+
+```typescript
+// core/blueprint/container/module-registry.ts
+import { ProcurementModule } from '@core/blueprint/modules/implementations/procurement-module';
+
+export const MODULE_REGISTRY = {
+  // ... existing modules
+  'procurement': ProcurementModule,
+};
+```
+
+### 最佳實踐
+
+#### ✅ 推薦做法
+
+1. **使用 Standalone Components**
+```typescript
+@Component({
+  selector: 'app-task-list',
+  standalone: true,
+  imports: [SHARED_IMPORTS],
+  ...
+})
+```
+
+2. **使用 Signals 管理狀態**
+```typescript
+tasks = signal<Task[]>([]);
+loading = signal(false);
+completedCount = computed(() => this.tasks().filter(t => t.completed).length);
+```
+
+3. **使用 inject() 注入依賴**
+```typescript
+private taskService = inject(TaskService);
+private destroyRef = inject(DestroyRef);
+```
+
+4. **使用 takeUntilDestroyed() 管理訂閱**
+```typescript
+this.taskService.tasks$
+  .pipe(takeUntilDestroyed(this.destroyRef))
+  .subscribe(tasks => this.tasks.set(tasks));
+```
+
+5. **使用 OnPush 變更檢測**
+```typescript
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  ...
+})
+```
+
+#### ❌ 禁止做法
+
+1. **禁止建立 NgModule**
+```typescript
+// ❌ 禁止
+@NgModule({
+  declarations: [TaskComponent],
+  ...
+})
+```
+
+2. **禁止使用 any 類型**
+```typescript
+// ❌ 禁止
+function process(data: any): any { ... }
+
+// ✅ 正確
+function process(data: TaskDto): Task { ... }
+```
+
+3. **禁止直接操作 Firestore**
+```typescript
+// ❌ 禁止
+private firestore = inject(Firestore);
+collectionData(collection(this.firestore, 'tasks')).subscribe(...);
+
+// ✅ 正確
+private taskRepository = inject(TaskRepository);
+this.taskRepository.findAll().subscribe(...);
+```
+
+4. **禁止在 constructor 執行業務邏輯**
+```typescript
+// ❌ 禁止
+constructor() {
+  this.loadTasks(); // ❌ 業務邏輯
+}
+
+// ✅ 正確
+ngOnInit(): void {
+  this.loadTasks(); // ✅ 在 ngOnInit 執行
+}
+```
+
+5. **禁止手動管理訂閱**
+```typescript
+// ❌ 禁止
+subscription: Subscription;
+ngOnInit() {
+  this.subscription = this.data$.subscribe(...);
+}
+ngOnDestroy() {
+  this.subscription.unsubscribe();
+}
+
+// ✅ 正確
+private destroyRef = inject(DestroyRef);
+ngOnInit() {
+  this.data$
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe(...);
+}
 ```
 
 ---
 
 ## 測試結構
+
+### 測試檔案組織
+
 ```
-每個模組包含對應測試:
 module-name/
-├─ services/
-│  ├─ service-a.service.ts
-│  └─ service-a.service.spec.ts  # 單元測試
-├─ module-name.integration.spec.ts  # 整合測試
-└─ module-name.e2e.spec.ts          # E2E 測試
+├── services/
+│   ├── service-a.service.ts
+│   └── service-a.service.spec.ts          # 單元測試
+├── components/
+│   ├── component-a.component.ts
+│   └── component-a.component.spec.ts      # 元件測試
+├── module-name.integration.spec.ts        # 整合測試
+└── module-name.e2e.spec.ts                # E2E 測試 (放在 e2e/ 目錄)
+```
+
+### 測試指令
+
+```bash
+# 單元測試
+yarn test
+
+# 單元測試 + Coverage
+yarn test-coverage
+
+# E2E 測試
+yarn e2e
+
+# 完整檢查 (lint + test + build)
+yarn check:full
 ```
 
 ---
 
-## 文件規範
+## 文檔規範
 
 ### 每個模組必須包含 README.md
+
 ```markdown
 # 模組名稱
 
 ## 功能說明
-簡述模組功能
+簡述模組功能與用途
 
-## 子模組
-列出所有子模組及其職責
+## 目錄結構
+列出模組內部結構
 
-## 對外 API
+## 核心 API
 列出提供給其他模組的 API
 
 ## 依賴模組
@@ -1212,91 +1091,60 @@ module-name/
 
 ## 使用範例
 提供程式碼範例
+
+## 事件
+列出發送與訂閱的事件
+
+## 測試
+測試覆蓋率與測試指令
 ```
 
 ---
 
-## 遷移指南
+## 遷移指南（未來架構）
 
-### 從舊結構遷移到新結構
+### 從當前結構遷移到 Domains 架構
 
-#### 步驟 1: 分析現有模組
+#### 目標結構
+
 ```
-現有: core/blueprint/modules/implementations/finance/
-新位置: domains/financial-domain/finance-module/
+src/app/
+├── core/                      # 核心基礎設施 (不變)
+├── domains/                   # 業務領域層 (新增) ⭐
+│   ├── shared-domain/         # 共享領域
+│   ├── project-management-domain/  # 專案管理領域
+│   ├── construction-domain/   # 營建工程領域
+│   ├── quality-assurance-domain/   # 品質保證領域
+│   └── financial-domain/      # 財務管理領域
+├── layout/                    # 佈局層 (不變)
+├── routes/                    # 路由層 (不變)
+└── shared/                    # 共享模組 (不變)
 ```
 
-#### 步驟 2: 建立領域目錄
+#### 遷移步驟
+
+1. **建立領域目錄**
 ```bash
-mkdir -p src/app/domains/financial-domain
+mkdir -p src/app/domains/construction-domain
 ```
 
-#### 步驟 3: 移動模組檔案
+2. **移動模組**
 ```bash
 # 保持模組內部結構不變
-mv core/blueprint/modules/implementations/finance \
-   domains/financial-domain/finance-module
+mv src/app/core/blueprint/modules/implementations/contract-module \
+   src/app/domains/construction-domain/contract-module
 ```
 
-#### 步驟 4: 更新匯入路徑
+3. **更新匯入路徑**
 ```typescript
 // 舊路徑
-import { FinanceService } from '@core/blueprint/modules/implementations/finance';
+import { ContractService } from '@core/blueprint/modules/implementations/contract-module';
 
 // 新路徑
-import { FinanceService } from '@domains/financial-domain/finance-module';
+import { ContractService } from '@domains/construction-domain/contract-module';
 ```
 
-#### 步驟 5: 建立子模組
-```
-將大型服務拆分為子模組:
-services/
-├─ invoice.service.ts          → submodules/invoice-management/
-├─ payment.service.ts          → submodules/payment-management/
-└─ budget.service.ts           → submodules/budget-management/
-```
-
----
-
-## 優勢總結
-
-### ✅ 清晰的業務劃分
-- 按領域組織,業務邏輯一目了然
-- 新人可快速找到對應功能模組
-
-### ✅ 高度可擴展
-- 新增功能只需在對應領域添加模組
-- 模組內部可無限添加子模組
-
-### ✅ 低耦合高內聚
-- 模組間透過事件和 API 通訊
-- 每個模組專注自身業務邏輯
-
-### ✅ 易於維護
-- 統一的目錄結構和命名規範
-- 完整的文件和測試覆蓋
-
-### ✅ 團隊協作友善
-- 不同團隊可獨立開發不同領域
-- 清晰的模組邊界減少衝突
-
----
-
-## 工具支援
-
-### 使用 CLI 快速生成模組
-```bash
-# 生成新領域
-yarn generate:domain [domain-name]
-
-# 生成新模組
-yarn generate:module [domain-name]/[module-name]
-
-# 生成新子模組
-yarn generate:submodule [domain-name]/[module-name]/[submodule-name]
-```
-
-### TypeScript Path Mapping
+4. **更新 TypeScript Path Mapping**
 ```json
 // tsconfig.json
 {
@@ -1313,82 +1161,46 @@ yarn generate:submodule [domain-name]/[module-name]/[submodule-name]
 
 ---
 
-## 範例:新增「採購管理模組」
+## 附錄
 
-### 1. 確定領域
-採購管理屬於營建工程領域
+### A. 技術決策記錄 (ADR)
 
-### 2. 建立模組結構
-```
-domains/construction-domain/procurement-module/
-├─ submodules/
-│  ├─ vendor-management/       # 供應商管理
-│  │  ├─ services/
-│  │  │  └─ vendor.service.ts
-│  │  └─ index.ts
-│  ├─ purchase-orders/         # 採購單管理
-│  │  ├─ services/
-│  │  │  └─ purchase-order.service.ts
-│  │  └─ index.ts
-│  └─ price-comparison/        # 比價管理
-│     ├─ services/
-│     │  └─ price-comparison.service.ts
-│     └─ index.ts
-├─ models/
-│  ├─ procurement.model.ts
-│  └─ index.ts
-├─ repositories/
-│  ├─ procurement.repository.ts
-│  └─ index.ts
-├─ services/
-│  ├─ procurement.service.ts
-│  └─ index.ts
-├─ procurement.module.ts
-├─ module.metadata.ts
-├─ index.ts
-└─ README.md
-```
+#### ADR-001: 採用 Standalone Components
+- **日期**: 2025-11-15
+- **狀態**: 已採用
+- **理由**: Angular 19+ 推薦，減少 NgModule 複雜度
+- **影響**: 所有新元件使用 Standalone，禁止建立 NgModule
 
-### 3. 實作模組
-```typescript
-// procurement.module.ts
-import { Injectable } from '@angular/core';
-import { BaseModule } from '@core/blueprint/modules/base';
+#### ADR-002: 使用 Signals 取代 RxJS Subject
+- **日期**: 2025-11-20
+- **狀態**: 已採用
+- **理由**: 更好的效能，更簡潔的 API
+- **影響**: 新狀態管理優先使用 Signals
 
-@Injectable()
-export class ProcurementModule extends BaseModule {
-  constructor() {
-    super();
-  }
+#### ADR-003: Repository 模式強制
+- **日期**: 2025-11-25
+- **狀態**: 已採用
+- **理由**: 資料存取層抽象，易於測試與替換
+- **影響**: 禁止直接操作 Firestore，必須透過 Repository
 
-  async initialize(): Promise<void> {
-    // 初始化邏輯
-  }
-}
-```
+### B. 參考資源
 
-### 4. 註冊到 Blueprint
-```typescript
-// module.metadata.ts
-export const ProcurementModuleMetadata = {
-  id: 'procurement',
-  name: '採購管理模組',
-  version: '1.0.0',
-  domain: 'construction-domain',
-  dependencies: ['contract-module', 'finance-module'],
-  exports: ['ProcurementApi']
-};
-```
+- [Angular 官方文檔](https://angular.dev)
+- [ng-alain 官方文檔](https://ng-alain.com)
+- [ng-zorro-antd 官方文檔](https://ng.ant.design)
+- [Firebase 官方文檔](https://firebase.google.com/docs)
+- [專案 ARCHITECTURE.md](./ARCHITECTURE.md)
+- [專案 ⭐.md](./discussions/⭐.md)
+
+### C. 變更日誌
+
+| 版本 | 日期 | 變更內容 |
+|------|------|----------|
+| 2.0.0 | 2025-12-16 | 完全重構文檔，結構化組織，符合 ⭐.md 規範 |
+| 1.0.0 | 2025-11-01 | 初始版本，描述未來 Domains 架構 |
 
 ---
 
-## 總結
-
-這個優化架構提供了:
-1. **清晰的業務領域劃分** (5 大領域)
-2. **標準化的三層結構** (領域 → 模組 → 子模組)
-3. **完整的擴展指南** (如何新增模組)
-4. **統一的命名規範** (檔案、目錄、類別)
-5. **詳細的遷移步驟** (從舊結構升級)
-
-此架構適合中大型 Angular 企業應用,支援團隊協作和長期維護。
+**文檔維護**: 本文檔應隨專案架構演進持續更新  
+**聯絡人**: 專案架構團隊  
+**最後審核**: 2025-12-16
