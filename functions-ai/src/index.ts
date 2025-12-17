@@ -16,9 +16,21 @@ setGlobalOptions({
   region: "asia-east1",
 });
 
-// Export AI functions
-export {generateText} from "./ai/generateText";
-export {generateChat} from "./ai/generateChat";
+// Import AI functions
+import {generateText} from "./ai/generateText";
+import {generateChat} from "./ai/generateChat";
 
-// Export contract parsing functions
-export {parseContract} from "./contract/parseContract";
+// Import contract parsing functions
+import {parseContract} from "./contract/parseContract";
+
+// Export AI functions with 'ai-' prefix
+// This matches the frontend expectation (ai-generateText, ai-generateChat)
+export const ai = {
+  generateText,
+  generateChat,
+};
+
+// Export contract functions with 'contract-' prefix
+export const contract = {
+  parseContract,
+};
