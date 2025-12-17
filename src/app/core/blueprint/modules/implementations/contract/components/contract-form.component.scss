@@ -1,0 +1,21 @@
+:host {
+  display: block;
+}
+
+nz-divider {
+  margin: 24px 0 16px 0;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+nz-form-item {
+  margin-bottom: 16px;
+}
+
+.ant-form-vertical {
+  .ant-form-item-label {
+    padding-bottom: 4px;
+  }
+}

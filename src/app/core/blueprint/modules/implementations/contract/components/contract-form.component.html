@@ -1,0 +1,253 @@
+<form nz-form [formGroup]="contractForm" nzLayout="vertical">
+  <!-- Basic Contract Information Section -->
+  <nz-divider nzText="基本資訊" nzOrientation="left"></nz-divider>
+
+  <div nz-row [nzGutter]="16">
+    <div nz-col [nzSpan]="8">
+      <nz-form-item>
+        <nz-form-label nzRequired>合約編號</nz-form-label>
+        <nz-form-control nzErrorTip="請輸入合約編號">
+          <input
+            nz-input
+            formControlName="contractNumber"
+            placeholder="請輸入合約編號"
+            [readonly]="readonly()"
+          />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    <div nz-col [nzSpan]="16">
+      <nz-form-item>
+        <nz-form-label nzRequired>合約名稱</nz-form-label>
+        <nz-form-control nzErrorTip="請輸入合約名稱">
+          <input
+            nz-input
+            formControlName="name"
+            placeholder="請輸入合約名稱"
+            [readonly]="readonly()"
+          />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+  </div>
+
+  <nz-form-item>
+    <nz-form-label>合約說明</nz-form-label>
+    <nz-form-control>
+      <textarea
+        nz-input
+        formControlName="description"
+        placeholder="請輸入合約說明"
+        [rows]="3"
+        [readonly]="readonly()"
+      ></textarea>
+    </nz-form-control>
+  </nz-form-item>
+
+  <!-- Owner Party Section -->
+  <nz-divider nzText="業主資訊" nzOrientation="left"></nz-divider>
+
+  <div formGroupName="ownerParty">
+    <div nz-row [nzGutter]="16">
+      <div nz-col [nzSpan]="12">
+        <nz-form-item>
+          <nz-form-label nzRequired>公司名稱</nz-form-label>
+          <nz-form-control nzErrorTip="請輸入公司名稱">
+            <input
+              nz-input
+              formControlName="companyName"
+              placeholder="請輸入公司名稱"
+              [readonly]="readonly()"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div nz-col [nzSpan]="12">
+        <nz-form-item>
+          <nz-form-label nzRequired>聯絡人</nz-form-label>
+          <nz-form-control nzErrorTip="請輸入聯絡人">
+            <input
+              nz-input
+              formControlName="contactPerson"
+              placeholder="請輸入聯絡人"
+              [readonly]="readonly()"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </div>
+
+    <div nz-row [nzGutter]="16">
+      <div nz-col [nzSpan]="12">
+        <nz-form-item>
+          <nz-form-label nzRequired>聯絡電話</nz-form-label>
+          <nz-form-control nzErrorTip="請輸入聯絡電話">
+            <input
+              nz-input
+              formControlName="contactPhone"
+              placeholder="請輸入聯絡電話"
+              [readonly]="readonly()"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div nz-col [nzSpan]="12">
+        <nz-form-item>
+          <nz-form-label>電子郵件</nz-form-label>
+          <nz-form-control nzErrorTip="請輸入有效的電子郵件">
+            <input
+              nz-input
+              type="email"
+              formControlName="contactEmail"
+              placeholder="請輸入電子郵件"
+              [readonly]="readonly()"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </div>
+
+    <nz-form-item>
+      <nz-form-label>地址</nz-form-label>
+      <nz-form-control>
+        <input
+          nz-input
+          formControlName="address"
+          placeholder="請輸入地址"
+          [readonly]="readonly()"
+        />
+      </nz-form-control>
+    </nz-form-item>
+  </div>
+
+  <!-- Contractor Party Section -->
+  <nz-divider nzText="承攬商資訊" nzOrientation="left"></nz-divider>
+
+  <div formGroupName="contractorParty">
+    <div nz-row [nzGutter]="16">
+      <div nz-col [nzSpan]="12">
+        <nz-form-item>
+          <nz-form-label nzRequired>公司名稱</nz-form-label>
+          <nz-form-control nzErrorTip="請輸入公司名稱">
+            <input
+              nz-input
+              formControlName="companyName"
+              placeholder="請輸入公司名稱"
+              [readonly]="readonly()"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div nz-col [nzSpan]="12">
+        <nz-form-item>
+          <nz-form-label nzRequired>聯絡人</nz-form-label>
+          <nz-form-control nzErrorTip="請輸入聯絡人">
+            <input
+              nz-input
+              formControlName="contactPerson"
+              placeholder="請輸入聯絡人"
+              [readonly]="readonly()"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </div>
+
+    <div nz-row [nzGutter]="16">
+      <div nz-col [nzSpan]="12">
+        <nz-form-item>
+          <nz-form-label nzRequired>聯絡電話</nz-form-label>
+          <nz-form-control nzErrorTip="請輸入聯絡電話">
+            <input
+              nz-input
+              formControlName="contactPhone"
+              placeholder="請輸入聯絡電話"
+              [readonly]="readonly()"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div nz-col [nzSpan]="12">
+        <nz-form-item>
+          <nz-form-label>電子郵件</nz-form-label>
+          <nz-form-control nzErrorTip="請輸入有效的電子郵件">
+            <input
+              nz-input
+              type="email"
+              formControlName="contactEmail"
+              placeholder="請輸入電子郵件"
+              [readonly]="readonly()"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </div>
+
+    <nz-form-item>
+      <nz-form-label>地址</nz-form-label>
+      <nz-form-control>
+        <input
+          nz-input
+          formControlName="address"
+          placeholder="請輸入地址"
+          [readonly]="readonly()"
+        />
+      </nz-form-control>
+    </nz-form-item>
+  </div>
+
+  <!-- Dates & Amount Section -->
+  <nz-divider nzText="日期與金額" nzOrientation="left"></nz-divider>
+
+  <div nz-row [nzGutter]="16">
+    <div nz-col [nzSpan]="8">
+      <nz-form-item>
+        <nz-form-label nzRequired>開始日期</nz-form-label>
+        <nz-form-control nzErrorTip="請選擇開始日期">
+          <nz-date-picker
+            formControlName="startDate"
+            nzPlaceHolder="選擇開始日期"
+            style="width: 100%"
+            [nzDisabled]="readonly()"
+          ></nz-date-picker>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    <div nz-col [nzSpan]="8">
+      <nz-form-item>
+        <nz-form-label nzRequired>結束日期</nz-form-label>
+        <nz-form-control nzErrorTip="請選擇結束日期">
+          <nz-date-picker
+            formControlName="endDate"
+            nzPlaceHolder="選擇結束日期"
+            style="width: 100%"
+            [nzDisabled]="readonly()"
+          ></nz-date-picker>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    <div nz-col [nzSpan]="8">
+      <nz-form-item>
+        <nz-form-label nzRequired>合約金額</nz-form-label>
+        <nz-form-control nzErrorTip="請輸入合約金額">
+          <nz-input-number
+            formControlName="totalAmount"
+            [nzMin]="0"
+            [nzStep]="1000"
+            [nzFormatter]="value => `NT$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+            [nzParser]="value => value.replace(/NT\$\s?|(,*)/g, '')"
+            style="width: 100%"
+            [nzDisabled]="readonly()"
+          ></nz-input-number>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+  </div>
+</form>
