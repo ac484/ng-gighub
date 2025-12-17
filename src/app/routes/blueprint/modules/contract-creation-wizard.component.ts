@@ -215,10 +215,27 @@ const STEP_ACTIVE = 6; // Active
                 </div>
               </nz-result>
             } @else {
-              <nz-result nzStatus="error" nzTitle="建立失敗" nzSubTitle="請重試或聯繫管理員">
+              <nz-result 
+                nzStatus="error" 
+                nzTitle="建立失敗" 
+                [nzSubTitle]="contractCreationAttempts() >= 3 
+                  ? '已達最大重試次數，請返回編輯檢查資料' 
+                  : '請重試或返回編輯檢查資料'"
+              >
                 <div nz-result-extra>
+                  @if (contractCreationAttempts() < 3) {
+                    <p class="text-grey mb-md">重試次數: {{ contractCreationAttempts() }} / 3</p>
+                  }
                   <button nz-button nzType="default" (click)="prevStep()">返回編輯</button>
-                  <button nz-button nzType="primary" (click)="retryContractCreation()" class="ml-sm">重試</button>
+                  <button 
+                    nz-button 
+                    nzType="primary" 
+                    (click)="retryContractCreation()" 
+                    [disabled]="contractCreationAttempts() >= 3"
+                    class="ml-sm"
+                  >
+                    重試
+                  </button>
                 </div>
               </nz-result>
             }
@@ -351,6 +368,10 @@ export class ContractCreationWizardComponent implements OnInit {
   submitting = signal(false);
   activating = signal(false);
   uploading = signal(false);
+
+  // Error recovery state
+  contractCreationAttempts = signal(0);
+  private readonly MAX_RETRY_ATTEMPTS = 3;
 
   // Form
   contractForm!: FormGroup;
@@ -544,12 +565,7 @@ export class ContractCreationWizardComponent implements OnInit {
       this.pollParsingStatusForEnhancedData();
     } catch (err) {
       console.error('[ContractCreationWizard]', 'startParsingWithoutContract failed', err);
-      this.parsingProgress.set({
-        requestId: '',
-        status: 'failed',
-        progress: 0,
-        message: err instanceof Error ? err.message : '啟動解析失敗'
-      });
+      this.handleParsingError(err instanceof Error ? err : new Error('啟動解析失敗'));
     }
   }
 
@@ -571,8 +587,11 @@ export class ContractCreationWizardComponent implements OnInit {
             // For now, we'll handle this in the polling completion
           }
           // Don't auto-advance - let user click to review data
-        } else if (progress.status !== 'failed') {
-          // Continue polling
+        } else if (progress.status === 'failed') {
+          // Handle parsing failure with user recovery
+          this.handleParsingError(new Error(progress.message || '文件解析失敗'));
+        } else {
+          // Continue polling for other statuses (pending, processing)
           setTimeout(checkProgress, 1000);
         }
       }
@@ -580,6 +599,33 @@ export class ContractCreationWizardComponent implements OnInit {
 
     // Start polling
     setTimeout(checkProgress, 500);
+  }
+
+  /**
+   * Handle parsing errors with automatic recovery
+   */
+  private handleParsingError(error: Error): void {
+    const errorMessage = error.message || '解析失敗';
+
+    this.parsingProgress.set({
+      requestId: '',
+      status: 'failed',
+      progress: 0,
+      message: errorMessage
+    });
+
+    this.message.error(`文件解析失敗: ${errorMessage}`, {
+      nzDuration: 5000
+    });
+
+    // Auto-return to upload step after 3 seconds to allow user recovery
+    setTimeout(() => {
+      this.currentStep.set(STEP_UPLOAD);
+      this.uploadedFiles.set([]);
+      this.fileAttachments.set([]);
+      this.parsingProgress.set(null);
+      this.message.info('已返回上傳步驟，請重新選擇檔案或檢查檔案品質');
+    }, 3000);
   }
 
   /**
@@ -605,6 +651,8 @@ export class ContractCreationWizardComponent implements OnInit {
     this.parsedData.set(null);
     this.editedParsedData.set(null);
     this.uploadedFiles.set([]);
+    this.fileAttachments.set([]);
+    this.contractCreationAttempts.set(0); // Reset retry counter
   }
 
   /**
@@ -674,9 +722,23 @@ export class ContractCreationWizardComponent implements OnInit {
   }
 
   /**
-   * NEW: Retry contract creation
+   * NEW: Retry contract creation with attempt limit
    */
   async retryContractCreation(): Promise<void> {
+    const attempts = this.contractCreationAttempts();
+
+    if (attempts >= this.MAX_RETRY_ATTEMPTS) {
+      this.message.error('建立失敗次數過多，請返回編輯步驟檢查資料或聯繫管理員', {
+        nzDuration: 5000
+      });
+      return;
+    }
+
+    this.contractCreationAttempts.update(n => n + 1);
+
+    // Clear previous error state
+    this.createdContract.set(null);
+
     const editedData = this.editedParsedData();
     if (editedData) {
       await this.createContractFromParsedData(editedData);
