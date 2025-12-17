@@ -2,14 +2,155 @@
 
 ## 📋 概述
 
-`functions-firestore` 模組負責處理 Firestore 資料庫相關的業務邏輯和資料操作。提供資料驗證、自動化資料處理、資料同步和資料完整性維護功能,確保資料庫的一致性和可靠性。
+`functions-firestore` 模組負責處理 Firestore 資料庫相關的業務邏輯和資料操作。提供即時資料變更監聽、自動化稽核日誌和資料完整性維護功能。
 
-## 🎯 目標
+## 🎯 核心功能
 
-- **資料完整性**: 確保資料庫資料的一致性和完整性
-- **自動化處理**: 自動執行資料相關的業務邏輯
-- **資料驗證**: 驗證和清理使用者輸入的資料
-- **同步機制**: 維護相關資料之間的同步
+### 1. 藍圖變更監聽 (Blueprint Change Listener)
+
+監聽 `blueprints/{blueprintId}` 集合的文件變更，自動建立稽核日誌。
+
+**功能特性**：
+- 偵測操作類型（建立、更新、刪除）
+- 追蹤重要欄位變更（name, status, owner, members）
+- 自動寫入 `audit_logs` 集合
+- 完整錯誤處理和日誌記錄
+
+**稽核日誌結構**：
+```typescript
+{
+  documentType: 'blueprint',
+  documentId: string,
+  operation: 'created' | 'updated' | 'deleted',
+  timestamp: Timestamp,
+  beforeData: any | null,
+  afterData: any | null,
+  changes?: Array<{
+    field: string,
+    oldValue: any,
+    newValue: any
+  }>
+}
+```
+
+### 2. 使用者建立監聽 (User Creation Listener)
+
+監聽 `users/{userId}` 集合的新文件建立，自動初始化使用者元資料。
+
+**功能特性**：
+- 設定預設元資料
+- 初始化通知偏好設定
+- 記錄建立時間戳記
+- 準備使用者個人檔案結構
+
+**使用者元資料結構**：
+```typescript
+{
+  createdAt: Timestamp,
+  lastLoginAt: null,
+  profileComplete: false,
+  notificationPreferences: {
+    email: true,
+    push: true
+  }
+}
+```
+
+## 💻 技術堆疊
+
+- **Firebase Functions**: v7.0.0 (v2 API)
+- **Firebase Admin**: v13.6.0
+- **TypeScript**: v5.7.3
+- **Node.js**: v24
+
+## ⚙️ 配置
+
+- **Region**: `asia-east1`
+- **Max Instances**: 10 (成本控制)
+
+## 🚀 開發指令
+
+```bash
+# 安裝依賴
+npm install
+
+# 建置
+npm run build
+
+# 部署
+npm run deploy
+
+# 監視模式
+npm run build:watch
+```
+
+## 📊 事件流程
+
+### 藍圖變更事件流程
+```
+1. blueprints/{blueprintId} 文件變更
+2. onBlueprintChange 觸發
+3. 提取變更前後資料
+4. 判斷操作類型
+5. 追蹤欄位變更（更新時）
+6. 建立稽核日誌項目
+7. 記錄到控制台
+```
+
+### 使用者建立事件流程
+```
+1. users/{userId} 新文件建立
+2. onUserCreated 觸發
+3. 提取使用者資料
+4. 初始化元資料
+5. 更新使用者文件
+6. 記錄到控制台
+```
+
+## 🛡️ 錯誤處理
+
+所有函式包含：
+- Try-catch 區塊進行錯誤隔離
+- 詳細的錯誤日誌與上下文
+- 錯誤重新拋出以支援 Firebase 重試機制
+- 結構化日誌便於除錯
+
+## 📝 監控
+
+函式記錄以下事件：
+- 文件變更與 ID 及操作類型
+- 更新時的欄位級變更
+- 使用者建立事件
+- 錯誤詳情與上下文
+
+## ✅ 最佳實踐
+
+1. **冪等性**: 函式設計為可安全重試
+2. **結構化日誌**: 所有日誌包含上下文資料
+3. **錯誤處理**: 全面的錯誤捕捉和記錄
+4. **類型安全**: 完整的 TypeScript 類型定義
+5. **最小依賴**: 僅使用必要的 Firebase 套件
+
+## 🔐 安全性
+
+- 使用 Firebase Admin SDK 具有提升權限
+- 在安全的 Cloud Functions 環境中運行
+- 無直接使用者輸入處理
+- 稽核日誌符合合規要求
+
+## 🔄 版本管理
+
+| 版本 | 日期 | 變更說明 |
+|------|------|----------|
+| 1.0.0 | 2024-12 | 初始版本 - 基礎資料處理功能 |
+
+## 👥 維護者
+
+GigHub Development Team
+
+## 📄 授權
+
+MIT License
 
 ## 📦 核心功能
 
