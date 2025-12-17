@@ -14,7 +14,7 @@ import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject, Uploa
 import { Observable, BehaviorSubject } from 'rxjs';
 
 import type { FileAttachment } from '../models';
-import { ContractEventService } from './contract-event.service';
+// import { ContractEventService } from './contract-event.service'; // TODO: Events now handled by ContractFacade
 
 /**
  * Upload progress information
@@ -37,7 +37,7 @@ export interface FileValidationResult {
 @Injectable({ providedIn: 'root' })
 export class ContractUploadService {
   private readonly storage = inject(Storage);
-  private readonly eventService = inject(ContractEventService);
+  // private readonly eventService = inject(ContractEventService); // TODO: Events now handled by ContractFacade
 
   // Configuration
   private readonly ACCEPTED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
@@ -128,7 +128,7 @@ export class ContractUploadService {
       };
 
       // Emit event
-      this.eventService.emitFileUploaded(blueprintId, contractId, fileId, file.name, downloadUrl);
+      // this.eventService.emitFileUploaded(blueprintId, contractId, fileId, file.name, downloadUrl); // TODO: Events now handled by ContractFacade
 
       return fileAttachment;
     } catch (err) {
@@ -290,7 +290,7 @@ export class ContractUploadService {
 
       // Emit event
       const fileId = storagePath.split('/').pop() || '';
-      this.eventService.emitFileRemoved(blueprintId, contractId, fileId, fileName);
+      // this.eventService.emitFileRemoved(blueprintId, contractId, fileId, fileName); // TODO: Events now handled by ContractFacade
     } catch (err) {
       console.error('[ContractUploadService]', 'Failed to delete file', err);
       throw err;

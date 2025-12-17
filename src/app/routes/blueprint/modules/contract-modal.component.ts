@@ -15,8 +15,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoggerService } from '@core';
 import type { Contract, ContractParty } from '@core/blueprint/modules/implementations/contract/models';
 import type { CreateContractDto, UpdateContractDto } from '@core/blueprint/modules/implementations/contract/models/dtos';
-import { ContractCreationService } from '@core/blueprint/modules/implementations/contract/services/contract-creation.service';
-import { ContractManagementService } from '@core/blueprint/modules/implementations/contract/services/contract-management.service';
+import { ContractFacade } from '@core/blueprint/modules/implementations/contract/facades';
 import { SHARED_IMPORTS } from '@shared';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -157,8 +156,7 @@ export class ContractModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly modalRef = inject(NzModalRef);
   private readonly modalData = inject<ContractModalData>(NZ_MODAL_DATA);
-  private readonly managementService = inject(ContractManagementService);
-  private readonly creationService = inject(ContractCreationService);
+  private readonly facade = inject(ContractFacade);
   private readonly message = inject(NzMessageService);
   private readonly logger = inject(LoggerService);
 
@@ -261,7 +259,7 @@ export class ContractModalComponent implements OnInit {
           endDate: formValue.endDate
         };
 
-        await this.managementService.update(this.modalData.blueprintId, this.modalData.contract!.id, updateData);
+        await this.facade.updateContract(this.modalData.contract!.id, updateData);
         this.message.success('合約更新成功');
       } else {
         // Create new contract
@@ -278,7 +276,7 @@ export class ContractModalComponent implements OnInit {
           createdBy: 'current-user' // TODO: Get from auth service
         };
 
-        await this.creationService.createDraft(this.modalData.blueprintId, createData);
+        await this.facade.createContract(createData);
         this.message.success('合約建立成功');
       }
 

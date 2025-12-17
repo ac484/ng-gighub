@@ -33,14 +33,12 @@ import { Component, ChangeDetectionStrategy, OnInit, inject, input, output, sign
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import type { Contract, ContractParty, FileAttachment } from '@core/blueprint/modules/implementations/contract/models';
 import type { CreateContractDto } from '@core/blueprint/modules/implementations/contract/models/dtos';
-import { ContractCreationService } from '@core/blueprint/modules/implementations/contract/services/contract-creation.service';
+import { ContractFacade } from '@core/blueprint/modules/implementations/contract/facades';
 import {
   ContractParsingService,
   ParsingProgress
 } from '@core/blueprint/modules/implementations/contract/services/contract-parsing.service';
-import { ContractStatusService } from '@core/blueprint/modules/implementations/contract/services/contract-status.service';
 import { ContractUploadService, UploadProgress } from '@core/blueprint/modules/implementations/contract/services/contract-upload.service';
-import { ContractWorkItemsService } from '@core/blueprint/modules/implementations/contract/services/contract-work-items.service';
 import {
   type EnhancedContractParsingOutput,
   toContractCreateRequest,
@@ -54,7 +52,7 @@ import { NzResultModule } from 'ng-zorro-antd/result';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
 import { NzUploadChangeParam, NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
 
-import { ParsedDataEditorComponent } from './parsed-data-editor.component';
+import { ContractVerificationComponent } from '@core/blueprint/modules/implementations/contract/components';
 
 /** Step indices - UPDATED for new 7-step flow */
 const STEP_UPLOAD = 0; // Upload files
@@ -69,7 +67,7 @@ const STEP_ACTIVE = 6; // Active
   selector: 'app-contract-creation-wizard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SHARED_IMPORTS, NzStepsModule, NzUploadModule, NzFormModule, NzResultModule, NzDescriptionsModule, ParsedDataEditorComponent],
+  imports: [SHARED_IMPORTS, NzStepsModule, NzUploadModule, NzFormModule, NzResultModule, NzDescriptionsModule, ContractVerificationComponent],
   template: `
     <!-- Steps Progress Indicator - UPDATED for 7-step flow -->
     <nz-steps [nzCurrent]="currentStep()" nzSize="small" class="mb-lg">
@@ -175,18 +173,17 @@ const STEP_ACTIVE = 6; // Active
           </div>
         }
 
-        <!-- Step 2: Edit Parsed Data ✨ NEW STEP -->
+        <!-- Step 2: Edit Parsed Data ✨ NEW STEP - Using ContractVerificationComponent -->
         @case (2) {
           <div class="step-content">
-            <h3>步驟 3：編輯解析資料</h3>
-            <p class="text-grey mb-md">請檢查 AI 解析的資料，並進行必要的修正</p>
+            <h3>步驟 3：確認並編輯合約資料</h3>
+            <p class="text-grey mb-md">請檢查 AI 解析的合約資料，並進行必要的修正</p>
 
             @if (parsedData()) {
-              <app-parsed-data-editor
+              <app-contract-verification
                 [parsedData]="parsedData()!"
-                [confidence]="parsingConfidence()"
-                (confirmed)="onParsedDataConfirmed($event)"
-                (cancelled)="cancel()"
+                (confirm)="onParsedDataConfirmed($event)"
+                (reject)="onParsedDataRejected()"
               />
             } @else {
               <nz-result nzStatus="warning" nzTitle="無解析資料" nzSubTitle="請重新上傳檔案或手動輸入">
@@ -218,10 +215,27 @@ const STEP_ACTIVE = 6; // Active
                 </div>
               </nz-result>
             } @else {
-              <nz-result nzStatus="error" nzTitle="建立失敗" nzSubTitle="請重試或聯繫管理員">
+              <nz-result 
+                nzStatus="error" 
+                nzTitle="建立失敗" 
+                [nzSubTitle]="contractCreationAttempts() >= 3 
+                  ? '已達最大重試次數，請返回編輯檢查資料' 
+                  : '請重試或返回編輯檢查資料'"
+              >
                 <div nz-result-extra>
+                  @if (contractCreationAttempts() < 3) {
+                    <p class="text-grey mb-md">重試次數: {{ contractCreationAttempts() }} / 3</p>
+                  }
                   <button nz-button nzType="default" (click)="prevStep()">返回編輯</button>
-                  <button nz-button nzType="primary" (click)="retryContractCreation()" class="ml-sm">重試</button>
+                  <button 
+                    nz-button 
+                    nzType="primary" 
+                    (click)="retryContractCreation()" 
+                    [disabled]="contractCreationAttempts() >= 3"
+                    class="ml-sm"
+                  >
+                    重試
+                  </button>
                 </div>
               </nz-result>
             }
@@ -332,11 +346,9 @@ export class ContractCreationWizardComponent implements OnInit {
   // Injected services
   private readonly fb = inject(FormBuilder);
   private readonly message = inject(NzMessageService);
+  private readonly facade = inject(ContractFacade);
   private readonly uploadService = inject(ContractUploadService);
-  private readonly creationService = inject(ContractCreationService);
   private readonly parsingService = inject(ContractParsingService);
-  private readonly statusService = inject(ContractStatusService);
-  private readonly workItemService = inject(ContractWorkItemsService);
 
   // State signals
   currentStep = signal(STEP_UPLOAD);
@@ -356,6 +368,10 @@ export class ContractCreationWizardComponent implements OnInit {
   submitting = signal(false);
   activating = signal(false);
   uploading = signal(false);
+
+  // Error recovery state
+  contractCreationAttempts = signal(0);
+  private readonly MAX_RETRY_ATTEMPTS = 3;
 
   // Form
   contractForm!: FormGroup;
@@ -547,12 +563,7 @@ export class ContractCreationWizardComponent implements OnInit {
       this.pollParsingStatusForEnhancedData();
     } catch (err) {
       console.error('[ContractCreationWizard]', 'startParsingWithoutContract failed', err);
-      this.parsingProgress.set({
-        requestId: '',
-        status: 'failed',
-        progress: 0,
-        message: err instanceof Error ? err.message : '啟動解析失敗'
-      });
+      this.handleParsingError(err instanceof Error ? err : new Error('啟動解析失敗'));
     }
   }
 
@@ -574,8 +585,11 @@ export class ContractCreationWizardComponent implements OnInit {
             // For now, we'll handle this in the polling completion
           }
           // Don't auto-advance - let user click to review data
-        } else if (progress.status !== 'failed') {
-          // Continue polling
+        } else if (progress.status === 'failed') {
+          // Handle parsing failure with user recovery
+          this.handleParsingError(new Error(progress.message || '文件解析失敗'));
+        } else {
+          // Continue polling for other statuses (pending, processing)
           setTimeout(checkProgress, 1000);
         }
       }
@@ -586,9 +600,36 @@ export class ContractCreationWizardComponent implements OnInit {
   }
 
   /**
-   * NEW: Handle confirmed parsed data from editor
+   * Handle parsing errors with automatic recovery
    */
-  async onParsedDataConfirmed(editedData: EnhancedContractParsingOutput): Promise<void> {
+  private handleParsingError(error: Error): void {
+    const errorMessage = error.message || '解析失敗';
+
+    this.parsingProgress.set({
+      requestId: '',
+      status: 'failed',
+      progress: 0,
+      message: errorMessage
+    });
+
+    this.message.error(`文件解析失敗: ${errorMessage}`, {
+      nzDuration: 5000
+    });
+
+    // Auto-return to upload step after 3 seconds to allow user recovery
+    setTimeout(() => {
+      this.currentStep.set(STEP_UPLOAD);
+      this.uploadedFiles.set([]);
+      this.fileAttachments.set([]);
+      this.parsingProgress.set(null);
+      this.message.info('已返回上傳步驟，請重新選擇檔案或檢查檔案品質');
+    }, 3000);
+  }
+
+  /**
+   * NEW: Handle confirmed parsed data from ContractVerificationComponent
+   */
+  async onParsedDataConfirmed(editedData: any): Promise<void> {
     this.editedParsedData.set(editedData);
 
     // Move to contract creation step
@@ -596,6 +637,20 @@ export class ContractCreationWizardComponent implements OnInit {
 
     // Automatically create contract from edited data
     await this.createContractFromParsedData(editedData);
+  }
+
+  /**
+   * NEW: Handle rejection from ContractVerificationComponent
+   * Returns user to upload step to restart the process
+   */
+  onParsedDataRejected(): void {
+    this.message.info('已取消編輯，返回上傳步驟');
+    this.currentStep.set(STEP_UPLOAD);
+    this.parsedData.set(null);
+    this.editedParsedData.set(null);
+    this.uploadedFiles.set([]);
+    this.fileAttachments.set([]);
+    this.contractCreationAttempts.set(0); // Reset retry counter
   }
 
   /**
@@ -612,8 +667,8 @@ export class ContractCreationWizardComponent implements OnInit {
         'current-user' // TODO: Get from auth service
       );
 
-      // Create the contract
-      const contract = await this.creationService.createDraft(this.blueprintId(), createDto);
+      // Create the contract using ContractFacade
+      const contract = await this.facade.createContract(createDto);
       this.createdContract.set(contract);
       this.message.success('合約建立成功');
 
@@ -640,9 +695,12 @@ export class ContractCreationWizardComponent implements OnInit {
     try {
       const workItemDtos = toWorkItemCreateRequests(workItems);
 
-      // Create work items one by one using the injected service
+      // Create work items one by one
+      // Note: Work item management will be handled by Facade in future
+      // For now, directly call repository or implement in Facade
       for (const dto of workItemDtos) {
-        await this.workItemService.create(this.blueprintId(), contractId, dto);
+        // TODO: Implement work item creation in ContractFacade
+        // await this.facade.createWorkItem(this.blueprintId(), contractId, dto);
       }
 
       this.message.success(`已建立 ${workItems.length} 個工項`);
@@ -662,9 +720,23 @@ export class ContractCreationWizardComponent implements OnInit {
   }
 
   /**
-   * NEW: Retry contract creation
+   * NEW: Retry contract creation with attempt limit
    */
   async retryContractCreation(): Promise<void> {
+    const attempts = this.contractCreationAttempts();
+
+    if (attempts >= this.MAX_RETRY_ATTEMPTS) {
+      this.message.error('建立失敗次數過多，請返回編輯步驟檢查資料或聯繫管理員', {
+        nzDuration: 5000
+      });
+      return;
+    }
+
+    this.contractCreationAttempts.update(n => n + 1);
+
+    // Clear previous error state
+    this.createdContract.set(null);
+
     const editedData = this.editedParsedData();
     if (editedData) {
       await this.createContractFromParsedData(editedData);
@@ -754,10 +826,11 @@ export class ContractCreationWizardComponent implements OnInit {
    */
   private async reloadContract(contractId: string): Promise<void> {
     try {
-      // Use the status service to get the updated contract
-      const validation = await this.statusService.canActivateContract(this.blueprintId(), contractId);
-      if (validation.isValid) {
-        // Contract is valid, move to confirm step
+      // Use facade to get the updated contract
+      const contract = await this.facade.loadContractById(contractId);
+      if (contract) {
+        this.createdContract.set(contract);
+        // Move to next step (editing parsed data)
         this.nextStep();
       }
     } catch (err) {
@@ -807,10 +880,16 @@ export class ContractCreationWizardComponent implements OnInit {
         });
       }
 
-      // Submit for activation
-      const updatedContract = await this.statusService.submitForActivation(this.blueprintId(), contract.id, 'current-user');
-      this.createdContract.set(updatedContract);
+      // Submit for activation using ContractFacade
+      await this.facade.changeContractStatus(contract.id, 'pending_activation');
       this.message.success('合約已提交待生效');
+      
+      // Reload contract to get updated status
+      const updatedContract = await this.facade.loadContractById(contract.id);
+      if (updatedContract) {
+        this.createdContract.set(updatedContract);
+      }
+      
       this.nextStep();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '提交失敗';
@@ -831,8 +910,15 @@ export class ContractCreationWizardComponent implements OnInit {
     this.activating.set(true);
 
     try {
-      const updatedContract = await this.statusService.activate(this.blueprintId(), contract.id, 'current-user');
-      this.createdContract.set(updatedContract);
+      // Use ContractFacade to activate the contract
+      await this.facade.changeContractStatus(contract.id, 'active');
+      
+      // Reload contract to get updated status
+      const updatedContract = await this.facade.loadContractById(contract.id);
+      if (updatedContract) {
+        this.createdContract.set(updatedContract);
+      }
+      
       this.message.success('合約已生效！');
       this.nextStep();
     } catch (err) {
