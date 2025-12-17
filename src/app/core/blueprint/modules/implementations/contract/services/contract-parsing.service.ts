@@ -361,17 +361,13 @@ export class ContractParsingService {
   /**
    * Convert enhanced parsed data to CreateContractDto
    * SETC-018 Phase 3: Enhanced parsing support
-   * 
+   *
    * @param parsedData - Contract parsed data from AI
    * @param blueprintId - Blueprint ID
    * @param createdBy - User ID
    * @returns CreateContractDto if enhanced parsing available, null otherwise
    */
-  toCreateContractDto(
-    parsedData: ContractParsedData,
-    blueprintId: string,
-    createdBy: string
-  ): CreateContractDto | null {
+  toCreateContractDto(parsedData: ContractParsedData, blueprintId: string, createdBy: string): CreateContractDto | null {
     try {
       // Check if this is enhanced parsing output
       if (!isEnhancedParsingOutput(parsedData.extractedData)) {
@@ -382,10 +378,7 @@ export class ContractParsingService {
       const enhanced = parsedData.extractedData as EnhancedContractParsingOutput;
 
       // Validate financial calculations
-      const financialValidation = validateFinancialCalculation(
-        enhanced.totalAmount,
-        enhanced.workItems
-      );
+      const financialValidation = validateFinancialCalculation(enhanced.totalAmount, enhanced.workItems);
 
       if (!financialValidation.valid) {
         console.warn('[ContractParsingService]', 'Financial calculation mismatch', {
@@ -416,7 +409,7 @@ export class ContractParsingService {
   /**
    * Extract work items from enhanced parsed data
    * SETC-018 Phase 3: Enhanced parsing support
-   * 
+   *
    * @param parsedData - Contract parsed data from AI
    * @returns Array of CreateWorkItemDto
    */
@@ -437,7 +430,7 @@ export class ContractParsingService {
   /**
    * Check if parsed data uses enhanced parsing format
    * SETC-018 Phase 3: Enhanced parsing detection
-   * 
+   *
    * @param parsedData - Contract parsed data
    * @returns True if enhanced parsing format
    */

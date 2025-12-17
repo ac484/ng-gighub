@@ -66,10 +66,7 @@ interface MaterialItem {
                 <span nz-icon nzType="environment" nzTheme="outline" class="mr-xs"></span>
                 {{ location.name }}
               </h4>
-              <nz-badge
-                [nzStatus]="getLocationStatus(location.status)"
-                [nzText]="getLocationStatusText(location.status)"
-              ></nz-badge>
+              <nz-badge [nzStatus]="getLocationStatus(location.status)" [nzText]="getLocationStatusText(location.status)"></nz-badge>
             </div>
             <div class="location-info">
               <p class="text-secondary">{{ location.address }}</p>
@@ -122,12 +119,7 @@ interface MaterialItem {
       </nz-space>
 
       <!-- Table -->
-      <st
-        [data]="filteredMaterials()"
-        [columns]="columns"
-        [loading]="loading()"
-        [page]="{show: true, showSize: true}"
-      ></st>
+      <st [data]="filteredMaterials()" [columns]="columns" [loading]="loading()" [page]="{ show: true, showSize: true }"></st>
     </nz-card>
 
     <!-- Add/Edit Material Modal -->
@@ -145,24 +137,14 @@ interface MaterialItem {
           <nz-form-item>
             <nz-form-label [nzRequired]="true">物料名稱</nz-form-label>
             <nz-form-control>
-              <input
-                nz-input
-                [(ngModel)]="editingMaterial().name"
-                name="name"
-                placeholder="輸入物料名稱"
-              />
+              <input nz-input [(ngModel)]="editingMaterial().name" name="name" placeholder="輸入物料名稱" />
             </nz-form-control>
           </nz-form-item>
 
           <nz-form-item>
             <nz-form-label [nzRequired]="true">類別</nz-form-label>
             <nz-form-control>
-              <nz-select
-                [(ngModel)]="editingMaterial().category"
-                name="category"
-                nzPlaceHolder="選擇類別"
-                class="w-full"
-              >
+              <nz-select [(ngModel)]="editingMaterial().category" name="category" nzPlaceHolder="選擇類別" class="w-full">
                 <nz-option nzValue="construction" nzLabel="建材"></nz-option>
                 <nz-option nzValue="electrical" nzLabel="電氣"></nz-option>
                 <nz-option nzValue="plumbing" nzLabel="水電"></nz-option>
@@ -192,12 +174,7 @@ interface MaterialItem {
               <nz-form-item>
                 <nz-form-label [nzRequired]="true">單位</nz-form-label>
                 <nz-form-control>
-                  <nz-select
-                    [(ngModel)]="editingMaterial().unit"
-                    name="unit"
-                    nzPlaceHolder="選擇單位"
-                    class="w-full"
-                  >
+                  <nz-select [(ngModel)]="editingMaterial().unit" name="unit" nzPlaceHolder="選擇單位" class="w-full">
                     <nz-option nzValue="件" nzLabel="件"></nz-option>
                     <nz-option nzValue="箱" nzLabel="箱"></nz-option>
                     <nz-option nzValue="噸" nzLabel="噸"></nz-option>
@@ -213,12 +190,7 @@ interface MaterialItem {
           <nz-form-item>
             <nz-form-label [nzRequired]="true">存放地點</nz-form-label>
             <nz-form-control>
-              <nz-select
-                [(ngModel)]="editingMaterial().locationId"
-                name="locationId"
-                nzPlaceHolder="選擇倉庫地點"
-                class="w-full"
-              >
+              <nz-select [(ngModel)]="editingMaterial().locationId" name="locationId" nzPlaceHolder="選擇倉庫地點" class="w-full">
                 @for (location of locations(); track location.id) {
                   <nz-option [nzValue]="location.id" [nzLabel]="location.name"></nz-option>
                 }
@@ -362,19 +334,19 @@ export class OrganizationRepositoryComponent implements OnInit {
   saving = signal(false);
   materialModalVisible = signal(false);
   locationModalVisible = signal(false);
-  
+
   selectedLocation = signal<string>('all');
   selectedLocationValue = 'all';
-  
+
   currentCategory = signal<string>('all');
   currentCategoryValue = 'all';
-  
+
   currentStatus = signal<string>('all');
   currentStatusValue = 'all';
 
   locations = signal<WarehouseLocation[]>([]);
   materials = signal<MaterialItem[]>([]);
-  
+
   editingMaterial = signal<Partial<MaterialItem>>({
     name: '',
     category: 'construction',
@@ -487,9 +459,7 @@ export class OrganizationRepositoryComponent implements OnInit {
     return allMaterials;
   });
 
-  materialModalTitle = computed(() =>
-    this.editingMaterial().id ? '編輯物料' : '新增物料'
-  );
+  materialModalTitle = computed(() => (this.editingMaterial().id ? '編輯物料' : '新增物料'));
 
   ngOnInit(): void {
     this.loadData();
@@ -676,7 +646,7 @@ export class OrganizationRepositoryComponent implements OnInit {
       const location = this.locations().find(l => l.id === material.locationId);
       const quantity = material.quantity || 0;
       const minStock = material.minStock || 0;
-      
+
       let status: 'sufficient' | 'low' | 'critical' = 'sufficient';
       if (quantity < minStock * 0.5) {
         status = 'critical';
@@ -689,13 +659,13 @@ export class OrganizationRepositoryComponent implements OnInit {
         this.materials.update(materials =>
           materials.map(m =>
             m.id === material.id
-              ? {
+              ? ({
                   ...m,
                   ...material,
                   locationName: location?.name || '',
                   status,
                   lastUpdated: new Date()
-                } as MaterialItem
+                } as MaterialItem)
               : m
           )
         );
