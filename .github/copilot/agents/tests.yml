@@ -1,0 +1,306 @@
+# Testing Agent Configuration
+# 測試代理配置
+
+name: tests
+description: "Specialized agent for test generation and validation with MCP tools"
+
+# MCP 工具用於測試
+mcp_tools:
+  primary:
+    - context7  # 查詢測試範例
+    - playwright  # E2E 測試
+    - filesystem  # 讀寫測試檔案
+    - git  # 查看變更
+  
+  secondary:
+    - supabase  # 資料庫測試
+    - sequential-thinking  # 測試策略分析
+    - software-planning-tool  # 測試計畫
+
+# 測試類型
+test_types:
+  unit:
+    framework: "Jasmine + Karma"
+    tools: ["context7", "filesystem"]
+    workflow:
+      - name: "查詢測試範例"
+        tool: context7.get-library-docs
+        params:
+          context7CompatibleLibraryID: "/angular/angular"
+          topic: "testing"
+      
+      - name: "生成測試檔案"
+        tool: filesystem.write_file
+        params:
+          path: "src/app/**/*.spec.ts"
+      
+      - name: "驗證語法"
+        description: "執行 lint 與 type check"
+    
+    patterns:
+      component:
+        - "TestBed.configureTestingModule"
+        - "fixture.detectChanges()"
+        - "expect().toBe()"
+      
+      service:
+        - "inject() pattern"
+        - "Mock dependencies"
+        - "Spy on methods"
+      
+      signal:
+        - "Test signal updates"
+        - "Test computed signals"
+        - "Test effect execution"
+  
+  integration:
+    framework: "Jasmine + Karma"
+    tools: ["context7", "supabase", "filesystem"]
+    workflow:
+      - name: "設定測試環境"
+        tool: supabase.create_branch
+        params:
+          name: "test-branch"
+      
+      - name: "執行整合測試"
+        description: "測試元件與服務整合"
+      
+      - name: "清理測試環境"
+        tool: supabase.delete_branch
+  
+  e2e:
+    framework: "Playwright"
+    tools: ["playwright", "filesystem"]
+    workflow:
+      - name: "啟動錄製"
+        tool: playwright.start_codegen_session
+        params:
+          options:
+            outputPath: "e2e/"
+            testNamePrefix: "E2E"
+            includeComments: true
+      
+      - name: "執行測試場景"
+        tools:
+          - playwright.playwright_navigate
+          - playwright.playwright_click
+          - playwright.playwright_fill
+          - playwright.playwright_screenshot
+      
+      - name: "生成測試程式碼"
+        tool: playwright.end_codegen_session
+      
+      - name: "驗證測試"
+        tool: playwright.playwright_get_visible_text
+
+# 測試生成策略
+test_generation:
+  component_tests:
+    trigger: "*.component.ts"
+    generate: "*.component.spec.ts"
+    strategy:
+      - "測試元件建立"
+      - "測試 input/output"
+      - "測試 signals"
+      - "測試使用者互動"
+      - "測試錯誤處理"
+    
+    mcp_workflow:
+      - tool: context7.get-library-docs
+        params:
+          context7CompatibleLibraryID: "/angular/angular"
+          topic: "component-testing"
+      
+      - tool: filesystem.read_text_file
+        description: "讀取元件檔案"
+      
+      - tool: sequential-thinking.sequentialthinking
+        description: "分析測試需求"
+      
+      - tool: filesystem.write_file
+        description: "生成測試檔案"
+  
+  service_tests:
+    trigger: "*.service.ts"
+    generate: "*.service.spec.ts"
+    strategy:
+      - "測試服務建立"
+      - "測試公開方法"
+      - "Mock 相依服務"
+      - "測試 HTTP 請求"
+      - "測試錯誤處理"
+    
+    mcp_workflow:
+      - tool: context7.get-library-docs
+        params:
+          context7CompatibleLibraryID: "/angular/angular"
+          topic: "service-testing"
+      
+      - tool: filesystem.read_text_file
+        description: "讀取服務檔案"
+      
+      - tool: filesystem.write_file
+        description: "生成測試檔案"
+  
+  repository_tests:
+    trigger: "*.repository.ts"
+    generate: "*.repository.spec.ts"
+    strategy:
+      - "Mock Supabase client"
+      - "測試 CRUD 操作"
+      - "測試錯誤處理"
+      - "測試資料轉換"
+    
+    mcp_workflow:
+      - tool: context7.get-library-docs
+        params:
+          context7CompatibleLibraryID: "/supabase/supabase"
+          topic: "testing"
+      
+      - tool: filesystem.read_text_file
+        description: "讀取 repository 檔案"
+      
+      - tool: filesystem.write_file
+        description: "生成測試檔案"
+
+# E2E 測試場景
+e2e_scenarios:
+  user_authentication:
+    description: "測試使用者登入流程"
+    steps:
+      - navigate: "http://localhost:4200/auth/login"
+      - fill: 
+          selector: "input[name='email']"
+          value: "test@example.com"
+      - fill:
+          selector: "input[name='password']"
+          value: "test123"
+      - click: "button[type='submit']"
+      - assert: "Dashboard should be visible"
+    
+    mcp_tools:
+      - playwright.playwright_navigate
+      - playwright.playwright_fill
+      - playwright.playwright_click
+      - playwright.playwright_screenshot
+      - playwright.playwright_get_visible_text
+  
+  crud_operations:
+    description: "測試 CRUD 操作"
+    steps:
+      - create: "新增資料"
+      - read: "讀取資料"
+      - update: "更新資料"
+      - delete: "刪除資料"
+    
+    mcp_tools:
+      - playwright.playwright_navigate
+      - playwright.playwright_click
+      - playwright.playwright_fill
+      - playwright.playwright_screenshot
+
+# 測試覆蓋率目標
+coverage_targets:
+  unit:
+    statements: 80
+    branches: 75
+    functions: 80
+    lines: 80
+  
+  integration:
+    critical_paths: 90
+    edge_cases: 70
+  
+  e2e:
+    user_flows: 100
+    critical_features: 100
+
+# 測試最佳實踐
+best_practices:
+  - "使用 AAA 模式 (Arrange, Act, Assert)"
+  - "一個測試一個斷言"
+  - "使用描述性測試名稱"
+  - "Mock 外部相依"
+  - "避免測試實作細節"
+  - "測試行為而非實作"
+  - "保持測試獨立"
+  - "快速執行測試"
+
+# 測試模板
+test_templates:
+  component_signal:
+    template: |
+      import { TestBed } from '@angular/core/testing';
+      import { {ComponentName} } from './{component-name}.component';
+      
+      describe('{ComponentName}', () => {
+        it('should create', () => {
+          const fixture = TestBed.createComponent({ComponentName});
+          const component = fixture.componentInstance;
+          expect(component).toBeTruthy();
+        });
+        
+        it('should update signal value', () => {
+          const fixture = TestBed.createComponent({ComponentName});
+          const component = fixture.componentInstance;
+          
+          component.{signalName}.set('new value');
+          
+          expect(component.{signalName}()).toBe('new value');
+        });
+      });
+  
+  service_http:
+    template: |
+      import { TestBed } from '@angular/core/testing';
+      import { provideHttpClient } from '@angular/common/http';
+      import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+      import { {ServiceName} } from './{service-name}.service';
+      
+      describe('{ServiceName}', () => {
+        let service: {ServiceName};
+        let httpMock: HttpTestingController;
+        
+        beforeEach(() => {
+          TestBed.configureTestingModule({
+            providers: [
+              provideHttpClient(),
+              provideHttpClientTesting(),
+              {ServiceName}
+            ]
+          });
+          service = TestBed.inject({ServiceName});
+          httpMock = TestBed.inject(HttpTestingController);
+        });
+        
+        afterEach(() => {
+          httpMock.verify();
+        });
+        
+        it('should fetch data', () => {
+          const mockData = { id: 1, name: 'Test' };
+          
+          service.getData().subscribe(data => {
+            expect(data).toEqual(mockData);
+          });
+          
+          const req = httpMock.expectOne('/api/data');
+          expect(req.request.method).toBe('GET');
+          req.flush(mockData);
+        });
+      });
+  
+  e2e_playwright:
+    template: |
+      import { test, expect } from '@playwright/test';
+      
+      test.describe('{Feature Name}', () => {
+        test('should {test scenario}', async ({ page }) => {
+          await page.goto('http://localhost:4200/{route}');
+          
+          await page.click('{selector}');
+          await page.fill('{input-selector}', '{value}');
+          
+          await expect(page.locator('{result-selector}')).toBeVisible();
+        });
+      });

@@ -1,0 +1,99 @@
+# Default Copilot Agent Configuration
+# 預設 Copilot 代理配置
+#
+# 此檔案定義 Copilot Coding Agent 的預設行為與 MCP 工具使用策略
+
+name: default
+description: "Default Copilot agent for general development tasks"
+
+# MCP 工具使用策略
+mcp_tools:
+  # 優先使用的工具
+  priority:
+    - context7  # 優先查詢最新文檔
+    - supabase  # 資料庫操作
+    - sequential-thinking  # 複雜問題分析
+    - filesystem  # 檔案操作
+    
+  # 自動觸發條件
+  auto_triggers:
+    # 當詢問 Angular/ng-alain/ng-zorro-antd 時
+    - pattern: "(?i)(angular|ng-alain|ng-zorro|signals|standalone|components?)"
+      tools:
+        - context7.resolve-library-id
+        - context7.get-library-docs
+      reason: "查詢最新 Angular 20/ng-alain 20 文檔"
+    
+    # 當詢問 Supabase/Database 時
+    - pattern: "(?i)(supabase|database|postgres|sql|rls|migration)"
+      tools:
+        - supabase.list_tables
+        - supabase.execute_sql
+        - postgres.query
+      reason: "資料庫操作與查詢"
+    
+    # 當需要複雜分析時
+    - pattern: "(?i)(analyze|design|architecture|plan|implement)"
+      tools:
+        - sequential-thinking.sequentialthinking
+        - software-planning-tool.start_planning
+      reason: "系統化思考與規劃"
+
+# 工作流程指引
+workflows:
+  code_generation:
+    steps:
+      - name: "查詢文檔"
+        tools: ["context7"]
+        description: "使用 context7 查詢最新 API 文檔"
+      
+      - name: "分析需求"
+        tools: ["sequential-thinking"]
+        description: "使用結構化思考分析需求"
+      
+      - name: "生成程式碼"
+        tools: ["filesystem"]
+        description: "建立或修改檔案"
+      
+      - name: "驗證程式碼"
+        tools: ["git"]
+        description: "檢查變更並提交"
+  
+  database_operation:
+    steps:
+      - name: "查詢 Schema"
+        tools: ["supabase", "postgres"]
+        description: "取得資料庫結構"
+      
+      - name: "執行操作"
+        tools: ["supabase.execute_sql", "postgres.query"]
+        description: "執行 SQL 查詢或遷移"
+      
+      - name: "驗證結果"
+        tools: ["supabase.get_advisors"]
+        description: "檢查安全性與效能"
+
+# 品質標準
+quality_standards:
+  - "使用最新 Angular 20 語法 (Signals, Standalone Components)"
+  - "遵循 ng-alain 架構模式"
+  - "實作 TypeScript 嚴格模式"
+  - "遵循專案 coding guidelines"
+  - "執行 Supabase RLS policies"
+  - "撰寫測試程式碼"
+
+# 安全檢查
+security_checks:
+  - "驗證 SQL injection 防護"
+  - "檢查 RLS policies"
+  - "確認輸入消毒"
+  - "避免硬編碼 secrets"
+  - "使用參數化查詢"
+
+# 效能優化
+performance:
+  - "使用 OnPush 變更偵測"
+  - "實作 lazy loading"
+  - "優化 bundle 大小"
+  - "使用 computed signals"
+  - "快取 API 回應"
