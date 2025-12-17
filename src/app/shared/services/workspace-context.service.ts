@@ -395,6 +395,7 @@ export class WorkspaceContextService {
   /**
    * Remove organization from the list
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   removeOrganization(_orgId: string): void {
     console.log('[WorkspaceContextService] ⚠️ Organization removed, reloading data...');
     this.reloadData();
@@ -403,6 +404,7 @@ export class WorkspaceContextService {
   /**
    * Add team to the list
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   addTeam(_team: Team): void {
     console.log('[WorkspaceContextService] ⚠️ Team added, reloading data...');
     this.reloadData();
@@ -411,6 +413,7 @@ export class WorkspaceContextService {
   /**
    * Remove team from the list
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   removeTeam(_teamId: string): void {
     console.log('[WorkspaceContextService] ⚠️ Team removed, reloading data...');
     this.reloadData();
@@ -419,6 +422,7 @@ export class WorkspaceContextService {
   /**
    * Add partner to the list
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   addPartner(_partner: Partner): void {
     console.log('[WorkspaceContextService] ⚠️ Partner added, reloading data...');
     this.reloadData();
@@ -427,6 +431,7 @@ export class WorkspaceContextService {
   /**
    * Remove partner from the list
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   removePartner(_partnerId: string): void {
     console.log('[WorkspaceContextService] ⚠️ Partner removed, reloading data...');
     this.reloadData();

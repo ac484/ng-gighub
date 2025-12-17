@@ -361,7 +361,7 @@ export class ModuleManagerComponent implements OnInit {
   async loadModules(): Promise<void> {
     try {
       await this.service.loadModules(this.blueprintId());
-    } catch (err) {
+    } catch (_err) {
       this.message.error('載入模組失敗');
     }
   }
@@ -370,7 +370,7 @@ export class ModuleManagerComponent implements OnInit {
     try {
       await this.service.reloadModules();
       this.message.success('已重新整理模組列表');
-    } catch (err) {
+    } catch (_err) {
       this.message.error('重新整理失敗');
     }
   }
@@ -424,7 +424,7 @@ export class ModuleManagerComponent implements OnInit {
         this.message.warning(`${result.failed.length} 個模組啟用失敗`);
       }
       this.service.clearSelection();
-    } catch (err) {
+    } catch (_err) {
       this.message.error('批次啟用失敗');
     }
   }
@@ -443,7 +443,7 @@ export class ModuleManagerComponent implements OnInit {
         this.message.warning(`${result.failed.length} 個模組停用失敗`);
       }
       this.service.clearSelection();
-    } catch (err) {
+    } catch (_err) {
       this.message.error('批次停用失敗');
     }
   }
@@ -460,7 +460,7 @@ export class ModuleManagerComponent implements OnInit {
     try {
       await this.service.enableModule(module.id);
       this.message.success(`已啟用模組: ${module.name}`);
-    } catch (err) {
+    } catch (_err) {
       this.message.error('啟用模組失敗');
     }
   }
@@ -469,7 +469,7 @@ export class ModuleManagerComponent implements OnInit {
     try {
       await this.service.disableModule(module.id);
       this.message.success(`已停用模組: ${module.name}`);
-    } catch (err) {
+    } catch (_err) {
       this.message.error('停用模組失敗');
     }
   }
@@ -488,7 +488,7 @@ export class ModuleManagerComponent implements OnInit {
     try {
       await this.service.updateModuleConfig(module.id, config);
       this.message.success('配置已更新');
-    } catch (err) {
+    } catch (_err) {
       this.message.error('更新配置失敗');
     }
   }
@@ -497,7 +497,7 @@ export class ModuleManagerComponent implements OnInit {
     try {
       await this.service.deleteModule(module.id);
       this.message.success(`已刪除模組: ${module.name}`);
-    } catch (err) {
+    } catch (_err) {
       this.message.error('刪除模組失敗');
     }
   }
@@ -506,7 +506,7 @@ export class ModuleManagerComponent implements OnInit {
     // Error will be cleared on next operation
   }
 
-  onTableChange(event: any): void {
+  onTableChange(_event: any): void {
     // Handle table pagination/sorting changes
   }
 }

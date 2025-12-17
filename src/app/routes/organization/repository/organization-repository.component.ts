@@ -615,10 +615,12 @@ export class OrganizationRepositoryComponent implements OnInit {
     this.message.success('已刪除物料');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   editLocation(_location: WarehouseLocation): void {
     this.message.info('編輯地點功能開發中');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   deleteLocation(_location: WarehouseLocation): void {
     this.message.info('刪除地點功能開發中');
   }
