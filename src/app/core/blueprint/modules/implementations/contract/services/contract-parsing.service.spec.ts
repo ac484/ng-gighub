@@ -36,45 +36,74 @@ describe('ContractParsingService', () => {
   const sampleFiles: FileAttachment[] = [
     {
       id: 'file-001',
-      name: 'contract.pdf',
-      url: 'https://storage.example.com/contract.pdf',
-      size: 1024000,
-      mimeType: 'application/pdf',
+      fileName: 'contract.pdf',
+      fileUrl: 'https://storage.example.com/contract.pdf',
+      fileSize: 1024000,
+      fileType: 'application/pdf',
       uploadedBy: userId,
       uploadedAt: new Date('2025-12-18')
     }
   ];
 
   const sampleParsedData: ContractParsedData = {
-    title: 'Construction Contract',
-    totalAmount: 1000000,
-    currency: 'TWD',
-    startDate: new Date('2025-01-01'),
-    endDate: new Date('2025-12-31'),
-    owner: {
-      name: 'Owner Corp',
-      contactPerson: 'John Owner',
-      contactPhone: '0912345678',
-      contactEmail: 'owner@test.com',
-      address: '123 Owner St'
-    },
-    contractor: {
-      name: 'Contractor LLC',
-      contactPerson: 'Jane Contractor',
-      contactPhone: '0987654321',
-      contactEmail: 'contractor@test.com',
-      address: '456 Contractor Ave'
-    },
-    workItems: [
-      {
-        name: 'Foundation Work',
-        description: 'Foundation construction',
-        unit: '式',
-        quantity: 1,
-        unitPrice: 500000,
-        category: 'foundation'
-      }
-    ]
+    parsingEngine: 'ai',
+    parsedAt: new Date('2025-12-18'),
+    confidence: 0.95,
+    needsVerification: true,
+    extractedData: {
+      contractTitle: 'Construction Contract',
+      totalAmount: 1000000,
+      currency: 'TWD',
+      startDate: '2025-01-01',
+      endDate: '2025-12-31',
+      parties: [
+        {
+          name: 'Owner Corp',
+          contactPerson: 'John Owner',
+          contactPhone: '0912345678',
+          contactEmail: 'owner@test.com',
+          address: '123 Owner St'
+        },
+        {
+          name: 'Contractor LLC',
+          contactPerson: 'Jane Contractor',
+          contactPhone: '0987654321',
+          contactEmail: 'contractor@test.com',
+          address: '456 Contractor Ave'
+        }
+      ],
+      workItems: [
+        {
+          name: 'Foundation Work',
+          description: 'Foundation construction',
+          unit: '式',
+          quantity: 1,
+          unitPrice: 500000,
+          category: 'foundation'
+        }
+      ]
+    }
+  };
+
+  // Sample owner and contractor for sampleContract
+  const sampleOwner: ContractParty = {
+    id: 'owner-001',
+    name: 'Owner Corp',
+    type: 'owner',
+    contactPerson: 'John Owner',
+    contactPhone: '0912345678',
+    contactEmail: 'owner@test.com',
+    address: '123 Owner St'
+  };
+
+  const sampleContractor: ContractParty = {
+    id: 'contractor-001',
+    name: 'Contractor LLC',
+    type: 'contractor',
+    contactPerson: 'Jane Contractor',
+    contactPhone: '0987654321',
+    contactEmail: 'contractor@test.com',
+    address: '456 Contractor Ave'
   };
 
   const sampleContract: Contract = {
@@ -83,14 +112,13 @@ describe('ContractParsingService', () => {
     contractNumber: 'CON-20251218-001',
     title: 'Test Contract',
     description: 'Test description',
-    owner: sampleParsedData.owner,
-    contractor: sampleParsedData.contractor,
+    owner: sampleOwner,
+    contractor: sampleContractor,
     totalAmount: 1000000,
     currency: 'TWD',
     status: 'draft',
     startDate: new Date('2025-01-01'),
     endDate: new Date('2025-12-31'),
-    terms: '',
     originalFiles: sampleFiles,
     workItems: [],
     createdBy: userId,

@@ -604,7 +604,7 @@ describe('ContractFacade', () => {
     });
 
     it('should set filters', () => {
-      const filters = { status: 'active' as ContractStatus };
+      const filters = { status: ['active' as ContractStatus] };
 
       facade.setFilters(filters);
 
