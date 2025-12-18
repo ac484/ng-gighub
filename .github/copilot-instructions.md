@@ -1,23 +1,62 @@
 # GigHub - Copilot Instructions
 
-> **⚠️ ATTENTION COPILOT**: You MUST read this entire file before responding to ANY request. This is MANDATORY, not optional.
+> **🔴 CRITICAL - MANDATORY COMPLIANCE REQUIRED 🔴**  
+> **GitHub Copilot MUST achieve 100% passive compliance with ALL rules in this file and referenced documents.**
+
+## ⚠️ MANDATORY PRE-TASK REQUIREMENTS
+
+**BEFORE responding to ANY request, Copilot MUST:**
+
+### 1. Read ALL Mandatory Rules (CRITICAL) 🔴
+
+**YOU MUST READ these files IN ORDER:**
+
+1. **`.github/rules/mandatory-workflow.md`** ← **START HERE** 🔴
+   - Mandatory workflow for EVERY task
+   - Required tool usage (Context7, Sequential Thinking, Planning Tool)
+   - Quality gates and verification statements
+
+2. **`.github/rules/project-rules.md`** ← **CORE RULES** 🔴
+   - Task definition format
+   - Development checklist
+   - Forbidden behaviors
+
+3. **`.github/rules/architectural-principles.md`** ← **ARCHITECTURE** 🔴
+   - Ten design principles
+   - Technical implementation standards
+   - Security and performance requirements
+
+4. **`.github/rules/enforcement-policy.md`** ← **ENFORCEMENT** 🔴
+   - Compliance checking mechanisms
+   - Violation handling procedures
+   - Exception policies
+
+5. **This file** (copilot-instructions.md) - Overview & tool usage details
+
+### 2. Execute Mandatory Checks (CRITICAL) 🔴
+
+**Before ANY response, verify:**
+
+- [ ] Have I read all mandatory rule files?
+- [ ] Do I need Context7 for external libraries? (If yes, MUST use)
+- [ ] Do I need Sequential Thinking for complex analysis? (If yes, MUST use)
+- [ ] Do I need Planning Tool for new features? (If yes, MUST use)
+- [ ] Does my solution follow three-layer architecture?
+- [ ] Does my solution use Repository pattern (NO direct Firestore)?
+- [ ] Does my solution use Standalone Components + Signals?
+- [ ] Have I avoided ALL forbidden patterns?
+
+**IF ANY CHECK FAILS → STOP and follow mandatory workflow**
 
 ## 🎯 Quick Start (READ THIS FIRST)
 
-**Before doing ANYTHING, you must:**
-
-1. ✅ **Read this file completely** - `.github/copilot-instructions.md`
-2. ✅ **Check mandatory tool usage policy** - See section below
-3. ✅ **Use context7** for ANY framework/library question
-4. ✅ **Use sequential-thinking** for complex problems
-5. ✅ **Use software-planning-tool** for new features
-6. ✅ **Reference quick-reference.instructions.md** for common patterns
-
 **New to this project?** Read these in order:
-1. This file (copilot-instructions.md) - Overview & mandatory policies
-2. `.github/instructions/quick-reference.instructions.md` - Common patterns
-3. `.github/copilot/constraints.md` - Forbidden practices
-4. `.github/copilot/shortcuts/chat-shortcuts.md` - Chat shortcuts
+1. **`.github/rules/README.md`** - Rules system overview ⭐
+2. **`.github/rules/mandatory-workflow.md`** - Mandatory workflow ⭐🔴
+3. This file (copilot-instructions.md) - Detailed tool usage
+4. `.github/instructions/quick-reference.instructions.md` - Common patterns
+5. `.github/copilot/constraints.md` - Forbidden practices
+6. `.github/copilot/shortcuts/chat-shortcuts.md` - Chat shortcuts
 
 ---
 
@@ -355,18 +394,161 @@ See `.github/copilot/` for additional resources:
 
 ---
 
-## 📢 FINAL REMINDER
+## 🔴 100% PASSIVE COMPLIANCE REQUIREMENT
 
-**YOU MUST:**
-- ✅ Read this instruction file at the start of EVERY session
-- ✅ Use context7 for ALL framework/library questions (MANDATORY)
-- ✅ Use sequential-thinking for complex problems (MANDATORY)
-- ✅ Use software-planning-tool for new features (MANDATORY)
-- ✅ Follow the quick reference guide for common patterns
-- ✅ Check constraints.md for forbidden practices
+### Mandatory Verification Process
 
-**FAILURE TO FOLLOW THESE REQUIREMENTS WILL RESULT IN INCORRECT OR OUTDATED CODE.**
+**EVERY response MUST include this verification statement:**
+
+```markdown
+### 🔍 強制規則遵守驗證
+
+#### 📋 Pre-Task Checks
+- [x] Read all mandatory rule files (.github/rules/*.md)
+- [x] Identified required tools (Context7/Sequential Thinking/Planning Tool)
+- [x] Verified solution follows three-layer architecture
+- [x] Confirmed Repository pattern usage (no direct Firestore)
+- [x] Checked all forbidden patterns avoided
+
+#### 🔧 Tool Usage
+- Context7: [✅ Used / ❌ Not Needed / ⚠️ REQUIRED BUT NOT USED]
+- Sequential Thinking: [✅ Used / ❌ Not Needed / ⚠️ REQUIRED BUT NOT USED]
+- Planning Tool: [✅ Used / ❌ Not Needed / ⚠️ REQUIRED BUT NOT USED]
+
+#### 🏗️ Architecture Compliance
+- Three-layer separation: [✅ Yes / ❌ No]
+- Repository pattern: [✅ Yes / ❌ No]
+- Security Rules: [✅ Implemented / ❌ Not Needed / ⚠️ MISSING]
+
+#### 💻 Code Quality
+- Standalone Components: [✅ Yes / ❌ No]
+- Signals usage: [✅ Yes / ❌ No]
+- inject() usage: [✅ Yes / ❌ No]
+- New control flow: [✅ Yes / ❌ No]
+- No any types: [✅ Yes / ⚠️ Found any types]
+
+#### 🚫 Forbidden Pattern Check
+- No direct Firestore: [✅ Clean]
+- No NgModule: [✅ Clean]
+- No constructor injection: [✅ Clean]
+- No manual subscriptions: [✅ Clean]
+
+**Compliance Status**: [✅ 100% COMPLIANT / ⚠️ WARNINGS / ❌ VIOLATIONS]
+```
+
+### Enforcement Levels
+
+| Level | Status | Action Required |
+|-------|--------|-----------------|
+| ✅ **100% COMPLIANT** | All checks pass | Proceed with response |
+| ⚠️ **WARNINGS** | SHOULD rules not followed | Proceed with warnings noted |
+| ❌ **VIOLATIONS** | MUST/MUST NOT violated | **STOP** - Follow mandatory workflow |
+
+### Violation Response
+
+**IF ANY MUST rule is violated:**
+
+1. **STOP** immediately
+2. Display violation message
+3. Explain correct approach
+4. Request user confirmation
+5. **RESTART** with proper workflow
+
+**Example Violation Response:**
+
+```
+🚫 MANDATORY RULE VIOLATION DETECTED
+
+Violation: Context7 not used for external library API
+Rule Level: MUST 🔴
+Rule File: .github/rules/mandatory-workflow.md
+
+Your request involves [Angular Signals API] but Context7 was not used.
+
+Correct Workflow:
+1. Call resolve-library-id({ libraryName: "angular" })
+2. Call get-library-docs({ context7CompatibleLibraryID: "/angular/angular", topic: "signals" })
+3. Provide solution based on official documentation
+
+Would you like me to restart with the correct workflow? [Yes/No]
+```
 
 ---
 
-**Note**: This repository emphasizes learning from existing patterns while creating maintainable, modern implementations. Always prioritize code quality, security, and maintainability over quick solutions. The mandatory tool usage policy ensures you provide accurate, up-to-date, and well-reasoned solutions.
+## 📢 FINAL REMINDER - 100% COMPLIANCE MANDATORY
+
+**YOU MUST - NO EXCEPTIONS:**
+
+### 1. Read ALL Mandatory Files FIRST 🔴
+- `.github/rules/mandatory-workflow.md`
+- `.github/rules/project-rules.md`
+- `.github/rules/architectural-principles.md`
+- `.github/rules/enforcement-policy.md`
+- This file (copilot-instructions.md)
+
+### 2. Use Required Tools ALWAYS 🔴
+- **Context7** for ALL external library/framework questions (MANDATORY)
+- **Sequential Thinking** for ALL complex analysis (MANDATORY)
+- **Planning Tool** for ALL new feature development (MANDATORY)
+
+### 3. Follow Architecture Rules STRICTLY 🔴
+- Three-layer architecture (UI → Service → Repository)
+- Repository pattern (NO direct Firestore access)
+- Firestore Security Rules (MANDATORY for all collections)
+- Standalone Components + Signals (NO NgModules)
+
+### 4. Avoid ALL Forbidden Patterns 🚫
+- NO direct Firestore operations
+- NO NgModule usage
+- NO constructor injection
+- NO any types
+- NO business logic in constructors
+- NO manual subscription management
+
+### 5. Provide Verification Statement EVERY TIME 📋
+- Include complete verification checklist
+- Mark all compliance checks
+- Note any warnings or violations
+- State overall compliance status
+
+---
+
+## 🎯 Success Criteria
+
+**A response is considered successful ONLY IF:**
+
+1. ✅ All mandatory rule files were read and followed
+2. ✅ Required tools were used appropriately
+3. ✅ Architecture rules were strictly followed
+4. ✅ All forbidden patterns were avoided
+5. ✅ Verification statement was included and accurate
+6. ✅ Solution meets functional requirements
+7. ✅ Code quality standards are met
+8. ✅ Security requirements are satisfied
+
+**ANYTHING LESS THAN 100% COMPLIANCE IS CONSIDERED FAILURE**
+
+---
+
+## 📚 Quick Reference Summary
+
+**Core Principle**: ALWAYS verify with official documentation (Context7) before providing solutions.
+
+**Architecture**: Three layers (UI → Service → Repository) with strict separation.
+
+**Technology Stack**: Angular 20 + Standalone Components + Signals + Firebase/Firestore.
+
+**Forbidden**: Direct Firestore, NgModule, any types, constructor injection, manual subscriptions.
+
+**Required**: Context7, Sequential Thinking, Planning Tool (when applicable).
+
+**Goal**: 100% passive compliance with ALL rules - no exceptions, no compromises.
+
+---
+
+**Version**: v2.0 (Rules-Enforced)  
+**Last Updated**: 2025-12-17  
+**Compliance Level**: MANDATORY - 100% Required  
+**Enforcement**: Automatic verification in EVERY response
+
+**Note**: This repository requires absolute adherence to all rules and standards. The mandatory tool usage policy and comprehensive rule system ensure you provide accurate, up-to-date, secure, and architecturally sound solutions. Quality, security, and maintainability are non-negotiable.
