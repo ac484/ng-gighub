@@ -112,10 +112,67 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
         #st
         [data]="filteredContracts()"
         [columns]="columns"
-        [loading]="loading()"
+        [loading]="loading() || bulkOperationInProgress()"
         [page]="{ show: true, pageSize: 10, showSize: true, pageSizes: [10, 20, 50, 100] }"
+        [(selectedRows)]="selectedContracts"
         (change)="onTableChange($event)"
       />
+
+      <!-- Bulk Operations Toolbar -->
+      @if (hasSelectedContracts()) {
+        <div class="bulk-actions-toolbar" style="
+          position: fixed;
+          bottom: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: white;
+          padding: 12px 24px;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        ">
+          <span style="color: #666; font-weight: 500;">
+            已選擇 {{ selectedContracts().length }} 筆合約
+          </span>
+
+          @if (deletableSelected().length > 0) {
+            <button 
+              nz-button 
+              nzType="default" 
+              nzDanger
+              (click)="bulkDelete()"
+              [nzLoading]="bulkOperationInProgress()"
+            >
+              <span nz-icon nzType="delete"></span>
+              刪除 ({{ deletableSelected().length }})
+            </button>
+          }
+
+          <button 
+            nz-button 
+            nzType="default"
+            (click)="bulkExport()"
+            [nzLoading]="bulkOperationInProgress()"
+          >
+            <span nz-icon nzType="download"></span>
+            匯出
+          </button>
+
+          <nz-divider nzType="vertical" style="height: 24px;" />
+
+          <button 
+            nz-button 
+            nzType="link"
+            (click)="clearSelection()"
+          >
+            <span nz-icon nzType="close"></span>
+            取消選擇
+          </button>
+        </div>
+      }
     </nz-card>
   `,
   styles: [
@@ -165,6 +222,12 @@ export class ContractListComponent implements OnInit {
 
   /** Debounced search signal */
   private debouncedSearch = signal('');
+
+  /** Selected contracts for bulk operations */
+  selectedContracts = signal<Contract[]>([]);
+
+  /** Bulk operation in progress */
+  bulkOperationInProgress = signal(false);
 
   // ==================== OPTIONS ====================
 
@@ -227,9 +290,53 @@ export class ContractListComponent implements OnInit {
     );
   });
 
+  /** Check if any contracts are selected */
+  hasSelectedContracts = computed(() => this.selectedContracts().length > 0);
+
+  /** Check if all visible contracts are selected */
+  allSelected = computed(() => {
+    const filtered = this.filteredContracts();
+    const selected = this.selectedContracts();
+    return filtered.length > 0 && filtered.every(c => selected.some(s => s.id === c.id));
+  });
+
+  /** Get deletable selected contracts (only drafts) */
+  deletableSelected = computed(() => 
+    this.selectedContracts().filter(c => c.status === 'draft')
+  );
+
   // ==================== ST TABLE COLUMNS ====================
 
   columns: STColumn[] = [
+    {
+      title: '',
+      type: 'checkbox',
+      width: 50,
+      index: 'id',
+      selections: [
+        {
+          text: '全選',
+          select: () => {
+            this.selectedContracts.set([...this.filteredContracts()]);
+          }
+        },
+        {
+          text: '取消全選',
+          select: () => {
+            this.selectedContracts.set([]);
+          }
+        },
+        {
+          text: '反選',
+          select: () => {
+            const current = this.selectedContracts();
+            const filtered = this.filteredContracts();
+            const newSelection = filtered.filter(c => !current.some(s => s.id === c.id));
+            this.selectedContracts.set(newSelection);
+          }
+        }
+      ]
+    },
     { 
       title: '合約編號', 
       index: 'contractNumber', 
@@ -507,5 +614,150 @@ export class ContractListComponent implements OnInit {
     } catch (error) {
       this.message.error('刪除合約失敗');
     }
+  }
+
+  // ==================== BULK OPERATIONS ====================
+
+  /**
+   * Clear all selected contracts
+   */
+  clearSelection(): void {
+    this.selectedContracts.set([]);
+  }
+
+  /**
+   * Bulk delete selected contracts (only drafts)
+   */
+  async bulkDelete(): Promise<void> {
+    const deletable = this.deletableSelected();
+    
+    if (deletable.length === 0) {
+      this.message.warning('沒有可刪除的合約（只能刪除草稿狀態）');
+      return;
+    }
+
+    // Confirm dialog
+    const confirmed = await new Promise<boolean>(resolve => {
+      const modal = this.message.create('warning', {
+        nzContent: `確認要刪除 ${deletable.length} 筆草稿合約嗎？此操作無法復原。`,
+        nzDuration: 0
+      });
+
+      // Using nz-modal would be better, but for simplicity:
+      setTimeout(() => {
+        const confirmBtn = confirm(`確認要刪除 ${deletable.length} 筆草稿合約嗎？此操作無法復原。`);
+        modal.close();
+        resolve(confirmBtn);
+      }, 100);
+    });
+
+    if (!confirmed) return;
+
+    this.bulkOperationInProgress.set(true);
+
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+
+      // Delete contracts sequentially with progress
+      for (let i = 0; i < deletable.length; i++) {
+        try {
+          await this.contractFacade.deleteContract(deletable[i].id);
+          successCount++;
+          
+          // Show progress
+          this.message.info(`刪除進度: ${i + 1}/${deletable.length}`, { nzDuration: 1000 });
+        } catch {
+          errorCount++;
+        }
+      }
+
+      // Show final result
+      if (errorCount === 0) {
+        this.message.success(`成功刪除 ${successCount} 筆合約`);
+      } else {
+        this.message.warning(`刪除完成：成功 ${successCount} 筆，失敗 ${errorCount} 筆`);
+      }
+
+      // Clear selection
+      this.clearSelection();
+    } catch (error) {
+      this.message.error('批次刪除失敗');
+    } finally {
+      this.bulkOperationInProgress.set(false);
+    }
+  }
+
+  /**
+   * Bulk export selected contracts to CSV
+   */
+  async bulkExport(): Promise<void> {
+    const selected = this.selectedContracts();
+    
+    if (selected.length === 0) {
+      this.message.warning('請先選擇要匯出的合約');
+      return;
+    }
+
+    this.bulkOperationInProgress.set(true);
+
+    try {
+      // Prepare CSV data
+      const headers = [
+        '合約編號',
+        '合約標題',
+        '狀態',
+        '業主',
+        '承包商',
+        '合約金額',
+        '簽約日期',
+        '開始日期',
+        '結束日期'
+      ];
+
+      const rows = selected.map(c => [
+        c.contractNumber,
+        c.title,
+        this.getStatusLabel(c.status),
+        c.owner.name,
+        c.contractor.name,
+        c.totalAmount.toString(),
+        c.signingDate,
+        c.startDate || '',
+        c.endDate || ''
+      ]);
+
+      // Create CSV content
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n');
+
+      // Create blob and download
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `contracts_export_${Date.now()}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      this.message.success(`已匯出 ${selected.length} 筆合約`);
+    } catch (error) {
+      this.message.error('匯出合約失敗');
+    } finally {
+      this.bulkOperationInProgress.set(false);
+    }
+  }
+
+  /**
+   * Get status label for export
+   */
+  private getStatusLabel(status: ContractStatus): string {
+    const option = this.statusOptions.find(opt => opt.value === status);
+    return option?.label || status;
   }
 }
