@@ -80,11 +80,29 @@ export const createParseDraft = onCall<CreateParseDraftRequest>(
       // Normalize OCR data
       const normalizedData = normalizeContractData(draft.ocrResult.parsedData);
 
+      const now = Timestamp.now();
+
       // Update draft
       await draftRef.update({
         status: 'draft',
         normalizedData,
-        updatedAt: Timestamp.now()
+        updatedAt: now
+      });
+
+      // Add history entry for normalization
+      await draftRef.collection('history').add({
+        action: 'normalized',
+        previousStatus: draft.status,
+        newStatus: 'draft',
+        performedBy: auth.uid,
+        performedAt: now,
+        details: {
+          hasContractNumber: !!normalizedData.contractNumber,
+          hasOwner: !!normalizedData.owner,
+          hasContractor: !!normalizedData.contractor,
+          workItemCount: normalizedData.workItems?.length || 0,
+          totalAmount: normalizedData.totalAmount || 0
+        }
       });
 
       logger.info('[createParseDraft]', 'Normalized draft created', { draftId, status: 'draft' });

@@ -77,6 +77,21 @@ export const processContractUpload = onCall<ProcessContractUploadRequest>(
 
       await draftRef.set(draft);
 
+      // Add history entry for initial upload
+      await draftRef.collection('history').add({
+        action: 'uploaded',
+        previousStatus: null,
+        newStatus: 'uploaded',
+        performedBy: requestedBy || auth.uid,
+        performedAt: now,
+        details: {
+          fileName: fileName || 'unknown',
+          fileType: fileType || 'application/pdf',
+          fileSize: fileSize || 0,
+          filePath
+        }
+      });
+
       logger.info('[processContractUpload]', 'Draft created', { draftId, status: 'uploaded' });
 
       // Trigger OCR parsing asynchronously
@@ -116,6 +131,16 @@ async function triggerOcrParsing(blueprintId: string, draftId: string, fileUrl: 
       updatedAt: Timestamp.now()
     });
 
+    // Add history entry for parsing start
+    await draftRef.collection('history').add({
+      action: 'parsing_started',
+      previousStatus: 'uploaded',
+      newStatus: 'parsing',
+      performedBy: 'system',
+      performedAt: Timestamp.now(),
+      details: { fileUrl }
+    });
+
     logger.info('[triggerOcrParsing]', 'Starting OCR parsing', { draftId, fileUrl });
 
     // Fetch the file and convert to base64 data URI for OCR
@@ -142,6 +167,21 @@ async function triggerOcrParsing(blueprintId: string, draftId: string, fileUrl: 
       updatedAt: Timestamp.now()
     });
 
+    // Add history entry for parsing complete
+    await draftRef.collection('history').add({
+      action: 'parsing_completed',
+      previousStatus: 'parsing',
+      newStatus: 'parsed',
+      performedBy: 'system',
+      performedAt: Timestamp.now(),
+      details: {
+        processingTimeMs,
+        engine: ocrResult.engine,
+        confidence: ocrResult.confidence?.overall || 0,
+        hasWorkItems: (ocrResult.parsedData?.workItems?.length || 0) > 0
+      }
+    });
+
     logger.info('[triggerOcrParsing]', 'OCR parsing completed', {
       draftId,
       status: 'parsed',
@@ -151,11 +191,23 @@ async function triggerOcrParsing(blueprintId: string, draftId: string, fileUrl: 
   } catch (error) {
     logger.error('[triggerOcrParsing]', 'OCR parsing failed', error);
 
+    const errorMessage = error instanceof Error ? error.message : 'OCR parsing failed';
+
     // Update draft with error status
     await draftRef.update({
       status: 'error',
-      errorMessage: error instanceof Error ? error.message : 'OCR parsing failed',
+      errorMessage,
       updatedAt: Timestamp.now()
+    });
+
+    // Add history entry for parsing error
+    await draftRef.collection('history').add({
+      action: 'parsing_error',
+      previousStatus: 'parsing',
+      newStatus: 'error',
+      performedBy: 'system',
+      performedAt: Timestamp.now(),
+      details: { errorMessage }
     });
   }
 }

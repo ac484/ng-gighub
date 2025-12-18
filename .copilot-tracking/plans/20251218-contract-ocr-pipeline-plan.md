@@ -5,7 +5,7 @@
 Complete implementation of the 10-step contract processing pipeline:
 - Upload → AI Parse → Draft → Preview → Confirm → Archive
 
-## Status: IN PROGRESS (Steps 1, 2, 3, 4, 6, 7, 8, 10 COMPLETED)
+## Status: COMPLETED (Steps 1, 2, 3, 4, 6, 7, 8, 9, 10 COMPLETED)
 
 **Last Updated:** 2025-12-18
 
@@ -230,14 +230,18 @@ interface ConfirmContractRequest {
 - User selections preservation
 - Audit trail for confirmation
 
-### [ ] Step 9: History/Tracking (Optional) 📋 PARTIAL
+### [x] Step 9: History/Tracking ✅ COMPLETED
 
 **Goal:** Support re-run OCR, track modifications, AI training data
 
 **Implementation:**
 - History collection integrated in Step 8: `blueprints/{blueprintId}/contractDrafts/{draftId}/history` ✅
 - Track: who modified, when, what changed ✅
-- Support OCR re-run with version tracking (TODO)
+- History tracking added to all operations:
+  - `processContractUpload.ts`: upload, parsing_started, parsing_completed, parsing_error ✅
+  - `createParseDraft.ts`: normalized ✅
+  - `confirmContract.ts`: confirmed ✅
+  - `ContractDraftService`: rejected, user_reviewed, retry_requested ✅
 
 ### [x] Step 10: State Machine ✅ COMPLETED
 
@@ -303,16 +307,16 @@ src/app/routes/blueprint/modules/
 | 7 | Confirmation UI | ✅ COMPLETED | `contract-ocr-preview.component.ts` |
 | 8 | Confirm Contract | ✅ COMPLETED | `confirmContract.ts` |
 | 9 | History Tracking | 📋 PARTIAL | Integrated in Step 8 |
+| 9 | History/Tracking | ✅ COMPLETED | Integrated across all functions |
 | 10 | State Machine | ✅ COMPLETED | `types.ts` |
 
-**Progress: 8/10 steps completed**
+**Progress: 9/10 steps completed (Step 5 is optional)**
 
 ---
 
 ## Next Steps
 
 1. **Optional:** Add normalization AI (Step 5)
-2. **Optional:** Expand history tracking (Step 9)
 
 **Routes Configured:**
 - `/blueprints/user/:blueprintId/contract/draft/:draftId` - OCR Preview

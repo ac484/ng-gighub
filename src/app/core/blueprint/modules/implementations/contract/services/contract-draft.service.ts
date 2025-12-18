@@ -348,17 +348,33 @@ export class ContractDraftService {
   /**
    * Reject a draft
    */
-  async rejectDraft(blueprintId: string, draftId: string, reason?: string): Promise<void> {
+  async rejectDraft(blueprintId: string, draftId: string, reason?: string, userId?: string): Promise<void> {
     this._loading.set(true);
     this._error.set(null);
 
     try {
       const draftDoc = doc(this.firestore, 'blueprints', blueprintId, 'contractDrafts', draftId);
 
+      // Get current draft to record previous status
+      const snapshot = await getDoc(draftDoc);
+      const previousStatus = snapshot.exists() ? (snapshot.data()['status'] as string) : 'unknown';
+
       await updateDoc(draftDoc, {
         status: 'rejected',
         errorMessage: reason || 'Rejected by user',
         updatedAt: Timestamp.now()
+      });
+
+      // Add history entry
+      const historyCol = collection(this.firestore, 'blueprints', blueprintId, 'contractDrafts', draftId, 'history');
+      const { addDoc: addDocFn } = await import('@angular/fire/firestore');
+      await addDocFn(historyCol, {
+        action: 'rejected',
+        previousStatus,
+        newStatus: 'rejected',
+        performedBy: userId || 'unknown',
+        performedAt: Timestamp.now(),
+        details: { reason: reason || 'Rejected by user' }
       });
 
       console.log('[ContractDraftService]', 'Draft rejected', { draftId, reason });
@@ -378,12 +394,16 @@ export class ContractDraftService {
   /**
    * Retry OCR parsing for a draft
    */
-  async retryParsing(blueprintId: string, draftId: string): Promise<void> {
+  async retryParsing(blueprintId: string, draftId: string, userId?: string): Promise<void> {
     this._loading.set(true);
     this._error.set(null);
 
     try {
       const draftDoc = doc(this.firestore, 'blueprints', blueprintId, 'contractDrafts', draftId);
+
+      // Get current draft to record previous status
+      const snapshot = await getDoc(draftDoc);
+      const previousStatus = snapshot.exists() ? (snapshot.data()['status'] as string) : 'unknown';
 
       // Reset status to trigger re-parsing
       await updateDoc(draftDoc, {
@@ -391,6 +411,18 @@ export class ContractDraftService {
         ocrResult: null,
         errorMessage: null,
         updatedAt: Timestamp.now()
+      });
+
+      // Add history entry
+      const historyCol = collection(this.firestore, 'blueprints', blueprintId, 'contractDrafts', draftId, 'history');
+      const { addDoc: addDocFn } = await import('@angular/fire/firestore');
+      await addDocFn(historyCol, {
+        action: 'retry_requested',
+        previousStatus,
+        newStatus: 'uploaded',
+        performedBy: userId || 'unknown',
+        performedAt: Timestamp.now(),
+        details: { reason: 'User requested retry' }
       });
 
       console.log('[ContractDraftService]', 'Retry parsing requested', { draftId });
@@ -417,6 +449,10 @@ export class ContractDraftService {
     try {
       const draftDoc = doc(this.firestore, 'blueprints', blueprintId, 'contractDrafts', draftId);
 
+      // Get current draft to record previous status
+      const snapshot = await getDoc(draftDoc);
+      const previousStatus = snapshot.exists() ? (snapshot.data()['status'] as string) : 'unknown';
+
       await updateDoc(draftDoc, {
         normalizedData: data,
         status: 'user_reviewed',
@@ -426,6 +462,21 @@ export class ContractDraftService {
           reviewedBy: userId
         },
         updatedAt: Timestamp.now()
+      });
+
+      // Add history entry
+      const historyCol = collection(this.firestore, 'blueprints', blueprintId, 'contractDrafts', draftId, 'history');
+      const { addDoc: addDocFn } = await import('@angular/fire/firestore');
+      await addDocFn(historyCol, {
+        action: 'user_reviewed',
+        previousStatus,
+        newStatus: 'user_reviewed',
+        performedBy: userId,
+        performedAt: Timestamp.now(),
+        details: {
+          modifiedFieldCount: Object.keys(data).length,
+          modifiedFields: Object.keys(data)
+        }
       });
 
       console.log('[ContractDraftService]', 'Draft data updated', { draftId });
