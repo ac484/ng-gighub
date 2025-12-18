@@ -5,9 +5,11 @@
 Complete implementation of the 10-step contract processing pipeline:
 - Upload → AI Parse → Draft → Preview → Confirm → Archive
 
-## Status: IN PROGRESS
+## Status: IN PROGRESS (Steps 1, 2, 4, 8, 10 COMPLETED)
 
-### Step 1: Frontend Upload to Firebase Storage ✅ FIXED
+**Last Updated:** 2025-12-18
+
+### Step 1: Frontend Upload to Firebase Storage ✅ COMPLETED
 
 **Problem:** Path mismatch between `contract-upload.service.ts` and `storage.rules`
 - Service uses: `contracts/{blueprintId}/{contractId}/original/{fileId}-{filename}`
@@ -22,21 +24,27 @@ Complete implementation of the 10-step contract processing pipeline:
 
 ## Implementation Checklist
 
-### [ ] Step 1: Frontend Upload to Firebase Storage ✅
+### [x] Step 1: Frontend Upload to Firebase Storage ✅ COMPLETED
 
 - [x] Fix storage.rules path mismatch
 - [x] Contract upload service path: `contracts/{blueprintId}/{contractId}/original/{fileId}-{filename}`
 - [x] Storage rules now allow `contracts/{blueprintId}/**`
 
-### [ ] Step 2: functions-integration - Receive fileUrl/filePath
+### [x] Step 2: functions-integration - Receive fileUrl/filePath ✅ COMPLETED
 
 **Goal:** Create processing task/draft, set status: uploaded → parsed, call functions-ai
 
 **Implementation:**
-- File: `functions-integration/src/contract/processContractUpload.ts`
-- Create Firestore draft document with status `uploaded`
-- Call functions-ai for OCR
-- Update status to `parsed` on success
+- File: `functions-integration/src/contract/processContractUpload.ts` ✅
+- Create Firestore draft document with status `uploaded` ✅
+- Call functions-ai for OCR (placeholder, needs Step 3 integration) ⚠️
+- Update status to `parsed` on success ✅
+
+**Files Created:**
+- `functions-integration/src/contract/processContractUpload.ts`
+- `functions-integration/src/contract/types.ts`
+- `functions-integration/src/contract/index.ts`
+- `functions-integration/src/index.ts`
 
 **API:**
 ```typescript
@@ -45,81 +53,88 @@ interface ProcessContractUploadRequest {
   contractId: string;
   fileUrl: string;
   filePath: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
   requestedBy: string;
 }
 
 interface ProcessContractUploadResponse {
   success: boolean;
   draftId: string;
-  status: 'uploaded' | 'parsed' | 'error';
+  status: ContractDraftStatus;
   error?: string;
 }
 ```
 
-### [ ] Step 3: functions-ai - OCR Parsing
+### [ ] Step 3: functions-ai - OCR Parsing ⚠️ NEEDS INTEGRATION
 
 **Goal:** Perform OCR, produce structured JSON, don't store directly
 
-**Implementation:**
-- File: `functions-ai/src/contract/parseContract.ts` (existing, needs review)
-- Use Google Cloud Vision API or Gemini for OCR
-- Return structured JSON with confidence scores
-- Don't write to Firestore directly
+**Current Status:**
+- File exists: `functions-ai/src/contract/parseContract.ts`
+- Needs to be called from `processContractUpload.ts`
+- Currently using placeholder OCR result
+
+**TODO:**
+- [ ] Review existing `parseContract.ts` implementation
+- [ ] Integrate actual call from `processContractUpload.ts`
+- [ ] Remove placeholder data
 
 **API:**
 ```typescript
-interface OcrParseResponse {
+interface OcrParseResult {
   success: boolean;
-  parsedData: {
-    contractNo?: string;
-    partyA?: string;
-    partyB?: string;
-    totalAmount?: number;
-    startDate?: string;
-    endDate?: string;
-    workItems?: WorkItemDraft[];
-    // ... other fields
-  };
-  confidence: {
-    overall: number;
-    fields: Record<string, number>;
-  };
+  parsedAt: Timestamp;
+  engine: 'gemini' | 'vision' | 'manual';
+  parsedData: ParsedContractData;
+  confidence: ConfidenceScores;
   rawText?: string;
+  processingTimeMs?: number;
 }
 ```
 
-### [ ] Step 4: functions-integration - Create Parse Draft
+### [x] Step 4: functions-integration - Create Parse Draft ✅ COMPLETED
 
 **Goal:** Create parse draft, store OCR result, set status: draft, return draftId
 
 **Implementation:**
-- File: `functions-integration/src/contract/createParseDraft.ts`
-- Store in Firestore: `blueprints/{blueprintId}/contractDrafts/{draftId}`
-- Include original OCR result
-- Set status to `draft`
+- File: `functions-integration/src/contract/createParseDraft.ts` ✅
+- Store in Firestore: `blueprints/{blueprintId}/contractDrafts/{draftId}` ✅
+- Normalize OCR data with helper functions ✅
+- Set status to `draft` ✅
 
-**Draft Schema:**
+**Files Created:**
+- `functions-integration/src/contract/createParseDraft.ts`
+
+**Draft Schema:** (implemented in `types.ts`)
 ```typescript
 interface ContractDraft {
   id: string;
   blueprintId: string;
-  contractId: string;
-  status: 'uploaded' | 'parsed' | 'draft' | 'user_reviewed' | 'confirmed' | 'archived';
+  contractId?: string;
+  status: ContractDraftStatus;
   originalFile: {
     url: string;
     path: string;
+    fileName: string;
+    fileType: string;
+    fileSize: number;
     uploadedAt: Timestamp;
     uploadedBy: string;
   };
-  ocrResult: OcrParseResponse;
+  ocrResult?: OcrParseResult;
   normalizedData?: NormalizedContractData;
   userSelections?: UserSelections;
+  confirmedContractId?: string;
+  errorMessage?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  createdBy: string;
 }
 ```
 
-### [ ] Step 5: functions-ai - Normalization (Optional)
+### [ ] Step 5: functions-ai - Normalization (Optional) 📋 PLANNED
 
 **Goal:** Second-pass AI for field normalization, generate candidate values
 
@@ -129,7 +144,9 @@ interface ContractDraft {
 - Don't modify original text
 - Return suitable structure for frontend selection
 
-### [ ] Step 6: Frontend Preview Page
+**Status:** Optional enhancement for later implementation
+
+### [ ] Step 6: Frontend Preview Page 📋 PLANNED
 
 **Goal:** Display OCR + normalized result, let user select/modify fields
 
@@ -147,60 +164,72 @@ interface ContractDraft {
 - Preview/Original toggle
 - Save as draft / Confirm buttons
 
-### [ ] Step 7: User Confirmation Submission
+### [ ] Step 7: User Confirmation Submission 📋 PLANNED
 
 **Goal:** Submit user-selected fields to create official contract
 
 **Payload:**
 ```typescript
-interface ConfirmContractPayload {
+interface ConfirmContractRequest {
+  blueprintId: string;
   draftId: string;
-  selectedFields: {
-    contractNo?: string;
-    partyA?: string;
-    partyB?: string;
-    totalAmount?: number;
-    // ... only selected fields
-  };
+  selectedFields: Partial<NormalizedContractData>;
   confirmedBy: string;
 }
 ```
 
-### [ ] Step 8: Create Official Contract
+### [x] Step 8: Create Official Contract ✅ COMPLETED
 
 **Goal:** Validate draft status, create official contract, update draft status
 
 **Implementation:**
-- File: `functions-integration/src/contract/confirmContract.ts`
-- Validate draft status is `draft` or `user_reviewed`
-- Create official contract in `blueprints/{blueprintId}/contracts/{contractId}`
-- Update draft status to `confirmed`
-- Preserve: original OCR, draft, user selections
+- File: `functions-integration/src/contract/confirmContract.ts` ✅
+- Validate draft status is `draft`, `user_reviewed`, or `parsed` ✅
+- Create official contract in `blueprints/{blueprintId}/contracts/{contractId}` ✅
+- Update draft status to `confirmed` ✅
+- Preserve: original OCR, draft, user selections ✅
+- Add history tracking ✅
 
-### [ ] Step 9: History/Tracking (Optional)
+**Files Created:**
+- `functions-integration/src/contract/confirmContract.ts`
+
+**Features Implemented:**
+- Status validation with `isValidStatusTransition()`
+- Transaction-based contract creation
+- History tracking in sub-collection
+- User selections preservation
+- Audit trail for confirmation
+
+### [ ] Step 9: History/Tracking (Optional) 📋 PARTIAL
 
 **Goal:** Support re-run OCR, track modifications, AI training data
 
 **Implementation:**
-- Add history collection: `blueprints/{blueprintId}/contractDrafts/{draftId}/history`
-- Track: who modified, when, what changed
-- Support OCR re-run with version tracking
+- History collection integrated in Step 8: `blueprints/{blueprintId}/contractDrafts/{draftId}/history` ✅
+- Track: who modified, when, what changed ✅
+- Support OCR re-run with version tracking (TODO)
 
-### [ ] Step 10: State Machine
+### [x] Step 10: State Machine ✅ COMPLETED
 
 **Goal:** Implement complete status transitions
 
-**States:**
+**States Implemented:** (in `types.ts`)
 ```
-uploaded → parsed → draft → user_reviewed → confirmed → archived
-                       ↓
-                    rejected → uploaded (re-upload)
+uploaded → parsing → parsed → draft → user_reviewed → confirmed → archived
+                                 ↓
+                              rejected → uploaded (re-upload)
+                                 ↓
+                              error → uploaded | archived
 ```
 
 **Implementation:**
-- Add status validation in all functions
-- Add status transition logging
-- Implement archived status for completed contracts
+- Status types defined in `types.ts` ✅
+- `VALID_STATUS_TRANSITIONS` constant ✅
+- `isValidStatusTransition()` helper function ✅
+- Status validation in all functions ✅
+
+**Files Modified:**
+- `functions-integration/src/contract/types.ts`
 
 ---
 
@@ -208,27 +237,55 @@ uploaded → parsed → draft → user_reviewed → confirmed → archived
 
 ```
 functions-integration/src/contract/
-├── processContractUpload.ts    # Step 2
-├── createParseDraft.ts         # Step 4
-├── confirmContract.ts          # Step 8
-├── index.ts                    # Export all functions
+├── processContractUpload.ts    # Step 2 ✅
+├── createParseDraft.ts         # Step 4 ✅
+├── confirmContract.ts          # Step 8 ✅
+├── types.ts                    # Type definitions ✅
+├── index.ts                    # Export all functions ✅
 
 functions-ai/src/contract/
-├── parseContract.ts            # Step 3 (existing)
-├── normalizeContract.ts        # Step 5
+├── parseContract.ts            # Step 3 (existing, needs integration)
+├── normalizeContract.ts        # Step 5 (planned)
 
 src/app/routes/blueprint/modules/contract/
-├── contract-ocr-preview.component.ts    # Step 6
+├── contract-ocr-preview.component.ts    # Step 6 (planned)
 ├── contract-ocr-preview.component.html
 ├── contract-ocr-preview.component.scss
 
 src/app/core/blueprint/modules/implementations/contract/
 ├── services/
-│   ├── contract-ocr-workflow.service.ts  # Orchestration
-│   ├── contract-draft.service.ts         # Draft management
+│   ├── contract-ocr-workflow.service.ts  # Orchestration (planned)
+│   ├── contract-draft.service.ts         # Draft management (planned)
 ├── models/
-│   ├── contract-draft.model.ts           # Draft interfaces
+│   ├── contract-draft.model.ts           # Draft interfaces (planned)
 ```
+
+---
+
+## Implementation Summary
+
+| Step | Description | Status | Files |
+|------|-------------|--------|-------|
+| 1 | Storage Rules Fix | ✅ COMPLETED | `storage.rules` |
+| 2 | Process Upload | ✅ COMPLETED | `processContractUpload.ts`, `types.ts` |
+| 3 | OCR Parsing | ⚠️ NEEDS INTEGRATION | `parseContract.ts` |
+| 4 | Create Parse Draft | ✅ COMPLETED | `createParseDraft.ts` |
+| 5 | Normalization | 📋 PLANNED | - |
+| 6 | Preview Page | 📋 PLANNED | - |
+| 7 | Confirmation UI | 📋 PLANNED | - |
+| 8 | Confirm Contract | ✅ COMPLETED | `confirmContract.ts` |
+| 9 | History Tracking | 📋 PARTIAL | Integrated in Step 8 |
+| 10 | State Machine | ✅ COMPLETED | `types.ts` |
+
+---
+
+## Next Steps
+
+1. **Priority 1:** Integrate actual OCR call from `processContractUpload.ts` to `functions-ai`
+2. **Priority 2:** Create frontend preview component (Step 6)
+3. **Priority 3:** Create confirmation submission flow (Step 7)
+4. **Optional:** Add normalization AI (Step 5)
+5. **Optional:** Expand history tracking (Step 9)
 
 ---
 
