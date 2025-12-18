@@ -11,8 +11,8 @@
  */
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal, computed, effect, ViewContainerRef } from '@angular/core';
-import type { Contract, ContractStatus, ContractStatistics } from '@core/blueprint/modules/implementations/contract/models';
 import { ContractFacade } from '@core/blueprint/modules/implementations/contract/facades';
+import type { Contract, ContractStatus, ContractStatistics } from '@core/blueprint/modules/implementations/contract/models';
 import { STColumn, STChange } from '@delon/abc/st';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS } from '@shared';

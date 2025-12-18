@@ -61,15 +61,15 @@ export interface ConfirmContractResponse {
  * Contract draft status
  */
 export type ContractDraftStatus =
-  | 'uploaded'    // File uploaded, awaiting OCR
-  | 'parsing'     // OCR in progress
-  | 'parsed'      // OCR completed
-  | 'draft'       // Draft created with normalized data
+  | 'uploaded' // File uploaded, awaiting OCR
+  | 'parsing' // OCR in progress
+  | 'parsed' // OCR completed
+  | 'draft' // Draft created with normalized data
   | 'user_reviewed' // User has reviewed the draft
-  | 'confirmed'   // Contract confirmed and created
-  | 'rejected'    // Draft rejected
-  | 'archived'    // Archived after confirmation
-  | 'error';      // Error occurred
+  | 'confirmed' // Contract confirmed and created
+  | 'rejected' // Draft rejected
+  | 'archived' // Archived after confirmation
+  | 'error'; // Error occurred
 
 /**
  * Contract draft document stored in Firestore

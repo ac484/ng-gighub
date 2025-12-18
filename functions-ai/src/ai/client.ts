@@ -4,8 +4,8 @@
  */
 
 import { GoogleGenAI } from '@google/genai';
-import { HttpsError } from 'firebase-functions/v2/https';
 import * as logger from 'firebase-functions/logger';
+import { HttpsError } from 'firebase-functions/v2/https';
 
 /**
  * Get the GenAI client instance
@@ -19,10 +19,7 @@ export function getGenAIClient(): GoogleGenAI {
 
   if (!apiKey) {
     logger.error('GEMINI_API_KEY environment variable is not set');
-    throw new HttpsError(
-      'failed-precondition',
-      'GEMINI_API_KEY is not configured. Please set it in Firebase Functions config.'
-    );
+    throw new HttpsError('failed-precondition', 'GEMINI_API_KEY is not configured. Please set it in Firebase Functions config.');
   }
 
   return new GoogleGenAI({ apiKey });
@@ -51,10 +48,10 @@ export const DEFAULT_VISION_MODEL = 'gemini-2.0-flash-exp';
  * - Higher max tokens for comprehensive contract analysis
  */
 export const DEFAULT_GENERATION_CONFIG = {
-  temperature: 0.2,  // Lower for more consistent parsing
+  temperature: 0.2, // Lower for more consistent parsing
   topP: 0.9,
   topK: 40,
-  maxOutputTokens: 8192  // Support long contracts
+  maxOutputTokens: 8192 // Support long contracts
 };
 
 /**

@@ -11,9 +11,7 @@ import { SHARED_IMPORTS } from '@shared';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SHARED_IMPORTS],
-  template: `
-    <nz-empty nzNotFoundContent="材料模組已清除" />
-  `,
+  template: ` <nz-empty nzNotFoundContent="材料模組已清除" /> `,
   styles: []
 })
 export class MaterialModuleViewComponent {

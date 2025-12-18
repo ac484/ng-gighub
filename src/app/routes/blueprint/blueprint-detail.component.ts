@@ -268,10 +268,7 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
           <nz-tab nzTitle="任務">
             <ng-template nz-tab>
               @if (blueprint()?.id) {
-                <app-tasks 
-                  [blueprintId]="blueprint()!.id"
-                  [blueprintOwnerType]="blueprint()!.ownerType"
-                />
+                <app-tasks [blueprintId]="blueprint()!.id" [blueprintOwnerType]="blueprint()!.ownerType" />
               }
             </ng-template>
           </nz-tab>
@@ -289,10 +286,7 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
           <nz-tab nzTitle="成員">
             <ng-template nz-tab>
               @if (blueprint()?.id) {
-                <app-blueprint-members 
-                  [blueprintId]="blueprint()!.id" 
-                  [blueprintOwnerType]="blueprint()!.ownerType" 
-                />
+                <app-blueprint-members [blueprintId]="blueprint()!.id" [blueprintOwnerType]="blueprint()!.ownerType" />
               }
             </ng-template>
           </nz-tab>

@@ -25,13 +25,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import type { Signal } from '@angular/core';
 import { LoggerService } from '@core';
 
-import type {
-  Contract,
-  ContractFilters,
-  ContractStatus,
-  CreateContractDto,
-  UpdateContractDto
-} from '../models';
+import type { Contract, ContractFilters, ContractStatus, CreateContractDto, UpdateContractDto } from '../models';
 
 /**
  * Contract Store State Interface
@@ -178,9 +172,7 @@ export class ContractStore {
    */
   readonly hasActiveFilters = computed<boolean>(() => {
     const filters = this._filters();
-    return !!(
-      filters.status && filters.status.length > 0
-    );
+    return !!(filters.status && filters.status.length > 0);
   });
 
   /**
@@ -246,9 +238,7 @@ export class ContractStore {
    */
   updateContract(contractId: string, updates: Partial<Contract>): void {
     this.logger.debug('[ContractStore]', 'updateContract', { contractId, updates });
-    this._contracts.update(current =>
-      current.map(c => (c.id === contractId ? { ...c, ...updates } : c))
-    );
+    this._contracts.update(current => current.map(c => (c.id === contractId ? { ...c, ...updates } : c)));
   }
 
   /**

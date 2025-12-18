@@ -13,16 +13,11 @@
  * @date 2025-12-18
  */
 
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { onCall, HttpsError } from 'firebase-functions/https';
 import * as logger from 'firebase-functions/logger';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
-import type {
-  ConfirmContractRequest,
-  ConfirmContractResponse,
-  ContractDraft,
-  ContractDraftStatus,
-  UserSelections
-} from './types';
+
+import type { ConfirmContractRequest, ConfirmContractResponse, ContractDraft, ContractDraftStatus, UserSelections } from './types';
 import { isValidStatusTransition } from './types';
 
 const db = getFirestore();

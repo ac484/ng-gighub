@@ -12,16 +12,11 @@
  * @date 2025-12-18
  */
 
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { onCall, HttpsError } from 'firebase-functions/https';
 import * as logger from 'firebase-functions/logger';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
-import type {
-  ContractDraft,
-  NormalizedContractData,
-  NormalizedWorkItem,
-  ParsedContractData,
-  ParsedWorkItem
-} from './types';
+
+import type { ContractDraft, NormalizedContractData, NormalizedWorkItem, ParsedContractData, ParsedWorkItem } from './types';
 import { isValidStatusTransition } from './types';
 
 const db = getFirestore();
@@ -105,10 +100,7 @@ export const createParseDraft = onCall<CreateParseDraftRequest>(
         throw error;
       }
 
-      throw new HttpsError(
-        'internal',
-        `Failed to create normalized draft: ${error instanceof Error ? error.message : 'Unknown error'}`
-      );
+      throw new HttpsError('internal', `Failed to create normalized draft: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 );

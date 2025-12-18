@@ -11,14 +11,9 @@ import { TestBed } from '@angular/core/testing';
 import { Firestore, collection, doc, addDoc, getDoc, updateDoc, Timestamp } from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 
-import type {
-  Contract,
-  ContractParsedData,
-  ContractParsingRequest,
-  FileAttachment
-} from '../models';
-import type { ContractParsingRequestDto, ContractParsingConfirmationDto } from '../models/dtos';
+import type { Contract, ContractParsedData, ContractParsingRequest, FileAttachment } from '../models';
 import { ContractParsingService, type ParsingResult } from './contract-parsing.service';
+import type { ContractParsingRequestDto, ContractParsingConfirmationDto } from '../models/dtos';
 import { ContractRepository } from '../repositories/contract.repository';
 
 describe('ContractParsingService', () => {
@@ -129,15 +124,12 @@ describe('ContractParsingService', () => {
   beforeEach(() => {
     // Create mock Firestore
     mockFirestore = jasmine.createSpyObj('Firestore', []);
-    
+
     // Create mock Functions
     mockFunctions = jasmine.createSpyObj('Functions', []);
-    
+
     // Create mock ContractRepository
-    mockContractRepository = jasmine.createSpyObj('ContractRepository', [
-      'findByIdOnce',
-      'update'
-    ]);
+    mockContractRepository = jasmine.createSpyObj('ContractRepository', ['findByIdOnce', 'update']);
 
     TestBed.configureTestingModule({
       providers: [
@@ -173,9 +165,7 @@ describe('ContractParsingService', () => {
     beforeEach(() => {
       // Mock Firestore collection and addDoc
       mockCollectionFn = jasmine.createSpy('collection');
-      mockAddDocFn = jasmine.createSpy('addDoc').and.returnValue(
-        Promise.resolve({ id: requestId } as any)
-      );
+      mockAddDocFn = jasmine.createSpy('addDoc').and.returnValue(Promise.resolve({ id: requestId } as any));
 
       // Mock global functions
       (globalThis as any).collection = mockCollectionFn;
@@ -405,9 +395,7 @@ describe('ContractParsingService', () => {
 
       // Mock successful operation
       const mockCollectionFn = jasmine.createSpy('collection');
-      const mockAddDocFn = jasmine.createSpy('addDoc').and.returnValue(
-        Promise.resolve({ id: requestId } as any)
-      );
+      const mockAddDocFn = jasmine.createSpy('addDoc').and.returnValue(Promise.resolve({ id: requestId } as any));
       (globalThis as any).collection = mockCollectionFn;
       (globalThis as any).addDoc = mockAddDocFn;
 
@@ -427,9 +415,7 @@ describe('ContractParsingService', () => {
       };
 
       const errorMessage = 'Test error';
-      const mockAddDocFn = jasmine.createSpy('addDoc').and.returnValue(
-        Promise.reject(new Error(errorMessage))
-      );
+      const mockAddDocFn = jasmine.createSpy('addDoc').and.returnValue(Promise.reject(new Error(errorMessage)));
       (globalThis as any).addDoc = mockAddDocFn;
 
       try {
@@ -446,7 +432,7 @@ describe('ContractParsingService', () => {
     it('should call parseContract function with correct parameters', async () => {
       // This test verifies the integration pattern
       // Actual implementation depends on httpsCallable usage
-      
+
       const mockCallable = jasmine.createSpy('httpsCallable').and.returnValue(
         jasmine.createSpy('call').and.returnValue(
           Promise.resolve({
