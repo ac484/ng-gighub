@@ -142,8 +142,8 @@ async function triggerOcrParsing(blueprintId: string, draftId: string, fileUrl: 
       updatedAt: Timestamp.now()
     });
 
-    logger.info('[triggerOcrParsing]', 'OCR parsing completed', { 
-      draftId, 
+    logger.info('[triggerOcrParsing]', 'OCR parsing completed', {
+      draftId,
       status: 'parsed',
       processingTimeMs,
       hasData: !!ocrResult.parsedData
@@ -185,11 +185,7 @@ async function fetchFileAsDataUri(fileUrl: string): Promise<string | null> {
  * Call the parseContract function from functions-ai
  * This simulates the AI parsing with structured output
  */
-async function callParseContractFunction(
-  blueprintId: string, 
-  draftId: string, 
-  fileDataUri: string
-): Promise<OcrParseResult> {
+async function callParseContractFunction(blueprintId: string, draftId: string, fileDataUri: string): Promise<OcrParseResult> {
   try {
     // In production, this would call the actual functions-ai endpoint
     // For now, we'll create a structured OCR result
@@ -197,10 +193,10 @@ async function callParseContractFunction(
     // const functionsAiUrl = process.env.FUNCTIONS_AI_URL || 'https://asia-east1-{project}.cloudfunctions.net/contract-parseContract';
     // const response = await fetch(functionsAiUrl, { method: 'POST', body: JSON.stringify({ fileDataUri, blueprintId }) });
 
-    logger.info('[callParseContractFunction]', 'Processing contract OCR', { 
-      blueprintId, 
+    logger.info('[callParseContractFunction]', 'Processing contract OCR', {
+      blueprintId,
       draftId,
-      fileDataUriLength: fileDataUri.length 
+      fileDataUriLength: fileDataUri.length
     });
 
     // Extract MIME type from data URI

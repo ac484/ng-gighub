@@ -13,11 +13,10 @@
  * @date 2025-12-18
  */
 
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Firestore, collection, doc, getDoc, updateDoc, onSnapshot, Timestamp, query, where, orderBy } from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DestroyRef } from '@angular/core';
 import { Subject } from 'rxjs';
 
 /**
@@ -456,7 +455,7 @@ export class ContractDraftService {
    * Convert Firestore document data to ContractDraft
    */
   private convertToDraft(id: string, data: Record<string, unknown>): ContractDraft {
-    const originalFile = data['originalFile'] as Record<string, unknown> || {};
+    const originalFile = (data['originalFile'] as Record<string, unknown>) || {};
     const ocrResult = data['ocrResult'] as Record<string, unknown> | undefined;
     const userSelections = data['userSelections'] as Record<string, unknown> | undefined;
 
@@ -466,13 +465,13 @@ export class ContractDraftService {
       contractId: data['contractId'] as string | undefined,
       status: data['status'] as ContractDraftStatus,
       originalFile: {
-        url: originalFile['url'] as string || '',
-        path: originalFile['path'] as string || '',
-        fileName: originalFile['fileName'] as string || '',
-        fileType: originalFile['fileType'] as string || 'application/pdf',
-        fileSize: originalFile['fileSize'] as number || 0,
+        url: (originalFile['url'] as string) || '',
+        path: (originalFile['path'] as string) || '',
+        fileName: (originalFile['fileName'] as string) || '',
+        fileType: (originalFile['fileType'] as string) || 'application/pdf',
+        fileSize: (originalFile['fileSize'] as number) || 0,
         uploadedAt: this.toDate(originalFile['uploadedAt']),
-        uploadedBy: originalFile['uploadedBy'] as string || ''
+        uploadedBy: (originalFile['uploadedBy'] as string) || ''
       },
       ocrResult: ocrResult
         ? {
@@ -488,10 +487,10 @@ export class ContractDraftService {
       normalizedData: data['normalizedData'] as ParsedContractData | undefined,
       userSelections: userSelections
         ? {
-            selectedFields: userSelections['selectedFields'] as string[] || [],
-            modifiedFields: userSelections['modifiedFields'] as Record<string, unknown> || {},
+            selectedFields: (userSelections['selectedFields'] as string[]) || [],
+            modifiedFields: (userSelections['modifiedFields'] as Record<string, unknown>) || {},
             reviewedAt: this.toDate(userSelections['reviewedAt']),
-            reviewedBy: userSelections['reviewedBy'] as string || '',
+            reviewedBy: (userSelections['reviewedBy'] as string) || '',
             notes: userSelections['notes'] as string | undefined
           }
         : undefined,
@@ -499,7 +498,7 @@ export class ContractDraftService {
       errorMessage: data['errorMessage'] as string | undefined,
       createdAt: this.toDate(data['createdAt']),
       updatedAt: this.toDate(data['updatedAt']),
-      createdBy: data['createdBy'] as string || ''
+      createdBy: (data['createdBy'] as string) || ''
     };
   }
 
