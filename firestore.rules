@@ -194,6 +194,36 @@ service cloud.firestore {
         && after.status == 'archived';
     }
     
+    /**
+     * Validate contract data
+     * 
+     * Contract validation rules:
+     * - Must have title, contractNumber, owner, contractor
+     * - Must have valid status
+     * - Must have valid date ranges
+     * - totalAmount must be positive number
+     */
+    function isValidContractData(data) {
+      return data.title is string && data.title.size() >= 3
+        && data.contractNumber is string && data.contractNumber.matches('^CON-[0-9]+$')
+        && data.owner is map
+        && data.owner.id is string
+        && data.owner.name is string
+        && data.owner.type is string
+        && data.contractor is map
+        && data.contractor.id is string
+        && data.contractor.name is string
+        && data.contractor.type is string
+        && data.totalAmount is number && data.totalAmount >= 0
+        && data.currency is string && data.currency.size() == 3
+        && data.status in ['draft', 'pending_activation', 'active', 'completed', 'terminated']
+        && data.startDate is timestamp
+        && data.endDate is timestamp
+        && data.createdBy is string
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+    
     // ==========================================
     // Blueprints Collection Rules
     // ==========================================
@@ -290,6 +320,79 @@ service cloud.firestore {
       match /quality/{qualityId} {
         allow read: if canReadBlueprint(blueprintId);
         allow create, update, delete: if canEditBlueprint(blueprintId);
+      }
+      
+      // ==========================================
+      // Contracts Subcollection Rules
+      // ==========================================
+      
+      /**
+       * Contracts are stored as subcollections under blueprints
+       * Path: /blueprints/{blueprintId}/contracts/{contractId}
+       * 
+       * Access Control:
+       * - Read: Users with blueprint read permission
+       * - Create: Users with blueprint edit permission
+       * - Update: Users with blueprint edit permission OR contract creator
+       * - Delete: Blueprint owners and maintainers only
+       */
+      match /contracts/{contractId} {
+        // Allow read if user can read the blueprint
+        allow read: if canReadBlueprint(blueprintId);
+        
+        // Allow create if user can edit the blueprint
+        allow create: if canEditBlueprint(blueprintId)
+          && request.resource.data.blueprintId == blueprintId
+          && request.resource.data.createdBy == getCurrentAccountId()
+          && isValidContractData(request.resource.data);
+        
+        // Allow update if user can edit the blueprint OR is the contract creator
+        allow update: if (canEditBlueprint(blueprintId) 
+                         || resource.data.createdBy == getCurrentAccountId())
+          && request.resource.data.blueprintId == blueprintId
+          && isValidContractData(request.resource.data);
+        
+        // Allow delete only for blueprint owners and maintainers
+        allow delete: if isBlueprintOwner(blueprintId) 
+                      || hasMemberRole(blueprintId, ['maintainer']);
+        
+        /**
+         * Work Items Subcollection
+         * Path: /blueprints/{blueprintId}/contracts/{contractId}/workItems/{workItemId}
+         */
+        match /workItems/{workItemId} {
+          // Read access follows contract read permission
+          allow read: if canReadBlueprint(blueprintId);
+          
+          // Write access requires blueprint edit permission
+          allow create, update: if canEditBlueprint(blueprintId)
+            && request.resource.data.contractId == contractId;
+          
+          // Delete requires blueprint edit permission
+          allow delete: if canEditBlueprint(blueprintId);
+        }
+        
+        /**
+         * Parsing Requests Subcollection
+         * Path: /blueprints/{blueprintId}/contracts/{contractId}/parsingRequests/{requestId}
+         * 
+         * These are AI parsing request records for contract documents
+         */
+        match /parsingRequests/{requestId} {
+          // Read access follows contract read permission
+          allow read: if canReadBlueprint(blueprintId);
+          
+          // Create requires edit permission (triggering AI parsing)
+          allow create: if canEditBlueprint(blueprintId)
+            && request.resource.data.contractId == contractId
+            && request.resource.data.requestedBy == getCurrentAccountId();
+          
+          // Update for status changes (Cloud Functions can update via service account)
+          allow update: if canEditBlueprint(blueprintId);
+          
+          // Delete not allowed (maintain audit trail)
+          allow delete: if false;
+        }
       }
     }
     
