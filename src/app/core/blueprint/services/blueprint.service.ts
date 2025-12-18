@@ -79,8 +79,8 @@ export class BlueprintService {
         await this.memberRepository.addMember(blueprint.id, blueprint.ownerType, {
           accountId: request.createdBy,
           blueprintId: blueprint.id,
-          memberType: 'user' as any,  // Creator is always a user
-          accountName: undefined,  // Will be populated later if needed
+          memberType: 'user' as any, // Creator is always a user
+          accountName: undefined, // Will be populated later if needed
           role: BlueprintRole.MAINTAINER,
           isExternal: false,
           grantedBy: request.createdBy,
@@ -170,7 +170,7 @@ export class BlueprintService {
   }
 
   async addMember(
-    blueprintId: string, 
+    blueprintId: string,
     blueprintOwnerType: OwnerType,
     member: Omit<Parameters<BlueprintMemberRepository['addMember']>[2], 'id' | 'grantedAt'>
   ): Promise<void> {

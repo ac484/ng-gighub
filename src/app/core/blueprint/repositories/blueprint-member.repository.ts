@@ -54,25 +54,20 @@ export class BlueprintMemberRepository {
   /**
    * Find members by member type
    * 依成員類型查詢成員
-   * 
+   *
    * @param blueprintId - Blueprint ID
    * @param memberType - Member type to filter by
    */
   findByMemberType(blueprintId: string, memberType: BlueprintMemberType): Observable<BlueprintMember[]> {
-    const q = query(
-      this.getMembersCollectionRef(blueprintId),
-      where('memberType', '==', memberType)
-    );
-    
-    return from(getDocs(q)).pipe(
-      map(snapshot => snapshot.docs.map(docSnap => this.toMember(docSnap.data(), docSnap.id)))
-    );
+    const q = query(this.getMembersCollectionRef(blueprintId), where('memberType', '==', memberType));
+
+    return from(getDocs(q)).pipe(map(snapshot => snapshot.docs.map(docSnap => this.toMember(docSnap.data(), docSnap.id))));
   }
 
   /**
    * Add a member to a blueprint with validation
    * 新增成員至藍圖（包含驗證）
-   * 
+   *
    * @param blueprintId - Blueprint ID
    * @param blueprintOwnerType - Blueprint owner type (for validation)
    * @param member - Member data to add
@@ -86,17 +81,14 @@ export class BlueprintMemberRepository {
   ): Promise<BlueprintMember> {
     // Validate member type is allowed for this owner type
     if (!isValidMemberTypeForOwner(blueprintOwnerType, member.memberType)) {
-      const errorMsg = blueprintOwnerType === OwnerType.USER
-        ? '個人藍圖只能新增用戶成員'
-        : `不允許的成員類型：${member.memberType}`;
-      
-      this.logger.error(
-        '[BlueprintMemberRepository]',
-        'Invalid member type for owner',
-        new Error(errorMsg),
-        { blueprintId, blueprintOwnerType, memberType: member.memberType }
-      );
-      
+      const errorMsg = blueprintOwnerType === OwnerType.USER ? '個人藍圖只能新增用戶成員' : `不允許的成員類型：${member.memberType}`;
+
+      this.logger.error('[BlueprintMemberRepository]', 'Invalid member type for owner', new Error(errorMsg), {
+        blueprintId,
+        blueprintOwnerType,
+        memberType: member.memberType
+      });
+
       throw new Error(errorMsg);
     }
 
@@ -107,7 +99,7 @@ export class BlueprintMemberRepository {
       this.logger.error('[BlueprintMemberRepository]', errorMsg, new Error(errorMsg));
       throw new Error(errorMsg);
     }
-    
+
     if (member.memberType === BlueprintMemberType.PARTNER && !member.isExternal) {
       const errorMsg = '夥伴成員必須標記為外部成員';
       this.logger.error('[BlueprintMemberRepository]', errorMsg, new Error(errorMsg));
@@ -119,7 +111,7 @@ export class BlueprintMemberRepository {
         ...member,
         grantedAt: Timestamp.now()
       });
-      
+
       const docSnap = await getDoc(docRef);
       return this.toMember(docSnap.data(), docRef.id);
     } catch (error) {

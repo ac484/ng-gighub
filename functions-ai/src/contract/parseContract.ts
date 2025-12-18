@@ -1,7 +1,7 @@
 /**
  * @fileOverview Contract Document Parsing Cloud Function
  * @description Extracts structured data from contract documents using Google Gemini AI
- * 
+ *
  * Phase 1 Refactoring Complete:
  * - ✅ Retry logic with exponential backoff
  * - ✅ Modernized AI client with HttpsError
@@ -9,7 +9,7 @@
  * - ✅ Unified type definitions
  * - ✅ Structured logging
  * - ✅ Validation and error handling
- * 
+ *
  * @module contract/parseContract
  */
 
@@ -19,12 +19,7 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { getGenAIClient, DEFAULT_VISION_MODEL } from '../ai/client';
 import { withRetry } from '../ai/retry';
 import { ContractPromptBuilder, PROMPT_PRESETS } from '../prompts';
-import {
-  ContractParsingInput,
-  ContractParsingOutput,
-  isValidContractOutput,
-  calculateOverallConfidence
-} from '../types';
+import { ContractParsingInput, ContractParsingOutput, isValidContractOutput, calculateOverallConfidence } from '../types';
 
 /**
  * Generation Configuration for Contract Parsing
@@ -34,10 +29,10 @@ const GENERATION_CONFIG = PROMPT_PRESETS.STANDARD;
 
 /**
  * Validates contract parsing output
- * 
+ *
  * Ensures all required fields are present and properly formatted.
  * Uses type guard from unified types module.
- * 
+ *
  * @param data - Parsed data to validate
  * @returns True if data is valid ContractParsingOutput
  */
@@ -107,24 +102,18 @@ export const parseContract = onCall<ContractParsingInput>(
     // Region
     region: 'asia-east1'
   },
-  async (request) => {
+  async request => {
     const { fileDataUri, blueprintId, additionalContext } = request.data;
     const requestId = `req-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
     // Validate input
     if (!fileDataUri) {
-      throw new HttpsError(
-        'invalid-argument',
-        'fileDataUri is required'
-      );
+      throw new HttpsError('invalid-argument', 'fileDataUri is required');
     }
 
     // Check authentication
     if (!request.auth) {
-      throw new HttpsError(
-        'unauthenticated',
-        'User must be authenticated to parse contracts'
-      );
+      throw new HttpsError('unauthenticated', 'User must be authenticated to parse contracts');
     }
 
     logger.info('Contract parsing request started', {
@@ -139,8 +128,7 @@ export const parseContract = onCall<ContractParsingInput>(
       const ai = getGenAIClient();
 
       // Build prompt using modular builder
-      const { systemInstruction, contents, jsonSchema } = 
-        ContractPromptBuilder.buildParsingPrompt(fileDataUri, additionalContext);
+      const { systemInstruction, contents, jsonSchema } = ContractPromptBuilder.buildParsingPrompt(fileDataUri, additionalContext);
 
       logger.info('Prompt built', {
         requestId,
@@ -170,7 +158,7 @@ export const parseContract = onCall<ContractParsingInput>(
                 role: 'user',
                 parts: [
                   { text: systemInstruction },
-                  { text: '\n\n' + contents },
+                  { text: `\n\n${contents}` },
                   {
                     inlineData: {
                       mimeType,
@@ -211,10 +199,7 @@ export const parseContract = onCall<ContractParsingInput>(
           response: resultText.substring(0, 500),
           error: parseError instanceof Error ? parseError.message : 'Unknown'
         });
-        throw new HttpsError(
-          'internal',
-          'Failed to parse AI response as valid JSON'
-        );
+        throw new HttpsError('internal', 'Failed to parse AI response as valid JSON');
       }
 
       // Validate parsed data
@@ -223,10 +208,7 @@ export const parseContract = onCall<ContractParsingInput>(
           requestId,
           data: JSON.stringify(parsedData, null, 2).substring(0, 500)
         });
-        throw new HttpsError(
-          'failed-precondition',
-          'Parsed contract data is incomplete or invalid'
-        );
+        throw new HttpsError('failed-precondition', 'Parsed contract data is incomplete or invalid');
       }
 
       logger.info('Contract parsing completed successfully', {
@@ -243,7 +225,6 @@ export const parseContract = onCall<ContractParsingInput>(
         data: parsedData,
         requestId
       };
-
     } catch (error) {
       // Log error with context
       logger.error('Contract parsing failed', {
@@ -260,10 +241,7 @@ export const parseContract = onCall<ContractParsingInput>(
       }
 
       // Wrap other errors as internal error
-      throw new HttpsError(
-        'internal',
-        `Contract parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-      );
+      throw new HttpsError('internal', `Contract parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 );

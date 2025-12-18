@@ -1,10 +1,10 @@
 /**
  * Firebase Emulator Setup for Integration Tests
- * 
+ *
  * This file provides utilities for connecting to Firebase Emulator Suite
  * during integration testing. Based on Firebase official documentation:
  * https://firebase.google.com/docs/emulator-suite/connect_and_prototype
- * 
+ *
  * Usage:
  * - Call connectToEmulators() in test setup to connect to local emulators
  * - Call disconnectFromEmulators() in test teardown to cleanup
@@ -36,10 +36,10 @@ export const EMULATOR_CONFIG = {
 
 /**
  * Connect Firestore to local emulator
- * 
+ *
  * @param firestore - Firestore instance from Angular Fire
  * @returns void
- * 
+ *
  * @example
  * ```typescript
  * const firestore = inject(Firestore);
@@ -48,13 +48,8 @@ export const EMULATOR_CONFIG = {
  */
 export function connectFirestoreToEmulator(firestore: Firestore): void {
   try {
-    connectFirestoreEmulator(
-      firestore,
-      EMULATOR_CONFIG.firestore.host,
-      EMULATOR_CONFIG.firestore.port
-    );
-    console.log('[Test] Connected to Firestore Emulator:', 
-      `${EMULATOR_CONFIG.firestore.host}:${EMULATOR_CONFIG.firestore.port}`);
+    connectFirestoreEmulator(firestore, EMULATOR_CONFIG.firestore.host, EMULATOR_CONFIG.firestore.port);
+    console.log('[Test] Connected to Firestore Emulator:', `${EMULATOR_CONFIG.firestore.host}:${EMULATOR_CONFIG.firestore.port}`);
   } catch (error) {
     // Emulator might already be connected, ignore error
     console.warn('[Test] Firestore Emulator connection warning:', error);
@@ -63,10 +58,10 @@ export function connectFirestoreToEmulator(firestore: Firestore): void {
 
 /**
  * Connect Storage to local emulator
- * 
+ *
  * @param storage - Firebase Storage instance from Angular Fire
  * @returns void
- * 
+ *
  * @example
  * ```typescript
  * const storage = inject(Storage);
@@ -75,13 +70,8 @@ export function connectFirestoreToEmulator(firestore: Firestore): void {
  */
 export function connectStorageToEmulator(storage: FirebaseStorage): void {
   try {
-    connectStorageEmulator(
-      storage,
-      EMULATOR_CONFIG.storage.host,
-      EMULATOR_CONFIG.storage.port
-    );
-    console.log('[Test] Connected to Storage Emulator:', 
-      `${EMULATOR_CONFIG.storage.host}:${EMULATOR_CONFIG.storage.port}`);
+    connectStorageEmulator(storage, EMULATOR_CONFIG.storage.host, EMULATOR_CONFIG.storage.port);
+    console.log('[Test] Connected to Storage Emulator:', `${EMULATOR_CONFIG.storage.host}:${EMULATOR_CONFIG.storage.port}`);
   } catch (error) {
     // Emulator might already be connected, ignore error
     console.warn('[Test] Storage Emulator connection warning:', error);
@@ -91,28 +81,25 @@ export function connectStorageToEmulator(storage: FirebaseStorage): void {
 /**
  * Connect all Firebase services to emulators
  * Call this in test setup (beforeEach or beforeAll)
- * 
+ *
  * @param firestore - Firestore instance
  * @param storage - Storage instance (optional)
  * @returns void
  */
-export function connectToEmulators(
-  firestore: Firestore,
-  storage?: FirebaseStorage
-): void {
+export function connectToEmulators(firestore: Firestore, storage?: FirebaseStorage): void {
   connectFirestoreToEmulator(firestore);
-  
+
   if (storage) {
     connectStorageToEmulator(storage);
   }
-  
+
   console.log('[Test] All Firebase emulators connected');
 }
 
 /**
  * Disconnect from emulators
  * Call this in test teardown (afterEach or afterAll)
- * 
+ *
  * Note: Firebase SDK doesn't provide explicit disconnect method
  * This is a placeholder for future cleanup if needed
  */
@@ -123,7 +110,7 @@ export function disconnectFromEmulators(): void {
 /**
  * Check if code is running in test environment
  * Useful for conditional emulator connection
- * 
+ *
  * @returns boolean - true if running in test environment
  */
 export function isTestEnvironment(): boolean {
@@ -133,7 +120,7 @@ export function isTestEnvironment(): boolean {
 /**
  * Get emulator URL for Firestore
  * Useful for debugging and logging
- * 
+ *
  * @returns string - Full emulator URL
  */
 export function getFirestoreEmulatorUrl(): string {
@@ -143,7 +130,7 @@ export function getFirestoreEmulatorUrl(): string {
 /**
  * Get emulator URL for Storage
  * Useful for debugging and logging
- * 
+ *
  * @returns string - Full emulator URL
  */
 export function getStorageEmulatorUrl(): string {
@@ -153,7 +140,7 @@ export function getStorageEmulatorUrl(): string {
 /**
  * Get emulator UI URL
  * Useful for opening emulator UI in tests
- * 
+ *
  * @returns string - Full emulator UI URL
  */
 export function getEmulatorUIUrl(): string {

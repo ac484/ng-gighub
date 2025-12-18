@@ -1,18 +1,23 @@
 /**
- * Import function triggers from their respective submodules:
+ * Firebase Cloud Functions - Integration Layer
  *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
+ * Main entry point for all Firebase Cloud Functions.
+ *
+ * Import function triggers from their respective submodules:
+ * - Contract OCR Pipeline (SETC-012)
  *
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
+ *
+ * @author GigHub Development Team
+ * @date 2025-12-18
  */
 
+import * as admin from 'firebase-admin';
 import { setGlobalOptions } from 'firebase-functions';
-import { onRequest } from 'firebase-functions/https';
 import * as logger from 'firebase-functions/logger';
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+// Initialize Firebase Admin SDK
+admin.initializeApp();
 
 // For cost control, you can set the maximum number of containers that can be
 // running at the same time. This helps mitigate the impact of unexpected
@@ -26,7 +31,12 @@ import * as logger from 'firebase-functions/logger';
 // this will be the maximum concurrent request count.
 setGlobalOptions({ maxInstances: 10 });
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+// =============================================================================
+// Contract OCR Pipeline Functions (SETC-012)
+// =============================================================================
+// Step 2: Process contract file upload
+// Step 4: Create normalized draft from OCR result
+// Step 8: Confirm contract and create official document
+export { processContractUpload, createParseDraft, confirmContract } from './contract';
+
+logger.info('[functions-integration]', 'Functions loaded successfully');

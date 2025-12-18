@@ -113,6 +113,34 @@ service firebase.storage {
     }
     
     // ==========================================
+    // Contract Files Storage Rules
+    // ==========================================
+    
+    /**
+     * Contract file storage
+     * Path pattern: contracts/{blueprintId}/{contractId}/{subPath}
+     * 
+     * Access: Users with blueprint access
+     * Operations: Upload, download, delete
+     * 
+     * Used by: ContractUploadService
+     * - contracts/{blueprintId}/{contractId}/original/{fileId}-{fileName}
+     */
+    match /contracts/{blueprintId}/{allPaths=**} {
+      // Allow read if user has blueprint access
+      allow read: if isAuthenticated() && canAccessBlueprint(blueprintId);
+      
+      // Allow write if user has blueprint access and file is valid
+      allow write: if isAuthenticated() 
+        && canAccessBlueprint(blueprintId)
+        && isValidFileSize()
+        && isAllowedFileType();
+      
+      // Allow delete if user has blueprint access
+      allow delete: if isAuthenticated() && canAccessBlueprint(blueprintId);
+    }
+    
+    // ==========================================
     // Deny All Other Paths
     // ==========================================
     

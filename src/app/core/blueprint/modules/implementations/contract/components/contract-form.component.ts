@@ -16,25 +16,16 @@
  * @date 2025-12-17
  */
 
-import {
-  Component,
-  ChangeDetectionStrategy,
-  OnInit,
-  inject,
-  input,
-  output,
-  signal,
-  computed,
-  effect
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, inject, input, output, signal, computed, effect } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { SHARED_IMPORTS } from '@shared';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
+import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
-import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
-import { NzDividerModule } from 'ng-zorro-antd/divider';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+
 import type { Contract, ContractParty } from '../models';
 import type { CreateContractDto } from '../models/dtos';
 
@@ -165,7 +156,7 @@ export class ContractFormComponent implements OnInit {
    * Setup form value changes subscription
    */
   private setupFormValueChanges(): void {
-    this.contractForm.valueChanges.subscribe((value) => {
+    this.contractForm.valueChanges.subscribe(value => {
       if (this.contractForm.valid) {
         this.formChange.emit(this.getFormValue());
       }

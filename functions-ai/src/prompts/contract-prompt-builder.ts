@@ -1,9 +1,9 @@
 /**
  * Contract Prompt Builder
- * 
+ *
  * Modular prompt construction for AI contract parsing with JSON schema validation.
  * Follows KISS principle and奧卡姆剃刀 (Occam's Razor) - simple, effective, maintainable.
- * 
+ *
  * @module prompts/contract-prompt-builder
  */
 
@@ -125,7 +125,7 @@ export class ContractPromptBuilder {
 
   /**
    * Build prompt for contract parsing
-   * 
+   *
    * @param fileUri - URI of the contract file (image/PDF)
    * @param additionalContext - Optional additional context or requirements
    * @returns Structured prompt for AI model
@@ -167,7 +167,7 @@ ${additionalContext ? `\n**額外要求**: ${additionalContext}` : ''}`;
   /**
    * Build validation prompt for parsed data
    * Used to verify and enhance AI-generated results
-   * 
+   *
    * @param parsedData - Initially parsed contract data
    * @returns Validation prompt
    */
@@ -191,17 +191,13 @@ ${JSON.stringify(parsedData, null, 2)}
   /**
    * Build enhancement prompt for low-confidence fields
    * Used to improve specific fields with low confidence scores
-   * 
+   *
    * @param fieldName - Name of the field to enhance
    * @param currentValue - Current value of the field
    * @param context - Additional context from the document
    * @returns Enhancement prompt
    */
-  static buildEnhancementPrompt(
-    fieldName: string,
-    currentValue: any,
-    context?: string
-  ): string {
+  static buildEnhancementPrompt(fieldName: string, currentValue: any, context?: string): string {
     return `請針對以下合約欄位進行深度分析和改進：
 
 **欄位名稱**: ${fieldName}

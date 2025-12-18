@@ -74,12 +74,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
         </nz-select>
 
         <nz-input-group nzPrefixIcon="search" style="width: 280px;">
-          <input 
-            nz-input 
-            [(ngModel)]="searchText" 
-            (input)="onSearchInput($event)" 
-            placeholder="搜尋合約編號、標題、業主、承包商..." 
-          />
+          <input nz-input [(ngModel)]="searchText" (input)="onSearchInput($event)" placeholder="搜尋合約編號、標題、業主、承包商..." />
         </nz-input-group>
 
         <nz-range-picker
@@ -101,9 +96,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
         </button>
 
         @if (hasActiveFilters()) {
-          <nz-tag nzColor="blue">
-            已篩選 {{ filteredContracts().length }} / {{ contracts().length }} 筆
-          </nz-tag>
+          <nz-tag nzColor="blue"> 已篩選 {{ filteredContracts().length }} / {{ contracts().length }} 筆 </nz-tag>
         }
       </div>
 
@@ -120,7 +113,9 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
       <!-- Bulk Operations Toolbar -->
       @if (hasSelectedContracts()) {
-        <div class="bulk-actions-toolbar" style="
+        <div
+          class="bulk-actions-toolbar"
+          style="
           position: fixed;
           bottom: 24px;
           left: 50%;
@@ -133,41 +128,25 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
           display: flex;
           align-items: center;
           gap: 12px;
-        ">
-          <span style="color: #666; font-weight: 500;">
-            已選擇 {{ selectedContracts().length }} 筆合約
-          </span>
+        "
+        >
+          <span style="color: #666; font-weight: 500;"> 已選擇 {{ selectedContracts().length }} 筆合約 </span>
 
           @if (deletableSelected().length > 0) {
-            <button 
-              nz-button 
-              nzType="default" 
-              nzDanger
-              (click)="bulkDelete()"
-              [nzLoading]="bulkOperationInProgress()"
-            >
+            <button nz-button nzType="default" nzDanger (click)="bulkDelete()" [nzLoading]="bulkOperationInProgress()">
               <span nz-icon nzType="delete"></span>
               刪除 ({{ deletableSelected().length }})
             </button>
           }
 
-          <button 
-            nz-button 
-            nzType="default"
-            (click)="bulkExport()"
-            [nzLoading]="bulkOperationInProgress()"
-          >
+          <button nz-button nzType="default" (click)="bulkExport()" [nzLoading]="bulkOperationInProgress()">
             <span nz-icon nzType="download"></span>
             匯出
           </button>
 
           <nz-divider nzType="vertical" style="height: 24px;" />
 
-          <button 
-            nz-button 
-            nzType="link"
-            (click)="clearSelection()"
-          >
+          <button nz-button nzType="link" (click)="clearSelection()">
             <span nz-icon nzType="close"></span>
             取消選擇
           </button>
@@ -283,11 +262,7 @@ export class ContractListComponent implements OnInit {
 
   /** Check if any filters are active */
   hasActiveFilters = computed(() => {
-    return (
-      this.selectedStatuses.length > 0 ||
-      this.debouncedSearch().length > 0 ||
-      this.dateRange !== null
-    );
+    return this.selectedStatuses.length > 0 || this.debouncedSearch().length > 0 || this.dateRange !== null;
   });
 
   /** Check if any contracts are selected */
@@ -301,9 +276,7 @@ export class ContractListComponent implements OnInit {
   });
 
   /** Get deletable selected contracts (only drafts) */
-  deletableSelected = computed(() => 
-    this.selectedContracts().filter(c => c.status === 'draft')
-  );
+  deletableSelected = computed(() => this.selectedContracts().filter(c => c.status === 'draft'));
 
   // ==================== ST TABLE COLUMNS ====================
 
@@ -337,15 +310,15 @@ export class ContractListComponent implements OnInit {
         }
       ]
     },
-    { 
-      title: '合約編號', 
-      index: 'contractNumber', 
+    {
+      title: '合約編號',
+      index: 'contractNumber',
       width: 150,
       sort: true
     },
-    { 
-      title: '合約標題', 
-      index: 'title', 
+    {
+      title: '合約標題',
+      index: 'title',
       width: 200,
       sort: true
     },
@@ -363,14 +336,14 @@ export class ContractListComponent implements OnInit {
       },
       sort: true
     },
-    { 
-      title: '業主', 
-      index: 'owner.name', 
+    {
+      title: '業主',
+      index: 'owner.name',
       width: 150
     },
-    { 
-      title: '承包商', 
-      index: 'contractor.name', 
+    {
+      title: '承包商',
+      index: 'contractor.name',
       width: 150
     },
     {
@@ -439,12 +412,10 @@ export class ContractListComponent implements OnInit {
 
   ngOnInit(): void {
     // Setup debounced search (300ms delay)
-    this.searchSubject
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe(searchTerm => {
-        this.debouncedSearch.set(searchTerm);
-        this.updateUrlQueryParams();
-      });
+    this.searchSubject.pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe(searchTerm => {
+      this.debouncedSearch.set(searchTerm);
+      this.updateUrlQueryParams();
+    });
 
     // 取得藍圖 ID 並初始化 facade
     this.route.parent?.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
@@ -630,7 +601,7 @@ export class ContractListComponent implements OnInit {
    */
   async bulkDelete(): Promise<void> {
     const deletable = this.deletableSelected();
-    
+
     if (deletable.length === 0) {
       this.message.warning('沒有可刪除的合約（只能刪除草稿狀態）');
       return;
@@ -664,7 +635,7 @@ export class ContractListComponent implements OnInit {
         try {
           await this.contractFacade.deleteContract(deletable[i].id);
           successCount++;
-          
+
           // Show progress
           this.message.info(`刪除進度: ${i + 1}/${deletable.length}`, { nzDuration: 1000 });
         } catch {
@@ -693,7 +664,7 @@ export class ContractListComponent implements OnInit {
    */
   async bulkExport(): Promise<void> {
     const selected = this.selectedContracts();
-    
+
     if (selected.length === 0) {
       this.message.warning('請先選擇要匯出的合約');
       return;
@@ -703,17 +674,7 @@ export class ContractListComponent implements OnInit {
 
     try {
       // Prepare CSV data
-      const headers = [
-        '合約編號',
-        '合約標題',
-        '狀態',
-        '業主',
-        '承包商',
-        '合約金額',
-        '簽約日期',
-        '開始日期',
-        '結束日期'
-      ];
+      const headers = ['合約編號', '合約標題', '狀態', '業主', '承包商', '合約金額', '簽約日期', '開始日期', '結束日期'];
 
       const rows = selected.map(c => [
         c.contractNumber,
@@ -728,16 +689,13 @@ export class ContractListComponent implements OnInit {
       ]);
 
       // Create CSV content
-      const csvContent = [
-        headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-      ].join('\n');
+      const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
 
       // Create blob and download
-      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
-      
+
       link.setAttribute('href', url);
       link.setAttribute('download', `contracts_export_${Date.now()}.csv`);
       link.style.visibility = 'hidden';

@@ -10,6 +10,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { Storage } from '@angular/fire/storage';
+
 import { ContractUploadService, UploadProgress, FileValidationResult } from './contract-upload.service';
 
 describe('ContractUploadService', () => {
@@ -37,10 +38,7 @@ describe('ContractUploadService', () => {
     };
 
     TestBed.configureTestingModule({
-      providers: [
-        ContractUploadService,
-        { provide: Storage, useValue: mockStorage }
-      ]
+      providers: [ContractUploadService, { provide: Storage, useValue: mockStorage }]
     });
 
     service = TestBed.inject(ContractUploadService);
@@ -163,18 +161,18 @@ describe('ContractUploadService', () => {
     it('should reject upload for invalid file', async () => {
       const invalidFile = new File(['test'], 'doc.txt', { type: 'text/plain' });
 
-      await expectAsync(
-        service.uploadContractFile(sampleBlueprintId, sampleContractId, invalidFile, sampleUserId)
-      ).toBeRejectedWithError(/Invalid file/);
+      await expectAsync(service.uploadContractFile(sampleBlueprintId, sampleContractId, invalidFile, sampleUserId)).toBeRejectedWithError(
+        /Invalid file/
+      );
     });
 
     it('should set uploading state during upload process', async () => {
       // Mock Firebase functions
       const mockRef = jasmine.createSpy('ref').and.returnValue(mockStorageRef);
       const mockUploadBytesResumable = jasmine.createSpy('uploadBytesResumable').and.returnValue(mockUploadTask);
-      const mockGetDownloadURL = jasmine.createSpy('getDownloadURL').and.returnValue(
-        Promise.resolve('https://storage.example.com/file.pdf')
-      );
+      const mockGetDownloadURL = jasmine
+        .createSpy('getDownloadURL')
+        .and.returnValue(Promise.resolve('https://storage.example.com/file.pdf'));
 
       // Setup mock upload task to complete immediately
       mockUploadTask.on.and.callFake((event: string, onProgress: any, onError: any, onComplete: any) => {
@@ -246,12 +244,7 @@ describe('ContractUploadService', () => {
       const files = [invalidFile, validFile];
 
       // uploadMultipleFiles should handle errors gracefully
-      const results = await service.uploadMultipleFiles(
-        sampleBlueprintId,
-        sampleContractId,
-        files,
-        sampleUserId
-      );
+      const results = await service.uploadMultipleFiles(sampleBlueprintId, sampleContractId, files, sampleUserId);
 
       // Should return results for successfully uploaded files only
       expect(Array.isArray(results)).toBe(true);
@@ -263,7 +256,7 @@ describe('ContractUploadService', () => {
   // ============================================================================
 
   describe('Progress Tracking', () => {
-    it('should track upload progress via observable', (done) => {
+    it('should track upload progress via observable', done => {
       const validFile = new File(['content'], 'test.pdf', { type: 'application/pdf' });
 
       // Mock Firebase functions
@@ -300,7 +293,7 @@ describe('ContractUploadService', () => {
 
       const progressUpdates: UploadProgress[] = [];
       progress$.subscribe({
-        next: (progress) => {
+        next: progress => {
           progressUpdates.push(progress);
         },
         complete: () => {
@@ -311,13 +304,13 @@ describe('ContractUploadService', () => {
       });
     });
 
-    it('should emit error for invalid file in uploadWithProgress', (done) => {
+    it('should emit error for invalid file in uploadWithProgress', done => {
       const invalidFile = new File(['content'], 'test.txt', { type: 'text/plain' });
 
       const progress$ = service.uploadWithProgress(sampleBlueprintId, sampleContractId, invalidFile);
 
       progress$.subscribe({
-        error: (error) => {
+        error: error => {
           expect(error).toBeDefined();
           expect(error.message).toContain('Invalid file');
           done();
@@ -392,9 +385,7 @@ describe('ContractUploadService', () => {
     it('should set error signal on upload failure', async () => {
       const invalidFile = new File(['content'], 'test.txt', { type: 'text/plain' });
 
-      await expectAsync(
-        service.uploadContractFile(sampleBlueprintId, sampleContractId, invalidFile, sampleUserId)
-      ).toBeRejected();
+      await expectAsync(service.uploadContractFile(sampleBlueprintId, sampleContractId, invalidFile, sampleUserId)).toBeRejected();
 
       expect(service.error()).not.toBeNull();
       expect(service.error()).toContain('Invalid file');
@@ -404,8 +395,7 @@ describe('ContractUploadService', () => {
       const validFile = new File(['content'], 'test.pdf', { type: 'application/pdf' });
 
       // First set an error
-      await service.uploadContractFile(sampleBlueprintId, sampleContractId, validFile, sampleUserId)
-        .catch(() => {}); // Ignore error for this test
+      await service.uploadContractFile(sampleBlueprintId, sampleContractId, validFile, sampleUserId).catch(() => {}); // Ignore error for this test
 
       // Note: Actual implementation would clear error on next successful operation
     });

@@ -9,13 +9,14 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
 import { LoggerService } from '@core';
 import { EnhancedEventBusService } from '@core/blueprint/events/enhanced-event-bus.service';
+import { of, throwError } from 'rxjs';
+
 import { ContractFacade, ContractEvents } from './contract.facade';
-import { ContractStore } from '../store';
+import type { Contract, ContractStatus, CreateContractDto, UpdateContractDto } from '../models';
 import { ContractRepository } from '../repositories';
-import type {Contract, ContractStatus, CreateContractDto, UpdateContractDto } from '../models';
+import { ContractStore } from '../store';
 
 describe('ContractFacade', () => {
   let facade: ContractFacade;
@@ -104,27 +105,13 @@ describe('ContractFacade', () => {
     (mockStore as any).hasError = jasmine.createSpy('hasError').and.returnValue(false);
 
     // Create mock Repository
-    mockRepository = jasmine.createSpyObj('ContractRepository', [
-      'findByBlueprint',
-      'findById',
-      'create',
-      'update',
-      'delete'
-    ]);
+    mockRepository = jasmine.createSpyObj('ContractRepository', ['findByBlueprint', 'findById', 'create', 'update', 'delete']);
 
     // Create mock EventBus
-    mockEventBus = jasmine.createSpyObj('EnhancedEventBusService', [
-      'initialize',
-      'emitEvent'
-    ]);
+    mockEventBus = jasmine.createSpyObj('EnhancedEventBusService', ['initialize', 'emitEvent']);
 
     // Create mock Logger
-    mockLogger = jasmine.createSpyObj('LoggerService', [
-      'info',
-      'debug',
-      'warn',
-      'error'
-    ]);
+    mockLogger = jasmine.createSpyObj('LoggerService', ['info', 'debug', 'warn', 'error']);
 
     TestBed.configureTestingModule({
       providers: [
@@ -262,11 +249,9 @@ describe('ContractFacade', () => {
       facade.subscribeToContracts();
 
       expect(mockRepository.findByBlueprint).toHaveBeenCalledWith(sampleBlueprintId);
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        '[ContractFacade]',
-        'Subscribing to real-time updates',
-        { blueprintId: sampleBlueprintId }
-      );
+      expect(mockLogger.info).toHaveBeenCalledWith('[ContractFacade]', 'Subscribing to real-time updates', {
+        blueprintId: sampleBlueprintId
+      });
     });
   });
 
@@ -529,9 +514,7 @@ describe('ContractFacade', () => {
     it('should throw error when contract not found in store', async () => {
       mockStore.getContractById.and.returnValue(undefined);
 
-      await expectAsync(
-        facade.changeContractStatus(sampleContractId, 'active')
-      ).toBeRejectedWithError(/not found in store/);
+      await expectAsync(facade.changeContractStatus(sampleContractId, 'active')).toBeRejectedWithError(/not found in store/);
     });
   });
 

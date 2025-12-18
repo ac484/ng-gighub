@@ -31,9 +31,10 @@
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ContractVerificationComponent } from '@core/blueprint/modules/implementations/contract/components';
+import { ContractFacade } from '@core/blueprint/modules/implementations/contract/facades';
 import type { Contract, ContractParty, FileAttachment } from '@core/blueprint/modules/implementations/contract/models';
 import type { CreateContractDto } from '@core/blueprint/modules/implementations/contract/models/dtos';
-import { ContractFacade } from '@core/blueprint/modules/implementations/contract/facades';
 import {
   ContractParsingService,
   ParsingProgress
@@ -52,8 +53,6 @@ import { NzResultModule } from 'ng-zorro-antd/result';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
 import { NzUploadChangeParam, NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
 
-import { ContractVerificationComponent } from '@core/blueprint/modules/implementations/contract/components';
-
 /** Step indices - UPDATED for new 7-step flow */
 const STEP_UPLOAD = 0; // Upload files
 const STEP_PARSING = 1; // AI parsing
@@ -67,7 +66,15 @@ const STEP_ACTIVE = 6; // Active
   selector: 'app-contract-creation-wizard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SHARED_IMPORTS, NzStepsModule, NzUploadModule, NzFormModule, NzResultModule, NzDescriptionsModule, ContractVerificationComponent],
+  imports: [
+    SHARED_IMPORTS,
+    NzStepsModule,
+    NzUploadModule,
+    NzFormModule,
+    NzResultModule,
+    NzDescriptionsModule,
+    ContractVerificationComponent
+  ],
   template: `
     <!-- Steps Progress Indicator - UPDATED for 7-step flow -->
     <nz-steps [nzCurrent]="currentStep()" nzSize="small" class="mb-lg">
@@ -215,22 +222,20 @@ const STEP_ACTIVE = 6; // Active
                 </div>
               </nz-result>
             } @else {
-              <nz-result 
-                nzStatus="error" 
-                nzTitle="建立失敗" 
-                [nzSubTitle]="contractCreationAttempts() >= 3 
-                  ? '已達最大重試次數，請返回編輯檢查資料' 
-                  : '請重試或返回編輯檢查資料'"
+              <nz-result
+                nzStatus="error"
+                nzTitle="建立失敗"
+                [nzSubTitle]="contractCreationAttempts() >= 3 ? '已達最大重試次數，請返回編輯檢查資料' : '請重試或返回編輯檢查資料'"
               >
                 <div nz-result-extra>
                   @if (contractCreationAttempts() < 3) {
                     <p class="text-grey mb-md">重試次數: {{ contractCreationAttempts() }} / 3</p>
                   }
                   <button nz-button nzType="default" (click)="prevStep()">返回編輯</button>
-                  <button 
-                    nz-button 
-                    nzType="primary" 
-                    (click)="retryContractCreation()" 
+                  <button
+                    nz-button
+                    nzType="primary"
+                    (click)="retryContractCreation()"
                     [disabled]="contractCreationAttempts() >= 3"
                     class="ml-sm"
                   >
@@ -883,13 +888,13 @@ export class ContractCreationWizardComponent implements OnInit {
       // Submit for activation using ContractFacade
       await this.facade.changeContractStatus(contract.id, 'pending_activation');
       this.message.success('合約已提交待生效');
-      
+
       // Reload contract to get updated status
       const updatedContract = await this.facade.loadContractById(contract.id);
       if (updatedContract) {
         this.createdContract.set(updatedContract);
       }
-      
+
       this.nextStep();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '提交失敗';
@@ -912,13 +917,13 @@ export class ContractCreationWizardComponent implements OnInit {
     try {
       // Use ContractFacade to activate the contract
       await this.facade.changeContractStatus(contract.id, 'active');
-      
+
       // Reload contract to get updated status
       const updatedContract = await this.facade.loadContractById(contract.id);
       if (updatedContract) {
         this.createdContract.set(updatedContract);
       }
-      
+
       this.message.success('合約已生效！');
       this.nextStep();
     } catch (err) {

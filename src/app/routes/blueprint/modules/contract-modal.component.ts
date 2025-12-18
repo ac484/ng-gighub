@@ -13,9 +13,9 @@
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoggerService } from '@core';
+import { ContractFacade } from '@core/blueprint/modules/implementations/contract/facades';
 import type { Contract, ContractParty } from '@core/blueprint/modules/implementations/contract/models';
 import type { CreateContractDto, UpdateContractDto } from '@core/blueprint/modules/implementations/contract/models/dtos';
-import { ContractFacade } from '@core/blueprint/modules/implementations/contract/facades';
 import { SHARED_IMPORTS } from '@shared';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzMessageService } from 'ng-zorro-antd/message';

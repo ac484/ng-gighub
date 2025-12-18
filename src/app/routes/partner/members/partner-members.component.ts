@@ -6,12 +6,12 @@ import { ContextType, PartnerMember, PartnerRole, OrganizationMember, PartnerSto
 import { OrganizationMemberRepository, AccountRepository } from '@core/repositories';
 import { SHARED_IMPORTS, WorkspaceContextService } from '@shared';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
-import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 
@@ -97,9 +97,9 @@ export interface PartnerMemberWithAccount extends PartnerMember {
               <tr>
                 <td>
                   <div class="member-info">
-                    <nz-avatar 
-                      [nzSize]="40" 
-                      [nzSrc]="getMemberAccount(member.user_id)?.avatar_url || undefined" 
+                    <nz-avatar
+                      [nzSize]="40"
+                      [nzSrc]="getMemberAccount(member.user_id)?.avatar_url || undefined"
                       [nzText]="getMemberInitials(member.user_id)"
                     ></nz-avatar>
                     <div class="member-details">

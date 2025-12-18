@@ -416,13 +416,7 @@ export class PartnerStore {
       await this.memberRepository.updateRole(memberId, newRole);
 
       // Update local state - find and update the member's role
-      this._members.update(members => 
-        members.map(member => 
-          member.id === memberId 
-            ? { ...member, role: newRole } 
-            : member
-        )
-      );
+      this._members.update(members => members.map(member => (member.id === memberId ? { ...member, role: newRole } : member)));
 
       this.logger.info('[PartnerStore]', `Member role updated: ${memberId} to ${newRole}`);
     } catch (err) {
