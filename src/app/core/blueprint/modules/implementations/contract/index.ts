@@ -15,3 +15,4 @@ export * from './config';
 export * from './exports';
 export * from './repositories';
 export * from './services';
+export * from './facades';
