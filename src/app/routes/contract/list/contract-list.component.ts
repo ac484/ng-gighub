@@ -26,6 +26,8 @@ import type { Contract, ContractStatus } from '@core/blueprint/modules/implement
 import { STColumn, STChange } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 /**
  * 合約清單元件
@@ -57,30 +59,52 @@ import { NzMessageService } from 'ng-zorro-antd/message';
       </div>
 
       <!-- 篩選區域 -->
-      <div class="filter-bar" style="margin-bottom: 16px; display: flex; gap: 16px; flex-wrap: wrap;">
+      <div class="filter-bar" style="margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
         <nz-select
-          [(ngModel)]="selectedStatus"
-          (ngModelChange)="onStatusChange($event)"
+          nzMode="multiple"
+          [(ngModel)]="selectedStatuses"
+          (ngModelChange)="onStatusChange()"
           nzPlaceHolder="選擇狀態"
           nzAllowClear
-          style="width: 150px;"
+          style="width: 220px;"
         >
           @for (opt of statusOptions; track opt.value) {
             <nz-option [nzValue]="opt.value" [nzLabel]="opt.label" />
           }
         </nz-select>
+
         <nz-input-group nzPrefixIcon="search" style="width: 280px;">
           <input 
             nz-input 
             [(ngModel)]="searchText" 
-            (ngModelChange)="onSearch($event)" 
-            placeholder="搜尋合約編號、標題..." 
+            (input)="onSearchInput($event)" 
+            placeholder="搜尋合約編號、標題、業主、承包商..." 
           />
         </nz-input-group>
-        <button nz-button (click)="refresh()">
+
+        <nz-range-picker
+          [(ngModel)]="dateRange"
+          (ngModelChange)="onDateRangeChange()"
+          nzFormat="yyyy-MM-dd"
+          [nzPlaceHolder]="['開始日期', '結束日期']"
+          style="width: 280px;"
+        />
+
+        <button nz-button (click)="clearFilters()" nzType="default">
+          <span nz-icon nzType="close-circle"></span>
+          清除篩選
+        </button>
+
+        <button nz-button (click)="refresh()" nzType="default">
           <span nz-icon nzType="reload"></span>
           重新整理
         </button>
+
+        @if (hasActiveFilters()) {
+          <nz-tag nzColor="blue">
+            已篩選 {{ filteredContracts().length }} / {{ contracts().length }} 筆
+          </nz-tag>
+        }
       </div>
 
       <!-- 合約列表 -->
@@ -124,14 +148,23 @@ export class ContractListComponent implements OnInit {
   /** All contracts from facade */
   contracts = this.contractFacade.contracts;
 
-  /** Selected status filter */
-  selectedStatus: ContractStatus | null = null;
+  /** Selected status filters (multiple) */
+  selectedStatuses: ContractStatus[] = [];
 
   /** Search text */
   searchText = '';
 
+  /** Date range filter */
+  dateRange: [Date, Date] | null = null;
+
   /** Blueprint ID (from route) */
   blueprintId = signal('');
+
+  /** Search subject for debouncing */
+  private searchSubject = new Subject<string>();
+
+  /** Debounced search signal */
+  private debouncedSearch = signal('');
 
   // ==================== OPTIONS ====================
 
@@ -152,28 +185,46 @@ export class ContractListComponent implements OnInit {
   activeCount = computed(() => this.contracts().filter(c => c.status === 'active').length);
   completedCount = computed(() => this.contracts().filter(c => c.status === 'completed').length);
 
-  /** Filtered contracts based on status and search */
+  /** Filtered contracts based on status, search, and date range */
   filteredContracts = computed(() => {
     let result = this.contracts();
 
-    // Filter by status
-    if (this.selectedStatus) {
-      result = result.filter(c => c.status === this.selectedStatus);
+    // Filter by status (multiple)
+    if (this.selectedStatuses.length > 0) {
+      result = result.filter(c => this.selectedStatuses.includes(c.status));
     }
 
-    // Filter by search text
-    if (this.searchText) {
-      const text = this.searchText.toLowerCase();
+    // Filter by debounced search text
+    const searchTerm = this.debouncedSearch().toLowerCase();
+    if (searchTerm) {
       result = result.filter(
         c =>
-          c.contractNumber.toLowerCase().includes(text) ||
-          c.title.toLowerCase().includes(text) ||
-          c.owner.name.toLowerCase().includes(text) ||
-          c.contractor.name.toLowerCase().includes(text)
+          c.contractNumber.toLowerCase().includes(searchTerm) ||
+          c.title.toLowerCase().includes(searchTerm) ||
+          c.owner.name.toLowerCase().includes(searchTerm) ||
+          c.contractor.name.toLowerCase().includes(searchTerm)
       );
     }
 
+    // Filter by date range (signing date)
+    if (this.dateRange && this.dateRange[0] && this.dateRange[1]) {
+      const [startDate, endDate] = this.dateRange;
+      result = result.filter(c => {
+        const signingDate = new Date(c.signingDate);
+        return signingDate >= startDate && signingDate <= endDate;
+      });
+    }
+
     return result;
+  });
+
+  /** Check if any filters are active */
+  hasActiveFilters = computed(() => {
+    return (
+      this.selectedStatuses.length > 0 ||
+      this.debouncedSearch().length > 0 ||
+      this.dateRange !== null
+    );
   });
 
   // ==================== ST TABLE COLUMNS ====================
@@ -280,6 +331,14 @@ export class ContractListComponent implements OnInit {
   // ==================== LIFECYCLE ====================
 
   ngOnInit(): void {
+    // Setup debounced search (300ms delay)
+    this.searchSubject
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(searchTerm => {
+        this.debouncedSearch.set(searchTerm);
+        this.updateUrlQueryParams();
+      });
+
     // 取得藍圖 ID 並初始化 facade
     this.route.parent?.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const id = params['id'];
@@ -296,6 +355,9 @@ export class ContractListComponent implements OnInit {
         this.message.error(error);
       }
     });
+
+    // Restore filters from URL query params
+    this.restoreFiltersFromUrl();
   }
 
   // ==================== ACTIONS ====================
@@ -316,13 +378,85 @@ export class ContractListComponent implements OnInit {
    */
   onStatusChange(): void {
     // Filtered contracts computed signal will update automatically
+    this.updateUrlQueryParams();
   }
 
   /**
-   * Handle search text change
+   * Handle search input (debounced)
    */
-  onSearch(): void {
+  onSearchInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.searchSubject.next(input.value);
+  }
+
+  /**
+   * Handle date range filter change
+   */
+  onDateRangeChange(): void {
     // Filtered contracts computed signal will update automatically
+    this.updateUrlQueryParams();
+  }
+
+  /**
+   * Clear all filters
+   */
+  clearFilters(): void {
+    this.selectedStatuses = [];
+    this.searchText = '';
+    this.debouncedSearch.set('');
+    this.dateRange = null;
+    this.updateUrlQueryParams();
+    this.message.info('已清除所有篩選條件');
+  }
+
+  /**
+   * Update URL query params with current filter state
+   */
+  private updateUrlQueryParams(): void {
+    const queryParams: any = {};
+
+    if (this.selectedStatuses.length > 0) {
+      queryParams['status'] = this.selectedStatuses.join(',');
+    }
+
+    if (this.debouncedSearch()) {
+      queryParams['search'] = this.debouncedSearch();
+    }
+
+    if (this.dateRange && this.dateRange[0] && this.dateRange[1]) {
+      queryParams['startDate'] = this.dateRange[0].toISOString();
+      queryParams['endDate'] = this.dateRange[1].toISOString();
+    }
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /**
+   * Restore filters from URL query params
+   */
+  private restoreFiltersFromUrl(): void {
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      // Restore status filter
+      if (params['status']) {
+        this.selectedStatuses = params['status'].split(',') as ContractStatus[];
+      }
+
+      // Restore search filter
+      if (params['search']) {
+        this.searchText = params['search'];
+        this.debouncedSearch.set(params['search']);
+      }
+
+      // Restore date range filter
+      if (params['startDate'] && params['endDate']) {
+        this.dateRange = [new Date(params['startDate']), new Date(params['endDate'])];
+      }
+    });
   }
 
   /**

@@ -10,8 +10,8 @@
 
 | 階段 | 任務 | 狀態 | 開始時間 | 完成時間 | 備註 |
 |-----|------|------|---------|---------|------|
-| **Phase 1** | Security & Testing Foundation | 🟡 進行中 | 2025-12-18 | - | 2 週 (40h) |
-| **Phase 2** | Feature Completion | 🟡 進行中 | 2025-12-18 | - | 3-4 週 (120h) |
+| **Phase 1** | Security & Testing Foundation | 🟡 進行中 | 2025-12-18 | - | 2 週 (40h), 44% 完成 |
+| **Phase 2** | Feature Completion | 🟡 進行中 | 2025-12-18 | - | 3-4 週 (120h), 4% 完成 |
 | **Phase 3** | Production Optimization | ⚪ 待開始 | - | - | 3-4 週 (120h) |
 
 ---
@@ -642,17 +642,276 @@
 
 ---
 
-## 📈 Phase 2 & Phase 3 規劃 (待詳細展開)
+## 📋 Phase 2: Feature Completion (進行中)
 
-### Phase 2: Feature Completion (待開始)
+**目標**: 完成 UI 元件、Cloud Functions 測試、E2E 測試基礎  
+**優先級**: 🟡 高  
+**預估工時**: 120 小時 (3-4 週)  
+**已用工時**: 5 小時  
+**狀態**: 🟡 進行中 (1%)
+
+### 任務清單
+
+#### 2.1 Contract List Component 🟡 進行中
+
+**優先級**: 🔴 極高  
+**預估**: 20 小時  
+**實際**: 5 小時  
+**狀態**: 🟡 進行中 (25%)  
+**開始時間**: 2025-12-18 15:10 UTC
+
+##### 2.1.1 ST Table Setup ✅ 已完成
+
+**預估**: 6 小時  
+**實際**: 1 小時  
+**狀態**: ✅ 已完成  
+**完成時間**: 2025-12-18 15:10 UTC
+
+**子任務**:
+- [x] 建立 Contract List Component (Standalone + Signals)
+- [x] 定義 STColumn[] 配置 (10 個資料欄位)
+- [x] 實作狀態統計區塊 (4 個狀態計數)
+- [x] 實作基礎篩選區域 (狀態選擇器 + 搜尋框)
+- [x] 連接 ContractFacade signals
+- [x] 實作排序、分頁功能
+- [x] 實作刪除功能 (僅 draft)
+
+**實作內容**:
+
+1. **Component 結構**:
+   - ✅ Standalone Component with OnPush
+   - ✅ Angular 20+ Signals 狀態管理
+   - ✅ 直接使用 ContractFacade signals (無 local state)
+   - ✅ Computed signals for reactive filtering
+
+2. **ST Table 配置**:
+   - ✅ 10 個資料欄位
+     - 合約編號 (sortable)
+     - 合約標題 (sortable)
+     - 狀態 (badge type, sortable)
+     - 業主名稱
+     - 承包商名稱
+     - 合約金額 (currency type, sortable)
+     - 簽約日期 (date type, sortable)
+     - 開始日期 (date type, sortable)
+     - 結束日期 (date type, sortable)
+     - 操作 (3 個按鈕)
+
+3. **Actions**:
+   - ✅ 查看 (所有狀態)
+   - ✅ 編輯 (僅 draft)
+   - ✅ 刪除 (僅 draft, 含確認對話框)
+
+4. **Statistics Dashboard**:
+   - ✅ 草稿數量
+   - ✅ 待生效數量
+   - ✅ 已生效數量
+   - ✅ 已完成數量
+
+**驗收標準**:
+- [x] ST table 顯示所有合約欄位
+- [x] 5 個欄位支援排序
+- [x] 狀態 badge 顯示正確顏色
+- [x] 分頁與每頁數量設定
+- [x] 操作按鈕根據狀態條件顯示
+- [x] 統計數字即時更新
+
+**Context7 使用**: ⚪ 無需 (參考專案既有 Warranty List Component 模式)
+
+**關鍵決策**:
+1. **直接使用 Facade signals**: 避免 local state 同步問題
+2. **Client-side filtering**: 合約數量適中，本地篩選效能足夠
+3. **Badge type status**: 使用內建 badge 保持 UI 一致性
+4. **Inline template/styles**: 簡化檔案結構，遵循奧卡姆剃刀
+
+**奧卡姆剃刀應用**:
+- ✅ 重用 Warranty List Component 模式
+- ✅ 無 intermediate store layer
+- ✅ Inline template/styles
+- ✅ 直接使用 Facade，避免包裝
+
+---
+
+##### 2.1.2 Filtering & Search Enhancement ✅ 已完成
+
+**預估**: 4 小時  
+**實際**: 4 小時  
+**狀態**: ✅ 已完成  
+**完成時間**: 2025-12-18 16:20 UTC (預估)
+
+**子任務**:
+- [x] 實作 debounced search (300ms)
+- [x] 增強狀態篩選 (多選)
+- [x] 新增日期範圍篩選 (簽約日期)
+- [x] 實作 Clear All Filters 按鈕
+- [x] URL query params 持久化
+- [x] 篩選計數顯示
+
+**實作內容**:
+
+1. **Debounced Search** (RxJS):
+   - ✅ 使用 Subject + debounceTime(300ms)
+   - ✅ distinctUntilChanged 避免重複查詢
+   - ✅ 搜尋 4 個欄位: 合約編號、標題、業主、承包商
+   - ✅ Debounced signal 與 computed 整合
+
+2. **Multiple Status Filter**:
+   - ✅ nzMode="multiple" 多選狀態
+   - ✅ 支援選擇 1-5 個狀態
+   - ✅ AllowClear 快速清除
+
+3. **Date Range Filter**:
+   - ✅ nz-range-picker 日期範圍選擇
+   - ✅ 篩選簽約日期 (signingDate)
+   - ✅ 格式: yyyy-MM-dd
+
+4. **URL Query Params**:
+   - ✅ updateUrlQueryParams() 持久化篩選條件
+   - ✅ restoreFiltersFromUrl() 還原篩選狀態
+   - ✅ 參數格式:
+     - `?status=draft,active`
+     - `?search=合約名稱`
+     - `?startDate=2025-01-01&endDate=2025-12-31`
+
+5. **Clear Filters**:
+   - ✅ 清除所有篩選條件
+   - ✅ 重置 URL query params
+   - ✅ 顯示清除成功訊息
+
+6. **Active Filters Badge**:
+   - ✅ 顯示篩選結果數量 (X / Total)
+   - ✅ hasActiveFilters() computed signal
+
+**驗收標準**:
+- [x] 搜尋有 300ms debounce
+- [x] 多狀態篩選正常運作
+- [x] 日期範圍篩選正確
+- [x] 篩選條件保存在 URL
+- [x] 重新載入頁面後篩選條件還原
+- [x] Clear Filters 清除所有條件
+- [x] 篩選計數顯示正確
+
+**Context7 使用**: ⚪ 無需 (RxJS operators 標準用法)
+
+**關鍵決策**:
+1. **Debounce 300ms**: 平衡即時反應與效能
+2. **Multiple status**: 提供更彈性的篩選組合
+3. **URL persistence**: 改善使用者體驗，支援分享連結
+4. **signingDate filter**: 最常用的日期篩選需求
+
+**奧卡姆剃刀應用**:
+- ✅ 使用標準 RxJS operators (debounceTime, distinctUntilChanged)
+- ✅ Computed signals 自動反應篩選變更
+- ✅ 簡單直接的 URL query params 格式
+
+---
+
+##### 2.1.3 Bulk Operations ⚪ 待開始
+
+**預估**: 4 小時  
+**狀態**: ⚪ 待開始
+
+**子任務**:
+- [ ] ST table checkbox column
+- [ ] Select All / Deselect All
+- [ ] Bulk delete with confirmation
+- [ ] Bulk export (CSV/Excel)
+- [ ] Progress indicator
+
+---
+
+##### 2.1.4 Unit Tests ⚪ 待開始
+
+**預估**: 4 小時  
+**狀態**: ⚪ 待開始
+
+**Context7 Required**:
+- Library: angular.dev
+- Topic: testing components signals st-table jasmine
+
+---
+
+##### 2.1.5 Integration & Polish ⚪ 待開始
+
+**預估**: 2 小時  
+**狀態**: ⚪ 待開始
+
+---
+
+#### 2.2 Contract Detail Component ⚪ 待開始
+
+**預估**: 18 小時  
+**狀態**: ⚪ 待開始
+
+---
+
+#### 2.3 Contract Upload Component ⚪ 待開始
+
+**預估**: 16 小時  
+**狀態**: ⚪ 待開始
+
+---
+
+## 📊 Phase 2 進度統計
+
+| 任務 | 預估 | 實際 | 狀態 | 完成度 |
+|-----|------|------|------|--------|
+| 2.1 Contract List Component | 20h | 5h | 🟡 進行中 | 25% |
+| - 2.1.1 ST Table Setup | 6h | 1h | ✅ 完成 | 100% |
+| - 2.1.2 Filtering & Search | 4h | 4h | ✅ 完成 | 100% |
+| - 2.1.3 Bulk Operations | 4h | 0h | ⚪ 待開始 | 0% |
+| - 2.1.4 Unit Tests | 4h | 0h | ⚪ 待開始 | 0% |
+| - 2.1.5 Integration & Polish | 2h | 0h | ⚪ 待開始 | 0% |
+| 2.2 Contract Detail | 18h | 0h | ⚪ 待開始 | 0% |
+| 2.3 Contract Upload | 16h | 0h | ⚪ 待開始 | 0% |
+| 2.4 Cloud Functions Tests | 24h | 0h | ⚪ 待開始 | 0% |
+| 2.5 E2E Test Framework | 20h | 0h | ⚪ 待開始 | 0% |
+| 2.6 Rate Limiting | 6h | 0h | ⚪ 待開始 | 0% |
+| 2.7 Documentation | 16h | 0h | ⚪ 待開始 | 0% |
+| **Phase 2 總計** | **120h** | **5h** | 🟡 進行中 | **4%** |
+
+**總任務**: 7 個主要任務  
+**已完成**: 0 個  
+**進行中**: 1 個 (Contract List Component)  
+**待開始**: 6 個  
+
+**預估工時**: 120 小時  
+**已用工時**: 5 小時  
+**剩餘工時**: 115 小時  
+
+**完成度**: 4% (5/120 小時完成)
+
+**已完成里程碑**:
+- ✅ Contract List Component ST Table 基礎設置 (1h)
+- ✅ Contract List Component 進階篩選與搜尋 (4h)
+  - ✅ Debounced search (300ms)
+  - ✅ Multiple status filter
+  - ✅ Date range filter
+  - ✅ URL query params persistence
+  - ✅ Clear all filters
+
+**進行中工作**:
+- 🟡 Contract List Component (25% 完成)
+
+**下一步重點**:
+- 🎯 完成 Bulk Operations (2.1.3, 4h)
+- 🎯 撰寫 Contract List Component 測試 (2.1.4, 4h)
+- 🎯 整合與樣式調整 (2.1.5, 2h)
+- 🎯 開始 Contract Detail Component (2.2, 18h)
+
+---
+
+## 📈 Phase 3 規劃 (待詳細展開)
+
+### Phase 3: Production Optimization (待開始)
 
 **預估**: 3-4 週 (120 小時)
 
 **主要任務**:
-1. 補充 UI 元件 (40h)
-2. Cloud Functions 測試 (30h)
-3. 端對端測試 (30h)
-4. Rate Limiting (20h)
+1. 效能測試與優化 (40h)
+2. 監控與告警 (20h)
+3. 文件補充 (30h)
+4. UAT 測試 (30h)
 
 ---
 
