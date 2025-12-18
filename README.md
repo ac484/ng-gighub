@@ -1,4 +1,5 @@
-firebase deploy --only functions:functions-ai firebase deploy --only functions:functions-firestore
+firebase deploy --only functions:functions-ai
+firebase deploy --only functions:functions-firestore
 firebase deploy --only functions:functions-storage
 
 
