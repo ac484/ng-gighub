@@ -678,6 +678,35 @@
 
 ---
 
+#### 12:05 - 修正測試編譯錯誤 ✅
+
+**問題發現**:
+- 執行 `yarn test` 時發現 TypeScript 編譯錯誤
+- ContractFacade 測試中使用了錯誤的 DTO 欄位名稱
+- Repository mock 返回值類型不正確
+
+**修正內容**:
+1. ✅ 修正 ContractParty.type 類型 ('company' → 'owner'/'contractor')
+2. ✅ 修正 CreateContractDto 欄位 (contractAmount → totalAmount, signingDate → signedDate)
+3. ✅ 修正 UpdateContractDto 欄位 (移除 updatedAt，由系統自動設定)
+4. ✅ 修正 sampleContract 物件 (新增缺少的 workItems, originalFiles)
+5. ✅ 修正 Repository.update mock (返回 Promise<Contract> 而非 Promise<void>)
+6. ✅ 補充所有 CreateContractDto 的 blueprintId 欄位
+
+**方法論驗證** ✅:
+- 使用 Context7 查詢 DTO 定義確認正確欄位
+- 參考官方 Model 定義進行修正
+- 確保型別安全，符合 TypeScript 嚴格模式
+
+**檔案變更**:
+- `contract.facade.spec.ts`: 修正 DTO 欄位名稱與型別
+
+**下一步**:
+- 重新執行測試驗證所有測試通過
+- 繼續下一階段實施
+
+---
+
 ## 🎯 當前焦點
 
 **當前任務**: 1.2 補充核心服務單元測試  
