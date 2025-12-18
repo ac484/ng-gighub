@@ -3,15 +3,15 @@ description: 'Quick reference cheat sheet for common GigHub patterns'
 applyTo: '**/*.ts, **/*.html, **/*.scss, **/*.css'
 ---
 
-# GigHub 快速參考指南 ⚡
+# GigHub Quick Reference Guide ⚡
 
-> 常用模式速查表 - 快速查找最佳實踐和禁止模式
+> Common patterns cheat sheet - Quick lookup for best practices and anti-patterns
 
-## 🎯 Angular 20 現代語法
+## 🎯 Angular 20 Modern Syntax
 
-### 元件定義
+### Component Definition
 ```typescript
-// ✅ 正確: Standalone Component with Signals
+// ✅ Correct: Standalone Component with Signals
 import { Component, signal, computed, inject } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
 
@@ -31,7 +31,7 @@ import { SHARED_IMPORTS } from '@shared';
   `
 })
 export class TaskListComponent {
-  // Signal 狀態
+  // Signal state
   private taskService = inject(TaskService);
   loading = signal(false);
   tasks = signal<Task[]>([]);
@@ -45,31 +45,31 @@ export class TaskListComponent {
 
 ### Input/Output (Angular 19+)
 ```typescript
-// ✅ 正確: 使用 input/output 函數
-task = input.required<Task>();           // 必填 input
-readonly = input(false);                 // 選填 input with default
-taskChange = output<Task>();             // output 事件
-value = model(0);                        // 雙向綁定
+// ✅ Correct: Use input/output functions
+task = input.required<Task>();           // Required input
+readonly = input(false);                 // Optional input with default
+taskChange = output<Task>();             // Output event
+value = model(0);                        // Two-way binding
 
-// ❌ 禁止: 使用裝飾器
+// ❌ Forbidden: Use decorators
 @Input() task!: Task;
 @Output() taskChange = new EventEmitter<Task>();
 ```
 
-### 依賴注入
+### Dependency Injection
 ```typescript
-// ✅ 正確: 使用 inject()
+// ✅ Correct: Use inject()
 private taskService = inject(TaskService);
 private router = inject(Router);
 private destroyRef = inject(DestroyRef);
 
-// ❌ 禁止: constructor 注入
+// ❌ Forbidden: constructor injection
 constructor(private taskService: TaskService) {}
 ```
 
-### 新控制流語法
+### New Control Flow Syntax
 ```html
-<!-- ✅ 正確: 使用新語法 -->
+<!-- ✅ Correct: Use new syntax -->
 @if (isAdmin()) {
   <app-admin-panel />
 } @else {
@@ -79,7 +79,7 @@ constructor(private taskService: TaskService) {}
 @for (item of items(); track item.id) {
   <div>{{ item.name }}</div>
 } @empty {
-  <p>沒有資料</p>
+  <p>No data</p>
 }
 
 @switch (status()) {
@@ -88,108 +88,77 @@ constructor(private taskService: TaskService) {}
   @default { <nz-badge nzStatus="default" /> }
 }
 
-<!-- ❌ 禁止: 舊語法 -->
+<!-- ❌ Forbidden: Old syntax -->
 <div *ngIf="isAdmin">...</div>
 <div *ngFor="let item of items; trackBy: trackByFn">...</div>
 ```
 
-## 🎨 ng-alain 常用元件
+## 🎨 ng-alain Common Components
 
-### ST 表格 (Simple Table)
+### ST Table (Simple Table)
 ```typescript
-import { STColumn, STData } from '@delon/abc/st';
+import { STColumn } from '@delon/abc/st';
 
 columns: STColumn[] = [
   { title: 'ID', index: 'id', width: 80 },
-  { title: '名稱', index: 'name' },
+  { title: 'Name', index: 'name' },
   { 
-    title: '狀態', 
+    title: 'Status', 
     index: 'status', 
     type: 'badge',
     badge: {
-      pending: { text: '待處理', color: 'processing' },
-      completed: { text: '已完成', color: 'success' }
+      pending: { text: 'Pending', color: 'processing' },
+      completed: { text: 'Completed', color: 'success' }
     }
   },
   {
-    title: '操作',
+    title: 'Actions',
     buttons: [
-      { text: '編輯', click: (record: any) => this.edit(record) },
-      { text: '刪除', click: (record: any) => this.delete(record), pop: true }
+      { text: 'Edit', click: (record: any) => this.edit(record) },
+      { text: 'Delete', click: (record: any) => this.delete(record), pop: true }
     ]
   }
 ];
 
-// Template
 <st [data]="tasks()" [columns]="columns" [loading]="loading()" />
 ```
 
-### 動態表單 (SF)
+### Dynamic Form (SF)
 ```typescript
 import { SFSchema } from '@delon/form';
 
 schema: SFSchema = {
   properties: {
-    name: { 
-      type: 'string', 
-      title: '任務名稱',
-      maxLength: 100 
-    },
-    description: { 
-      type: 'string', 
-      title: '描述',
-      ui: { widget: 'textarea', rows: 4 }
-    },
-    assignee: {
-      type: 'string',
-      title: '負責人',
-      enum: this.users,
-      ui: { widget: 'select' }
-    },
-    dueDate: {
-      type: 'string',
-      title: '截止日期',
-      format: 'date',
-      ui: { widget: 'date' }
-    }
+    name: { type: 'string', title: 'Task Name', maxLength: 100 },
+    description: { type: 'string', title: 'Description', ui: { widget: 'textarea', rows: 4 } },
+    assignee: { type: 'string', title: 'Assignee', enum: this.users, ui: { widget: 'select' } },
+    dueDate: { type: 'string', title: 'Due Date', format: 'date', ui: { widget: 'date' } }
   },
   required: ['name', 'assignee']
 };
 
-// Template
 <sf [schema]="schema" (formSubmit)="submit($event)" />
 ```
 
-### 權限控制 (ACL)
+### Access Control (ACL)
 ```typescript
 import { ACLService } from '@delon/acl';
 
 private aclService = inject(ACLService);
 
-// 檢查權限
 canEdit(): boolean {
   return this.aclService.can('task:edit');
 }
 
-// Template
-<button 
-  *aclIf="'task:delete'" 
-  nz-button 
-  nzDanger
-  (click)="delete()"
->
-  刪除
-</button>
+<button *aclIf="'task:delete'" nz-button nzDanger (click)="delete()">Delete</button>
 ```
 
-## 🔥 Firebase/Firestore 資料存取
+## 🔥 Firebase/Firestore Data Access
 
 ### Repository Pattern
 ```typescript
-// core/data-access/repositories/task-firestore.repository.ts
 import { inject, Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, doc, docData, addDoc, updateDoc, deleteDoc, query, orderBy } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Firestore, collection, query, orderBy } from '@angular/fire/firestore';
 
 @Injectable({ providedIn: 'root' })
 export class TaskRepository {
@@ -201,11 +170,6 @@ export class TaskRepository {
     return collectionData(q, { idField: 'id' }) as Observable<Task[]>;
   }
   
-  findById(id: string): Observable<Task | undefined> {
-    const taskDoc = doc(this.firestore, 'tasks', id);
-    return docData(taskDoc, { idField: 'id' }) as Observable<Task | undefined>;
-  }
-  
   async create(task: Omit<Task, 'id'>): Promise<string> {
     const docRef = await addDoc(this.tasksCollection, {
       ...task,
@@ -214,28 +178,11 @@ export class TaskRepository {
     });
     return docRef.id;
   }
-  
-  async update(id: string, task: Partial<Task>): Promise<void> {
-    const taskDoc = doc(this.firestore, 'tasks', id);
-    await updateDoc(taskDoc, {
-      ...task,
-      updatedAt: new Date()
-    });
-  }
-  
-  async delete(id: string): Promise<void> {
-    const taskDoc = doc(this.firestore, 'tasks', id);
-    await deleteDoc(taskDoc);
-  }
 }
 ```
 
 ### Store Pattern with Signals
 ```typescript
-// core/facades/task.store.ts
-import { Injectable, signal, computed, inject } from '@angular/core';
-import { TaskRepository } from '@core/infra/task.repository';
-
 @Injectable({ providedIn: 'root' })
 export class TaskStore {
   private repository = inject(TaskRepository);
@@ -243,174 +190,68 @@ export class TaskStore {
   // Private state
   private _tasks = signal<Task[]>([]);
   private _loading = signal(false);
-  private _error = signal<string | null>(null);
   
-  // Public readonly state
+  // Public readonly
   tasks = this._tasks.asReadonly();
   loading = this._loading.asReadonly();
-  error = this._error.asReadonly();
   
   // Computed
   completedTasks = computed(() => 
     this._tasks().filter(t => t.status === 'completed')
   );
   
-  pendingTasks = computed(() =>
-    this._tasks().filter(t => t.status === 'pending')
-  );
-  
-  // Actions
   loadTasks(): void {
     this._loading.set(true);
-    this._error.set(null);
-    
     this.repository.findAll().subscribe({
       next: (tasks) => {
         this._tasks.set(tasks);
         this._loading.set(false);
-      },
-      error: (err) => {
-        this._error.set(err instanceof Error ? err.message : 'Unknown error');
-        this._loading.set(false);
       }
     });
   }
-  
-  async createTask(task: Omit<Task, 'id'>): Promise<void> {
-    try {
-      const id = await this.repository.create(task);
-      // Task will be automatically updated via Firestore observable
-    } catch (err) {
-      this._error.set(err instanceof Error ? err.message : 'Unknown error');
-      throw err;
-    }
-  }
 }
 ```
 
-### Firestore Snapshot Listeners
-```typescript
-import { DestroyRef, inject } from '@angular/core';
-import { Firestore, collection, onSnapshot } from '@angular/fire/firestore';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+## 🚫 Anti-Patterns Quick Reference
 
-private firestore = inject(Firestore);
-private destroyRef = inject(DestroyRef);
+### Angular Anti-Patterns
+| ❌ Forbidden | ✅ Correct |
+|--------------|-----------|
+| `any` type | Explicit types |
+| Direct signal mutation | Use `update()` method |
+| Manual subscriptions | `takeUntilDestroyed()` |
+| Constructor business logic | `ngOnInit()` |
+| NgModule | Standalone Components |
+| `@Input/@Output` decorators | `input()/output()` functions |
 
-ngOnInit(): void {
-  this.subscribeToTasks();
-}
+### Architecture Anti-Patterns
+| ❌ Forbidden | ✅ Correct |
+|--------------|-----------|
+| Component calls Firestore | Component → Service → Repository |
+| Service contains UI logic | Separate concerns |
+| Repository has business logic | Keep data access only |
+| Direct Firestore operations | Use Repository Pattern |
 
-private subscribeToTasks(): void {
-  const tasksCol = collection(this.firestore, 'tasks');
-  
-  // Using onSnapshot for real-time updates
-  const unsubscribe = onSnapshot(tasksCol, (snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-      if (change.type === 'added') {
-        console.log('New task: ', change.doc.data());
-      }
-      if (change.type === 'modified') {
-        console.log('Modified task: ', change.doc.data());
-      }
-      if (change.type === 'removed') {
-        console.log('Removed task: ', change.doc.data());
-      }
-    });
-  });
-  
-  // Auto cleanup
-  this.destroyRef.onDestroy(() => {
-    this.channel?.unsubscribe();
-  });
-}
-```
+### Security Anti-Patterns
+| ❌ Forbidden | ✅ Correct |
+|--------------|-----------|
+| Log sensitive data | Log IDs only |
+| Direct innerHTML | Angular sanitization |
+| Hardcoded credentials | Environment variables |
+| Client-only auth checks | Security Rules + client |
 
-## 🚫 禁止模式速查
+## 📚 References
 
-### Angular 反模式
-```typescript
-// ❌ 禁止: any 類型
-function process(data: any): any { ... }
-
-// ✅ 正確: 明確類型
-function process(data: TaskDto): Task { ... }
-
-// ❌ 禁止: 直接修改 Signal 內部值
-this._tasks().push(newTask);
-
-// ✅ 正確: 使用 update 方法
-this._tasks.update(tasks => [...tasks, newTask]);
-
-// ❌ 禁止: 未清理 Subscription
-ngOnInit() {
-  this.data$.subscribe(data => { ... });
-}
-
-// ✅ 正確: 使用 takeUntilDestroyed
-private destroyRef = inject(DestroyRef);
-ngOnInit() {
-  this.data$
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe(data => { ... });
-}
-```
-
-### 架構反模式
-```typescript
-// ❌ 禁止: 元件直接呼叫 Firestore
-@Component({ ... })
-export class TaskComponent {
-  private firestore = inject(Firestore);
-  
-  loadTasks() {
-    const tasksCol = collection(this.firestore, 'tasks');
-    collectionData(tasksCol).subscribe(data => { ... });
-  }
-}
-
-// ✅ 正確: 透過 Store/Facade
-@Component({ ... })
-export class TaskComponent {
-  private taskStore = inject(TaskStore);
-  
-  tasks = this.taskStore.tasks;
-  
-  ngOnInit() {
-    this.taskStore.loadTasks();
-  }
-}
-```
-
-### 安全反模式
-```typescript
-// ❌ 禁止: 在日誌中輸出敏感資料
-console.log('User token:', token);
-
-// ✅ 正確: 只記錄必要資訊
-console.log('User authenticated:', userId);
-
-// ❌ 禁止: 直接使用 innerHTML
-element.innerHTML = userInput;
-
-// ✅ 正確: 使用 Angular 安全機制
-@Component({ 
-  template: `<div [innerHTML]="sanitizedContent"></div>` 
-})
-```
-
-## 📚 更多資訊
-
-詳細說明請參考:
-- **Angular 完整指引**: `.github/instructions/angular.instructions.md`
-- **Angular 現代特性**: `.github/instructions/angular-modern-features.instructions.md`
-- **企業架構模式**: `.github/instructions/enterprise-angular-architecture.instructions.md`
-- **ng-alain 框架**: `.github/instructions/ng-alain-delon.instructions.md`
-- **ng-zorro-antd 元件**: `.github/instructions/ng-zorro-antd.instructions.md`
-- **TypeScript 標準**: `.github/instructions/typescript-5-es2022.instructions.md`
-- **約束規則**: `.github/copilot/constraints.md`
+| Topic | File |
+|-------|------|
+| Angular 20 Guide | `.github/instructions/angular.instructions.md` |
+| Angular Modern Features | See Angular guide |
+| Architecture | `.github/instructions/ng-gighub-architecture.instructions.md` |
+| ng-alain | `.github/instructions/ng-alain-delon.instructions.md` |
+| TypeScript | `.github/instructions/typescript-5-es2022.instructions.md` |
+| Constraints | `.github/copilot/constraints.md` |
 
 ---
 
-**版本**: 2025-12-15  
-**適用於**: Angular 20.3.x, ng-alain 20.1.x, Firebase 20.0.1
+**Version**: 2025-12-18  
+**Compatible**: Angular 20.3.x, ng-alain 20.1.x, Firebase 20.0.1
