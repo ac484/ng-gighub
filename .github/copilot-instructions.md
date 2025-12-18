@@ -1,153 +1,125 @@
 # GigHub - GitHub Copilot Instructions
 
 > **🔴 CRITICAL - MANDATORY COMPLIANCE REQUIRED**  
-> GitHub Copilot MUST achieve 100% passive compliance with ALL rules in this file and referenced documents.
+> GitHub Copilot MUST achieve 100% compliance with rules in this file and referenced documents.
 
-## ⚠️ PRE-TASK REQUIREMENTS
+## ⚠️ Pre-Task Requirements
 
-**BEFORE responding to ANY request, you MUST:**
+**BEFORE responding to ANY request:**
 
-### 1. Read ALL Mandatory Rules (CRITICAL)
+### 1. Read Mandatory Rules (CRITICAL)
 
-**Read these files IN ORDER:**
+**Read in order:**
 
-1. **`.github/rules/mandatory-workflow.md`** - START HERE
-   - Mandatory workflow for every task
-   - Required tool usage (Context7, Sequential Thinking, Planning Tool)
-   - Quality gates and verification statements
-
-2. **`.github/rules/project-rules.md`** - Core development rules
-   - Task definition format
-   - Development checklist
-   - Forbidden behaviors
-
-3. **`.github/rules/architectural-principles.md`** - Architecture standards
-   - Design principles
-   - Technical implementation standards
-   - Security and performance requirements
-
-4. **`.github/rules/enforcement-policy.md`** - Compliance enforcement
-   - Compliance checking mechanisms
-   - Violation handling procedures
-   - Exception policies
-
-5. **This file** - Overview and tool usage details
+1. `.github/rules/mandatory-workflow.md` - START HERE
+2. `.github/rules/project-rules.md` - Core rules
+3. `.github/rules/architectural-principles.md` - Architecture
+4. `.github/rules/enforcement-policy.md` - Compliance
+5. This file - Overview & tools
 
 ### 2. Execute Mandatory Checks
 
-**Before ANY response, verify:**
+**Verify before responding:**
 
 - [ ] Read all mandatory rule files
-- [ ] Check if Context7 needed for external libraries (if yes, MUST use)
-- [ ] Check if Sequential Thinking needed for complex analysis (if yes, MUST use)
-- [ ] Check if Planning Tool needed for new features (if yes, MUST use)
-- [ ] Verify solution follows three-layer architecture
-- [ ] Confirm Repository pattern usage (NO direct Firestore)
-- [ ] Verify Standalone Components + Signals usage
-- [ ] Confirm all forbidden patterns avoided
+- [ ] Context7 for external libraries (if applicable)
+- [ ] Sequential Thinking for complex analysis (if applicable)
+- [ ] Planning Tool for new features (if applicable)
+- [ ] Three-layer architecture followed
+- [ ] Repository pattern used (NO direct Firestore)
+- [ ] Standalone Components + Signals used
+- [ ] Forbidden patterns avoided
 
 **If ANY check fails → STOP and follow mandatory workflow**
 
-## Quick Start Guide
+## Quick Start
 
-**New to this project?** Read these in order:
-1. `.github/rules/README.md` - Rules system overview
-2. `.github/rules/mandatory-workflow.md` - Mandatory workflow
-3. This file - Tool usage details
-4. `.github/instructions/quick-reference.instructions.md` - Common patterns
+**New to project? Read in order:**
+1. `.github/rules/README.md` - Rules overview
+2. `.github/rules/mandatory-workflow.md` - Workflow
+3. This file - Tool usage
+4. `.github/instructions/quick-reference.instructions.md` - Patterns
 5. `.github/copilot/constraints.md` - Forbidden practices
 
 ## Project Overview
 
-**GigHub** is an enterprise-level construction site progress tracking system built with:
-- **Angular 20** - Standalone Components and Signals
-- **ng-alain 20** - Admin framework
-- **ng-zorro-antd 20** - Ant Design UI components
-- **Firebase/Firestore** - Backend services (Auth + Database)
-- **TypeScript 5.9** - Strict mode enabled
-- **RxJS 7.8** - Reactive programming
+**GigHub** - Enterprise construction site progress tracking system
 
-### Modern Angular Features (v19+)
-- ✅ **Signals** - Reactive state with `signal()`, `computed()`, `effect()`
-- ✅ **Control Flow** - `@if`, `@for`, `@switch` syntax
-- ✅ **Modern Inputs/Outputs** - `input()`, `output()`, `model()` functions
-- ✅ **Functional Guards** - Function-based guards with `inject()`
+**Tech Stack:**
+| Category | Technology | Version |
+|----------|-----------|---------|
+| Frontend | Angular | 20.3.x |
+| Admin Framework | ng-alain | 20.1.x |
+| UI Components | ng-zorro-antd | 20.3.x |
+| Backend | Firebase/Firestore | 20.0.x |
+| Language | TypeScript | 5.9.x |
+| Reactive | RxJS | 7.8.x |
+| Package Manager | Yarn | 4.9.2 |
 
-### Development Commands
+**Modern Angular (v19+):**
+- ✅ Signals: `signal()`, `computed()`, `effect()`
+- ✅ Control Flow: `@if`, `@for`, `@switch`
+- ✅ Modern I/O: `input()`, `output()`, `model()`
+- ✅ Functional Guards: `inject()`
 
-**Package Manager**: Yarn 4.9.2
-
+**Commands:**
 ```bash
-# Install dependencies
-yarn install
-
-# Development server  
-yarn start              # http://localhost:4200
-
-# Build
-yarn build             # Production build
-yarn analyze           # Build with source maps
-
-# Linting
-yarn lint              # Run all linters
-yarn lint:ts           # TypeScript/Angular
-yarn lint:style        # LESS styles
-
-# Testing
-yarn test              # Unit tests with watch
-yarn test-coverage     # Tests with coverage
-yarn e2e               # End-to-end tests
+yarn start          # Dev server (localhost:4200)
+yarn build          # Production build
+yarn lint           # Run linters
+yarn test           # Unit tests
+yarn e2e            # E2E tests
 ```
 
 ## MANDATORY Tool Usage
 
-**CRITICAL**: You MUST use these MCP tools. This is not optional.
+### Required MCP Tools
 
-### Tool Usage Requirements
+| Tool | When to Use | Required For |
+|------|-------------|--------------|
+| **Context7** | External library questions | ALL library/framework APIs |
+| **Sequential Thinking** | Complex problems | Architecture, multi-step analysis |
+| **Planning Tool** | New features (5+ tasks) | Task decomposition & tracking |
 
-#### 1. context7 (MANDATORY for library/framework questions)
+**Detailed Guide:** `.github/instructions/mcp-tools-usage.instructions.md`
 
-**YOU MUST USE context7 BEFORE:**
-- Writing ANY code using external libraries
-- Answering framework API or best practice questions
-- Implementing third-party dependency features
-- Verifying syntax or method signatures
+### Context7 (MANDATORY)
 
-**Required Workflow:**
+**MUST use BEFORE:**
+- Writing code with external libraries
+- Answering framework API questions
+- Implementing third-party features
+- Verifying syntax/signatures
+
+**Workflow:**
 ```
-1. resolve-library-id({ libraryName: "library-name" })
-2. get-library-docs({ context7CompatibleLibraryID: "/lib/lib", topic: "topic" })
-3. Read package.json to verify version
-4. Use documentation to provide accurate answers
+1. resolve-library-id({ libraryName })
+2. get-library-docs({ context7CompatibleLibraryID, topic })
+3. Read package.json (verify version)
+4. Use documentation
 ```
 
-**Examples requiring context7:**
-- "How to use Angular Signals?" → MUST call context7
-- "ng-alain ST table setup?" → MUST call context7  
-- "Firebase authentication?" → MUST call context7
-- "Firestore queries?" → MUST call context7
-- "RxJS operators?" → MUST call context7
+**Examples:**
+- Angular Signals → Context7 REQUIRED
+- ng-alain ST table → Context7 REQUIRED
+- Firebase auth → Context7 REQUIRED
+- RxJS operators → Context7 REQUIRED
 
-**NEVER:**
-- Guess or assume API signatures
-- Provide outdated syntax
-- Skip context7 verification
+### Sequential Thinking (MANDATORY)
 
-#### 2. sequential-thinking (MANDATORY for complex tasks)
+**MUST use WHEN:**
+- Architecture design
+- Complex bug analysis
+- Technical trade-offs
+- Task breakdown
+- Refactoring plans
 
-**YOU MUST USE sequential-thinking WHEN:**
-- Designing system architecture or new features
-- Analyzing complex bugs with multiple causes
-- Making technical trade-off decisions
-- Breaking down large tasks into steps
-- Planning refactoring strategies
-
-**Required Workflow:**
+**Workflow:**
 ```
-1. Identify problem complexity (if >2 steps, use sequential-thinking)
-2. Call sequential-thinking to analyze
-3. Document reasoning process
-4. Present solution with justification
+1. Identify complexity (>2 steps)
+2. Analyze (Observe → Analyze → Propose)
+3. Document reasoning
+4. Present solution
 ```
 
 #### 3. software-planning-tool (MANDATORY for new features)
@@ -176,156 +148,117 @@ yarn e2e               # End-to-end tests
 | Bug analysis (>2 causes) | sequential-thinking | Systematic problem solving |
 | API usage question | context7 | Verify current documentation |
 
-### Compliance Check
+### Planning Tool (MANDATORY)
 
-**Before providing ANY solution:**
-1. ✅ Did I check if context7 is needed?
-2. ✅ Did I check if sequential-thinking is needed?
-3. ✅ Did I check if software-planning-tool is needed?
-4. ✅ Did I read this instruction file?
+**MUST use WHEN:**
+- New features (5+ tasks)
+- Architecture refactoring
+- Complex integrations
+- Large bug fixes
 
-**If answer to ANY question is NO, STOP and use the required tool(s) first.**
+**Workflow:**
+```
+1. start_planning({ goal })
+2. add_todo(task, complexity)
+3. update_todo_status(id, status)
+4. Track progress
+```
 
-## Repository Guidelines
+## Development Guidelines
+
+### Architecture
+
+**Three-Layer Pattern:**
+```
+UI (Components) → Business (Services) → Data (Repositories) → Firestore
+```
+
+**Key Principles:**
+- Standalone Components only
+- Signals for state management
+- Repository pattern for data access
+- Security Rules at database level
 
 ### Code Standards
 
-**Architecture**: Three-layer architecture
-- Foundation Layer: Account, Auth, Organization
-- Container Layer: Blueprint, Permissions, Events
-- Business Layer: Tasks, Logs, Quality
+| Aspect | Requirement |
+|--------|-------------|
+| Components | Standalone, Signals, OnPush |
+| DI | `inject()` function only |
+| I/O | `input()`, `output()`, `model()` |
+| Control Flow | `@if`, `@for`, `@switch` |
+| Types | No `any`, use explicit types |
+| Testing | 80%+ services, 60%+ components |
 
-**Component Standards**:
-- Use Standalone Components (no NgModules)
-- Use Signals for state (`signal()`, `computed()`, `effect()`)
-- Use `inject()` for dependency injection
-- Use `input()`, `output()`, `model()` (Angular ≥19)
-- Use new control flow (`@if`, `@for`, `@switch`)
-- Import from `SHARED_IMPORTS` for common modules
+### Naming Conventions
 
-**Naming Conventions**:
-- Components: `feature-name.component.ts`
-- Services: `feature-name.service.ts`
-- Guards: `feature-name.guard.ts`
-- Use kebab-case for file names
-
-**State Management**:
-- Use Signals for component state
-- Use services for shared state
-- Use `@delon/cache` for persistent data
-- Use RxJS with `takeUntilDestroyed()` for subscriptions
-
-### Quality Standards
-
-**Code Quality**:
-- TypeScript strict mode enabled
-- No `any` types (use `unknown` with guards)
-- Comprehensive JSDoc comments
-- Unit tests for services (80%+ coverage)
-- Component tests (60%+ coverage)
-
-**Performance**:
-- Use `OnPush` change detection
-- Implement virtual scrolling for large lists
-- Lazy load feature modules
-- Optimize bundle size
-
-**Security**:
-- Use `@delon/auth` for authentication
-- Implement `@delon/acl` for authorization
-- Sanitize user inputs
-- Follow Angular security best practices
-- Implement Firestore Security Rules
-
-### Review Checklist
-
-**Before PR**:
-- [ ] Tests added/updated
-- [ ] No TypeScript errors
-- [ ] Lint passes
-- [ ] Follows project architecture
-- [ ] Uses SHARED_IMPORTS
-- [ ] Signals for state management
-- [ ] Uses new control flow syntax
-- [ ] Uses modern input/output functions
-- [ ] Uses `inject()` for dependency injection
-- [ ] Proper error handling
-
-## Additional Documentation
-
-Key documentation files in `.github/instructions/`:
-- `quick-reference.instructions.md` - Common patterns quick reference
-- `angular-modern-features.instructions.md` - Angular modern features guide
-- `angular.instructions.md` - Angular 20 development guidelines
-- `enterprise-angular-architecture.instructions.md` - Enterprise architecture patterns
-- `typescript-5-es2022.instructions.md` - TypeScript standards
-- `ng-alain-delon.instructions.md` - ng-alain & Delon framework
-- `ng-gighub-*.instructions.md` - GigHub-specific guidelines
-
-Additional resources in `.github/copilot/`:
-- `shortcuts/chat-shortcuts.md` - Copilot Chat shortcuts
-- `constraints.md` - Forbidden patterns
-- `agents/auto-triggers.yml` - MCP auto-trigger rules
-- `mcp-servers.yml` - MCP server configuration
-
-## Compliance Requirements
-
-### Mandatory Verification
-
-**EVERY response MUST include this verification:**
-
-```markdown
-### Compliance Verification
-
-#### Pre-Task Checks
-- [x] Read all mandatory rule files
-- [x] Identified required tools
-- [x] Verified three-layer architecture
-- [x] Confirmed Repository pattern usage
-- [x] Checked forbidden patterns avoided
-
-#### Tool Usage
-- Context7: [✅ Used / ❌ Not Needed / ⚠️ REQUIRED BUT NOT USED]
-- Sequential Thinking: [✅ Used / ❌ Not Needed / ⚠️ REQUIRED BUT NOT USED]
-- Planning Tool: [✅ Used / ❌ Not Needed / ⚠️ REQUIRED BUT NOT USED]
-
-#### Architecture Compliance
-- Three-layer separation: [✅ Yes / ❌ No]
-- Repository pattern: [✅ Yes / ❌ No]
-- Security Rules: [✅ Implemented / ❌ Not Needed / ⚠️ MISSING]
-
-#### Code Quality
-- Standalone Components: [✅ Yes / ❌ No]
-- Signals usage: [✅ Yes / ❌ No]
-- inject() usage: [✅ Yes / ❌ No]
-- New control flow: [✅ Yes / ❌ No]
-- No any types: [✅ Yes / ⚠️ Found any types]
-
-#### Forbidden Pattern Check
-- No direct Firestore: [✅ Clean]
-- No NgModule: [✅ Clean]
-- No constructor injection: [✅ Clean]
-- No manual subscriptions: [✅ Clean]
-
-**Status**: [✅ COMPLIANT / ⚠️ WARNINGS / ❌ VIOLATIONS]
+```
+feature-name.component.ts
+feature-name.service.ts
+feature-name.repository.ts
+feature-name.guard.ts
 ```
 
-### Enforcement Levels
+## Documentation Structure
 
-| Level | Status | Action |
-|-------|--------|--------|
-| ✅ COMPLIANT | All checks pass | Proceed |
-| ⚠️ WARNINGS | SHOULD rules not followed | Proceed with warnings |
-| ❌ VIOLATIONS | MUST rules violated | STOP - Follow workflow |
+### Core Instructions (`.github/instructions/`)
 
-### Violation Response
+**Framework:**
+- `angular.instructions.md` - Angular 20 guide
+- `ng-alain-delon.instructions.md` - Admin framework
+- `typescript-5-es2022.instructions.md` - TypeScript standards
 
-**If MUST rule violated:**
-1. STOP immediately
-2. Display violation message
-3. Explain correct approach
-4. Request user confirmation
-5. RESTART with proper workflow
+**GigHub-Specific:**
+- `ng-gighub-architecture.instructions.md` - Architecture patterns
+- `ng-gighub-development-workflow.instructions.md` - Development process
+- `ng-gighub-firestore-repository.instructions.md` - Data access patterns
+- `ng-gighub-security-rules.instructions.md` - Security implementation
+- `mcp-tools-usage.instructions.md` - MCP tools comprehensive guide
+- `quick-reference.instructions.md` - Quick patterns lookup
+
+**Best Practices:**
+- `a11y.instructions.md` - Accessibility
+- `security-and-owasp.instructions.md` - Security guidelines
+- `performance-optimization.instructions.md` - Performance tips
+- `code-review-generic.instructions.md` - Review standards
+
+### Rules (`.github/rules/`)
+
+- `mandatory-workflow.md` - Required workflow
+- `project-rules.md` - Project-specific rules
+- `architectural-principles.md` - Architecture standards
+- `enforcement-policy.md` - Compliance enforcement
+
+## Compliance Verification
+
+**Before ANY response, verify:**
+
+| Check | Requirement |
+|-------|-------------|
+| Tool Usage | Context7/Sequential Thinking/Planning Tool used if needed |
+| Architecture | Three-layer pattern followed |
+| Data Access | Repository pattern used (no direct Firestore) |
+| Components | Standalone + Signals |
+| Patterns | No forbidden patterns |
+
+**Enforcement:**
+- ✅ **COMPLIANT**: All checks pass → Proceed
+- ⚠️ **WARNINGS**: SHOULD rules → Proceed with note
+- ❌ **VIOLATIONS**: MUST rules → STOP and correct
+
+## Success Criteria
+
+**Response considered successful ONLY IF:**
+1. ✅ All mandatory rules followed
+2. ✅ Required tools used appropriately
+3. ✅ Architecture rules strictly followed
+4. ✅ All forbidden patterns avoided
+5. ✅ Verification completed
+6. ✅ Solution meets requirements
+7. ✅ Code quality standards met
+8. ✅ Security requirements satisfied
+
+**Less than 100% compliance = FAILURE**
 
 ## Core Requirements
 
@@ -384,3 +317,17 @@ Additional resources in `.github/copilot/`:
 **Compliance Level**: MANDATORY - 100% Required
 
 **Note**: This repository requires absolute adherence to all rules and standards. The mandatory tool usage policy ensures accurate, up-to-date, secure, and architecturally sound solutions.
+
+---
+
+**Version**: v3.1 (Optimized)  
+**Last Updated**: 2025-12-18  
+**Compliance Level**: MANDATORY - 100% Required
+
+**Note**: This repository requires absolute adherence to all rules and standards. The mandatory tool usage policy ensures accurate, up-to-date, secure, and architecturally sound solutions.
+
+**For detailed guidance, refer to:**
+- MCP Tools: `.github/instructions/mcp-tools-usage.instructions.md`
+- Quick Reference: `.github/instructions/quick-reference.instructions.md`
+- Architecture: `.github/instructions/ng-gighub-architecture.instructions.md`
+- Workflow: `.github/instructions/ng-gighub-development-workflow.instructions.md`
