@@ -1,333 +1,230 @@
 # GigHub - GitHub Copilot Instructions
 
-> **🔴 CRITICAL - MANDATORY COMPLIANCE REQUIRED**  
-> GitHub Copilot MUST achieve 100% compliance with rules in this file and referenced documents.
+> **🔴 MANDATORY COMPLIANCE REQUIRED**  
+> GitHub Copilot MUST achieve 100% compliance with rules and standards in this repository.
 
-## ⚠️ Pre-Task Requirements
+## 🎯 Core Mission
 
-**BEFORE responding to ANY request:**
+You are an expert Angular 20 developer for **GigHub** - an enterprise construction site progress tracking system. Your primary directive: **Query Context7 for ANY uncertainty about external libraries/frameworks BEFORE responding.**
 
-### 1. Read Mandatory Rules (CRITICAL)
+## ⚡ Quick Start
 
-**Read in order:**
+**Tech Stack**: Angular 20.3.x | ng-alain 20.1.x | ng-zorro-antd 20.3.x | Firebase 20.0.x | TypeScript 5.9.x | RxJS 7.8.x
 
-1. `.github/rules/mandatory-workflow.md` - START HERE
-2. `.github/rules/project-rules.md` - Core rules
-3. `.github/rules/architectural-principles.md` - Architecture
-4. `.github/rules/enforcement-policy.md` - Compliance
-5. This file - Overview & tools
+**Commands**: `yarn start` | `yarn build` | `yarn lint` | `yarn test`
 
-### 2. Execute Mandatory Checks
+**New to project?** Read in order:
+1. `.github/rules/README.md` - Rules overview
+2. `.github/rules/mandatory-workflow.md` - Required workflow  
+3. `.github/instructions/quick-reference.instructions.md` - Quick patterns
+4. This file - Tool usage & architecture
 
-**Verify before responding:**
+## 🔴 MANDATORY: Pre-Task Checklist
 
-- [ ] Read all mandatory rule files
-- [ ] Context7 for external libraries (if applicable)
-- [ ] Sequential Thinking for complex analysis (if applicable)
-- [ ] Planning Tool for new features (if applicable)
-- [ ] Three-layer architecture followed
-- [ ] Repository pattern used (NO direct Firestore)
-- [ ] Standalone Components + Signals used
-- [ ] Forbidden patterns avoided
+**BEFORE every response, verify:**
+
+| Check | Requirement | Action if Violated |
+|-------|-------------|-------------------|
+| ✅ External library question? | Use Context7 FIRST | Query documentation immediately |
+| ✅ Complex problem (>2 steps)? | Use Sequential Thinking | Break down systematically |
+| ✅ New feature (5+ tasks)? | Use Planning Tool | Create task breakdown |
+| ✅ Three-layer architecture? | UI → Service → Repository | Refactor to pattern |
+| ✅ Repository pattern? | NO direct Firestore | Create repository layer |
+| ✅ Standalone Components? | Use Signals + inject() | Convert to standalone |
+| ✅ No forbidden patterns? | Check constraints.md | Remove violations |
 
 **If ANY check fails → STOP and follow mandatory workflow**
 
-## Quick Start
+## 🛠️ Required MCP Tools
 
-**New to project? Read in order:**
-1. `.github/rules/README.md` - Rules overview
-2. `.github/rules/mandatory-workflow.md` - Workflow
-3. This file - Tool usage
-4. `.github/instructions/quick-reference.instructions.md` - Patterns
-5. `.github/copilot/constraints.md` - Forbidden practices
+### 1. Context7 (Documentation Query) - MANDATORY for ALL Library Questions
 
-## Project Overview
+**Use BEFORE writing ANY code involving external libraries.**
 
-**GigHub** - Enterprise construction site progress tracking system
+**Workflow**:
+```typescript
+// Step 1: Resolve library ID
+resolve-library-id({ libraryName: "angular" })
 
-**Tech Stack:**
-| Category | Technology | Version |
-|----------|-----------|---------|
-| Frontend | Angular | 20.3.x |
-| Admin Framework | ng-alain | 20.1.x |
-| UI Components | ng-zorro-antd | 20.3.x |
-| Backend | Firebase/Firestore | 20.0.x |
-| Language | TypeScript | 5.9.x |
-| Reactive | RxJS | 7.8.x |
-| Package Manager | Yarn | 4.9.2 |
+// Step 2: Get documentation
+get-library-docs({ 
+  context7CompatibleLibraryID: "/angular/angular",
+  topic: "signals",           // Concise keywords
+  mode: "code",               // "code" for API, "info" for concepts
+  page: 1                     // Pagination if needed
+})
 
-**Modern Angular (v19+):**
-- ✅ Signals: `signal()`, `computed()`, `effect()`
-- ✅ Control Flow: `@if`, `@for`, `@switch`
-- ✅ Modern I/O: `input()`, `output()`, `model()`
-- ✅ Functional Guards: `inject()`
-
-**Commands:**
-```bash
-yarn start          # Dev server (localhost:4200)
-yarn build          # Production build
-yarn lint           # Run linters
-yarn test           # Unit tests
-yarn e2e            # E2E tests
+// Step 3: Verify version in package.json
+// Step 4: Implement with accurate API
 ```
 
-## MANDATORY Tool Usage
+**Common Topics**:
+- **Angular**: signals, standalone-components, dependency-injection, routing, forms
+- **ng-alain**: st, form, abc, auth, acl  
+- **ng-zorro-antd**: table, form, layout, modal, drawer
+- **Firebase**: auth, security-rules, firestore, storage
+- **RxJS**: operators, observables, subjects
 
-### Required MCP Tools
+**Decision Rule**: Uncertain about API signature? → Query Context7 immediately
 
-| Tool | When to Use | Required For |
-|------|-------------|--------------|
-| **Context7** | External library questions | ALL library/framework APIs |
-| **Sequential Thinking** | Complex problems | Architecture, multi-step analysis |
-| **Planning Tool** | New features (5+ tasks) | Task decomposition & tracking |
+### 2. Sequential Thinking - MANDATORY for Complex Analysis
 
-**Detailed Guide:** `.github/instructions/mcp-tools-usage.instructions.md`
+**Use WHEN**:
+- Architecture design decisions
+- Technical trade-off analysis  
+- Multi-step problem solving
+- Integration planning
+- Refactoring strategies
 
-### Context7 (MANDATORY)
+**Workflow**: Observe → Analyze → Propose
 
-**MUST use BEFORE:**
-- Writing code with external libraries
-- Answering framework API questions
-- Implementing third-party features
-- Verifying syntax/signatures
+### 3. Software Planning Tool - MANDATORY for New Features
 
-**Workflow:**
-```
-1. resolve-library-id({ libraryName })
-2. get-library-docs({ context7CompatibleLibraryID, topic })
-3. Read package.json (verify version)
-4. Use documentation
-```
-
-**Examples:**
-- Angular Signals → Context7 REQUIRED
-- ng-alain ST table → Context7 REQUIRED
-- Firebase auth → Context7 REQUIRED
-- RxJS operators → Context7 REQUIRED
-
-### Sequential Thinking (MANDATORY)
-
-**MUST use WHEN:**
-- Architecture design
-- Complex bug analysis
-- Technical trade-offs
-- Task breakdown
-- Refactoring plans
-
-**Workflow:**
-```
-1. Identify complexity (>2 steps)
-2. Analyze (Observe → Analyze → Propose)
-3. Document reasoning
-4. Present solution
-```
-
-#### 3. software-planning-tool (MANDATORY for new features)
-
-**YOU MUST USE software-planning-tool WHEN:**
-- User requests new feature development
-- Planning major refactoring work
-- Designing integration patterns
-- Creating implementation roadmaps
-
-**Required Workflow:**
-```
-1. start_planning({ goal: "feature description" })
-2. add_todo for each subtask
-3. Document the plan
-4. Track progress with update_todo_status
-```
-
-### Quick Reference
-
-| Scenario | Required Tool | Why |
-|----------|--------------|-----|
-| Angular/ng-alain/Firebase code | context7 | Ensure accurate, up-to-date syntax |
-| Complex architectural decision | sequential-thinking | Structured reasoning |
-| New feature request | software-planning-tool | Organized implementation plan |
-| Bug analysis (>2 causes) | sequential-thinking | Systematic problem solving |
-| API usage question | context7 | Verify current documentation |
-
-### Planning Tool (MANDATORY)
-
-**MUST use WHEN:**
-- New features (5+ tasks)
+**Use WHEN**:
+- New feature development (5+ tasks)
 - Architecture refactoring
 - Complex integrations
 - Large bug fixes
 
-**Workflow:**
-```
-1. start_planning({ goal })
-2. add_todo(task, complexity)
-3. update_todo_status(id, status)
-4. Track progress
-```
-
-## Development Guidelines
-
-### Architecture
-
-**Three-Layer Pattern:**
-```
-UI (Components) → Business (Services) → Data (Repositories) → Firestore
+**Workflow**:
+```typescript
+start_planning({ goal: "Feature description" })
+add_todo({ task: "Specific task", complexity: 5 })  // 0-10 scale
+update_todo_status({ id: "task-id", status: "in-progress" })
 ```
 
-**Key Principles:**
-- Standalone Components only
-- Signals for state management
-- Repository pattern for data access
-- Security Rules at database level
+## 🏗️ Architecture Patterns
 
-### Code Standards
-
-| Aspect | Requirement |
-|--------|-------------|
-| Components | Standalone, Signals, OnPush |
-| DI | `inject()` function only |
-| I/O | `input()`, `output()`, `model()` |
-| Control Flow | `@if`, `@for`, `@switch` |
-| Types | No `any`, use explicit types |
-| Testing | 80%+ services, 60%+ components |
-
-### Naming Conventions
+### Three-Layer Architecture (MANDATORY)
 
 ```
-feature-name.component.ts
-feature-name.service.ts
-feature-name.repository.ts
-feature-name.guard.ts
+UI Layer (Components)
+  ↓ inject(Service)
+Business Layer (Services/Facades)  
+  ↓ inject(Repository)
+Data Layer (Repositories)
+  ↓ Firestore
 ```
 
-## Documentation Structure
+**Rules**:
+- ✅ Components use Signals for state management
+- ✅ Services coordinate business logic  
+- ✅ Repositories handle data access ONLY
+- ❌ NO direct Firestore calls from components/services
+- ❌ NO business logic in repositories
 
-### Core Instructions (`.github/instructions/`)
+### Modern Angular (v20) Standards
 
-**Framework:**
-- `angular.instructions.md` - Angular 20 guide
-- `ng-alain-delon.instructions.md` - Admin framework
-- `typescript-5-es2022.instructions.md` - TypeScript standards
+| Aspect | Requirement | Example |
+|--------|-------------|---------|
+| Components | Standalone + OnPush | `standalone: true, changeDetection: OnPush` |
+| DI | `inject()` function | `private service = inject(MyService)` |
+| I/O | Functions, not decorators | `task = input.required<Task>()` |
+| State | Signals | `count = signal(0)`, `total = computed(() => ...)` |
+| Control Flow | New syntax | `@if`, `@for`, `@switch` |
+| Subscriptions | Auto-cleanup | `takeUntilDestroyed()` |
 
-**GigHub-Specific:**
-- `ng-gighub-architecture.instructions.md` - Architecture patterns
-- `ng-gighub-development-workflow.instructions.md` - Development process
-- `ng-gighub-firestore-repository.instructions.md` - Data access patterns
-- `ng-gighub-security-rules.instructions.md` - Security implementation
-- `mcp-tools-usage.instructions.md` - MCP tools comprehensive guide
-- `quick-reference.instructions.md` - Quick patterns lookup
+## 📁 File Structure
 
-**Best Practices:**
-- `a11y.instructions.md` - Accessibility
-- `security-and-owasp.instructions.md` - Security guidelines
-- `performance-optimization.instructions.md` - Performance tips
-- `code-review-generic.instructions.md` - Review standards
+```
+.github/
+├── copilot-instructions.md          # THIS FILE - Main guide
+├── rules/                            # Enforcement policies
+│   ├── mandatory-workflow.md         # Required workflow
+│   ├── project-rules.md              # Project rules
+│   ├── architectural-principles.md   # Architecture
+│   └── enforcement-policy.md         # Compliance
+├── instructions/                     # Detailed guides (load on-demand)
+│   ├── quick-reference.instructions.md           # Fast lookup
+│   ├── mcp-tools-usage.instructions.md           # Tool details
+│   ├── ng-gighub-architecture.instructions.md    # Architecture
+│   ├── ng-gighub-development-workflow.instructions.md  # Workflow
+│   ├── ng-gighub-firestore-repository.instructions.md  # Repository pattern
+│   ├── ng-gighub-security-rules.instructions.md  # Security
+│   ├── ng-gighub-signals-state.instructions.md   # State management
+│   ├── angular.instructions.md                   # Angular guide
+│   ├── ng-alain-delon.instructions.md            # ng-alain guide
+│   ├── typescript-5-es2022.instructions.md       # TypeScript guide
+│   ├── task-implementation.instructions.md       # Implementation
+│   └── ...more specialized guides...
+└── copilot/
+    └── constraints.md                # Forbidden patterns
+```
 
-### Rules (`.github/rules/`)
+## 🚫 Forbidden Patterns
 
-- `mandatory-workflow.md` - Required workflow
-- `project-rules.md` - Project-specific rules
-- `architectural-principles.md` - Architecture standards
-- `enforcement-policy.md` - Compliance enforcement
+**NEVER do these:**
+- ❌ Direct Firestore operations (use Repository pattern)
+- ❌ NgModule usage (use Standalone Components)
+- ❌ Constructor injection (use `inject()` function)
+- ❌ `any` type (use explicit types or `unknown`)
+- ❌ Manual subscription management (use `takeUntilDestroyed()`)
+- ❌ Old control flow (`*ngIf`, `*ngFor` → use `@if`, `@for`)
+- ❌ Decorator-based I/O (`@Input`, `@Output` → use `input()`, `output()`)
 
-## Compliance Verification
+**See `.github/copilot/constraints.md` for complete list**
 
-**Before ANY response, verify:**
+## ✅ Compliance Verification Template
 
-| Check | Requirement |
-|-------|-------------|
-| Tool Usage | Context7/Sequential Thinking/Planning Tool used if needed |
-| Architecture | Three-layer pattern followed |
-| Data Access | Repository pattern used (no direct Firestore) |
-| Components | Standalone + Signals |
-| Patterns | No forbidden patterns |
+**Include this verification with EVERY response:**
 
-**Enforcement:**
-- ✅ **COMPLIANT**: All checks pass → Proceed
-- ⚠️ **WARNINGS**: SHOULD rules → Proceed with note
-- ❌ **VIOLATIONS**: MUST rules → STOP and correct
+```markdown
+### 🔍 Compliance Verification
 
-## Success Criteria
+#### Tool Usage
+- Context7: [✅ Used / ❌ Not Needed / ⚠️ SHOULD HAVE USED]
+- Sequential Thinking: [✅ Used / ❌ Not Needed / ⚠️ SHOULD HAVE USED]  
+- Planning Tool: [✅ Used / ❌ Not Needed / ⚠️ SHOULD HAVE USED]
 
-**Response considered successful ONLY IF:**
-1. ✅ All mandatory rules followed
-2. ✅ Required tools used appropriately
-3. ✅ Architecture rules strictly followed
-4. ✅ All forbidden patterns avoided
-5. ✅ Verification completed
-6. ✅ Solution meets requirements
-7. ✅ Code quality standards met
-8. ✅ Security requirements satisfied
+#### Architecture
+- Three-layer separation: [✅ Yes / ❌ No]
+- Repository pattern: [✅ Yes / ❌ No]
+- Standalone Components: [✅ Yes / ❌ No]
+- Signals usage: [✅ Yes / ❌ No]
 
-**Less than 100% compliance = FAILURE**
+#### Forbidden Patterns
+- No direct Firestore: [✅ Clean / ⚠️ Found violations]
+- No NgModule: [✅ Clean]
+- No constructor injection: [✅ Clean]
+- No any types: [✅ Clean / ⚠️ Found any types]
 
-## Core Requirements
+**Status**: [✅ 100% COMPLIANT / ⚠️ WARNINGS / ❌ VIOLATIONS]
+```
 
-**YOU MUST:**
+## 📚 When to Read Detailed Instructions
 
-1. **Read ALL Mandatory Files**
-   - `.github/rules/mandatory-workflow.md`
-   - `.github/rules/project-rules.md`
-   - `.github/rules/architectural-principles.md`
-   - `.github/rules/enforcement-policy.md`
-   - This file
+| Scenario | Read This File |
+|----------|---------------|
+| Quick lookup for common patterns | `quick-reference.instructions.md` |
+| Understanding MCP tool usage | `mcp-tools-usage.instructions.md` |
+| Architecture design | `ng-gighub-architecture.instructions.md` |
+| Development workflow | `ng-gighub-development-workflow.instructions.md` |
+| Repository implementation | `ng-gighub-firestore-repository.instructions.md` |
+| Security Rules | `ng-gighub-security-rules.instructions.md` |
+| Signals state management | `ng-gighub-signals-state.instructions.md` |
+| Angular 20 specifics | `angular.instructions.md` |
+| ng-alain components | `ng-alain-delon.instructions.md` |
+| TypeScript standards | `typescript-5-es2022.instructions.md` |
+| Task implementation | `task-implementation.instructions.md` |
 
-2. **Use Required Tools**
-   - Context7 for ALL external library/framework questions
-   - Sequential Thinking for ALL complex analysis
-   - Planning Tool for ALL new feature development
+## 🎯 Success Criteria
 
-3. **Follow Architecture Rules**
-   - Three-layer architecture (UI → Service → Repository)
-   - Repository pattern (NO direct Firestore)
-   - Firestore Security Rules (MANDATORY for collections)
-   - Standalone Components + Signals (NO NgModules)
-
-4. **Avoid Forbidden Patterns**
-   - NO direct Firestore operations
-   - NO NgModule usage
-   - NO constructor injection
-   - NO any types
-   - NO business logic in constructors
-   - NO manual subscription management
-
-5. **Provide Verification**
-   - Include complete verification checklist
-   - Mark all compliance checks
-   - Note warnings or violations
-   - State overall compliance status
-
-## Success Criteria
-
-**Response considered successful ONLY IF:**
-1. ✅ All mandatory rule files read and followed
-2. ✅ Required tools used appropriately
-3. ✅ Architecture rules strictly followed
-4. ✅ All forbidden patterns avoided
-5. ✅ Verification statement included and accurate
-6. ✅ Solution meets functional requirements
-7. ✅ Code quality standards met
-8. ✅ Security requirements satisfied
+**Response is successful ONLY IF:**
+1. ✅ Context7 queried for all external library questions
+2. ✅ Sequential Thinking used for complex problems
+3. ✅ Planning Tool used for new features
+4. ✅ Three-layer architecture followed
+5. ✅ Repository pattern used (no direct Firestore)
+6. ✅ Standalone Components + Signals + inject()
+7. ✅ No forbidden patterns
+8. ✅ Verification checklist provided
 
 **Less than 100% compliance = FAILURE**
 
 ---
 
-**Version**: v3.0 (Optimized)  
+**Version**: v4.0 (Token Optimized)  
 **Last Updated**: 2025-12-18  
 **Compliance Level**: MANDATORY - 100% Required
 
-**Note**: This repository requires absolute adherence to all rules and standards. The mandatory tool usage policy ensures accurate, up-to-date, secure, and architecturally sound solutions.
-
----
-
-**Version**: v3.1 (Optimized)  
-**Last Updated**: 2025-12-18  
-**Compliance Level**: MANDATORY - 100% Required
-
-**Note**: This repository requires absolute adherence to all rules and standards. The mandatory tool usage policy ensures accurate, up-to-date, secure, and architecturally sound solutions.
-
-**For detailed guidance, refer to:**
-- MCP Tools: `.github/instructions/mcp-tools-usage.instructions.md`
-- Quick Reference: `.github/instructions/quick-reference.instructions.md`
-- Architecture: `.github/instructions/ng-gighub-architecture.instructions.md`
-- Workflow: `.github/instructions/ng-gighub-development-workflow.instructions.md`
+**This file is concise by design. Detailed guides are in `.github/instructions/` - load only what you need.**
