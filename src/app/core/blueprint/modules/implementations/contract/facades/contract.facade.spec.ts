@@ -37,7 +37,8 @@ describe('ContractFacade', () => {
     description: 'Test Description',
     status: 'draft' as ContractStatus,
     owner: {
-      type: 'company',
+      id: 'owner-1',
+      type: 'owner',
       name: 'Owner Corp',
       contactPerson: 'John Doe',
       contactPhone: '123-456-7890',
@@ -45,18 +46,21 @@ describe('ContractFacade', () => {
       address: '123 Main St'
     },
     contractor: {
-      type: 'company',
+      id: 'contractor-1',
+      type: 'contractor',
       name: 'Contractor LLC',
       contactPerson: 'Jane Smith',
       contactPhone: '098-765-4321',
       contactEmail: 'jane@contractor.com',
       address: '456 Oak Ave'
     },
-    contractAmount: 1000000,
+    totalAmount: 1000000,
     currency: 'TWD',
+    workItems: [],
     startDate: new Date('2025-01-01'),
     endDate: new Date('2025-12-31'),
-    signingDate: new Date('2024-12-15'),
+    signedDate: new Date('2024-12-15'),
+    originalFiles: [],
     createdAt: new Date(),
     createdBy: sampleUserId,
     updatedAt: new Date(),
@@ -277,15 +281,17 @@ describe('ContractFacade', () => {
 
     it('should create new contract successfully', async () => {
       const createDto: CreateContractDto = {
+        blueprintId: sampleBlueprintId,
         title: 'New Contract',
         description: 'New Description',
         owner: sampleContract.owner,
         contractor: sampleContract.contractor,
-        contractAmount: 500000,
+        totalAmount: 500000,
         currency: 'TWD',
         startDate: new Date('2025-01-01'),
         endDate: new Date('2025-12-31'),
-        signingDate: new Date('2024-12-15')
+        signedDate: new Date('2024-12-15'),
+        createdBy: sampleUserId
       };
 
       mockRepository.create.and.returnValue(Promise.resolve(sampleContract));
@@ -302,15 +308,17 @@ describe('ContractFacade', () => {
 
     it('should emit CREATED event after successful creation', async () => {
       const createDto: CreateContractDto = {
+        blueprintId: sampleBlueprintId,
         title: 'New Contract',
         description: '',
         owner: sampleContract.owner,
         contractor: sampleContract.contractor,
-        contractAmount: 500000,
+        totalAmount: 500000,
         currency: 'TWD',
         startDate: new Date(),
         endDate: new Date(),
-        signingDate: new Date()
+        signedDate: new Date(),
+        createdBy: sampleUserId
       };
 
       mockRepository.create.and.returnValue(Promise.resolve(sampleContract));
@@ -332,15 +340,17 @@ describe('ContractFacade', () => {
 
     it('should handle create errors', async () => {
       const createDto: CreateContractDto = {
+        blueprintId: sampleBlueprintId,
         title: 'New Contract',
         description: '',
         owner: sampleContract.owner,
         contractor: sampleContract.contractor,
-        contractAmount: 500000,
+        totalAmount: 500000,
         currency: 'TWD',
         startDate: new Date(),
         endDate: new Date(),
-        signingDate: new Date()
+        signedDate: new Date(),
+        createdBy: sampleUserId
       };
 
       const errorMessage = 'Failed to create';
@@ -356,15 +366,17 @@ describe('ContractFacade', () => {
       facade.reset();
 
       const createDto: CreateContractDto = {
+        blueprintId: sampleBlueprintId,
         title: 'Test',
         description: '',
         owner: sampleContract.owner,
         contractor: sampleContract.contractor,
-        contractAmount: 500000,
+        totalAmount: 500000,
         currency: 'TWD',
         startDate: new Date(),
         endDate: new Date(),
-        signingDate: new Date()
+        signedDate: new Date(),
+        createdBy: sampleUserId
       };
 
       await expectAsync(facade.createContract(createDto)).toBeRejectedWithError(/Blueprint ID not set/);
@@ -383,12 +395,12 @@ describe('ContractFacade', () => {
     it('should update existing contract', async () => {
       const updateDto: UpdateContractDto = {
         title: 'Updated Title',
-        updatedAt: new Date(),
         updatedBy: sampleUserId
       };
 
-      mockRepository.update.and.returnValue(Promise.resolve());
-      mockRepository.findById.and.returnValue(of({ ...sampleContract, ...updateDto }));
+      const updatedContract = { ...sampleContract, ...updateDto, updatedAt: new Date() };
+      mockRepository.update.and.returnValue(Promise.resolve(updatedContract));
+      mockRepository.findById.and.returnValue(of(updatedContract));
 
       await facade.updateContract(sampleContractId, updateDto);
 
@@ -399,12 +411,12 @@ describe('ContractFacade', () => {
     it('should emit UPDATED event after successful update', async () => {
       const updateDto: UpdateContractDto = {
         title: 'Updated Title',
-        updatedAt: new Date(),
         updatedBy: sampleUserId
       };
 
-      mockRepository.update.and.returnValue(Promise.resolve());
-      mockRepository.findById.and.returnValue(of({ ...sampleContract, ...updateDto }));
+      const updatedContract = { ...sampleContract, ...updateDto, updatedAt: new Date() };
+      mockRepository.update.and.returnValue(Promise.resolve(updatedContract));
+      mockRepository.findById.and.returnValue(of(updatedContract));
 
       await facade.updateContract(sampleContractId, updateDto);
 
@@ -422,7 +434,6 @@ describe('ContractFacade', () => {
     it('should handle update errors', async () => {
       const updateDto: UpdateContractDto = {
         title: 'Updated Title',
-        updatedAt: new Date(),
         updatedBy: sampleUserId
       };
 
@@ -447,8 +458,9 @@ describe('ContractFacade', () => {
 
     it('should change contract status successfully', async () => {
       const newStatus: ContractStatus = 'active';
+      const updatedContract = { ...sampleContract, status: newStatus };
 
-      mockRepository.update.and.returnValue(Promise.resolve());
+      mockRepository.update.and.returnValue(Promise.resolve(updatedContract));
 
       await facade.changeContractStatus(sampleContractId, newStatus);
 
@@ -458,7 +470,8 @@ describe('ContractFacade', () => {
 
     it('should emit STATUS_CHANGED event', async () => {
       const newStatus: ContractStatus = 'active';
-      mockRepository.update.and.returnValue(Promise.resolve());
+      const updatedContract = { ...sampleContract, status: newStatus };
+      mockRepository.update.and.returnValue(Promise.resolve(updatedContract));
 
       await facade.changeContractStatus(sampleContractId, newStatus);
 
@@ -475,7 +488,8 @@ describe('ContractFacade', () => {
     });
 
     it('should emit ACTIVATED event when status changes to active', async () => {
-      mockRepository.update.and.returnValue(Promise.resolve());
+      const updatedContract = { ...sampleContract, status: 'active' as ContractStatus };
+      mockRepository.update.and.returnValue(Promise.resolve(updatedContract));
 
       await facade.changeContractStatus(sampleContractId, 'active');
 
@@ -487,7 +501,8 @@ describe('ContractFacade', () => {
     });
 
     it('should emit COMPLETED event when status changes to completed', async () => {
-      mockRepository.update.and.returnValue(Promise.resolve());
+      const updatedContract = { ...sampleContract, status: 'completed' as ContractStatus };
+      mockRepository.update.and.returnValue(Promise.resolve(updatedContract));
 
       await facade.changeContractStatus(sampleContractId, 'completed');
 
@@ -499,7 +514,8 @@ describe('ContractFacade', () => {
     });
 
     it('should emit TERMINATED event when status changes to terminated', async () => {
-      mockRepository.update.and.returnValue(Promise.resolve());
+      const updatedContract = { ...sampleContract, status: 'terminated' as ContractStatus };
+      mockRepository.update.and.returnValue(Promise.resolve(updatedContract));
 
       await facade.changeContractStatus(sampleContractId, 'terminated');
 
@@ -649,15 +665,17 @@ describe('ContractFacade', () => {
       mockRepository.create.and.returnValue(Promise.resolve(sampleContract));
 
       const createDto: CreateContractDto = {
+        blueprintId: sampleBlueprintId,
         title: 'Test',
         description: '',
         owner: sampleContract.owner,
         contractor: sampleContract.contractor,
-        contractAmount: 500000,
+        totalAmount: 500000,
         currency: 'TWD',
         startDate: new Date(),
         endDate: new Date(),
-        signingDate: new Date()
+        signedDate: new Date(),
+        createdBy: sampleUserId
       };
 
       await facade.createContract(createDto);
@@ -679,15 +697,17 @@ describe('ContractFacade', () => {
       mockEventBus.emitEvent.and.throwError('EventBus error');
 
       const createDto: CreateContractDto = {
+        blueprintId: sampleBlueprintId,
         title: 'Test',
         description: '',
         owner: sampleContract.owner,
         contractor: sampleContract.contractor,
-        contractAmount: 500000,
+        totalAmount: 500000,
         currency: 'TWD',
         startDate: new Date(),
         endDate: new Date(),
-        signingDate: new Date()
+        signedDate: new Date(),
+        createdBy: sampleUserId
       };
 
       // Should not throw - event emission errors are logged but not propagated
