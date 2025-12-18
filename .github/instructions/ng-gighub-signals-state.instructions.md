@@ -5,8 +5,7 @@ applyTo: '**/*.ts'
 
 # GigHub Signals 狀態管理
 
-> **專案專用**: Angular Signals 響應式狀態管理  
-> **來源**: 從 `原則.md` 和 Angular 20 最佳實踐提取
+> **專案專用**: Angular Signals 響應式狀態管理
 
 ## 🎯 核心原則 (MUST) 🔴
 

@@ -5,8 +5,7 @@ applyTo: '**/*.ts'
 
 # GigHub Firestore Repository Pattern
 
-> **專案專用**: Firestore Repository 模式實作指引  
-> **來源**: 從 `src/app/core/data-access/repositories/base/firestore-base.repository.ts` 提取
+> **專案專用**: Firestore Repository 模式實作指引
 
 ## 🎯 核心原則 (MUST) 🔴
 

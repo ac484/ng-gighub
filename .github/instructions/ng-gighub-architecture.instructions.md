@@ -5,8 +5,7 @@ applyTo: '**/*.ts, **/*.html, **/*.scss'
 
 # GigHub 系統架構設計
 
-> **專案專用**: GigHub 工地施工進度追蹤管理系統  
-> **來源**: 從 `原則.md` 和 `architectural-principles.md` 提取
+> **專案專用**: GigHub 工地施工進度追蹤管理系統
 
 ## 🎯 核心理念 (MUST) 🔴
 

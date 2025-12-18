@@ -5,8 +5,7 @@ applyTo: 'firestore.rules, **/*.ts'
 
 # GigHub Security Rules
 
-> **專案專用**: Firestore Security Rules 設計與實作  
-> **來源**: 從 `原則.md` 和 `architectural-principles.md` 提取
+> **專案專用**: Firestore Security Rules 設計與實作
 
 ## 🔒 核心原則 (MUST) 🔴
 
