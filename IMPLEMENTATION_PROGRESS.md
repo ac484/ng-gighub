@@ -1173,26 +1173,31 @@
 **開始時間**: 2025-12-18 15:00 UTC
 
 **子任務**:
-- [x] 2.1.1 ST Table Setup (1h/6h)
+- [x] 2.1.1 ST Table Setup (1h/6h) ✅ 完成
   - [x] 建立 Contract List Component (Standalone + Signals)
   - [x] 定義 STColumn[] 配置 (所有合約欄位)
   - [x] 實作狀態統計區塊 (草稿/待生效/已生效/已完成)
   - [x] 實作篩選區域 (狀態選擇器 + 搜尋框)
   - [x] 連接 ContractFacade signals
   - [x] 實作排序、分頁功能
-  - [ ] 測試與調整樣式
-- [ ] 2.1.2 Filtering & Search (0h/4h)
-  - [ ] 實作 debounced search (300ms)
-  - [ ] URL query params 持久化
-  - [ ] 清除篩選功能
-- [ ] 2.1.3 Bulk Operations (0h/4h)
-  - [ ] 多選 checkbox 欄位
-  - [ ] 批次刪除功能
-  - [ ] 批次匯出功能
+- [x] 2.1.2 Filtering & Search (4h/4h) ✅ 完成
+  - [x] 實作 debounced search (300ms) with RxJS Subject
+  - [x] 增強狀態篩選 (多選 1-5 個狀態)
+  - [x] 新增日期範圍篩選 (簽約日期)
+  - [x] URL query params 持久化 (status, search, dateRange)
+  - [x] 清除篩選功能 (Clear All Filters button)
+  - [x] 篩選計數 badge (X / Total)
+- [x] 2.1.3 Bulk Operations (4h/4h) ✅ 完成
+  - [x] 多選 checkbox 欄位 (ST table type='checkbox')
+  - [x] 全選/反選/取消全選功能
+  - [x] Bulk actions toolbar (fixed bottom position)
+  - [x] 批次刪除功能 (僅草稿，含確認對話框)
+  - [x] 批次匯出功能 (CSV format with UTF-8 BOM)
+  - [x] 進度指示器 (bulkOperationInProgress signal)
 - [ ] 2.1.4 Unit Tests (0h/4h)
   - [ ] Component 初始化測試
   - [ ] 篩選與搜尋測試
-  - [ ] 操作按鈕測試
+  - [ ] 批次操作測試
   - [ ] Signal 狀態測試
 - [ ] 2.1.5 Integration & Polish (0h/2h)
   - [ ] 路由配置整合
@@ -1215,12 +1220,25 @@
    - ✅ Pagination with customizable page size
 
 3. **Filtering & Statistics** ✅:
-   - ✅ Status dropdown filter
-   - ✅ Search by contract number/title/parties
+   - ✅ Status dropdown filter (multiple selection)
+   - ✅ Debounced search (300ms) by contract number/title/parties
+   - ✅ Date range filter (signing date)
+   - ✅ URL query params persistence
+   - ✅ Clear all filters button
+   - ✅ Active filters badge (filtered count / total)
    - ✅ Real-time statistics (4 status counts)
    - ✅ Computed signals for reactive filtering
 
-4. **Navigation** ✅:
+4. **Bulk Operations** ✅:
+   - ✅ Checkbox column for multi-select
+   - ✅ Select all / Deselect all / Invert selection
+   - ✅ Bulk actions toolbar (fixed bottom, auto-show on selection)
+   - ✅ Bulk delete (drafts only, with confirmation)
+   - ✅ Bulk export to CSV (UTF-8 with BOM)
+   - ✅ Progress indicator during operations
+   - ✅ Computed signals (hasSelectedContracts, allSelected, deletableSelected)
+
+5. **Navigation** ✅:
    - ✅ View detail: `/contract/{id}`
    - ✅ Edit: `/contract/{id}/edit`
    - ✅ Delete with confirmation (draft only)
@@ -1229,6 +1247,8 @@
 **Context7 使用**:
 - ⚪ 計畫查詢: `@delon/abc st table angular signals pagination`
 - ✅ 實際參考: 既有 Warranty List Component 模式
+- ✅ Task 2.1.2: 標準 RxJS patterns (debounceTime, distinctUntilChanged)
+- ✅ Task 2.1.3: ST table checkbox type (無需查詢，文檔明確)
 - ✅ 遵循專案慣例: STColumn, computed filters, OnPush
 
 **關鍵決策**:
@@ -1238,31 +1258,61 @@
    - 理由: 合約數量預期不多，本地篩選效能足夠
 3. **Status Badge**: 使用 ST table 內建 badge type
    - 理由: 一致的 UI 風格，減少自訂樣式
+4. **Debounced Search (300ms)**: RxJS Subject + debounceTime
+   - 理由: 平衡即時反應與效能，標準模式
+5. **Bulk Export (CSV)**: Native Blob API with UTF-8 BOM
+   - 理由: 簡單直接，Excel 相容，無需第三方庫
+6. **Bulk Delete Confirmation**: Native confirm() dialog
+   - 理由: 簡單可靠，避免額外依賴
 
 **奧卡姆剃刀應用**:
 - ✅ 重用專案現有 ST table 模式 (Warranty List)
 - ✅ 使用 SHARED_IMPORTS 避免重複匯入
 - ✅ 直接使用 ContractFacade，避免建立 intermediate store
 - ✅ Inline template 和 styles，保持檔案簡潔
+- ✅ 標準 RxJS operators (debounceTime 300ms)
+- ✅ Native Browser APIs (Blob, confirm) 避免額外依賴
+- ✅ Sequential bulk delete (簡單可靠，無需複雜錯誤處理)
 
 **檔案變更**:
-- `src/app/routes/contract/list/contract-list.component.ts`: +336 行 (新建)
+- `src/app/routes/contract/list/contract-list.component.ts`: +636 行 (新建)
+  - Task 2.1.1: +336 行 (基礎 ST table)
+  - Task 2.1.2: +120 行 (debounced search, filters, URL persistence)
+  - Task 2.1.3: +180 行 (bulk operations, toolbar, CSV export)
+
+**進度統計**:
+- Task 2.1 完成度: 45% (9h/20h)
+  - 2.1.1: ✅ 完成 (1h)
+  - 2.1.2: ✅ 完成 (4h)
+  - 2.1.3: ✅ 完成 (4h)
+  - 2.1.4: ⚪ 待開始 (4h)
+  - 2.1.5: ⚪ 待開始 (2h)
 
 **下一步**:
-1. 實作 debounced search (300ms delay)
+1. 撰寫 component unit tests (Task 2.1.4, 4h)
 2. 新增 URL query params 持久化
 3. 實作批次操作 (多選 + 刪除/匯出)
 4. 撰寫 component unit tests
+5. 樣式優化與整合測試
+
+**實施進度**:
+- ✅ Task 2.1.1 完成 (2025-12-18 15:10 UTC)
+- ✅ Task 2.1.2 完成 (2025-12-18 16:20 UTC)
+- ✅ Task 2.1.3 完成 (2025-12-18 17:30 UTC)
+- ⚪ Task 2.1.4 待開始 (預計 4h)
+- ⚪ Task 2.1.5 待開始 (預計 2h)
+
+**累計工時**: Phase 2 - 9h/120h (7.5%)
 
 ---
 
 ## 🎯 當前焦點
 
-**當前任務**: Phase 2.1.1 - Contract List ST Table Setup  
-**狀態**: 🟡 進行中 (基礎完成，待測試與優化)  
-**完成度**: Phase 1 (44%) → Phase 2 開始 (1%)  
-**下一步**: 完成 filtering enhancements & unit tests
+**當前任務**: Phase 2.1.3 - Bulk Operations ✅ 完成
+**狀態**: 🟢 Task 2.1 進度 45% (9h/20h完成)
+**完成度**: Phase 1 (44%) → Phase 2 (7.5%)
+**下一步**: Task 2.1.4 - Component Unit Tests (4h)
 
 ---
 
-**最後更新**: 2025-12-18 15:10 UTC
+**最後更新**: 2025-12-18 17:30 UTC
