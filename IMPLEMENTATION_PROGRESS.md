@@ -11,7 +11,7 @@
 | 階段 | 任務 | 狀態 | 開始時間 | 完成時間 | 備註 |
 |-----|------|------|---------|---------|------|
 | **Phase 1** | Security & Testing Foundation | 🟡 進行中 | 2025-12-18 | - | 2 週 (40h) |
-| **Phase 2** | Feature Completion | ⚪ 待開始 | - | - | 3-4 週 (120h) |
+| **Phase 2** | Feature Completion | 🟡 進行中 | 2025-12-18 | - | 3-4 週 (120h) |
 | **Phase 3** | Production Optimization | ⚪ 待開始 | - | - | 3-4 週 (120h) |
 
 ---
@@ -897,12 +897,113 @@
 
 ---
 
-## 🎯 當前焦點
+## 📋 Phase 2: Feature Completion (進行中)
 
-**當前任務**: 1.2 補充核心服務單元測試  
-**狀態**: ✅ 已完成 (3/3 服務)  
-**下一步**: 執行測試驗證 & 設定整合測試環境
+**目標**: 完成 UI 元件、Cloud Functions 測試、E2E 測試框架  
+**優先級**: 🟡 高  
+**預估工時**: 120 小時 (3 人週)  
+**開始時間**: 2025-12-18 15:00 UTC
+
+### 任務清單
+
+#### 2.1 Contract List Component ✅ 已開始
+
+**優先級**: 🔴 極高  
+**預估**: 20 小時  
+**狀態**: 🟡 進行中  
+**開始時間**: 2025-12-18 15:00 UTC
+
+**子任務**:
+- [x] 2.1.1 ST Table Setup (1h/6h)
+  - [x] 建立 Contract List Component (Standalone + Signals)
+  - [x] 定義 STColumn[] 配置 (所有合約欄位)
+  - [x] 實作狀態統計區塊 (草稿/待生效/已生效/已完成)
+  - [x] 實作篩選區域 (狀態選擇器 + 搜尋框)
+  - [x] 連接 ContractFacade signals
+  - [x] 實作排序、分頁功能
+  - [ ] 測試與調整樣式
+- [ ] 2.1.2 Filtering & Search (0h/4h)
+  - [ ] 實作 debounced search (300ms)
+  - [ ] URL query params 持久化
+  - [ ] 清除篩選功能
+- [ ] 2.1.3 Bulk Operations (0h/4h)
+  - [ ] 多選 checkbox 欄位
+  - [ ] 批次刪除功能
+  - [ ] 批次匯出功能
+- [ ] 2.1.4 Unit Tests (0h/4h)
+  - [ ] Component 初始化測試
+  - [ ] 篩選與搜尋測試
+  - [ ] 操作按鈕測試
+  - [ ] Signal 狀態測試
+- [ ] 2.1.5 Integration & Polish (0h/2h)
+  - [ ] 路由配置整合
+  - [ ] 樣式優化
+  - [ ] 錯誤處理完善
+
+**實作內容**:
+
+1. **Component Structure** ✅:
+   - ✅ Standalone Component with OnPush
+   - ✅ Angular 20+ Signals 狀態管理
+   - ✅ 使用 inject() 注入依賴
+   - ✅ Modern template syntax (@for, @if)
+
+2. **ST Table Features** ✅:
+   - ✅ 10 個資料欄位 (編號、標題、狀態、業主、承包商、金額、日期等)
+   - ✅ Status badge with 5 狀態 (draft, pending_activation, active, completed, terminated)
+   - ✅ 3 個操作按鈕 (查看、編輯、刪除)
+   - ✅ Sorting on 5 columns (編號、標題、狀態、金額、日期)
+   - ✅ Pagination with customizable page size
+
+3. **Filtering & Statistics** ✅:
+   - ✅ Status dropdown filter
+   - ✅ Search by contract number/title/parties
+   - ✅ Real-time statistics (4 status counts)
+   - ✅ Computed signals for reactive filtering
+
+4. **Navigation** ✅:
+   - ✅ View detail: `/contract/{id}`
+   - ✅ Edit: `/contract/{id}/edit`
+   - ✅ Delete with confirmation (draft only)
+   - ✅ Create new: `/contract/create`
+
+**Context7 使用**:
+- ⚪ 計畫查詢: `@delon/abc st table angular signals pagination`
+- ✅ 實際參考: 既有 Warranty List Component 模式
+- ✅ 遵循專案慣例: STColumn, computed filters, OnPush
+
+**關鍵決策**:
+1. **Facade Integration**: 直接使用 ContractFacade.contracts 和 loading signals
+   - 理由: 簡化狀態管理，避免重複的 local state
+2. **Client-side Filtering**: 使用 computed signals 進行本地篩選
+   - 理由: 合約數量預期不多，本地篩選效能足夠
+3. **Status Badge**: 使用 ST table 內建 badge type
+   - 理由: 一致的 UI 風格，減少自訂樣式
+
+**奧卡姆剃刀應用**:
+- ✅ 重用專案現有 ST table 模式 (Warranty List)
+- ✅ 使用 SHARED_IMPORTS 避免重複匯入
+- ✅ 直接使用 ContractFacade，避免建立 intermediate store
+- ✅ Inline template 和 styles，保持檔案簡潔
+
+**檔案變更**:
+- `src/app/routes/contract/list/contract-list.component.ts`: +336 行 (新建)
+
+**下一步**:
+1. 實作 debounced search (300ms delay)
+2. 新增 URL query params 持久化
+3. 實作批次操作 (多選 + 刪除/匯出)
+4. 撰寫 component unit tests
 
 ---
 
-**最後更新**: 2025-12-18 11:40 UTC
+## 🎯 當前焦點
+
+**當前任務**: Phase 2.1.1 - Contract List ST Table Setup  
+**狀態**: 🟡 進行中 (基礎完成，待測試與優化)  
+**完成度**: Phase 1 (44%) → Phase 2 開始 (1%)  
+**下一步**: 完成 filtering enhancements & unit tests
+
+---
+
+**最後更新**: 2025-12-18 15:10 UTC
