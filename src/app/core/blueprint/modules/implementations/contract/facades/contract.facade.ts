@@ -24,15 +24,10 @@
 
 import { Injectable, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, firstValueFrom, catchError, of, tap } from 'rxjs';
 import { LoggerService } from '@core';
 import { EnhancedEventBusService } from '@core/blueprint/events/enhanced-event-bus.service';
 import { SystemEventType } from '@core/blueprint/events/types/system-event-type.enum';
-
-import { ContractStore } from '../store';
-import { ContractRepository } from '../repositories';
-// TODO: Fix WorkItemRepository export (should be ContractWorkItemRepository)
-// import { WorkItemRepository } from '../repositories';
+import { Observable, firstValueFrom, catchError, of, tap } from 'rxjs';
 
 import type {
   Contract,
@@ -43,6 +38,11 @@ import type {
   UpdateContractDto,
   ContractParty
 } from '../models';
+import { ContractRepository } from '../repositories';
+// TODO: Fix WorkItemRepository export (should be ContractWorkItemRepository)
+// import { WorkItemRepository } from '../repositories';
+
+import { ContractStore } from '../store';
 
 /**
  * Contract Domain Events
@@ -561,7 +561,7 @@ export class ContractFacade {
 
       this.logger.debug('[ContractFacade]', 'Event emitted', { eventType, data });
     } catch (error) {
-      this.logger.error('[ContractFacade]', 'Failed to emit event', error as Error, {  eventType });
+      this.logger.error('[ContractFacade]', 'Failed to emit event', error as Error, { eventType });
     }
   }
 }

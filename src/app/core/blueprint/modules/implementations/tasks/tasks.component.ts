@@ -138,11 +138,11 @@ export class TasksComponent implements OnInit {
 
   // Input from parent (Angular 19+ input() function)
   blueprintId = input<string>();
-  blueprintOwnerType = input<string>();  // 'user' or 'organization' - required for task assignee validation
+  blueprintOwnerType = input<string>(); // 'user' or 'organization' - required for task assignee validation
 
   // Internal state
   _blueprintId = signal<string>('');
-  _blueprintOwnerType = signal<string>('user');  // Default to user
+  _blueprintOwnerType = signal<string>('user'); // Default to user
   blueprintName = signal<string>('任務管理');
   selectedViewIndex = 0;
   currentViewMode = signal<TaskViewMode>(TaskViewMode.LIST);

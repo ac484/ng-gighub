@@ -18,10 +18,10 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Team, Partner, OwnerType, BlueprintMemberType } from '@core';
-import { getAllowedAssigneeTypes } from '@core/domain/utils';
 import { BlueprintMemberRepository } from '@core/blueprint/repositories/blueprint-member.repository';
 import { PartnerRepository } from '@core/data-access/repositories/shared/partner.repository';
 import { TeamRepository } from '@core/data-access/repositories/shared/team.repository';
+import { getAllowedAssigneeTypes } from '@core/domain/utils';
 import { FirebaseService } from '@core/services/firebase.service';
 import { TaskStore } from '@core/state/stores/task.store';
 import { BlueprintMember, BlueprintRole } from '@core/types/blueprint/blueprint.types';
@@ -33,7 +33,7 @@ import { NzSliderModule } from 'ng-zorro-antd/slider';
 import { firstValueFrom } from 'rxjs';
 interface ModalData {
   blueprintId: string;
-  blueprintOwnerType: string;  // 'user' or 'organization' - required for assignee validation
+  blueprintOwnerType: string; // 'user' or 'organization' - required for assignee validation
   task?: Task;
   parentTask?: Task;
   mode: 'create' | 'edit' | 'view';
@@ -603,18 +603,14 @@ export class TaskModalComponent implements OnInit {
       if (!isAlreadyMember) {
         // Add creator as CONTRIBUTOR with USER member type
         // Note: accountName will be populated by the backend or can be updated later
-        await this.memberRepo.addMember(
-          this.modalData.blueprintId,
-          this.modalData.blueprintOwnerType as OwnerType,
-          {
-            blueprintId: this.modalData.blueprintId,
-            accountId: creatorId,
-            memberType: BlueprintMemberType.USER,
-            role: BlueprintRole.CONTRIBUTOR,
-            isExternal: false,
-            grantedBy: creatorId
-          }
-        );
+        await this.memberRepo.addMember(this.modalData.blueprintId, this.modalData.blueprintOwnerType as OwnerType, {
+          blueprintId: this.modalData.blueprintId,
+          accountId: creatorId,
+          memberType: BlueprintMemberType.USER,
+          role: BlueprintRole.CONTRIBUTOR,
+          isExternal: false,
+          grantedBy: creatorId
+        });
 
         // Reload members list
         await this.loadBlueprintMembers();

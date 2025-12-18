@@ -1,16 +1,8 @@
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import {
-  BlueprintMember,
-  BlueprintMemberType,
-  BlueprintRole,
-  BusinessRole,
-  OwnerType,
-  LoggerService,
-  FirebaseAuthService
-} from '@core';
-import { getAllowedMemberTypes } from '@core/domain/utils';
+import { BlueprintMember, BlueprintMemberType, BlueprintRole, BusinessRole, OwnerType, LoggerService, FirebaseAuthService } from '@core';
 import { BlueprintMemberRepository } from '@core/blueprint/repositories';
+import { getAllowedMemberTypes } from '@core/domain/utils';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
@@ -73,9 +65,7 @@ import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
       <nz-form-item>
         <nz-form-label [nzSpan]="6">外部成員</nz-form-label>
         <nz-form-control [nzSpan]="16">
-          <label nz-checkbox formControlName="isExternal" [nzDisabled]="isExternalDisabled()">
-            標記為外部成員（承包商、顧問等）
-          </label>
+          <label nz-checkbox formControlName="isExternal" [nzDisabled]="isExternalDisabled()"> 標記為外部成員（承包商、顧問等） </label>
           @if (isExternalDisabled()) {
             <div class="text-muted mt-xs">
               {{ memberType === BlueprintMemberType.TEAM ? '團隊成員自動標記為內部成員' : '夥伴成員自動標記為外部成員' }}
@@ -110,7 +100,7 @@ export class MemberModalComponent implements OnInit {
 
   submitting = signal(false);
   isEdit = false;
-  memberType = BlueprintMemberType.USER;  // Track current member type
+  memberType = BlueprintMemberType.USER; // Track current member type
 
   // Calculate allowed member types based on blueprint owner type
   allowedMemberTypes = this.calculateAllowedMemberTypes();

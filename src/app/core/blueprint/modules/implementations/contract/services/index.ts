@@ -1,16 +1,17 @@
 /**
  * Contract Module - Services Export
  *
- * Specialized service implementations for file handling and AI parsing.
+ * Specialized service implementations for file handling, AI parsing, and draft management.
  * Business logic has been migrated to ContractFacade.
  *
  * @author GigHub Development Team
- * @date 2025-12-17
+ * @date 2025-12-18
  */
 
 // Specialized services (kept)
 export * from './contract-upload.service';
 export * from './contract-parsing.service';
+export * from './contract-draft.service';
 
 // Removed services (migrated to ContractFacade):
 // - contract-management.service → ContractFacade (CRUD operations)

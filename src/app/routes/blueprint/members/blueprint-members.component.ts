@@ -65,7 +65,7 @@ export class BlueprintMembersComponent implements OnInit {
 
   // Input: blueprint ID and owner type (required for member validation)
   blueprintId = input.required<string>();
-  blueprintOwnerType = input.required<string>();  // 'user' or 'organization'
+  blueprintOwnerType = input.required<string>(); // 'user' or 'organization'
 
   // ✅ Modern Pattern: Use AsyncState for unified state management
   readonly membersState = createAsyncArrayState<BlueprintMember>([]);

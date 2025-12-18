@@ -36,18 +36,14 @@ export const DEFAULT_RETRY_OPTIONS: RetryOptions = {
 
 /**
  * Execute a function with exponential backoff retry
- * 
+ *
  * @param fn - Async function to execute
  * @param options - Retry options (partial, uses defaults for omitted fields)
  * @param context - Context string for logging
  * @returns Promise resolving to function result
  * @throws HttpsError if all retries fail
  */
-export async function withRetry<T>(
-  fn: () => Promise<T>,
-  options: Partial<RetryOptions> = {},
-  context?: string
-): Promise<T> {
+export async function withRetry<T>(fn: () => Promise<T>, options: Partial<RetryOptions> = {}, context?: string): Promise<T> {
   const opts = { ...DEFAULT_RETRY_OPTIONS, ...options };
   let lastError: any;
   let delay = opts.initialDelay;
@@ -58,7 +54,7 @@ export async function withRetry<T>(
       return await fn();
     } catch (error: any) {
       lastError = error;
-      
+
       // If this was the last attempt, break and throw
       if (attempt === opts.maxRetries) {
         break;
@@ -93,15 +89,12 @@ export async function withRetry<T>(
     code: lastError.code
   });
 
-  throw new HttpsError(
-    'unavailable',
-    `Operation failed after ${opts.maxRetries + 1} attempts: ${lastError.message}`
-  );
+  throw new HttpsError('unavailable', `Operation failed after ${opts.maxRetries + 1} attempts: ${lastError.message}`);
 }
 
 /**
  * Check if error is retryable
- * 
+ *
  * Retryable errors include:
  * - UNAVAILABLE (service temporarily unavailable)
  * - DEADLINE_EXCEEDED (timeout)
