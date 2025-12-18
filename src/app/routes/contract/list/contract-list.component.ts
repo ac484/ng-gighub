@@ -220,7 +220,7 @@ export class ContractListComponent implements OnInit {
       index: 'totalAmount',
       width: 120,
       type: 'currency',
-      currency: { format: { currency: 'TWD' } },
+      currency: { format: { ngCurrency: { display: 'symbol', currencyCode: 'TWD' } } },
       sort: true,
       className: 'text-right'
     },
