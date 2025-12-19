@@ -1,9 +1,8 @@
 /**
  * Contract Module - Application Layer
  * 
- * Public exports for services, facades, and state management
+ * Public exports for services and state management
  */
 
 export * from './services';
-export * from './facades';
 export * from './state';
