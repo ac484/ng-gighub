@@ -29,19 +29,8 @@ import { EnhancedEventBusService } from '@core/blueprint/events/enhanced-event-b
 import { SystemEventType } from '@core/blueprint/events/types/system-event-type.enum';
 import { Observable, firstValueFrom, catchError, of, tap } from 'rxjs';
 
-import type {
-  Contract,
-  ContractFilters,
-  ContractStatus,
-  ContractWorkItem,
-  CreateContractDto,
-  UpdateContractDto,
-  ContractParty
-} from '../models';
+import type { Contract, ContractFilters, ContractStatus, CreateContractDto, UpdateContractDto, ContractParty } from '../models';
 import { ContractRepository } from '../repositories';
-// TODO: Fix WorkItemRepository export (should be ContractWorkItemRepository)
-// import { WorkItemRepository } from '../repositories';
-
 import { ContractStore } from '../store';
 
 /**
@@ -78,8 +67,6 @@ export class ContractFacade {
   // Core dependencies
   private readonly store = inject(ContractStore);
   private readonly contractRepo = inject(ContractRepository);
-  // TODO: Uncomment when WorkItemRepository export is fixed
-  // private readonly workItemRepo = inject(WorkItemRepository);
   private readonly eventBus = inject(EnhancedEventBusService);
 
   // Current context

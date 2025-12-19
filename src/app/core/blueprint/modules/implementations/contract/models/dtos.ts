@@ -1,13 +1,13 @@
 /**
- * Contract Module - DTO (Data Transfer Objects)
+ * Contract Module - DTO (Data Transfer Objects) (Simplified)
  *
- * Defines DTOs for creating and updating contracts and work items.
+ * Basic DTOs for creating and updating contracts.
  *
  * @author GigHub Development Team
- * @date 2025-12-15
+ * @date 2025-12-18
  */
 
-import type { ContractParty, ContractTerm, ContractStatus, FileAttachment, ContractParsedData } from './contract.model';
+import type { ContractParty, ContractTerm, ContractStatus, ContractLineItem } from './contract.model';
 
 /**
  * Create Contract DTO
@@ -15,7 +15,7 @@ import type { ContractParty, ContractTerm, ContractStatus, FileAttachment, Contr
 export interface CreateContractDto {
   /** Blueprint ID */
   blueprintId: string;
-  /** Contract number (optional, auto-generated if not provided) */
+  /** Contract number */
   contractNumber?: string;
   /** Contract title */
   title: string;
@@ -35,12 +35,14 @@ export interface CreateContractDto {
   currency?: string;
 
   // Dates
-  /** Contract signature date */
-  signedDate?: Date;
   /** Contract start date */
   startDate: Date;
   /** Contract end date */
   endDate: Date;
+
+  // Line Items
+  /** Contract line items */
+  lineItems?: ContractLineItem[];
 
   // Terms
   /** Contract terms */
@@ -73,74 +75,22 @@ export interface UpdateContractDto {
   currency?: string;
 
   // Dates
-  /** Contract signature date */
-  signedDate?: Date;
   /** Contract start date */
   startDate?: Date;
   /** Contract end date */
   endDate?: Date;
 
+  // Line Items
+  /** Contract line items */
+  lineItems?: ContractLineItem[];
+
   // Terms
   /** Contract terms */
   terms?: ContractTerm[];
 
-  // Files
-  /** Original contract files */
-  originalFiles?: FileAttachment[];
-  /** Parsed data */
-  parsedData?: ContractParsedData;
-
   // User
   /** User who updates the contract */
   updatedBy?: string;
-}
-
-/**
- * Create Work Item DTO
- */
-export interface CreateWorkItemDto {
-  /** Work item code */
-  code: string;
-  /** Work item name */
-  name: string;
-  /** Work item description */
-  description: string;
-  /** Category */
-  category?: string;
-
-  // Quantity and pricing
-  /** Unit of measurement */
-  unit: string;
-  /** Total quantity */
-  quantity: number;
-  /** Unit price */
-  unitPrice: number;
-}
-
-/**
- * Update Work Item DTO
- */
-export interface UpdateWorkItemDto {
-  /** Work item code */
-  code?: string;
-  /** Work item name */
-  name?: string;
-  /** Work item description */
-  description?: string;
-  /** Category */
-  category?: string;
-
-  // Quantity and pricing
-  /** Unit of measurement */
-  unit?: string;
-  /** Total quantity */
-  quantity?: number;
-  /** Unit price */
-  unitPrice?: number;
-
-  // Task linkage
-  /** IDs of tasks linked to this work item */
-  linkedTaskIds?: string[];
 }
 
 /**
@@ -153,81 +103,4 @@ export interface ContractStatusChangeDto {
   reason?: string;
   /** User who changes the status */
   changedBy: string;
-}
-
-/**
- * Contract Party DTO (for creation)
- */
-export interface CreateContractPartyDto {
-  /** Party name */
-  name: string;
-  /** Party type */
-  type: 'owner' | 'contractor' | 'subcontractor';
-  /** Contact person */
-  contactPerson: string;
-  /** Contact phone */
-  contactPhone: string;
-  /** Contact email */
-  contactEmail: string;
-  /** Address */
-  address?: string;
-  /** Tax ID */
-  taxId?: string;
-  /** Business number */
-  businessNumber?: string;
-}
-
-/**
- * File Upload DTO
- */
-export interface FileUploadDto {
-  /** File name */
-  fileName: string;
-  /** File type (MIME) */
-  fileType: string;
-  /** File size in bytes */
-  fileSize: number;
-  /** User who uploads */
-  uploadedBy: string;
-}
-
-/**
- * Contract Parsing Request DTO
- */
-export interface ContractParsingRequestDto {
-  /** Blueprint ID */
-  blueprintId: string;
-  /** Contract ID */
-  contractId: string;
-  /** File IDs to parse */
-  fileIds: string[];
-  /** Parsing engine preference */
-  enginePreference?: 'ocr' | 'ai' | 'auto';
-  /** User who requests parsing */
-  requestedBy: string;
-}
-
-/**
- * Contract Parsing Confirmation DTO
- */
-export interface ContractParsingConfirmationDto {
-  /** Blueprint ID */
-  blueprintId: string;
-  /** Contract ID */
-  contractId: string;
-  /** Whether data is confirmed as-is or modified */
-  confirmationType: 'confirmed' | 'modified';
-  /** Modified data (if any) */
-  modifiedData?: {
-    contractNumber?: string;
-    title?: string;
-    totalAmount?: number;
-    currency?: string;
-    startDate?: Date;
-    endDate?: Date;
-    owner?: Partial<ContractParty>;
-    contractor?: Partial<ContractParty>;
-  };
-  /** User who confirms */
-  confirmedBy: string;
 }

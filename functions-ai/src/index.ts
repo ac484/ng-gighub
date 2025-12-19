@@ -1,36 +1,21 @@
 /**
- * @fileOverview Firebase Functions Entry Point
- * @description Exports all Cloud Functions for AI and Contract Parsing
+ * GigHub AI Functions
+ * Enterprise-standard Google GenAI integration
  *
- * Functions:
- * - ai-generateText: Generate text from prompts
- * - ai-generateChat: Generate chat responses
- * - contract-parseContract: Parse contract documents
+ * Based on @google/genai v1.34.0 SDK best practices
+ * Supports both Gemini Developer API and Vertex AI
  */
 
 import { setGlobalOptions } from 'firebase-functions/v2';
 
 // Set global options for all functions
+// Optimized for enterprise workloads with cost control
 setGlobalOptions({
-  maxInstances: 10,
-  region: 'asia-east1'
+  maxInstances: 10, // Limit concurrent instances for cost control
+  region: 'us-central1', // Default region (can be overridden per function)
+  memory: '512MiB', // Sufficient for AI operations
+  timeoutSeconds: 60 // Default timeout
 });
 
-// Import AI functions
-import { generateChat } from './ai/generateChat';
-import { generateText } from './ai/generateText';
-
-// Import contract parsing functions
-import { parseContract } from './contract/parseContract';
-
-// Export AI functions with 'ai-' prefix
-// This matches the frontend expectation (ai-generateText, ai-generateChat)
-export const ai = {
-  generateText,
-  generateChat
-};
-
-// Export contract functions with 'contract-' prefix
-export const contract = {
-  parseContract
-};
+// Export GenAI functions
+export { generateContent, generateText, generateStream, health, models } from './functions/genai.functions';

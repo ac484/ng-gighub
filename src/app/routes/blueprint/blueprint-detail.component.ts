@@ -22,7 +22,7 @@ import { ContainerDashboardComponent } from './container/container-dashboard.com
 import { BlueprintMembersComponent } from './members/blueprint-members.component';
 import { AcceptanceModuleViewComponent } from './modules/acceptance-module-view.component';
 import { CloudModuleViewComponent } from './modules/cloud-module-view.component';
-import { ContractModuleViewComponent } from './modules/contract-module-view.component';
+import { ContractModuleViewComponent } from './modules/contract/contract-module-view.component';
 import { FinanceModuleViewComponent } from './modules/finance-module-view.component';
 import { IssuesModuleViewComponent } from './modules/issues-module-view.component';
 import { LogModuleViewComponent } from './modules/log-module-view.component';

@@ -7,3 +7,4 @@
 
 export * from './contract.model';
 export * from './dtos';
+export * from './work-item.model';

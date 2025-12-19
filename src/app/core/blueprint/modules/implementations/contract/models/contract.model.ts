@@ -1,11 +1,10 @@
 /**
- * Contract Module - Core Data Models
+ * Contract Module - Core Data Models (Simplified)
  *
- * Defines the domain models for the Contract management system.
- * Contract is the foundation of SETC workflow (Phase 0).
+ * Basic domain models for Contract management system.
  *
  * @author GigHub Development Team
- * @date 2025-12-15
+ * @date 2025-12-18
  */
 
 /**
@@ -13,7 +12,7 @@
  * - draft: 草稿（建立中）
  * - pending_activation: 待生效（等待確認）
  * - active: 已生效（可建立任務）
- * - completed: 已完成（所有工項完成）
+ * - completed: 已完成
  * - terminated: 已終止（提前終止）
  */
 export type ContractStatus = 'draft' | 'pending_activation' | 'active' | 'completed' | 'terminated';
@@ -70,6 +69,35 @@ export interface ContractTerm {
 }
 
 /**
+ * Contract Line Item (合約細項)
+ * Detailed breakdown of contract items
+ */
+export interface ContractLineItem {
+  /** Line item identifier */
+  id: string;
+  /** 號碼 - Item number for ordering */
+  itemNumber: number;
+  /** 項次 - Item sequence/code */
+  itemCode: string;
+  /** 名稱 - Item name/description */
+  name: string;
+  /** 數量 - Quantity */
+  quantity: number;
+  /** 單位 - Unit of measurement (e.g., '個', '件', '式', 'm²') */
+  unit: string;
+  /** 單價 - Unit price */
+  unitPrice: number;
+  /** 金額 - Amount (quantity × unitPrice) */
+  amount: number;
+  /** 折扣 - Discount percentage (0-100) */
+  discountPercent?: number;
+  /** 小記 - Subtotal after discount */
+  subtotal: number;
+  /** 備註 - Notes/remarks */
+  remarks?: string;
+}
+
+/**
  * File Attachment (檔案附件)
  */
 export interface FileAttachment {
@@ -92,132 +120,6 @@ export interface FileAttachment {
 }
 
 /**
- * Contract Parsing Status
- * - pending: 等待解析
- * - processing: 解析中
- * - completed: 解析完成
- * - failed: 解析失敗
- * - skipped: 跳過解析（手動建檔）
- */
-export type ContractParsingStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'skipped';
-
-/**
- * Contract Parsing Request (解析請求)
- */
-export interface ContractParsingRequest {
-  /** Request identifier */
-  id: string;
-  /** Contract ID */
-  contractId: string;
-  /** Blueprint ID */
-  blueprintId: string;
-  /** Files to parse */
-  fileIds: string[];
-  /** Parsing engine preference */
-  enginePreference: 'ocr' | 'ai' | 'auto';
-  /** Request status */
-  status: ContractParsingStatus;
-  /** User who requested */
-  requestedBy: string;
-  /** Request timestamp */
-  requestedAt: Date;
-  /** Completion timestamp */
-  completedAt?: Date;
-  /** Error message if failed */
-  errorMessage?: string;
-}
-
-/**
- * Contract Parsed Data (OCR/AI 解析資料)
- */
-export interface ContractParsedData {
-  /** Parsing engine used */
-  parsingEngine: 'ocr' | 'ai' | 'manual';
-  /** Parsing timestamp */
-  parsedAt: Date;
-  /** Confidence score (0-1) */
-  confidence: number;
-  /** Extracted data */
-  extractedData: {
-    contractNumber?: string;
-    contractTitle?: string;
-    totalAmount?: number;
-    currency?: string;
-    parties?: Array<Partial<ContractParty>>;
-    workItems?: Array<Partial<ContractWorkItem>>;
-    terms?: Array<Partial<ContractTerm>>;
-    startDate?: string;
-    endDate?: string;
-  };
-  /** Flag indicating if verification is needed */
-  needsVerification: boolean;
-  /** Verification status */
-  verificationStatus?: 'pending' | 'confirmed' | 'modified';
-  /** User who verified */
-  verifiedBy?: string;
-  /** Verification timestamp */
-  verifiedAt?: Date;
-}
-
-/**
- * Contract Work Item (合約工項)
- */
-export interface ContractWorkItem {
-  /** Work item identifier */
-  id: string;
-  /** Parent contract ID */
-  contractId: string;
-  /** Work item code */
-  code: string;
-  /** Work item name */
-  name: string;
-  /** Work item description */
-  description: string;
-  /** Category classification */
-  category?: string;
-
-  // Quantity and pricing
-  /** Unit of measurement */
-  unit: string;
-  /** Total quantity */
-  quantity: number;
-  /** Unit price */
-  unitPrice: number;
-  /** Total price (quantity * unitPrice) */
-  totalPrice: number;
-
-  // Task linkage
-  /** IDs of tasks linked to this work item */
-  linkedTaskIds?: string[];
-
-  // Execution status
-  /** Completed quantity */
-  completedQuantity: number;
-  /** Completed amount */
-  completedAmount: number;
-  /** Completion percentage (0-100) */
-  completionPercentage: number;
-
-  // Audit
-  /** Creation timestamp */
-  createdAt: Date;
-  /** Last update timestamp */
-  updatedAt: Date;
-}
-
-/**
- * Work Item Progress (工項進度)
- */
-export interface WorkItemProgress {
-  /** Completed quantity */
-  completedQuantity: number;
-  /** Completed amount */
-  completedAmount: number;
-  /** Completion percentage (0-100) */
-  completionPercentage: number;
-}
-
-/**
  * Contract Status History Entry
  */
 export interface ContractStatusHistory {
@@ -236,7 +138,29 @@ export interface ContractStatusHistory {
 }
 
 /**
- * Main Contract Interface
+ * Contract Statistics
+ */
+export interface ContractStatistics {
+  /** Total number of contracts */
+  total: number;
+  /** Number of draft contracts */
+  draft: number;
+  /** Number of pending activation contracts */
+  pendingActivation: number;
+  /** Number of active contracts */
+  active: number;
+  /** Number of completed contracts */
+  completed: number;
+  /** Number of terminated contracts */
+  terminated: number;
+  /** Total value of all contracts */
+  totalValue: number;
+  /** Total value of active contracts */
+  activeValue: number;
+}
+
+/**
+ * Main Contract Interface (Simplified)
  * Represents a construction contract between parties
  */
 export interface Contract {
@@ -263,9 +187,9 @@ export interface Contract {
   /** Currency code (e.g., 'TWD', 'USD') */
   currency: string;
 
-  // Work items
-  /** List of work items */
-  workItems: ContractWorkItem[];
+  // Line Items (細項)
+  /** Contract line items - detailed breakdown */
+  lineItems?: ContractLineItem[];
 
   // Terms
   /** Contract terms and conditions */
@@ -277,7 +201,7 @@ export interface Contract {
 
   // Dates
   /** Contract signature date */
-  signedDate?: Date;
+  signingDate: Date;
   /** Contract start date */
   startDate: Date;
   /** Contract end date */
@@ -286,8 +210,6 @@ export interface Contract {
   // Files
   /** Original contract files (PDF/images) */
   originalFiles: FileAttachment[];
-  /** Parsed data from OCR/AI (if any) */
-  parsedData?: ContractParsedData;
 
   // Audit
   /** User who created the contract */
@@ -305,53 +227,9 @@ export interface Contract {
   /** Activation timestamp */
   activatedAt?: Date;
 
-  // File attachments (additional documents beyond original contract files)
+  // File attachments (additional documents)
   /** Additional attachments (reports, photos, etc.) */
   attachments?: FileAttachment[];
-}
-
-/**
- * Validation Result
- */
-export interface ValidationResult {
-  /** Whether validation passed */
-  valid: boolean;
-  /** Validation errors (if any) */
-  errors: string[];
-  /** Validation warnings (if any) */
-  warnings: string[];
-}
-
-/**
- * Work Item Progress Update
- */
-export interface WorkItemProgress {
-  /** Updated completed quantity */
-  completedQuantity: number;
-  /** Updated completed amount */
-  completedAmount: number;
-}
-
-/**
- * Contract Statistics
- */
-export interface ContractStatistics {
-  /** Total number of contracts */
-  total: number;
-  /** Number of draft contracts */
-  draft: number;
-  /** Number of pending activation contracts */
-  pendingActivation: number;
-  /** Number of active contracts */
-  active: number;
-  /** Number of completed contracts */
-  completed: number;
-  /** Number of terminated contracts */
-  terminated: number;
-  /** Total contract value */
-  totalValue: number;
-  /** Active contract value */
-  activeValue: number;
 }
 
 /**

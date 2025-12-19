@@ -1,140 +1,78 @@
 /**
- * Firestore Cloud Functions
+ * Firebase Cloud Functions - Firestore Operations
+ * Enterprise-standard implementation with v2 API
  *
- * Handles Firestore document change events including:
- * - Blueprint document changes (create, update, delete)
- * - Audit logging for data changes
+ * This module provides:
+ * - Firestore document triggers (onCreate, onUpdate, onDelete, onWrite)
+ * - HTTPS callable functions for client applications
+ * - Type-safe interfaces and comprehensive error handling
+ * - Structured logging and audit trails
+ * - Best practices from Firebase Functions v7.0.0
+ *
+ * @see https://firebase.google.com/docs/functions
  */
 
-import * as admin from 'firebase-admin';
-import * as logger from 'firebase-functions/logger';
 import { setGlobalOptions } from 'firebase-functions/v2';
-import { onDocumentWritten, onDocumentCreated } from 'firebase-functions/v2/firestore';
 
-// Initialize Firebase Admin SDK
-admin.initializeApp();
-
-// Set global options for cost control
+// Set global options for all functions in this codebase
 setGlobalOptions({
+  region: 'us-central1',
   maxInstances: 10,
-  region: 'asia-east1'
+  timeoutSeconds: 60,
+  memory: '256MiB'
 });
 
-/**
- * Triggered when a blueprint document is created, updated, or deleted
- * Logs the change and creates an audit trail
- */
-export const onBlueprintChange = onDocumentWritten(
-  {
-    document: 'blueprints/{blueprintId}',
-    region: 'asia-east1'
-  },
-  async event => {
-    const blueprintId = event.params.blueprintId;
-    const beforeData = event.data?.before?.data();
-    const afterData = event.data?.after?.data();
+// ============================================================================
+// Firestore Triggers
+// ============================================================================
+// Document lifecycle triggers for automated operations
 
-    // Determine operation type
-    const operation = !beforeData ? 'created' : !afterData ? 'deleted' : 'updated';
+export { onTaskCreated, onTaskUpdated, onTaskDeleted, onTaskWritten } from './triggers/task.triggers';
 
-    logger.info('Blueprint document changed', {
-      blueprintId,
-      operation,
-      hasBeforeData: !!beforeData,
-      hasAfterData: !!afterData
-    });
+// ============================================================================
+// Callable Functions
+// ============================================================================
+// HTTPS callable functions for client applications with authentication
 
-    try {
-      // Create audit log entry
-      const auditLog = {
-        documentType: 'blueprint',
-        documentId: blueprintId,
-        operation,
-        timestamp: admin.firestore.FieldValue.serverTimestamp(),
-        beforeData: beforeData || null,
-        afterData: afterData || null
-      };
+export { createTask, updateTask, deleteTask, getTask, listTasks } from './callable/task.callable';
 
-      // Only track specific field changes for updates
-      if (operation === 'updated' && beforeData && afterData) {
-        const changes: Array<{ field: string; oldValue: any; newValue: any }> = [];
-
-        // Track important field changes
-        const fieldsToTrack = ['name', 'status', 'owner', 'members'];
-        fieldsToTrack.forEach(field => {
-          if (beforeData[field] !== afterData[field]) {
-            changes.push({
-              field,
-              oldValue: beforeData[field],
-              newValue: afterData[field]
-            });
-          }
-        });
-
-        if (changes.length > 0) {
-          Object.assign(auditLog, { changes });
-          logger.info('Blueprint fields changed', { blueprintId, changes });
-        }
-      }
-
-      // Write audit log to Firestore
-      await admin.firestore().collection('audit_logs').add(auditLog);
-      logger.info('Audit log created', { blueprintId, operation });
-
-      return { success: true, operation, blueprintId };
-    } catch (error) {
-      logger.error('Error processing blueprint change', {
-        blueprintId,
-        operation,
-        error: error instanceof Error ? error.message : String(error)
-      });
-      throw error;
-    }
-  }
-);
+// ============================================================================
+// Usage Examples
+// ============================================================================
 
 /**
- * Triggered when a user document is created
- * Initializes user metadata and sets up default collections
+ * Firestore Triggers Usage:
+ *
+ * These triggers automatically execute when documents change:
+ * - onTaskCreated: Fires when a new task is added
+ * - onTaskUpdated: Fires when a task is modified
+ * - onTaskDeleted: Fires when a task is removed
+ * - onTaskWritten: Fires on any write operation
+ *
+ * No client code needed - triggers run automatically
  */
-export const onUserCreated = onDocumentCreated(
-  {
-    document: 'users/{userId}',
-    region: 'asia-east1'
-  },
-  async event => {
-    const userId = event.params.userId;
-    const userData = event.data?.data();
 
-    logger.info('New user created', {
-      userId,
-      email: userData?.email
-    });
-
-    try {
-      // Initialize user metadata
-      const userMetadata = {
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        lastLoginAt: null,
-        profileComplete: false,
-        notificationPreferences: {
-          email: true,
-          push: true
-        }
-      };
-
-      // Update user document with metadata
-      await admin.firestore().collection('users').doc(userId).set(userMetadata, { merge: true });
-
-      logger.info('User metadata initialized', { userId });
-
-      return { success: true, userId };
-    } catch (error) {
-      logger.error('Error initializing user', {
-        userId,
-        error: error instanceof Error ? error.message : String(error)
-      });
-      throw error;
-    }
-  }
-);
+/**
+ * Callable Functions Usage (from Angular):
+ *
+ * ```typescript
+ * import { getFunctions, httpsCallable } from '@angular/fire/functions';
+ *
+ * const functions = getFunctions();
+ *
+ * // Create a task
+ * const createTask = httpsCallable<CreateTaskData, TaskResponse>(functions, 'createTask');
+ * const result = await createTask({
+ *   title: 'New Task',
+ *   description: 'Task description',
+ *   priority: 'high'
+ * });
+ *
+ * // List tasks
+ * const listTasks = httpsCallable<ListTasksData, TaskListResponse>(functions, 'listTasks');
+ * const tasks = await listTasks({
+ *   status: 'pending',
+ *   limit: 20
+ * });
+ * ```
+ */

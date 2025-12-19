@@ -1,22 +1,11 @@
 /**
- * Contract Module - Services Export
+ * Contract Module - Services Export (Skeleton UI)
  *
- * Specialized service implementations for file handling, AI parsing, and draft management.
- * Business logic has been migrated to ContractFacade.
+ * Simplified services for basic contract module functionality.
  *
  * @author GigHub Development Team
  * @date 2025-12-18
  */
 
-// Specialized services (kept)
+// Basic file upload service (simplified)
 export * from './contract-upload.service';
-export * from './contract-parsing.service';
-export * from './contract-draft.service';
-
-// Removed services (migrated to ContractFacade):
-// - contract-management.service → ContractFacade (CRUD operations)
-// - contract-creation.service → ContractFacade.createContract()
-// - contract-status.service → ContractFacade.changeContractStatus()
-// - contract-lifecycle.service → ContractFacade (lifecycle workflows)
-// - contract-work-items.service → ContractFacade (work item logic)
-// - contract-event.service → ContractFacade (integrated with BlueprintEventBus)

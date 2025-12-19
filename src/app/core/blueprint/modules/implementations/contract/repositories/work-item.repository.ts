@@ -311,7 +311,7 @@ export class ContractWorkItemRepository {
         throw new Error(`Work item ${workItemId} not found`);
       }
 
-      const linkedTaskIds = (current.linkedTaskIds || []).filter(id => id !== taskId);
+      const linkedTaskIds = (current.linkedTaskIds || []).filter((id: string) => id !== taskId);
 
       const docRef = this.getWorkItemDocRef(blueprintId, contractId, workItemId);
       await updateDoc(docRef, {

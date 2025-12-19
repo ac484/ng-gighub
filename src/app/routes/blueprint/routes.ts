@@ -30,11 +30,5 @@ export const routes: Routes = [
     path: ':id/finance',
     loadChildren: () => import('./finance/routes').then(m => m.financeRoutes),
     data: { title: '財務管理' }
-  },
-  // Contract OCR Preview route
-  {
-    path: ':blueprintId/contract/draft/:draftId',
-    loadComponent: () => import('./modules/contract-ocr-preview.component').then(m => m.ContractOcrPreviewComponent),
-    data: { title: '合約 OCR 預覽' }
   }
 ];
