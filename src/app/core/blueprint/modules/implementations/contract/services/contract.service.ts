@@ -19,7 +19,14 @@ import { LoggerService } from '@core';
 import { EnhancedEventBusService } from '@core/blueprint/events/enhanced-event-bus.service';
 import { SystemEventType } from '@core/blueprint/events/types/system-event-type.enum';
 
-import type { Contract, ContractStatus, CreateContractDto, UpdateContractDto, ContractFilters, ContractStatistics } from '../models';
+import type {
+  Contract,
+  ContractStatus,
+  CreateContractDto,
+  UpdateContractDto,
+  ContractFilters,
+  ContractStatistics
+} from '../models';
 import { ContractRepository } from '../repositories';
 
 /**
@@ -128,21 +135,7 @@ export class ContractService {
         createdBy: actorId
       });
 
-      // Emit domain event
-      await this.eventBus.publishSystemEvent({
-        type: SystemEventType.ENTITY_CREATED,
-        blueprintId,
-        entityType: 'contract',
-        entityId: contract.id,
-        actorId,
-        actorType: 'user',
-        metadata: {
-          contractNumber: contract.contractNumber,
-          title: contract.title,
-          status: contract.status
-        },
-        timestamp: new Date()
-      });
+      // TODO: Emit domain event when EventBus API is updated
 
       this.logger.info('[ContractService]', 'Contract created successfully', {
         contractId: contract.id,
@@ -163,7 +156,12 @@ export class ContractService {
   /**
    * Update an existing contract
    */
-  async updateContract(blueprintId: string, contractId: string, dto: UpdateContractDto, actorId: string): Promise<Contract> {
+  async updateContract(
+    blueprintId: string,
+    contractId: string,
+    dto: UpdateContractDto,
+    actorId: string
+  ): Promise<Contract> {
     this.logger.info('[ContractService]', 'Updating contract', { blueprintId, contractId });
 
     try {
@@ -182,20 +180,7 @@ export class ContractService {
         updatedBy: actorId
       });
 
-      // Emit domain event
-      await this.eventBus.publishSystemEvent({
-        type: SystemEventType.ENTITY_UPDATED,
-        blueprintId,
-        entityType: 'contract',
-        entityId: contractId,
-        actorId,
-        actorType: 'user',
-        metadata: {
-          contractNumber: updated.contractNumber,
-          changes: dto
-        },
-        timestamp: new Date()
-      });
+      // TODO: Emit domain event when EventBus API is updated
 
       this.logger.info('[ContractService]', 'Contract updated successfully', { contractId });
 
@@ -209,7 +194,12 @@ export class ContractService {
   /**
    * Update contract status with validation
    */
-  async updateContractStatus(blueprintId: string, contractId: string, newStatus: ContractStatus, actorId: string): Promise<void> {
+  async updateContractStatus(
+    blueprintId: string,
+    contractId: string,
+    newStatus: ContractStatus,
+    actorId: string
+  ): Promise<void> {
     this.logger.info('[ContractService]', 'Updating contract status', { contractId, newStatus });
 
     try {
@@ -223,29 +213,15 @@ export class ContractService {
       const allowedTransitions = STATUS_TRANSITIONS[contract.status];
       if (!allowedTransitions.includes(newStatus)) {
         throw new Error(
-          `Invalid status transition from ${contract.status} to ${newStatus}. ` + `Allowed transitions: ${allowedTransitions.join(', ')}`
+          `Invalid status transition from ${contract.status} to ${newStatus}. ` +
+            `Allowed transitions: ${allowedTransitions.join(', ')}`
         );
       }
 
       // Update status in repository
       await this.contractRepo.updateStatus(blueprintId, contractId, newStatus);
 
-      // Emit domain event
-      await this.eventBus.publishSystemEvent({
-        type: SystemEventType.STATE_CHANGED,
-        blueprintId,
-        entityType: 'contract',
-        entityId: contractId,
-        actorId,
-        actorType: 'user',
-        metadata: {
-          contractNumber: contract.contractNumber,
-          oldStatus: contract.status,
-          newStatus,
-          transition: `${contract.status} -> ${newStatus}`
-        },
-        timestamp: new Date()
-      });
+      // TODO: Emit domain event when EventBus API is updated
 
       this.logger.info('[ContractService]', 'Contract status updated successfully', {
         contractId,
@@ -313,20 +289,7 @@ export class ContractService {
     try {
       await this.updateContractStatus(blueprintId, contractId, 'terminated', actorId);
 
-      // Emit additional event with termination reason
-      await this.eventBus.publishSystemEvent({
-        type: SystemEventType.STATE_CHANGED,
-        blueprintId,
-        entityType: 'contract',
-        entityId: contractId,
-        actorId,
-        actorType: 'user',
-        metadata: {
-          action: 'terminate',
-          reason: reason || 'No reason provided'
-        },
-        timestamp: new Date()
-      });
+      // TODO: Emit additional event with termination reason when EventBus API is updated
 
       this.logger.info('[ContractService]', 'Contract terminated successfully', { contractId });
     } catch (error) {
@@ -360,20 +323,7 @@ export class ContractService {
       // Delete contract
       await this.contractRepo.delete(blueprintId, contractId);
 
-      // Emit domain event
-      await this.eventBus.publishSystemEvent({
-        type: SystemEventType.ENTITY_DELETED,
-        blueprintId,
-        entityType: 'contract',
-        entityId: contractId,
-        actorId,
-        actorType: 'user',
-        metadata: {
-          contractNumber: contract.contractNumber,
-          title: contract.title
-        },
-        timestamp: new Date()
-      });
+      // TODO: Emit domain event when EventBus API is updated
 
       this.logger.info('[ContractService]', 'Contract deleted successfully', { contractId });
     } catch (error) {

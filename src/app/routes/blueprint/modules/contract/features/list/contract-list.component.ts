@@ -55,6 +55,8 @@ import { ContractTableComponent } from './components/contract-table.component';
           (viewContract)="viewContract.emit($event)"
           (editContract)="editContract.emit($event)"
           (deleteContract)="deleteContract.emit($event)"
+          (previewContract)="previewContract.emit($event)"
+          (parseContract)="parseContract.emit($event)"
         />
       }
     </nz-card>
@@ -92,6 +94,8 @@ export class ContractListComponent {
   readonly viewContract = output<Contract>();
   readonly editContract = output<Contract>();
   readonly deleteContract = output<Contract>();
+  readonly previewContract = output<Contract>();
+  readonly parseContract = output<Contract>();
 
   /**
    * Handle search text change

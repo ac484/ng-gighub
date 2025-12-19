@@ -230,6 +230,10 @@ export interface Contract {
   // File attachments (additional documents)
   /** Additional attachments (reports, photos, etc.) */
   attachments?: FileAttachment[];
+
+  // AI-parsed data
+  /** Parsed contract data from AI document processing */
+  parsedData?: string; // JSON string of ParsedContractData, stored separately to avoid large documents
 }
 
 /**
