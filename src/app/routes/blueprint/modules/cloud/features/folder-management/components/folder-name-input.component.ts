@@ -21,12 +21,7 @@ import { NzInputModule } from 'ng-zorro-antd/input';
     <nz-form-item>
       <nz-form-label>{{ label }}</nz-form-label>
       <nz-form-control>
-        <input
-          nz-input
-          [formControl]="folderNameControl"
-          placeholder="請輸入資料夾名稱"
-          autofocus
-        />
+        <input nz-input [formControl]="folderNameControl" placeholder="請輸入資料夾名稱" autofocus />
       </nz-form-control>
     </nz-form-item>
   `,

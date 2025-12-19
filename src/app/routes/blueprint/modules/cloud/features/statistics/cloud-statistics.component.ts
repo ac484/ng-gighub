@@ -21,10 +21,7 @@ import { NzStatisticModule } from 'ng-zorro-antd/statistic';
     <nz-card nzTitle="雲端儲存" class="mb-md">
       <nz-row [nzGutter]="16">
         <nz-col [nzSpan]="8">
-          <nz-statistic
-            [nzValue]="(stats().storageUsed / 1024 / 1024).toFixed(2)"
-            nzTitle="已用容量 (MB)"
-          >
+          <nz-statistic [nzValue]="(stats().storageUsed / 1024 / 1024).toFixed(2)" nzTitle="已用容量 (MB)">
             <ng-template #nzPrefix>
               <span nz-icon nzType="cloud"></span>
             </ng-template>
@@ -38,10 +35,7 @@ import { NzStatisticModule } from 'ng-zorro-antd/statistic';
           </nz-statistic>
         </nz-col>
         <nz-col [nzSpan]="8">
-          <nz-statistic
-            [nzValue]="stats().usagePercentage.toFixed(1) + '%'"
-            nzTitle="使用率"
-          >
+          <nz-statistic [nzValue]="stats().usagePercentage.toFixed(1) + '%'" nzTitle="使用率">
             <ng-template #nzPrefix>
               <span nz-icon nzType="pie-chart"></span>
             </ng-template>

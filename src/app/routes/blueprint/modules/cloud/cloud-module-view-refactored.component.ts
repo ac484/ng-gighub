@@ -23,10 +23,10 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree';
 
 // Feature Components
-import { CloudStatisticsComponent } from './features/statistics/cloud-statistics.component';
-import { FolderTreeComponent, FolderNameInputComponent } from './features/folder-management';
-import { FileListComponent } from './features/file-list';
 import { FileDetailsComponent } from './features/file-details';
+import { FileListComponent } from './features/file-list';
+import { FolderTreeComponent, FolderNameInputComponent } from './features/folder-management';
+import { CloudStatisticsComponent } from './features/statistics/cloud-statistics.component';
 import { UploadAreaComponent } from './features/upload';
 import { buildFolderSet, isValidFolderName, getFolderFromPath } from './shared/utils/file-utils';
 
@@ -34,25 +34,14 @@ import { buildFolderSet, isValidFolderName, getFolderFromPath } from './shared/u
   selector: 'app-cloud-module-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    SHARED_IMPORTS,
-    CloudStatisticsComponent,
-    FolderTreeComponent,
-    FileListComponent,
-    FileDetailsComponent,
-    UploadAreaComponent
-  ],
+  imports: [SHARED_IMPORTS, CloudStatisticsComponent, FolderTreeComponent, FileListComponent, FileDetailsComponent, UploadAreaComponent],
   template: `
     <!-- Storage Statistics -->
     <app-cloud-statistics [stats]="stats()" class="mb-md" />
 
     <!-- Upload Area -->
     <nz-card>
-      <app-upload-area
-        [loading]="loading()"
-        (filesSelected)="handleFileUpload($event)"
-        (createFolderClick)="createFolder()"
-      />
+      <app-upload-area [loading]="loading()" (filesSelected)="handleFileUpload($event)" (createFolderClick)="createFolder()" />
 
       <!-- 3-Column Layout -->
       <nz-row [nzGutter]="16">
@@ -105,9 +94,7 @@ export class CloudModuleViewComponent implements OnInit {
   selectedFile = signal<CloudFile | null>(null);
   selectedFolderKeys = signal<string[]>(['root']);
   currentFolder = signal<string>('');
-  treeData = signal<NzTreeNodeOptions[]>([
-    { title: '全部檔案', key: 'root', icon: 'folder', expanded: true, children: [] }
-  ]);
+  treeData = signal<NzTreeNodeOptions[]>([{ title: '全部檔案', key: 'root', icon: 'folder', expanded: true, children: [] }]);
   filteredFiles = signal<CloudFile[]>([]);
 
   ngOnInit(): void {
@@ -264,8 +251,7 @@ export class CloudModuleViewComponent implements OnInit {
    */
   private addFolder(folderName: string): void {
     const currentFolder = this.currentFolder();
-    const newFolderPath =
-      currentFolder && currentFolder !== 'root' ? `${currentFolder}/${folderName}` : folderName;
+    const newFolderPath = currentFolder && currentFolder !== 'root' ? `${currentFolder}/${folderName}` : folderName;
 
     const existingFolders = buildFolderSet(this.files());
 

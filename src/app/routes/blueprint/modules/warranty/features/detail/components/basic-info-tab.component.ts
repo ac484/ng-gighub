@@ -10,8 +10,9 @@
  */
 
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import { SHARED_IMPORTS } from '@shared';
 import type { Warranty } from '@core/blueprint/modules/implementations/warranty';
+import { SHARED_IMPORTS } from '@shared';
+
 import { WarrantyStatusBadgeComponent } from '../../../shared';
 
 /**
@@ -37,7 +38,9 @@ import { WarrantyStatusBadgeComponent } from '../../../shared';
         <nz-descriptions-item nzTitle="結束日期">{{ w.endDate | date: 'yyyy-MM-dd' }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="保固責任方" [nzSpan]="2">
           <div>
-            <div><strong>{{ w.warrantor.name }}</strong></div>
+            <div
+              ><strong>{{ w.warrantor.name }}</strong></div
+            >
             <div>聯絡人：{{ w.warrantor.contactName }}</div>
             <div>電話：{{ w.warrantor.contactPhone }}</div>
             <div>信箱：{{ w.warrantor.contactEmail }}</div>

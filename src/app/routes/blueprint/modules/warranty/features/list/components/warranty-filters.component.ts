@@ -10,8 +10,8 @@
  */
 
 import { Component, ChangeDetectionStrategy, output, signal } from '@angular/core';
-import { SHARED_IMPORTS } from '@shared';
 import type { WarrantyStatus } from '@core/blueprint/modules/implementations/warranty';
+import { SHARED_IMPORTS } from '@shared';
 
 /**
  * 保固篩選元件
@@ -35,12 +35,7 @@ import type { WarrantyStatus } from '@core/blueprint/modules/implementations/war
         }
       </nz-select>
       <nz-input-group nzPrefixIcon="search" style="width: 240px;">
-        <input 
-          nz-input 
-          [(ngModel)]="searchText" 
-          (ngModelChange)="searchChange.emit($event)" 
-          placeholder="搜尋保固編號..." 
-        />
+        <input nz-input [(ngModel)]="searchText" (ngModelChange)="searchChange.emit($event)" placeholder="搜尋保固編號..." />
       </nz-input-group>
       <button nz-button (click)="refresh.emit()">
         <span nz-icon nzType="reload"></span>

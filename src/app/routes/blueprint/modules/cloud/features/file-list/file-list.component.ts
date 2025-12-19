@@ -9,10 +9,10 @@
 import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
 import type { CloudFile } from '@core/blueprint/modules/implementations/cloud';
 import { SHARED_IMPORTS } from '@shared';
-import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzTableModule } from 'ng-zorro-antd/table';
 
 @Component({
   selector: 'app-file-list',
@@ -44,16 +44,28 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
               <td>{{ formatFileSize(file.size) }}</td>
               <td>{{ file.uploadedAt | date: 'yyyy-MM-dd HH:mm' }}</td>
               <td>
-                <button nz-button nzType="link" nzSize="small" 
+                <button
+                  nz-button
+                  nzType="link"
+                  nzSize="small"
                   (click)="fileDownload.emit(file); $event.stopPropagation()"
-                  nz-tooltip nzTooltipTitle="下載">
+                  nz-tooltip
+                  nzTooltipTitle="下載"
+                >
                   <span nz-icon nzType="download"></span>
                 </button>
-                <button nz-button nzType="link" nzSize="small" nzDanger
-                  nz-popconfirm nzPopconfirmTitle="確定要刪除此檔案嗎？"
+                <button
+                  nz-button
+                  nzType="link"
+                  nzSize="small"
+                  nzDanger
+                  nz-popconfirm
+                  nzPopconfirmTitle="確定要刪除此檔案嗎？"
                   (nzOnConfirm)="fileDelete.emit(file)"
                   (click)="$event.stopPropagation()"
-                  nz-tooltip nzTooltipTitle="刪除">
+                  nz-tooltip
+                  nzTooltipTitle="刪除"
+                >
                   <span nz-icon nzType="delete"></span>
                 </button>
               </td>

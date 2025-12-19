@@ -24,13 +24,7 @@ import { SHARED_IMPORTS } from '@shared';
             <span nz-icon nzType="plus"></span>
             新增合約
           </button>
-          <button 
-            nz-button 
-            (click)="onQuickCreate()" 
-            class="mr-sm" 
-            nz-tooltip 
-            nzTooltipTitle="快速建立（跳過上傳與解析）"
-          >
+          <button nz-button (click)="onQuickCreate()" class="mr-sm" nz-tooltip nzTooltipTitle="快速建立（跳過上傳與解析）">
             <span nz-icon nzType="thunderbolt"></span>
             快速建立
           </button>
@@ -41,12 +35,7 @@ import { SHARED_IMPORTS } from '@shared';
         </nz-col>
         <nz-col [nzFlex]="'none'">
           <nz-input-group [nzPrefix]="searchPrefix" style="width: 240px;">
-            <input 
-              nz-input 
-              placeholder="搜尋合約..." 
-              [(ngModel)]="searchText" 
-              (ngModelChange)="onSearchChange()" 
-            />
+            <input nz-input placeholder="搜尋合約..." [(ngModel)]="searchText" (ngModelChange)="onSearchChange()" />
           </nz-input-group>
           <ng-template #searchPrefix>
             <span nz-icon nzType="search"></span>

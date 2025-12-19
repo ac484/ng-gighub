@@ -31,25 +31,14 @@ import { NzFormModule } from 'ng-zorro-antd/form';
         <nz-form-item>
           <nz-form-label>合約描述</nz-form-label>
           <nz-form-control>
-            <textarea 
-              nz-input 
-              formControlName="description" 
-              placeholder="請輸入合約描述" 
-              rows="3"
-            ></textarea>
+            <textarea nz-input formControlName="description" placeholder="請輸入合約描述" rows="3"></textarea>
           </nz-form-control>
         </nz-form-item>
 
         <nz-form-item>
           <nz-form-label nzRequired>合約金額</nz-form-label>
           <nz-form-control nzErrorTip="請輸入合約金額">
-            <nz-input-number 
-              formControlName="totalAmount" 
-              [nzMin]="0" 
-              [nzStep]="1000" 
-              style="width: 100%;" 
-              placeholder="請輸入金額" 
-            />
+            <nz-input-number formControlName="totalAmount" [nzMin]="0" [nzStep]="1000" style="width: 100%;" placeholder="請輸入金額" />
           </nz-form-control>
         </nz-form-item>
 
@@ -58,11 +47,7 @@ import { NzFormModule } from 'ng-zorro-antd/form';
             <nz-form-item>
               <nz-form-label nzRequired>開始日期</nz-form-label>
               <nz-form-control nzErrorTip="請選擇開始日期">
-                <nz-date-picker 
-                  formControlName="startDate" 
-                  style="width: 100%;" 
-                  placeholder="請選擇開始日期" 
-                />
+                <nz-date-picker formControlName="startDate" style="width: 100%;" placeholder="請選擇開始日期" />
               </nz-form-control>
             </nz-form-item>
           </div>
@@ -70,11 +55,7 @@ import { NzFormModule } from 'ng-zorro-antd/form';
             <nz-form-item>
               <nz-form-label nzRequired>結束日期</nz-form-label>
               <nz-form-control nzErrorTip="請選擇結束日期">
-                <nz-date-picker 
-                  formControlName="endDate" 
-                  style="width: 100%;" 
-                  placeholder="請選擇結束日期" 
-                />
+                <nz-date-picker formControlName="endDate" style="width: 100%;" placeholder="請選擇結束日期" />
               </nz-form-control>
             </nz-form-item>
           </div>

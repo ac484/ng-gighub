@@ -12,12 +12,12 @@
 
 import { Component, ChangeDetectionStrategy, inject, input, signal } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { SHARED_IMPORTS } from '@shared';
 import type { Warranty, WarrantyDefect } from '@core/blueprint/modules/implementations/warranty';
 import { WarrantyDefectRepository } from '@core/blueprint/modules/implementations/warranty';
+import { SHARED_IMPORTS } from '@shared';
 
-import { WarrantyListComponent } from './features/list';
 import { WarrantyDetailDrawerComponent } from './features/detail';
+import { WarrantyListComponent } from './features/list';
 
 /**
  * 保固管理模組視圖元件 (主協調器)
@@ -39,11 +39,7 @@ import { WarrantyDetailDrawerComponent } from './features/detail';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- List Feature -->
-    <app-warranty-list
-      [blueprintId]="blueprintId()"
-      (viewDetail)="openDetailDrawer($event)"
-      (viewDefects)="navigateToDefects($event)"
-    />
+    <app-warranty-list [blueprintId]="blueprintId()" (viewDetail)="openDetailDrawer($event)" (viewDefects)="navigateToDefects($event)" />
 
     <!-- Detail Feature (Drawer) -->
     <app-warranty-detail-drawer

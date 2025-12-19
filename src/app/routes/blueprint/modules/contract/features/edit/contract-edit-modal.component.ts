@@ -21,8 +21,8 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
 
 import { ContractFormComponent } from './components/contract-form.component';
-import { OwnerFormComponent } from './components/owner-form.component';
 import { ContractorFormComponent } from './components/contractor-form.component';
+import { OwnerFormComponent } from './components/owner-form.component';
 
 interface ContractModalData {
   blueprintId: string;
@@ -33,13 +33,7 @@ interface ContractModalData {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-contract-edit-modal',
   standalone: true,
-  imports: [
-    SHARED_IMPORTS,
-    NzFormModule,
-    ContractFormComponent,
-    OwnerFormComponent,
-    ContractorFormComponent
-  ],
+  imports: [SHARED_IMPORTS, NzFormModule, ContractFormComponent, OwnerFormComponent, ContractorFormComponent],
   template: `
     <form nz-form [formGroup]="form" (ngSubmit)="submit()">
       <!-- Contract Information -->

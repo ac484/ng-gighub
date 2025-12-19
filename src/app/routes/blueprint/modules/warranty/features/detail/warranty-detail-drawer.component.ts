@@ -11,10 +11,10 @@
  */
 
 import { Component, ChangeDetectionStrategy, inject, input, output, signal } from '@angular/core';
-import { SHARED_IMPORTS } from '@shared';
 import type { Warranty, WarrantyDefect } from '@core/blueprint/modules/implementations/warranty';
-import { WarrantyStatusBadgeComponent } from '../../shared';
+import { SHARED_IMPORTS } from '@shared';
 
+import { WarrantyStatusBadgeComponent } from '../../shared';
 import { BasicInfoTabComponent } from './components/basic-info-tab.component';
 import { DefectsTabComponent } from './components/defects-tab.component';
 import { RepairsTabComponent } from './components/repairs-tab.component';
@@ -25,22 +25,10 @@ import { RepairsTabComponent } from './components/repairs-tab.component';
 @Component({
   selector: 'app-warranty-detail-drawer',
   standalone: true,
-  imports: [
-    SHARED_IMPORTS,
-    WarrantyStatusBadgeComponent,
-    BasicInfoTabComponent,
-    DefectsTabComponent,
-    RepairsTabComponent
-  ],
+  imports: [SHARED_IMPORTS, WarrantyStatusBadgeComponent, BasicInfoTabComponent, DefectsTabComponent, RepairsTabComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <nz-drawer
-      [nzVisible]="visible()"
-      [nzTitle]="drawerTitle"
-      [nzWidth]="720"
-      [nzClosable]="true"
-      (nzOnClose)="close.emit()"
-    >
+    <nz-drawer [nzVisible]="visible()" [nzTitle]="drawerTitle" [nzWidth]="720" [nzClosable]="true" (nzOnClose)="close.emit()">
       <ng-template #drawerTitle>
         <div style="display: flex; align-items: center; gap: 12px;">
           <span style="font-size: 16px; font-weight: 500;">保固詳情</span>

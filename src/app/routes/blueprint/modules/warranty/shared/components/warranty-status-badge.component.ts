@@ -10,8 +10,8 @@
  */
 
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import { SHARED_IMPORTS } from '@shared';
 import type { WarrantyStatus } from '@core/blueprint/modules/implementations/warranty';
+import { SHARED_IMPORTS } from '@shared';
 
 /**
  * 保固狀態標籤元件

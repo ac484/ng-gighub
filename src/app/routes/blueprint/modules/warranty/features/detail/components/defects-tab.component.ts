@@ -10,8 +10,8 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { SHARED_IMPORTS } from '@shared';
 import type { WarrantyDefect } from '@core/blueprint/modules/implementations/warranty';
+import { SHARED_IMPORTS } from '@shared';
 
 /**
  * 缺失頁籤元件
@@ -25,10 +25,7 @@ import type { WarrantyDefect } from '@core/blueprint/modules/implementations/war
     @if (defects().length > 0) {
       <nz-list [nzDataSource]="defects()" nzBordered>
         <nz-list-item *ngFor="let defect of defects()">
-          <nz-list-item-meta
-            [nzTitle]="defectTitle"
-            [nzDescription]="defect.description"
-          >
+          <nz-list-item-meta [nzTitle]="defectTitle" [nzDescription]="defect.description">
             <ng-template #defectTitle>
               {{ defect.defectNumber }} -
               <nz-tag [nzColor]="getSeverityColor(defect.severity)">

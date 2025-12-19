@@ -19,8 +19,8 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
 
 import { BasicInfoStepComponent } from './components/basic-info-step.component';
-import { ConfirmStepComponent } from './components/confirm-step.component';
 import { CompletionStepComponent } from './components/completion-step.component';
+import { ConfirmStepComponent } from './components/confirm-step.component';
 
 /** Step indices */
 const STEP_BASIC_INFO = 0;
@@ -31,13 +31,7 @@ const STEP_COMPLETE = 2;
   selector: 'app-contract-creation-wizard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    SHARED_IMPORTS,
-    NzStepsModule,
-    BasicInfoStepComponent,
-    ConfirmStepComponent,
-    CompletionStepComponent
-  ],
+  imports: [SHARED_IMPORTS, NzStepsModule, BasicInfoStepComponent, ConfirmStepComponent, CompletionStepComponent],
   template: `
     <div class="wizard-container">
       <!-- Steps Progress -->
@@ -52,9 +46,7 @@ const STEP_COMPLETE = 2;
         <app-basic-info-step [form]="contractForm" />
         <div class="step-actions">
           <button nz-button nzType="default" (click)="cancel()">取消</button>
-          <button nz-button nzType="primary" (click)="nextStep()" [disabled]="!contractForm.valid">
-            下一步
-          </button>
+          <button nz-button nzType="primary" (click)="nextStep()" [disabled]="!contractForm.valid"> 下一步 </button>
         </div>
       }
 
@@ -63,19 +55,13 @@ const STEP_COMPLETE = 2;
         <app-confirm-step [formValue]="contractForm.value" />
         <div class="step-actions">
           <button nz-button nzType="default" (click)="prevStep()">上一步</button>
-          <button nz-button nzType="primary" (click)="createContract()" [nzLoading]="submitting()">
-            建立合約
-          </button>
+          <button nz-button nzType="primary" (click)="createContract()" [nzLoading]="submitting()"> 建立合約 </button>
         </div>
       }
 
       <!-- Step: Complete -->
       @if (currentStep() === 2) {
-        <app-completion-step 
-          [createdContract]="createdContract()" 
-          (viewContract)="onViewContract()"
-          (createAnother)="onCreateAnother()"
-        />
+        <app-completion-step [createdContract]="createdContract()" (viewContract)="onViewContract()" (createAnother)="onCreateAnother()" />
       }
     </div>
   `,

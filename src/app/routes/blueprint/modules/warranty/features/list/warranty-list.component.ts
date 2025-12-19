@@ -18,8 +18,8 @@ import type { Warranty, WarrantyStatus } from '@core/blueprint/modules/implement
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
-import { WarrantyStatisticsComponent, type WarrantyStatistics } from './components/warranty-statistics.component';
 import { WarrantyFiltersComponent } from './components/warranty-filters.component';
+import { WarrantyStatisticsComponent, type WarrantyStatistics } from './components/warranty-statistics.component';
 import { WarrantyTableComponent } from './components/warranty-table.component';
 
 /**
@@ -49,11 +49,7 @@ import { WarrantyTableComponent } from './components/warranty-table.component';
       <app-warranty-statistics [statistics]="statistics()" />
 
       <!-- 篩選區域 -->
-      <app-warranty-filters
-        (statusChange)="onStatusChange($event)"
-        (searchChange)="onSearchChange($event)"
-        (refresh)="refresh()"
-      />
+      <app-warranty-filters (statusChange)="onStatusChange($event)" (searchChange)="onSearchChange($event)" (refresh)="refresh()" />
 
       <!-- 保固列表 -->
       <app-warranty-table
@@ -121,11 +117,7 @@ export class WarrantyListComponent implements OnInit {
     const text = this.searchText();
     if (text) {
       const lowerText = text.toLowerCase();
-      result = result.filter(
-        w =>
-          w.warrantyNumber.toLowerCase().includes(lowerText) ||
-          w.warrantor.name.toLowerCase().includes(lowerText)
-      );
+      result = result.filter(w => w.warrantyNumber.toLowerCase().includes(lowerText) || w.warrantor.name.toLowerCase().includes(lowerText));
     }
 
     return result;

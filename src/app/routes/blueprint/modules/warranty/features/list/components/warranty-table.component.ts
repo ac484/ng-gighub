@@ -10,9 +10,9 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import type { Warranty } from '@core/blueprint/modules/implementations/warranty';
 import { STColumn, STChange } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
-import type { Warranty } from '@core/blueprint/modules/implementations/warranty';
 
 /**
  * 保固表格元件

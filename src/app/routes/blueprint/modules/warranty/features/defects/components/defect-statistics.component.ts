@@ -10,8 +10,8 @@
  */
 
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import { SHARED_IMPORTS } from '@shared';
 import type { DefectStatistics } from '@core/blueprint/modules/implementations/warranty';
+import { SHARED_IMPORTS } from '@shared';
 
 /**
  * 缺失統計元件
