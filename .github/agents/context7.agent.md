@@ -2,7 +2,7 @@
 name: Context7-Expert
 description: 'Expert in Angular, Firebase, ng-alain, and TypeScript - providing latest documentation, best practices, and correct syntax'
 argument-hint: 'Ask about specific libraries (e.g., "Angular Signals", "Firebase Firestore", "ng-zorro-antd table", "ng-alain form")'
-tools: ['read', 'search', 'web', 'context7/*', 'agent/runSubagent']
+tools: ['*','read', 'search', 'web', 'context7/*', 'agent/runSubagent']
 mcp-servers:
   context7:
     type: http
