@@ -1,15 +1,16 @@
 /**
  * Contract AI Parser Service
- * 
+ *
  * Integrates with functions-ai-document to extract structured data
  * from contract documents using Google Cloud Document AI
- * 
+ *
  * @author GigHub Development Team
  * @date 2025-12-19
  */
 
 import { Injectable, inject, signal } from '@angular/core';
 import { Functions, httpsCallable, HttpsCallableResult } from '@angular/fire/functions';
+
 import type {
   ParsedContractData,
   ParseContractRequest,
@@ -59,7 +60,7 @@ export class ContractAIParserService {
 
   /**
    * Parse contract document from storage
-   * 
+   *
    * Calls functions-ai-document processDocumentFromStorage
    */
   async parseContractFromStorage(request: ParseContractRequest): Promise<ParseContractResult> {
@@ -68,10 +69,10 @@ export class ContractAIParserService {
 
     try {
       // Call Cloud Function
-      const processDocument = httpsCallable<
-        { storagePath: string; fileName: string },
-        DocumentAIResponse
-      >(this.functions, 'processDocumentFromStorage');
+      const processDocument = httpsCallable<{ storagePath: string; fileName: string }, DocumentAIResponse>(
+        this.functions,
+        'processDocumentFromStorage'
+      );
 
       const result: HttpsCallableResult<DocumentAIResponse> = await processDocument({
         storagePath: request.storagePath,
@@ -167,7 +168,10 @@ export class ContractAIParserService {
   /**
    * Extract contract number from text
    */
-  private extractContractNumber(text: string, entities?: Array<{ type: string; mentionText: string; confidence: number }>): string | undefined {
+  private extractContractNumber(
+    text: string,
+    entities?: Array<{ type: string; mentionText: string; confidence: number }>
+  ): string | undefined {
     // Look for patterns like "合約編號", "Contract No.", etc.
     const patterns = [/合約編號[：:]\s*([A-Z0-9-]+)/i, /契約編號[：:]\s*([A-Z0-9-]+)/i, /Contract\s+No\.?\s*[：:]?\s*([A-Z0-9-]+)/i];
 
@@ -194,13 +198,20 @@ export class ContractAIParserService {
    */
   private extractTitle(text: string): string | undefined {
     // Look for title patterns
-    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    const lines = text
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => l.length > 0);
 
     // Typically title is in first few lines and contains keywords
     for (let i = 0; i < Math.min(10, lines.length); i++) {
       const line = lines[i];
       if (
-        (line.includes('合約') || line.includes('契約') || line.includes('協議') || line.includes('Contract') || line.includes('Agreement')) &&
+        (line.includes('合約') ||
+          line.includes('契約') ||
+          line.includes('協議') ||
+          line.includes('Contract') ||
+          line.includes('Agreement')) &&
         line.length < 100
       ) {
         return line;
@@ -228,12 +239,12 @@ export class ContractAIParserService {
     for (const line of lines) {
       if (keywords.some(k => line.includes(k))) {
         capturing = true;
-        partySection = line + '\n';
+        partySection = `${line}\n`;
       } else if (capturing) {
         if (line.trim().length === 0 || keywords.some(k => line.includes(k))) {
           break;
         }
-        partySection += line + '\n';
+        partySection += `${line}\n`;
         if (partySection.length > 500) break; // Limit section size
       }
     }
@@ -347,7 +358,10 @@ export class ContractAIParserService {
     };
   }
 
-  private extractTotalAmount(text: string, formFields?: Array<{ fieldName: string; fieldValue: string; confidence: number }>): number | undefined {
+  private extractTotalAmount(
+    text: string,
+    formFields?: Array<{ fieldName: string; fieldValue: string; confidence: number }>
+  ): number | undefined {
     // Check form fields first
     if (formFields) {
       const amountField = formFields.find(f => f.fieldName.toLowerCase().includes('amount') || f.fieldName.includes('金額'));
@@ -386,7 +400,10 @@ export class ContractAIParserService {
   /**
    * Extract date information
    */
-  private extractDateInfo(text: string, entities?: Array<{ type: string; mentionText: string; confidence: number }>): ExtractedDateInfo | undefined {
+  private extractDateInfo(
+    text: string,
+    entities?: Array<{ type: string; mentionText: string; confidence: number }>
+  ): ExtractedDateInfo | undefined {
     const startDate = this.extractDate(text, ['開始日期', 'Start Date', '施工日期']);
     const endDate = this.extractDate(text, ['完工日期', 'End Date', '結束日期', '竣工日期']);
     const signingDate = this.extractDate(text, ['簽訂日期', 'Signing Date', '立約日期']);
@@ -485,7 +502,7 @@ export class ContractAIParserService {
           confidence: 'medium'
         };
       } else if (currentSection) {
-        currentSection.content += line + '\n';
+        currentSection.content += `${line}\n`;
       }
     }
 

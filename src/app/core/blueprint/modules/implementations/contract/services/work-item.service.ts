@@ -19,12 +19,7 @@ import { LoggerService } from '@core';
 import { EnhancedEventBusService } from '@core/blueprint/events/enhanced-event-bus.service';
 import { SystemEventType } from '@core/blueprint/events/types/system-event-type.enum';
 
-import type {
-  ContractWorkItem,
-  CreateWorkItemDto,
-  UpdateWorkItemDto,
-  WorkItemProgress
-} from '../models';
+import type { ContractWorkItem, CreateWorkItemDto, UpdateWorkItemDto, WorkItemProgress } from '../models';
 import { ContractWorkItemRepository } from '../repositories';
 
 /**
@@ -131,12 +126,7 @@ export class WorkItemService {
   /**
    * Create a new work item
    */
-  async createWorkItem(
-    blueprintId: string,
-    contractId: string,
-    dto: CreateWorkItemDto,
-    actorId: string
-  ): Promise<ContractWorkItem> {
+  async createWorkItem(blueprintId: string, contractId: string, dto: CreateWorkItemDto, actorId: string): Promise<ContractWorkItem> {
     this.logger.info('[WorkItemService]', 'Creating work item', { blueprintId, contractId, code: dto.code });
 
     try {
@@ -336,8 +326,7 @@ export class WorkItemService {
       await this.workItemRepo.updateProgress(blueprintId, contractId, workItemId, progress);
 
       // Calculate completion percentage
-      const completionPercentage =
-        workItem.quantity > 0 ? Math.round((progress.completedQuantity / workItem.quantity) * 100) : 0;
+      const completionPercentage = workItem.quantity > 0 ? Math.round((progress.completedQuantity / workItem.quantity) * 100) : 0;
 
       // Emit domain event
       await this.eventBus.publishSystemEvent({
@@ -375,13 +364,7 @@ export class WorkItemService {
   /**
    * Link a task to a work item
    */
-  async linkTaskToWorkItem(
-    blueprintId: string,
-    contractId: string,
-    workItemId: string,
-    taskId: string,
-    actorId: string
-  ): Promise<void> {
+  async linkTaskToWorkItem(blueprintId: string, contractId: string, workItemId: string, taskId: string, actorId: string): Promise<void> {
     this.logger.info('[WorkItemService]', 'Linking task to work item', { workItemId, taskId });
 
     try {
@@ -489,12 +472,7 @@ export class WorkItemService {
   /**
    * Delete a work item
    */
-  async deleteWorkItem(
-    blueprintId: string,
-    contractId: string,
-    workItemId: string,
-    actorId: string
-  ): Promise<void> {
+  async deleteWorkItem(blueprintId: string, contractId: string, workItemId: string, actorId: string): Promise<void> {
     this.logger.info('[WorkItemService]', 'Deleting work item', { workItemId });
 
     try {

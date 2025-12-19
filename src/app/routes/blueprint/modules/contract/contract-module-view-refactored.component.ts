@@ -22,8 +22,8 @@
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal, computed, effect } from '@angular/core';
 import { ContractFacade } from '@core/blueprint/modules/implementations/contract/facades';
-import { ContractAIParserService } from '@core/blueprint/modules/implementations/contract/services';
 import type { Contract, ContractStatistics } from '@core/blueprint/modules/implementations/contract/models';
+import { ContractAIParserService } from '@core/blueprint/modules/implementations/contract/services';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS } from '@shared';
 import { NzDrawerService } from 'ng-zorro-antd/drawer';

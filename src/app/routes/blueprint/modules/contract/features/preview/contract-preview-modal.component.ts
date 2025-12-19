@@ -29,25 +29,14 @@ export interface ContractPreviewModalData {
   template: `
     <div class="preview-container">
       <!-- Header Info -->
-      <nz-alert
-        nzType="info"
-        nzMessage="文件預覽"
-        [nzDescription]="fileDescription"
-        [nzShowIcon]="true"
-        class="mb-md"
-      />
+      <nz-alert nzType="info" nzMessage="文件預覽" [nzDescription]="fileDescription" [nzShowIcon]="true" class="mb-md" />
 
       <!-- Preview Frame -->
       @if (isPreviewable()) {
         <div class="preview-frame-wrapper">
           @if (isPdfFile()) {
             <!-- Use Google Docs Viewer for PDF -->
-            <iframe
-              [src]="googleDocsViewerUrl()"
-              class="preview-frame"
-              frameborder="0"
-              allowfullscreen
-            ></iframe>
+            <iframe [src]="googleDocsViewerUrl()" class="preview-frame" frameborder="0" allowfullscreen></iframe>
           } @else if (isImageFile()) {
             <!-- Direct image display -->
             <div class="image-preview">
@@ -57,10 +46,7 @@ export interface ContractPreviewModalData {
         </div>
       } @else {
         <!-- Not previewable -->
-        <nz-empty
-          nzNotFoundImage="simple"
-          [nzNotFoundContent]="notPreviewableContent"
-        />
+        <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="notPreviewableContent" />
       }
 
       <!-- Footer Actions -->
@@ -208,6 +194,6 @@ export class ContractPreviewModalComponent {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+    return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;
   }
 }

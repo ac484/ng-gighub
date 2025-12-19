@@ -8,8 +8,8 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, output, signal, inject } from '@angular/core';
-import { ContractUploadService } from '@core/blueprint/modules/implementations/contract/services';
 import type { FileAttachment } from '@core/blueprint/modules/implementations/contract/models';
+import { ContractUploadService } from '@core/blueprint/modules/implementations/contract/services';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzUploadFile, NzUploadChangeParam } from 'ng-zorro-antd/upload';
@@ -57,7 +57,12 @@ import { NzUploadFile, NzUploadChangeParam } from 'ng-zorro-antd/upload';
         <nz-card nzTitle="已上傳文件" [nzSize]="'small'" class="mt-md">
           <div class="file-info">
             <div class="file-icon">
-              <span nz-icon [nzType]="getFileIcon(uploadedFile()!.fileType)" nzTheme="outline" style="font-size: 48px; color: #1890ff;"></span>
+              <span
+                nz-icon
+                [nzType]="getFileIcon(uploadedFile()!.fileType)"
+                nzTheme="outline"
+                style="font-size: 48px; color: #1890ff;"
+              ></span>
             </div>
             <div class="file-details">
               <div><strong>檔名：</strong>{{ uploadedFile()!.fileName }}</div>
@@ -239,6 +244,6 @@ export class ContractUploadStepComponent {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;
   }
 }

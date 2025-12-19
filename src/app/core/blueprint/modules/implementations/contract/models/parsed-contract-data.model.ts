@@ -1,9 +1,9 @@
 /**
  * Parsed Contract Data Model
- * 
+ *
  * Represents structured data extracted from contract documents
  * using AI document processing (functions-ai-document)
- * 
+ *
  * @author GigHub Development Team
  * @date 2025-12-19
  */
@@ -101,76 +101,76 @@ export interface ExtractedTextSection {
 
 /**
  * Parsed Contract Data
- * 
+ *
  * Structured data extracted from contract document using AI
  */
 export interface ParsedContractData {
   /** Parse session ID */
   id: string;
-  
+
   /** Source file reference */
   sourceFileId: string;
-  
+
   /** Parse timestamp */
   parsedAt: Date;
-  
+
   /** Parse status */
   status: 'pending' | 'processing' | 'completed' | 'failed';
-  
+
   /** Overall confidence score (0-100) */
   confidenceScore: number;
-  
+
   // Extracted structured data
   /** Contract number */
   contractNumber?: string;
-  
+
   /** Contract title */
   title?: string;
-  
+
   /** Owner/Party A information */
   owner?: ExtractedPartyInfo;
-  
+
   /** Contractor/Party B information */
   contractor?: ExtractedPartyInfo;
-  
+
   /** Financial information */
   financial?: ExtractedFinancialInfo;
-  
+
   /** Date information */
   dates?: ExtractedDateInfo;
-  
+
   /** Extracted line items */
   lineItems?: ExtractedLineItem[];
-  
+
   /** Extracted text sections (terms, clauses, etc.) */
   textSections?: ExtractedTextSection[];
-  
+
   /** Full extracted text (raw) */
   fullText?: string;
-  
+
   // Metadata
   /** Page count */
   pageCount?: number;
-  
+
   /** Processing time in milliseconds */
   processingTime?: number;
-  
+
   /** Error message if parsing failed */
   errorMessage?: string;
-  
+
   /** Warnings during parsing */
   warnings?: string[];
-  
+
   // User actions
   /** Has user reviewed and approved the parsed data */
   isReviewed: boolean;
-  
+
   /** User who reviewed */
   reviewedBy?: string;
-  
+
   /** Review timestamp */
   reviewedAt?: Date;
-  
+
   /** User notes on parsed data */
   notes?: string;
 }
@@ -181,16 +181,16 @@ export interface ParsedContractData {
 export interface ParseContractRequest {
   /** File ID to parse */
   fileId: string;
-  
+
   /** Storage path of file */
   storagePath: string;
-  
+
   /** File name */
   fileName: string;
-  
+
   /** Optional: specify document type for better parsing */
   documentType?: 'construction_contract' | 'general_contract' | 'service_agreement';
-  
+
   /** Optional: language hint */
   languageHint?: 'zh-TW' | 'zh-CN' | 'en-US';
 }
@@ -201,13 +201,13 @@ export interface ParseContractRequest {
 export interface ParseContractResult {
   /** Parse session ID */
   parseId: string;
-  
+
   /** Parsed data */
   data: ParsedContractData;
-  
+
   /** Success status */
   success: boolean;
-  
+
   /** Error message if failed */
   error?: string;
 }

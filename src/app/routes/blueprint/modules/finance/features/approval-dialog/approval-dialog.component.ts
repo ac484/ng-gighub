@@ -13,17 +13,11 @@
  * @date 2025-12-16
  */
 
-import {
-  Component,
-  ChangeDetectionStrategy,
-  inject,
-  signal
-} from '@angular/core';
-import { NzModalRef, NZ_MODAL_DATA } from 'ng-zorro-antd/modal';
-import { NzMessageService } from 'ng-zorro-antd/message';
-
-import { SHARED_IMPORTS } from '@shared';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import type { Invoice } from '@core/blueprint/modules/implementations/finance';
+import { SHARED_IMPORTS } from '@shared';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzModalRef, NZ_MODAL_DATA } from 'ng-zorro-antd/modal';
 
 /**
  * 審核對話框輸入資料
