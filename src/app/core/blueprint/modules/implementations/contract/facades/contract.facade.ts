@@ -22,7 +22,7 @@
  * @date 2025-12-17
  */
 
-import { Injectable, inject, DestroyRef } from '@angular/core';
+import { Injectable, inject, DestroyRef, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoggerService } from '@core';
 import { EnhancedEventBusService } from '@core/blueprint/events/enhanced-event-bus.service';
@@ -72,6 +72,10 @@ export class ContractFacade {
   // Current context
   private blueprintId: string | null = null;
   private userId: string | null = null;
+
+  // Initialization state
+  private readonly _initialized = signal(false);
+  readonly initialized = this._initialized.asReadonly();
 
   // ============================================================================
   // Public State Accessors (from Store)
@@ -130,10 +134,15 @@ export class ContractFacade {
    * @param userId - Current user ID
    */
   initialize(blueprintId: string, userId: string): void {
+    if (!blueprintId) {
+      throw new Error('[ContractFacade] Invalid blueprint ID');
+    }
+
     this.logger.info('[ContractFacade]', 'Initializing', { blueprintId, userId });
 
     this.blueprintId = blueprintId;
     this.userId = userId;
+    this._initialized.set(true);
 
     // Initialize event bus if not already initialized
     this.eventBus.initialize(blueprintId, userId);
@@ -152,6 +161,7 @@ export class ContractFacade {
     this.store.reset();
     this.blueprintId = null;
     this.userId = null;
+    this._initialized.set(false);
   }
 
   // ============================================================================
@@ -159,12 +169,20 @@ export class ContractFacade {
   // ============================================================================
 
   /**
+   * Ensure facade is initialized before operations
+   * @private
+   */
+  private ensureInitialized(): void {
+    if (!this._initialized()) {
+      throw new Error('[ContractFacade] Blueprint ID not set. Call initialize() first.');
+    }
+  }
+
+  /**
    * Load all contracts for current blueprint
    */
   async loadContracts(): Promise<void> {
-    if (!this.blueprintId) {
-      throw new Error('[ContractFacade] Blueprint ID not set. Call initialize() first.');
-    }
+    this.ensureInitialized();
 
     this.logger.debug('[ContractFacade]', 'Loading contracts', { blueprintId: this.blueprintId });
 
@@ -173,7 +191,7 @@ export class ContractFacade {
       this.store.clearError();
 
       const contracts = await firstValueFrom(
-        this.contractRepo.findByBlueprint(this.blueprintId).pipe(
+        this.contractRepo.findByBlueprint(this.blueprintId!).pipe(
           catchError(error => {
             this.logger.error('[ContractFacade]', 'Failed to load contracts', error as Error, { blueprintId: this.blueprintId });
             this.store.setError(error.message || 'Failed to load contracts');

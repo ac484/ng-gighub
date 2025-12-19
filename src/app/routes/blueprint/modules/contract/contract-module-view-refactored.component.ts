@@ -112,17 +112,19 @@ export class ContractModuleViewComponent implements OnInit {
   });
 
   constructor() {
-    // Effect to reload contracts when blueprintId changes
+    // Effect to initialize facade and reload contracts when blueprintId changes
     effect(() => {
       const id = this.blueprintId();
       if (id) {
+        // MUST initialize facade first before any operations
+        this.facade.initialize(id, 'current-user'); // TODO: Replace with actual user ID from auth service
         this.loadContracts();
       }
     });
   }
 
   ngOnInit(): void {
-    // Initial load handled by effect
+    // Initialization handled by effect when blueprintId is available
   }
 
   /**
