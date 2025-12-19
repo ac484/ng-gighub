@@ -112,11 +112,31 @@ Welcome to the GigHub construction site progress tracking management system. Thi
 ### HTTP & API
 
 **規則**:
-- 必須使用 @angular/fire 服務（Firestore、Auth、Storage）
+- 必須直接注入 @angular/fire 服務：
+  - `inject(Firestore)` - 資料庫操作
+  - `inject(Auth)` - 認證服務
+  - `inject(Storage)` - 檔案儲存
+- 禁止建立 Firebase 封裝服務（app.config.ts 已統一初始化）
 - 必須遵循 repository 模式進行資料存取
 - 必須在 repositories 中實作錯誤處理
 - 必須使用 RxJS 運算子進行資料轉換
-- 必須使用 @angular/fire 的 `collectionData()` 和 `docData()` 取得 observables
+- 可使用 @angular/fire 的輔助函數（`collectionData()`, `docData()`）取得 observables
+
+**範例**:
+```typescript
+import { Injectable, inject } from '@angular/core';
+import { Firestore, collection, getDocs } from '@angular/fire/firestore';
+
+@Injectable({ providedIn: 'root' })
+export class TaskRepository {
+  private firestore = inject(Firestore); // ✅ 直接注入
+  
+  async findAll() {
+    const snapshot = await getDocs(collection(this.firestore, 'tasks'));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  }
+}
+```
 
 ### Forms
 

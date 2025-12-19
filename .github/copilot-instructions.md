@@ -110,7 +110,7 @@ Data Layer (Repositories)
 - ✅ Components use Signals for state management
 - ✅ Services coordinate business logic  
 - ✅ Repositories handle data access ONLY
-- ❌ NO direct Firestore calls from components/services
+- ❌ NO FirebaseService wrapper (inject Firestore directly)
 - ❌ NO business logic in repositories
 
 ### Modern Angular (v20) Standards
@@ -154,7 +154,7 @@ Data Layer (Repositories)
 ## 🚫 Forbidden Patterns
 
 **NEVER do these:**
-- ❌ Direct Firestore operations (use Repository pattern)
+- ❌ FirebaseService wrapper (inject Firestore directly from @angular/fire)
 - ❌ NgModule usage (use Standalone Components)
 - ❌ Constructor injection (use `inject()` function)
 - ❌ `any` type (use explicit types or `unknown`)

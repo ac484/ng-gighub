@@ -198,79 +198,32 @@ export class TaskService {
 #### 3. Data Layer (Repository)
 
 **職責**:
-- 封裝 Firestore 操作
-- 提供 CRUD 操作介面
-- 處理資料轉換
+- 直接使用 @angular/fire 服務（Firestore, Auth, Storage）
+- 實作領域特定查詢與資料轉換
+- 處理資料存取錯誤
 
 **禁止**:
 - ❌ 包含業務邏輯
+- ❌ 封裝 Firebase API（app.config.ts 已統一初始化）
 - ❌ 直接被 UI 呼叫
 
 **範例**:
 
 ```typescript
 import { Injectable, inject } from '@angular/core';
-import { 
-  Firestore, 
-  collection, 
-  doc,
-  getDocs,
-  getDoc,
-  addDoc, 
-  updateDoc, 
-  deleteDoc,
-  query,
-  where,
-  orderBy
-} from '@angular/fire/firestore';
+import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
 
 @Injectable({ providedIn: 'root' })
 export class TaskRepository {
-  private firestore = inject(Firestore);
-  private tasksCollection = collection(this.firestore, 'tasks');
+  private firestore = inject(Firestore); // ✅ 直接注入
   
-  async findAll(): Promise<Task[]> {
-    const q = query(this.tasksCollection, orderBy('createdAt', 'desc'));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
-  }
-  
-  async findById(id: string): Promise<Task | null> {
-    const docRef = doc(this.firestore, 'tasks', id);
-    const snapshot = await getDoc(docRef);
-    return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } as Task : null;
-  }
-  
-  async findByBlueprintId(blueprintId: string): Promise<Task[]> {
+  async findByBlueprint(blueprintId: string): Promise<Task[]> {
     const q = query(
-      this.tasksCollection, 
-      where('blueprintId', '==', blueprintId),
-      orderBy('createdAt', 'desc')
+      collection(this.firestore, 'tasks'),
+      where('blueprint_id', '==', blueprintId)
     );
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
-  }
-  
-  async create(task: Omit<Task, 'id'>): Promise<Task> {
-    const docRef = await addDoc(this.tasksCollection, {
-      ...task,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    });
-    return { id: docRef.id, ...task } as Task;
-  }
-  
-  async update(id: string, task: Partial<Task>): Promise<void> {
-    const docRef = doc(this.firestore, 'tasks', id);
-    await updateDoc(docRef, {
-      ...task,
-      updatedAt: new Date()
-    });
-  }
-  
-  async delete(id: string): Promise<void> {
-    const docRef = doc(this.firestore, 'tasks', id);
-    await deleteDoc(docRef);
   }
 }
 ```

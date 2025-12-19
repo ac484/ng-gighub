@@ -9,16 +9,39 @@ applyTo: '**/*.ts'
 
 ## 🎯 核心原則 (MUST) 🔴
 
-**禁止直接操作 Firestore，必須使用 Repository 模式**
+**必須使用 Repository 模式，直接注入 @angular/fire 服務**
 
 ### 為什麼需要 Repository Pattern?
 
-1. **資料存取抽象** - 將 Firestore 實作細節與業務邏輯分離
+1. **資料存取抽象** - 將資料操作與業務邏輯分離
 2. **統一錯誤處理** - 集中處理 Firestore 錯誤與重試邏輯
 3. **自動重試機制** - Exponential Backoff 處理暫時性失敗
-4. **可測試性** - 輕鬆 mock Repository 進行單元測試
+4. **可測試性** - 輕鬆 mock Firestore 進行單元測試
 5. **可維護性** - 集中管理資料存取邏輯
 6. **效能追蹤** - 自動記錄操作時間與效能指標
+
+### @angular/fire 最佳實踐
+
+**✅ DO**: 直接注入 Firestore 服務
+```typescript
+import { Firestore } from '@angular/fire/firestore';
+
+@Injectable({ providedIn: 'root' })
+export class TaskRepository {
+  private firestore = inject(Firestore); // ✅ 直接注入
+}
+```
+
+**❌ DON'T**: 建立不必要的封裝層
+```typescript
+// ❌ 不需要 - app.config.ts 已經提供 Firestore
+export class FirebaseService {
+  private firestore = inject(Firestore);
+  collection(path: string) {
+    return collection(this.firestore, path); // 沒有增加價值
+  }
+}
+```
 
 ## 📐 FirestoreBaseRepository 架構
 
@@ -33,8 +56,8 @@ import { FirestoreBaseRepository } from './base/firestore-base.repository';
  * @template T - 領域實體類型
  */
 export abstract class FirestoreBaseRepository<T> {
-  // 自動注入依賴
-  protected readonly firebaseService = inject(FirebaseService);
+  // ✅ 直接注入 @angular/fire 服務
+  protected readonly firestore = inject(Firestore);
   protected readonly logger = inject(LoggerService);
   protected readonly errorTracking = inject(ErrorTrackingService);
   
@@ -237,7 +260,7 @@ export class TaskRepository extends FirestoreBaseRepository<Task> {
   async findByBlueprintId(blueprintId: string): Promise<Task[]> {
     return this.executeWithRetry(async () => {
       const q = query(
-        this.collectionRef,
+        collection(this.firestore, this.collectionName),
         where('blueprint_id', '==', blueprintId),
         where('deleted_at', '==', null),
         orderBy('created_at', 'desc')
