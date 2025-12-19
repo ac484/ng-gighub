@@ -113,7 +113,7 @@ export class WarrantyEventHandlers {
    * 發送：保固期開始
    */
   async emitWarrantyStarted(warranty: Warranty): Promise<void> {
-    await this.emit(WARRANTY_MODULE_EVENTS.WARRANTY_PERIOD_STARTED as WarrantyEventType, {
+    await this.emit(WARRANTY_MODULE_EVENTS.WARRANTY_ACTIVATED as WarrantyEventType, {
       warrantyId: warranty.id,
       blueprintId: warranty.blueprintId,
       warrantyNumber: warranty.warrantyNumber,
@@ -127,7 +127,8 @@ export class WarrantyEventHandlers {
    * 發送：保固狀態變更
    */
   async emitWarrantyStatusChanged(warranty: Warranty, previousStatus: string, newStatus: string): Promise<void> {
-    await this.emit(WARRANTY_MODULE_EVENTS.WARRANTY_STATUS_CHANGED as WarrantyEventType, {
+    // Note: This event doesn't exist in WARRANTY_MODULE_EVENTS, using a generic approach
+    await this.emit('warranty.status_changed' as WarrantyEventType, {
       warrantyId: warranty.id,
       blueprintId: warranty.blueprintId,
       warrantyNumber: warranty.warrantyNumber,
@@ -140,7 +141,7 @@ export class WarrantyEventHandlers {
    * 發送：保固即將到期
    */
   async emitWarrantyExpiringSoon(warranty: Warranty, daysRemaining: number): Promise<void> {
-    await this.emit(WARRANTY_MODULE_EVENTS.WARRANTY_EXPIRING_SOON as WarrantyEventType, {
+    await this.emit(WARRANTY_MODULE_EVENTS.WARRANTY_EXPIRING as WarrantyEventType, {
       warrantyId: warranty.id,
       blueprintId: warranty.blueprintId,
       warrantyNumber: warranty.warrantyNumber,
@@ -153,7 +154,7 @@ export class WarrantyEventHandlers {
    * 發送：保固已過期
    */
   async emitWarrantyExpired(warranty: Warranty): Promise<void> {
-    await this.emit(WARRANTY_MODULE_EVENTS.WARRANTY_PERIOD_EXPIRED as WarrantyEventType, {
+    await this.emit(WARRANTY_MODULE_EVENTS.WARRANTY_EXPIRED as WarrantyEventType, {
       warrantyId: warranty.id,
       blueprintId: warranty.blueprintId,
       warrantyNumber: warranty.warrantyNumber,
@@ -182,7 +183,7 @@ export class WarrantyEventHandlers {
    * 發送：缺失已報告
    */
   async emitDefectReported(defect: WarrantyDefect): Promise<void> {
-    await this.emit(WARRANTY_MODULE_EVENTS.WARRANTY_DEFECT_REPORTED as WarrantyEventType, {
+    await this.emit(WARRANTY_MODULE_EVENTS.DEFECT_REPORTED as WarrantyEventType, {
       warrantyId: defect.warrantyId,
       blueprintId: defect.blueprintId,
       defectId: defect.id,
@@ -196,7 +197,7 @@ export class WarrantyEventHandlers {
    * 發送：缺失已確認
    */
   async emitDefectConfirmed(defect: WarrantyDefect): Promise<void> {
-    await this.emit(WARRANTY_MODULE_EVENTS.WARRANTY_DEFECT_CONFIRMED as WarrantyEventType, {
+    await this.emit(WARRANTY_MODULE_EVENTS.DEFECT_CONFIRMED as WarrantyEventType, {
       warrantyId: defect.warrantyId,
       blueprintId: defect.blueprintId,
       defectId: defect.id,
@@ -209,7 +210,7 @@ export class WarrantyEventHandlers {
    * 發送：缺失已拒絕
    */
   async emitDefectRejected(defect: WarrantyDefect, reason: string): Promise<void> {
-    await this.emit(WARRANTY_MODULE_EVENTS.WARRANTY_DEFECT_REJECTED as WarrantyEventType, {
+    await this.emit(WARRANTY_MODULE_EVENTS.DEFECT_REJECTED as WarrantyEventType, {
       warrantyId: defect.warrantyId,
       blueprintId: defect.blueprintId,
       defectId: defect.id,
@@ -222,7 +223,7 @@ export class WarrantyEventHandlers {
    * 發送：缺失已結案
    */
   async emitDefectClosed(defect: WarrantyDefect): Promise<void> {
-    await this.emit(WARRANTY_MODULE_EVENTS.WARRANTY_DEFECT_CLOSED as WarrantyEventType, {
+    await this.emit(WARRANTY_MODULE_EVENTS.DEFECT_CLOSED as WarrantyEventType, {
       warrantyId: defect.warrantyId,
       blueprintId: defect.blueprintId,
       defectId: defect.id,
@@ -238,7 +239,7 @@ export class WarrantyEventHandlers {
    * 發送：維修已建立
    */
   async emitRepairCreated(repair: WarrantyRepair): Promise<void> {
-    await this.emit(WARRANTY_MODULE_EVENTS.WARRANTY_REPAIR_CREATED as WarrantyEventType, {
+    await this.emit(WARRANTY_MODULE_EVENTS.REPAIR_CREATED as WarrantyEventType, {
       warrantyId: repair.warrantyId,
       blueprintId: repair.blueprintId,
       repairId: repair.id,
@@ -251,7 +252,7 @@ export class WarrantyEventHandlers {
    * 發送：維修已開始
    */
   async emitRepairStarted(repair: WarrantyRepair): Promise<void> {
-    await this.emit(WARRANTY_MODULE_EVENTS.WARRANTY_REPAIR_STARTED as WarrantyEventType, {
+    await this.emit(WARRANTY_MODULE_EVENTS.REPAIR_STARTED as WarrantyEventType, {
       warrantyId: repair.warrantyId,
       blueprintId: repair.blueprintId,
       repairId: repair.id,
@@ -264,7 +265,7 @@ export class WarrantyEventHandlers {
    * 發送：維修已完成
    */
   async emitRepairCompleted(repair: WarrantyRepair): Promise<void> {
-    await this.emit(WARRANTY_MODULE_EVENTS.WARRANTY_REPAIR_COMPLETED as WarrantyEventType, {
+    await this.emit(WARRANTY_MODULE_EVENTS.REPAIR_COMPLETED as WarrantyEventType, {
       warrantyId: repair.warrantyId,
       blueprintId: repair.blueprintId,
       repairId: repair.id,
@@ -278,7 +279,7 @@ export class WarrantyEventHandlers {
    * 發送：維修已驗收
    */
   async emitRepairVerified(repair: WarrantyRepair, passed: boolean): Promise<void> {
-    await this.emit(WARRANTY_MODULE_EVENTS.WARRANTY_REPAIR_VERIFIED as WarrantyEventType, {
+    await this.emit(WARRANTY_MODULE_EVENTS.REPAIR_VERIFIED as WarrantyEventType, {
       warrantyId: repair.warrantyId,
       blueprintId: repair.blueprintId,
       repairId: repair.id,

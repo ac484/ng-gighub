@@ -16,6 +16,7 @@ import { NzCalendarModule } from 'ng-zorro-antd/calendar';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
+import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
@@ -73,6 +74,7 @@ export const SHARED_ZORRO_MODULES = [
   NzBadgeModule,
   NzCheckboxModule,
   NzDatePickerModule,
+  NzDescriptionsModule,
   NzDividerModule,
   NzDrawerModule,
   NzInputNumberModule,
