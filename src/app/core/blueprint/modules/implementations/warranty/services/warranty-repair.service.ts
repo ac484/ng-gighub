@@ -93,6 +93,7 @@ export class WarrantyRepairService {
     }
 
     const createOptions: CreateRepairOptions = {
+      warrantyId: data.warrantyId,
       defectId: data.defectId,
       description: data.description,
       repairMethod: data.repairMethod,

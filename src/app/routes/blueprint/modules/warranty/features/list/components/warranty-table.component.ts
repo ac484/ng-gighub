@@ -28,7 +28,8 @@ import { SHARED_IMPORTS } from '@shared';
       [data]="warranties()"
       [columns]="columns"
       [loading]="loading()"
-      [page]="{ show: true, pageSize: 10 }"
+      [page]="{ show: true, showSize: false }"
+      [ps]="10"
       (change)="change.emit($event)"
     />
   `

@@ -98,6 +98,11 @@ export const WARRANTY_MODULE_EVENTS = {
 } as const;
 
 /**
+ * 保固事件類型
+ */
+export type WarrantyEventType = (typeof WARRANTY_MODULE_EVENTS)[keyof typeof WARRANTY_MODULE_EVENTS];
+
+/**
  * 保固模組權限
  */
 export const WARRANTY_MODULE_PERMISSIONS = {
