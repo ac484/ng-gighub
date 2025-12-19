@@ -19,3 +19,6 @@ export * from './members';
 
 // Issues Module (Refactored)
 export * from './issues';
+
+// QA Module (Refactored)
+export * from './qa';

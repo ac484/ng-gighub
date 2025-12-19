@@ -26,7 +26,7 @@ import { FinanceModuleViewComponent } from './modules/finance';
 import { IssuesModuleViewComponent } from './modules/issues';
 import { LogModuleViewComponent } from './modules/log-module-view.component';
 import { MembersModuleViewComponent } from './modules/members';
-import { QaModuleViewComponent } from './modules/qa-module-view.component';
+import { QaModuleViewComponent } from './modules/qa';
 import { SafetyModuleViewComponent } from './modules/safety-module-view.component';
 import { WarrantyModuleViewComponent } from './modules/warranty';
 import { WorkflowModuleViewComponent } from './modules/workflow-module-view.component';
