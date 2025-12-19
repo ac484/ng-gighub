@@ -21,7 +21,7 @@ import { ConstructionLogComponent } from './construction-log/construction-log.co
 import { ContainerDashboardComponent } from './container/container-dashboard.component';
 import { BlueprintMembersComponent } from './members/blueprint-members.component';
 import { AcceptanceModuleViewComponent } from './modules/acceptance-module-view.component';
-import { CloudModuleViewComponent } from './modules/cloud-module-view.component';
+import { CloudModuleViewComponent } from './modules/cloud';
 import { ContractModuleViewComponent } from './modules/contract/contract-module-view.component';
 import { FinanceModuleViewComponent } from './modules/finance-module-view.component';
 import { IssuesModuleViewComponent } from './modules/issues-module-view.component';
