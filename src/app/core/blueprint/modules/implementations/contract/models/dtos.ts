@@ -88,6 +88,10 @@ export interface UpdateContractDto {
   /** Contract terms */
   terms?: ContractTerm[];
 
+  // AI Parsing
+  /** Parsed contract data (JSON string) */
+  parsedData?: string;
+
   // User
   /** User who updates the contract */
   updatedBy?: string;

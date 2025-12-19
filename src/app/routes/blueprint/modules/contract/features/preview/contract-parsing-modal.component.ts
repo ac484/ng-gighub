@@ -11,6 +11,8 @@ import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/cor
 import type { ParsedContractData } from '@core/blueprint/modules/implementations/contract/models';
 import { SHARED_IMPORTS } from '@shared';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
+import { NzStepsModule } from 'ng-zorro-antd/steps';
+import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 
 /**
  * Modal data interface
@@ -29,7 +31,7 @@ type ParsingStatus = 'pending' | 'processing' | 'completed' | 'failed';
   selector: 'app-contract-parsing-modal',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SHARED_IMPORTS],
+  imports: [SHARED_IMPORTS, NzStepsModule, NzDescriptionsModule],
   template: `
     <div class="parsing-container">
       <!-- Parsing Header -->

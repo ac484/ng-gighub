@@ -340,7 +340,7 @@ export class ContractModuleViewComponent implements OnInit {
 
     // Create parsing modal
     const modalRef = this.modalService.create({
-      nzTitle: null,
+      nzTitle: '',  // Empty string instead of null
       nzContent: ContractParsingModalComponent,
       nzData: {
         contractId: contract.id,
