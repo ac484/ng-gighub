@@ -15,12 +15,7 @@ import { SHARED_IMPORTS } from '@shared';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SHARED_IMPORTS],
-  template: `
-    <nz-badge
-      [nzStatus]="statusConfig().status"
-      [nzText]="statusConfig().text"
-    />
-  `,
+  template: ` <nz-badge [nzStatus]="statusConfig().status" [nzText]="statusConfig().text" /> `,
   styles: []
 })
 export class AcceptanceStatusBadgeComponent {

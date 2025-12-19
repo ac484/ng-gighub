@@ -1,12 +1,14 @@
 /**
- * Qa Domain Module Exports
+ * QA Domain Module Exports
  *
- * Public API for 品質控管域 module.
+ * Public API for Quality Assurance module.
  *
- * @module QaDomain
+ * Following the same pattern as Issue Module (SETC-001 ~ SETC-008).
+ *
+ * @module QADomain
  * @author GigHub Development Team
  * @date 2025-12-13
- * @updated 2025-12-16 - SETC-041 擴展生命週期服務
+ * @updated 2025-12-19 - Enhanced with sub-module exports
  */
 
 export * from './qa.module';
@@ -14,3 +16,5 @@ export * from './module.metadata';
 export * from './models';
 export * from './repositories/qa.repository';
 export * from './services';
+export * from './exports';
+export * from './config';

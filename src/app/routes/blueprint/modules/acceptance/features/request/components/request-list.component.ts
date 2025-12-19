@@ -10,6 +10,7 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
 import { AcceptanceRecord } from '@core/blueprint/modules/implementations/acceptance/models';
 import { STColumn } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
+
 import { AcceptanceStatusBadgeComponent } from '../../../shared';
 
 @Component({
