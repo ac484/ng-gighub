@@ -39,28 +39,60 @@
 ```
 docs/
 ├── README.md                    # 本文檔 - 導覽指南
-├── ARCHITECTURE.md              # 系統架構總覽
+├── ARCHITECTURE.md              # 系統架構總覽 (高層次)
+├── TREE.md                      # 專案檔案結構樹狀圖
 ├── analysis/                    # 專案分析文檔
+│   ├── CODE_OPTIMIZATION_ANALYSIS.md
 │   ├── CONTRACT_MODULE_PRODUCTION_ANALYSIS.md
-│   └── PROJECT_ANALYSIS_SUMMARY.md
-├── architecture/                # 架構設計文檔
+│   ├── CONTRACT-PARSING-GAP-ANALYSIS.md
+│   ├── OCR-PDF-PARSING-ANALYSIS.md
+│   ├── OCR_WORKFLOW_README.md
+│   ├── ORPHANED_FILES_ANALYSIS.md
+│   ├── PARTNER_MODULE_SUMMARY.md
+│   ├── PROJECT_ANALYSIS_SUMMARY.md
+│   ├── TREE_OPTIMIZATION_SUMMARY.md
+│   ├── VISUAL_COMPARISON.md
+│   └── IMPLEMENTATION_SUMMARY.md
+├── architecture/                # 詳細架構設計文檔
+│   ├── README.md
 │   ├── EXECUTIVE_SUMMARY.md
 │   ├── Contract-AI-Integration_Architecture.md
-│   └── firebase-adapter-*.md
+│   ├── firebase-adapter-implementation-roadmap.md
+│   └── firebase-adapter-pattern-proposal.md
+├── design/                      # 設計決策與模型文檔
+│   ├── blueprint-ownership-membership.md
+│   └── partner-member-management-modernization.md
 ├── discussions/                 # 專案規劃與開發指引
-│   ├── ⭐.md                    # 核心開發規範 (MANDATORY)
-│   ├── SETC-*.md                # 詳細任務規劃 (69個任務)
-│   ├── MODULE-*.md              # 模組規劃文檔
-│   ├── TREE.md                  # 專案結構樹狀圖
-│   └── SUMMARY.md               # 專案進度總覽
+│   ├── README.md
+│   ├── 00-core/                 # 核心文檔
+│   ├── 01-overview/             # SETC 工作流程定義
+│   ├── 02-planning/             # 規劃文檔
+│   ├── 03-implementation/       # 實施文檔
+│   ├── 10-issue-module/         # 問題模組任務
+│   ├── 20-contract-module/      # 合約模組任務
+│   ├── 30-automation/           # 自動化任務
+│   ├── 40-finance/              # 財務模組任務
+│   ├── 50-warranty-module/      # 保固模組任務
+│   ├── 60-defect-module/        # 缺失模組任務
+│   ├── 70-task-module/          # 任務模組任務
+│   └── 80-acceptance-module/    # 驗收模組任務
 ├── planning/                    # 實施計劃文檔
 │   ├── IMPLEMENTATION_PROGRESS.md
 │   └── PHASE2_IMPLEMENTATION_PLAN.md
 ├── principles/                  # 系統設計原則
-│   ├── principles.md            # 核心設計原則
+│   ├── principles.md            # 核心設計原則 (十大原則)
 │   └── rules.md                 # 開發規則
 ├── ui-theme/                    # UI主題設計
+│   ├── README.md
+│   ├── BEST_PRACTICES.md
+│   ├── COLOR_SYSTEM.md
+│   ├── COMPONENTS.md
+│   ├── IMPLEMENTATION_GUIDE.md
+│   ├── MIGRATION.md
+│   ├── TESTING.md
+│   └── XUANWU_THEME.md
 └── Archived/                    # 已歸檔的文檔
+    └── SETC-000-*.md            # 舊版任務文檔
 ```
 
 ---
