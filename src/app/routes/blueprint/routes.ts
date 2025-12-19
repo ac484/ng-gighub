@@ -28,7 +28,7 @@ export const routes: Routes = [
   },
   {
     path: ':id/finance',
-    loadChildren: () => import('./finance/routes').then(m => m.financeRoutes),
+    loadChildren: () => import('./modules/finance/routes').then(m => m.financeRoutes),
     data: { title: '財務管理' }
   }
 ];

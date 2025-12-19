@@ -11,6 +11,9 @@
 // Main Orchestrator
 export { FinanceModuleViewComponent } from './finance-module-view.component';
 
+// Routes
+export { financeRoutes } from './routes';
+
 // Feature Exports
 export * from './features/dashboard';
 export * from './features/invoice-list';
