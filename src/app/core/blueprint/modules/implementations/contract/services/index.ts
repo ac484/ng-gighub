@@ -1,11 +1,15 @@
 /**
- * Contract Module - Services Export (Skeleton UI)
+ * Contract Module - Services Export
  *
- * Simplified services for basic contract module functionality.
+ * Complete services for contract module functionality.
  *
  * @author GigHub Development Team
- * @date 2025-12-18
+ * @date 2025-12-19
  */
 
-// Basic file upload service (simplified)
+// Core business logic services
+export * from './contract.service';
+export * from './work-item.service';
+
+// File upload service
 export * from './contract-upload.service';
