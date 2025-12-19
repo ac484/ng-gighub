@@ -1,8 +1,15 @@
 /**
- * Contract Module - Shared Components
+ * Blueprint Modules - Shared Components
+ * 藍圖模組 - 共享元件
+ *
+ * Exports all module components for easy import
  */
 
+// Contract Module
 export * from './contract/contract-creation-wizard.component';
 export * from './contract/contract-detail-drawer.component';
 export * from './contract/contract-modal.component';
 export * from './contract/contract-module-view.component';
+
+// Members Module
+export * from './members';

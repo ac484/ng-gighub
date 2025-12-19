@@ -19,13 +19,13 @@ import { firstValueFrom } from 'rxjs';
 
 import { ConstructionLogComponent } from './construction-log/construction-log.component';
 import { ContainerDashboardComponent } from './container/container-dashboard.component';
-import { BlueprintMembersComponent } from './members/blueprint-members.component';
 import { AcceptanceModuleViewComponent } from './modules/acceptance-module-view.component';
 import { CloudModuleViewComponent } from './modules/cloud';
 import { ContractModuleViewComponent } from './modules/contract';
 import { FinanceModuleViewComponent } from './modules/finance-module-view.component';
 import { IssuesModuleViewComponent } from './modules/issues-module-view.component';
 import { LogModuleViewComponent } from './modules/log-module-view.component';
+import { MemberListComponent } from './modules/members';
 import { QaModuleViewComponent } from './modules/qa-module-view.component';
 import { SafetyModuleViewComponent } from './modules/safety-module-view.component';
 import { WarrantyModuleViewComponent } from './modules/warranty-module-view.component';
@@ -67,7 +67,7 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
     NzFormModule,
     DatePipe,
     AuditLogsComponent,
-    BlueprintMembersComponent,
+    MemberListComponent,
     ConstructionLogComponent,
     ContainerDashboardComponent,
     TasksComponent,
@@ -286,7 +286,7 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
           <nz-tab nzTitle="成員">
             <ng-template nz-tab>
               @if (blueprint()?.id) {
-                <app-blueprint-members [blueprintId]="blueprint()!.id" [blueprintOwnerType]="blueprint()!.ownerType" />
+                <app-member-list [blueprintId]="blueprint()!.id" [blueprintOwnerType]="blueprint()!.ownerType" />
               }
             </ng-template>
           </nz-tab>
