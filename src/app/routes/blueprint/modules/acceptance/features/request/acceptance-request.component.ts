@@ -15,6 +15,7 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { AcceptanceRecord } from '@core/blueprint/modules/implementations/acceptance/models';
 import { SHARED_IMPORTS } from '@shared';
+
 import { RequestListComponent, RequestStatisticsComponent } from './components';
 
 @Component({

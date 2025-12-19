@@ -23,25 +23,13 @@ import { NzStatisticModule } from 'ng-zorro-antd/statistic';
           <nz-statistic [nzValue]="totalCount()" nzTitle="總申請數" />
         </nz-col>
         <nz-col [nzSpan]="6">
-          <nz-statistic
-            [nzValue]="pendingCount()"
-            nzTitle="待審核"
-            [nzValueStyle]="{ color: '#faad14' }"
-          />
+          <nz-statistic [nzValue]="pendingCount()" nzTitle="待審核" [nzValueStyle]="{ color: '#faad14' }" />
         </nz-col>
         <nz-col [nzSpan]="6">
-          <nz-statistic
-            [nzValue]="inReviewCount()"
-            nzTitle="審核中"
-            [nzValueStyle]="{ color: '#1890ff' }"
-          />
+          <nz-statistic [nzValue]="inReviewCount()" nzTitle="審核中" [nzValueStyle]="{ color: '#1890ff' }" />
         </nz-col>
         <nz-col [nzSpan]="6">
-          <nz-statistic
-            [nzValue]="approvedCount()"
-            nzTitle="已通過"
-            [nzValueStyle]="{ color: '#52c41a' }"
-          />
+          <nz-statistic [nzValue]="approvedCount()" nzTitle="已通過" [nzValueStyle]="{ color: '#52c41a' }" />
         </nz-col>
       </nz-row>
     </nz-card>
@@ -53,12 +41,9 @@ export class RequestStatisticsComponent {
 
   totalCount = () => this.requests().length;
 
-  pendingCount = () =>
-    this.requests().filter(r => r.status === AcceptanceStatus.PENDING).length;
+  pendingCount = () => this.requests().filter(r => r.status === AcceptanceStatus.PENDING).length;
 
-  inReviewCount = () =>
-    this.requests().filter(r => r.status === AcceptanceStatus.IN_REVIEW).length;
+  inReviewCount = () => this.requests().filter(r => r.status === AcceptanceStatus.IN_REVIEW).length;
 
-  approvedCount = () =>
-    this.requests().filter(r => r.status === AcceptanceStatus.APPROVED).length;
+  approvedCount = () => this.requests().filter(r => r.status === AcceptanceStatus.APPROVED).length;
 }

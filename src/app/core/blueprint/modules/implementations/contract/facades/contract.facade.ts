@@ -170,6 +170,7 @@ export class ContractFacade {
 
   /**
    * Ensure facade is initialized before operations
+   *
    * @private
    */
   private ensureInitialized(): void {

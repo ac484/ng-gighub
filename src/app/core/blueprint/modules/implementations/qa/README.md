@@ -2,19 +2,22 @@
 
 > **Domain ID**: `qa`  
 > **Version**: 1.0.0  
-> **Status**: Ready for Implementation  
-> **Architecture**: Blueprint Container Module  
-> **Priority**: P2 (必要)
+> **Status**: ✅ Structured (2025-12-19)  
+> **Architecture**: Blueprint Container Module (Feature-based)  
+> **Priority**: P2 (必要)  
+> **Pattern**: Following Issue Module (SETC-001 ~ SETC-008)
 
 ## 📋 Overview
 
 品質控管域負責施工品質管理與檢查，提供檢查表管理、缺失紀錄、現場巡檢及品質報告等功能。本模組遵循 Blueprint Container 架構設計，實現零耦合、可擴展的模組化設計。
 
+**🎯 2025-12-19 更新**: 模組已重構為功能導向架構（Feature-based Architecture），遵循 Issue Module 的模式，提供清晰的 API 介面和子模組分離。
+
 ### 業務範圍
 
 施工品質管理與檢查，包括：
 - 例行檢查表管理與執行
-- 缺失紀錄與修復流程
+- 缺失紀錄與修復流程（SETC-041 ~ SETC-044）
 - 現場巡檢排程與記錄
 - 品質報告生成與匯出
 
@@ -22,11 +25,16 @@
 
 - ✅ **可組態檢查表**: 自定義檢查項目與標準
 - ✅ **缺失管理**: 完整的缺失追蹤與修復流程
+- ✅ **缺失生命週期**: 狀態機管理 (SETC-041)
+- ✅ **整改流程**: 修復進度追蹤 (SETC-042)
+- ✅ **複驗管理**: 驗證工作流 (SETC-043)
+- ✅ **Issue 整合**: 嚴重缺失自動升級為 Issue (SETC-044)
 - ✅ **行動巡檢**: 支援行動裝置現場巡檢
 - ✅ **照片標註**: 缺失照片拍攝與標註功能
 - ✅ **品質報告**: 自動生成品質報告與統計
 - ✅ **零耦合設計**: 透過 Event Bus 與其他模組通訊
 - ✅ **完整生命週期管理**: 實作 IBlueprintModule 介面
+- ✅ **清晰 API 介面**: 提供統一的 IQAModuleApi 存取
 
 ### 設計原則
 
@@ -34,38 +42,70 @@
 2. **缺失閉環**: 從發現、記錄、修復到驗證的完整閉環
 3. **可追溯性**: 所有檢查與缺失都可追溯
 4. **移動優先**: 優化行動裝置使用體驗
+5. **高內聚低耦合**: 子模組獨立但協作良好
+6. **明確介面**: 透過 exports/API 與外部通訊
 
 ## 🏗️ Architecture
 
-### Domain 結構
+### New Structure (2025-12-19)
 
 ```
 qa/
-├── qa.module.ts                  # Domain 主模塊 (實作 IBlueprintModule)
-├── module.metadata.ts            # Domain 元資料
-├── qa.repository.ts              # 共用資料存取層
-├── qa.routes.ts                  # Domain 路由配置
-├── services/                     # Sub-Module Services
-│   ├── checklist.service.ts      # Sub-Module: Checklist
-│   ├── defect.service.ts         # Sub-Module: Defect Management
-│   ├── inspection.service.ts     # Sub-Module: Inspection
-│   └── report.service.ts         # Sub-Module: QA Report
-├── models/                       # Domain 模型
-│   ├── checklist.model.ts
-│   ├── defect.model.ts
-│   ├── inspection.model.ts
-│   └── qa-report.model.ts
-├── views/                        # Domain UI 元件
-│   ├── checklist/
-│   ├── defect/
-│   ├── inspection/
-│   └── report/
-├── config/
-│   └── qa.config.ts              # 模組配置
-├── exports/
-│   └── qa-api.exports.ts         # 公開 API
+├── qa.module.ts                  # 主模組 (實作 IBlueprintModule)
+├── module.metadata.ts            # 模組元資料與事件定義
 ├── index.ts                      # 統一匯出
-└── README.md                     # 本文件
+├── README.md                     # 本文件
+│
+├── models/                       # 資料模型
+│   ├── qa.model.ts               # 缺失模型與類型
+│   └── index.ts
+│
+├── repositories/                 # 資料存取層
+│   └── qa.repository.ts          # QA Repository
+│
+├── services/                     # 業務邏輯層（按功能分離）
+│   ├── checklist.service.ts      # 檢查表管理
+│   ├── defect.service.ts         # 基礎缺失 CRUD
+│   ├── defect-lifecycle.service.ts        # 缺失生命週期 (SETC-041)
+│   ├── defect-resolution.service.ts       # 缺失整改 (SETC-042)
+│   ├── defect-reinspection.service.ts     # 缺失複驗 (SETC-043)
+│   ├── defect-issue-integration.service.ts # 缺失-Issue 整合 (SETC-044)
+│   ├── inspection.service.ts     # 現場巡檢
+│   ├── report.service.ts         # 品質報告
+│   └── index.ts
+│
+├── exports/                      # 公開 API 介面 (NEW)
+│   ├── qa-api.exports.ts         # IQAModuleApi 定義
+│   └── index.ts
+│
+└── config/                       # 模組配置 (NEW)
+    ├── qa.config.ts              # IQAConfig & DEFAULT_QA_CONFIG
+    └── index.ts
+```
+
+### Module Architecture Pattern
+
+遵循 Issue Module 的三層架構模式：
+
+```
+External Modules
+      ↓ (Event Bus)
+QA Module API (IQAModuleApi)
+      ↓
+Services Layer (8 sub-modules)
+  ├── ChecklistService
+  ├── DefectService
+  ├── DefectLifecycleService      (SETC-041)
+  ├── DefectResolutionService     (SETC-042)
+  ├── DefectReinspectionService   (SETC-043)
+  ├── DefectIssueIntegrationService (SETC-044)
+  ├── InspectionService
+  └── ReportService
+      ↓
+Repository Layer
+  └── QaRepository
+      ↓
+Firestore
 ```
 
 ## 📦 Sub-Modules (子模塊)

@@ -31,11 +31,11 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { lastValueFrom } from 'rxjs';
 
 // Feature imports - each feature is self-contained
-import { AcceptanceRequestComponent } from './features/request';
-import { AcceptanceReviewComponent } from './features/review';
+import { AcceptanceConclusionComponent } from './features/conclusion';
 import { AcceptancePreliminaryComponent } from './features/preliminary';
 import { AcceptanceReInspectionComponent } from './features/re-inspection';
-import { AcceptanceConclusionComponent } from './features/conclusion';
+import { AcceptanceRequestComponent } from './features/request';
+import { AcceptanceReviewComponent } from './features/review';
 
 type ViewMode = 'request' | 'review' | 'preliminary' | 're-inspection' | 'conclusion';
 
@@ -54,11 +54,7 @@ type ViewMode = 'request' | 'review' | 'preliminary' | 're-inspection' | 'conclu
   template: `
     <!-- View Mode Tabs -->
     <nz-card class="mb-md">
-      <nz-segmented
-        [nzOptions]="viewOptions"
-        [ngModel]="activeView()"
-        (ngModelChange)="onViewChange($event)"
-      />
+      <nz-segmented [nzOptions]="viewOptions" [ngModel]="activeView()" (ngModelChange)="onViewChange($event)" />
     </nz-card>
 
     <!-- Feature Views -->
@@ -146,8 +142,7 @@ export class AcceptanceModuleViewComponent implements OnInit {
   ];
 
   // Computed filtered records by type/status
-  requests = () =>
-    this.allRecords().filter(r => r.status === AcceptanceStatus.PENDING || r.status === AcceptanceStatus.IN_REVIEW);
+  requests = () => this.allRecords().filter(r => r.status === AcceptanceStatus.PENDING || r.status === AcceptanceStatus.IN_REVIEW);
 
   reviews = () => this.allRecords().filter(r => r.status === AcceptanceStatus.IN_REVIEW);
 
