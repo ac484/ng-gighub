@@ -18,12 +18,12 @@ import { Routes } from '@angular/router';
 export const financeRoutes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./finance-dashboard.component').then(m => m.FinanceDashboardComponent),
+    loadComponent: () => import('../modules/finance/features/dashboard').then(m => m.FinanceDashboardComponent),
     data: { title: '財務概覽' }
   },
   {
     path: 'invoices',
-    loadComponent: () => import('./invoice-list.component').then(m => m.InvoiceListComponent),
+    loadComponent: () => import('../modules/finance/features/invoice-list').then(m => m.InvoiceListComponent),
     data: {
       title: '請款單管理',
       invoiceType: 'receivable'
@@ -31,7 +31,7 @@ export const financeRoutes: Routes = [
   },
   {
     path: 'payments',
-    loadComponent: () => import('./invoice-list.component').then(m => m.InvoiceListComponent),
+    loadComponent: () => import('../modules/finance/features/invoice-list').then(m => m.InvoiceListComponent),
     data: {
       title: '付款單管理',
       invoiceType: 'payable'

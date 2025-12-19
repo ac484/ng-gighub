@@ -1,0 +1,368 @@
+<!-- Finance Module View Template -->
+<!-- 財務域視圖元件模板 - 顯示於藍圖詳情頁面的 Tab 中 -->
+
+<!-- 財務摘要區塊 -->
+<nz-card nzTitle="財務摘要" [nzExtra]="summaryExtra" class="mb-md">
+  <ng-template #summaryExtra>
+    <button nz-button nzType="link" (click)="refreshSummary()">
+      <span nz-icon nzType="reload"></span>
+      重新整理
+    </button>
+  </ng-template>
+
+  @if (loading()) {
+    <div style="text-align: center; padding: 24px;">
+      <nz-spin nzSimple></nz-spin>
+    </div>
+  } @else {
+    <nz-row [nzGutter]="[16, 16]">
+      <!-- 應收帳款卡片 -->
+      <nz-col [nzXs]="24" [nzSm]="12" [nzLg]="8">
+        <nz-card nzSize="small" [nzHoverable]="true">
+          <div class="summary-card receivable">
+            <div class="summary-header">
+              <span nz-icon nzType="rise" class="summary-icon"></span>
+              <span class="summary-title">應收帳款</span>
+            </div>
+            <nz-statistic
+              [nzValue]="summary().receivables.total"
+              [nzPrefix]="dollarPrefix"
+              [nzValueStyle]="{ color: '#52c41a', fontSize: '24px' }">
+            </nz-statistic>
+            <nz-divider></nz-divider>
+            <nz-progress
+              [nzPercent]="summary().receivables.collectionRate"
+              [nzFormat]="formatPercent"
+              nzStatus="active"
+              nzStrokeColor="#52c41a">
+            </nz-progress>
+            <div class="summary-detail">
+              <span>已收：${{ formatNumber(summary().receivables.collected) }}</span>
+              <span>待收：${{ formatNumber(summary().receivables.pending) }}</span>
+            </div>
+          </div>
+        </nz-card>
+      </nz-col>
+
+      <!-- 應付帳款卡片 -->
+      <nz-col [nzXs]="24" [nzSm]="12" [nzLg]="8">
+        <nz-card nzSize="small" [nzHoverable]="true">
+          <div class="summary-card payable">
+            <div class="summary-header">
+              <span nz-icon nzType="fall" class="summary-icon"></span>
+              <span class="summary-title">應付帳款</span>
+            </div>
+            <nz-statistic
+              [nzValue]="summary().payables.total"
+              [nzPrefix]="dollarPrefix"
+              [nzValueStyle]="{ color: '#faad14', fontSize: '24px' }">
+            </nz-statistic>
+            <nz-divider></nz-divider>
+            <nz-progress
+              [nzPercent]="summary().payables.paymentRate"
+              [nzFormat]="formatPercent"
+              nzStatus="active"
+              nzStrokeColor="#faad14">
+            </nz-progress>
+            <div class="summary-detail">
+              <span>已付：${{ formatNumber(summary().payables.paid) }}</span>
+              <span>待付：${{ formatNumber(summary().payables.pending) }}</span>
+            </div>
+          </div>
+        </nz-card>
+      </nz-col>
+
+      <!-- 損益概覽卡片 -->
+      <nz-col [nzXs]="24" [nzSm]="24" [nzLg]="8">
+        <nz-card nzSize="small" [nzHoverable]="true">
+          <div class="summary-card profit">
+            <div class="summary-header">
+              <span nz-icon nzType="dollar" class="summary-icon"></span>
+              <span class="summary-title">損益概覽</span>
+            </div>
+            <nz-statistic
+              [nzValue]="summary().grossProfit"
+              [nzPrefix]="dollarPrefix"
+              [nzValueStyle]="getProfitStyle()">
+            </nz-statistic>
+            <nz-divider></nz-divider>
+            <div style="text-align: center;">
+              @if (summary().grossProfitMargin >= 20) {
+                <nz-tag nzColor="success">毛利率：{{ summary().grossProfitMargin.toFixed(1) }}%</nz-tag>
+              } @else if (summary().grossProfitMargin >= 10) {
+                <nz-tag nzColor="warning">毛利率：{{ summary().grossProfitMargin.toFixed(1) }}%</nz-tag>
+              } @else {
+                <nz-tag nzColor="error">毛利率：{{ summary().grossProfitMargin.toFixed(1) }}%</nz-tag>
+              }
+            </div>
+            <div class="summary-detail" style="justify-content: center; margin-top: 8px;">
+              <span style="font-size: 12px; color: #999;">統計時間：{{ summary().asOf | date:'yyyy-MM-dd HH:mm' }}</span>
+            </div>
+          </div>
+        </nz-card>
+      </nz-col>
+    </nz-row>
+  }
+</nz-card>
+
+<!-- 請款/付款流程說明 -->
+<nz-card nzTitle="請款/付款流程" class="mb-md">
+  <nz-steps [nzCurrent]="workflowStep()" nzSize="small">
+    <nz-step nzTitle="金額確認" nzDescription="確認可請款%/可付款%">
+      <ng-template #nzIcon>
+        <span nz-icon nzType="audit"></span>
+      </ng-template>
+    </nz-step>
+    <nz-step nzTitle="建立清單" nzDescription="建立可請款/付款清單">
+      <ng-template #nzIcon>
+        <span nz-icon nzType="file-add"></span>
+      </ng-template>
+    </nz-step>
+    <nz-step nzTitle="送審流程" nzDescription="草稿→送出→審核">
+      <ng-template #nzIcon>
+        <span nz-icon nzType="solution"></span>
+      </ng-template>
+    </nz-step>
+    <nz-step nzTitle="開票付款" nzDescription="開票→收/付款">
+      <ng-template #nzIcon>
+        <span nz-icon nzType="transaction"></span>
+      </ng-template>
+    </nz-step>
+    <nz-step nzTitle="成本計入" nzDescription="更新成本統計">
+      <ng-template #nzIcon>
+        <span nz-icon nzType="bar-chart"></span>
+      </ng-template>
+    </nz-step>
+  </nz-steps>
+</nz-card>
+
+<!-- 財務功能 Tabs -->
+<nz-card>
+  <nz-tabset [(nzSelectedIndex)]="activeTabIndex">
+    <!-- 可請款清單 Tab -->
+    <nz-tab nzTitle="可請款清單">
+      <ng-template nz-tab>
+        <div class="tab-header mb-md">
+          <nz-row [nzGutter]="16" nzAlign="middle">
+            <nz-col [nzFlex]="1">
+              <nz-alert nzType="info" [nzMessage]="receivableAlertMsg" nzShowIcon></nz-alert>
+              <ng-template #receivableAlertMsg>
+                共 {{ receivableItems().length }} 筆可請款項目，總金額：${{ formatNumber(totalReceivableAmount()) }}
+              </ng-template>
+            </nz-col>
+            <nz-col>
+              <button nz-button nzType="primary" (click)="createReceivableInvoice()">
+                <span nz-icon nzType="plus"></span>
+                建立請款單
+              </button>
+            </nz-col>
+          </nz-row>
+        </div>
+
+        @if (receivableItems().length === 0) {
+          <nz-empty nzNotFoundContent="暫無可請款項目"></nz-empty>
+        } @else {
+          <st [data]="receivableItems()" [columns]="billableColumns" />
+        }
+      </ng-template>
+    </nz-tab>
+
+    <!-- 可付款清單 Tab -->
+    <nz-tab nzTitle="可付款清單">
+      <ng-template nz-tab>
+        <div class="tab-header mb-md">
+          <nz-row [nzGutter]="16" nzAlign="middle">
+            <nz-col [nzFlex]="1">
+              <nz-alert nzType="warning" [nzMessage]="payableAlertMsg" nzShowIcon></nz-alert>
+              <ng-template #payableAlertMsg>
+                共 {{ payableItems().length }} 筆可付款項目，總金額：${{ formatNumber(totalPayableAmount()) }}
+              </ng-template>
+            </nz-col>
+            <nz-col>
+              <button nz-button nzType="default" (click)="createPayableInvoice()">
+                <span nz-icon nzType="plus"></span>
+                建立付款單
+              </button>
+            </nz-col>
+          </nz-row>
+        </div>
+
+        @if (payableItems().length === 0) {
+          <nz-empty nzNotFoundContent="暫無可付款項目"></nz-empty>
+        } @else {
+          <st [data]="payableItems()" [columns]="billableColumns" />
+        }
+      </ng-template>
+    </nz-tab>
+
+    <!-- 請款單列表 Tab -->
+    <nz-tab nzTitle="請款單">
+      <ng-template nz-tab>
+        <div class="tab-header mb-md">
+          <nz-row [nzGutter]="16" nzAlign="middle">
+            <nz-col [nzFlex]="1">
+              <nz-space>
+                <nz-select *nzSpaceItem [(ngModel)]="receivableStatusFilter" (ngModelChange)="filterInvoices()" style="width: 160px;" nzPlaceHolder="篩選狀態" nzAllowClear>
+                  @for (status of statusOptions; track status.value) {
+                    <nz-option [nzValue]="status.value" [nzLabel]="status.label"></nz-option>
+                  }
+                </nz-select>
+              </nz-space>
+            </nz-col>
+            <nz-col>
+              <button nz-button nzType="primary" (click)="createReceivableInvoice()">
+                <span nz-icon nzType="plus"></span>
+                新增請款單
+              </button>
+            </nz-col>
+          </nz-row>
+        </div>
+
+        @if (invoiceService.loading()) {
+          <div style="text-align: center; padding: 24px;">
+            <nz-spin nzSimple></nz-spin>
+          </div>
+        } @else if (filteredReceivableInvoices().length === 0) {
+          <nz-empty nzNotFoundContent="暫無請款記錄"></nz-empty>
+        } @else {
+          <st [data]="filteredReceivableInvoices()" [columns]="invoiceColumns" />
+        }
+      </ng-template>
+    </nz-tab>
+
+    <!-- 付款單列表 Tab -->
+    <nz-tab nzTitle="付款單">
+      <ng-template nz-tab>
+        <div class="tab-header mb-md">
+          <nz-row [nzGutter]="16" nzAlign="middle">
+            <nz-col [nzFlex]="1">
+              <nz-space>
+                <nz-select *nzSpaceItem [(ngModel)]="payableStatusFilter" (ngModelChange)="filterInvoices()" style="width: 160px;" nzPlaceHolder="篩選狀態" nzAllowClear>
+                  @for (status of statusOptions; track status.value) {
+                    <nz-option [nzValue]="status.value" [nzLabel]="status.label"></nz-option>
+                  }
+                </nz-select>
+              </nz-space>
+            </nz-col>
+            <nz-col>
+              <button nz-button nzType="default" (click)="createPayableInvoice()">
+                <span nz-icon nzType="plus"></span>
+                新增付款單
+              </button>
+            </nz-col>
+          </nz-row>
+        </div>
+
+        @if (paymentService.loading()) {
+          <div style="text-align: center; padding: 24px;">
+            <nz-spin nzSimple></nz-spin>
+          </div>
+        } @else if (filteredPayableInvoices().length === 0) {
+          <nz-empty nzNotFoundContent="暫無付款記錄"></nz-empty>
+        } @else {
+          <st [data]="filteredPayableInvoices()" [columns]="invoiceColumns" />
+        }
+      </ng-template>
+    </nz-tab>
+
+    <!-- 成本管理 Tab -->
+    <nz-tab nzTitle="成本管理">
+      <ng-template nz-tab>
+        <nz-row [nzGutter]="16" class="mb-md">
+          <nz-col [nzSpan]="8">
+            <nz-card nzSize="small">
+              <nz-statistic nzTitle="實際成本" [nzValue]="costStats().actualCost" [nzPrefix]="dollarPrefix"></nz-statistic>
+            </nz-card>
+          </nz-col>
+          <nz-col [nzSpan]="8">
+            <nz-card nzSize="small">
+              <nz-statistic nzTitle="應收總額" [nzValue]="costStats().totalReceivable" [nzPrefix]="dollarPrefix" [nzValueStyle]="{ color: '#52c41a' }"></nz-statistic>
+            </nz-card>
+          </nz-col>
+          <nz-col [nzSpan]="8">
+            <nz-card nzSize="small">
+              <nz-statistic nzTitle="應付總額" [nzValue]="costStats().totalPayable" [nzPrefix]="dollarPrefix" [nzValueStyle]="{ color: '#faad14' }"></nz-statistic>
+            </nz-card>
+          </nz-col>
+        </nz-row>
+
+        @if (costService.loading()) {
+          <div style="text-align: center; padding: 24px;">
+            <nz-spin nzSimple></nz-spin>
+          </div>
+        } @else if (costService.data().length === 0) {
+          <nz-empty nzNotFoundContent="暫無成本記錄"></nz-empty>
+        } @else {
+          <st [data]="costService.data()" [columns]="costColumns" />
+        }
+      </ng-template>
+    </nz-tab>
+
+    <!-- 審核流程 Tab -->
+    <nz-tab nzTitle="審核流程">
+      <ng-template nz-tab>
+        <nz-row [nzGutter]="24">
+          <nz-col [nzSpan]="12">
+            <nz-card nzTitle="待審核請款單" nzSize="small">
+              @if (pendingApprovalReceivables().length === 0) {
+                <nz-empty nzNotFoundContent="暫無待審核項目" [nzNotFoundImage]="'simple'"></nz-empty>
+              } @else {
+                <nz-timeline>
+                  @for (invoice of pendingApprovalReceivables(); track invoice.id) {
+                    <nz-timeline-item [nzColor]="getTimelineColor(invoice.status)">
+                      <div class="timeline-item">
+                        <div class="timeline-header">
+                          <strong>{{ invoice.invoiceNumber }}</strong>
+                          <nz-tag [nzColor]="getStatusColor(invoice.status)">{{ getStatusLabel(invoice.status) }}</nz-tag>
+                        </div>
+                        <div class="timeline-content">
+                          金額：${{ formatNumber(invoice.total) }}
+                        </div>
+                        <div class="timeline-actions">
+                          <button nz-button nzType="link" nzSize="small" (click)="approveInvoice(invoice)">
+                            <span nz-icon nzType="check"></span> 審核
+                          </button>
+                        </div>
+                      </div>
+                    </nz-timeline-item>
+                  }
+                </nz-timeline>
+              }
+            </nz-card>
+          </nz-col>
+          <nz-col [nzSpan]="12">
+            <nz-card nzTitle="待審核付款單" nzSize="small">
+              @if (pendingApprovalPayables().length === 0) {
+                <nz-empty nzNotFoundContent="暫無待審核項目" [nzNotFoundImage]="'simple'"></nz-empty>
+              } @else {
+                <nz-timeline>
+                  @for (invoice of pendingApprovalPayables(); track invoice.id) {
+                    <nz-timeline-item [nzColor]="getTimelineColor(invoice.status)">
+                      <div class="timeline-item">
+                        <div class="timeline-header">
+                          <strong>{{ invoice.invoiceNumber }}</strong>
+                          <nz-tag [nzColor]="getStatusColor(invoice.status)">{{ getStatusLabel(invoice.status) }}</nz-tag>
+                        </div>
+                        <div class="timeline-content">
+                          金額：${{ formatNumber(invoice.total) }}
+                        </div>
+                        <div class="timeline-actions">
+                          <button nz-button nzType="link" nzSize="small" (click)="approveInvoice(invoice)">
+                            <span nz-icon nzType="check"></span> 審核
+                          </button>
+                        </div>
+                      </div>
+                    </nz-timeline-item>
+                  }
+                </nz-timeline>
+              }
+            </nz-card>
+          </nz-col>
+        </nz-row>
+      </ng-template>
+    </nz-tab>
+  </nz-tabset>
+</nz-card>
+
+<!-- Dollar Prefix Template -->
+<ng-template #dollarPrefix>$</ng-template>
