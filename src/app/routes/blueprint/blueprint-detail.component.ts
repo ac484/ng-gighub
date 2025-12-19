@@ -17,7 +17,7 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { firstValueFrom } from 'rxjs';
 
-import { ConstructionLogComponent } from './construction-log/construction-log.component';
+import { DiaryModuleViewComponent } from './modules/diary';
 import { ContainerDashboardComponent } from './container/container-dashboard.component';
 import { BlueprintMembersComponent } from './members/blueprint-members.component';
 import { AcceptanceModuleViewComponent } from './modules/acceptance-module-view.component';
@@ -39,7 +39,7 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
  * - Display blueprint information
  * - Show enabled modules
  * - Navigate to module pages
- * - Integrated construction logs (工地施工日誌)
+ * - Integrated diary module (工地施工日誌)
  * - Integrated tasks (任務管理)
  * - Integrated audit logs (審計記錄) in overview sidebar
  * - Cloud module (雲端模組) for storage and backup
@@ -68,7 +68,7 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
     DatePipe,
     AuditLogsComponent,
     BlueprintMembersComponent,
-    ConstructionLogComponent,
+    DiaryModuleViewComponent,
     ContainerDashboardComponent,
     TasksComponent,
     LogModuleViewComponent,
@@ -273,11 +273,11 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
             </ng-template>
           </nz-tab>
 
-          <!-- Construction Logs Tab -->
+          <!-- Diary Tab -->
           <nz-tab nzTitle="施工日誌">
             <ng-template nz-tab>
               @if (blueprint()?.id) {
-                <app-construction-log [blueprintId]="blueprint()!.id" />
+                <app-diary-module-view [blueprintId]="blueprint()!.id" />
               }
             </ng-template>
           </nz-tab>
