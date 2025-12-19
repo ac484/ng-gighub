@@ -28,7 +28,7 @@ import {
 import { LoggerService } from '@core';
 import { Observable, from, map, catchError, of } from 'rxjs';
 
-import type { Contract, ContractFilters, ContractStatus, CreateContractDto, UpdateContractDto } from '../models';
+import type { Contract, ContractFilters, ContractStatus, CreateContractDto, FileAttachment, UpdateContractDto } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class ContractRepository {
@@ -76,7 +76,7 @@ export class ContractRepository {
       signingDate: signingDate instanceof Timestamp ? signingDate.toDate() : new Date(signingDate as string | number | Date),
       startDate: startDate instanceof Timestamp ? startDate.toDate() : new Date(startDate as string | number | Date),
       endDate: endDate instanceof Timestamp ? endDate.toDate() : new Date(endDate as string | number | Date),
-      originalFiles: (data['originalFiles'] as Contract['originalFiles']) || [],
+      originalFiles: this.convertFileAttachments((data['originalFiles'] as Contract['originalFiles']) || []),
       createdBy: data['createdBy'] as string,
       createdAt: createdAt instanceof Timestamp ? createdAt.toDate() : new Date(createdAt as string | number | Date),
       updatedBy: data['updatedBy'] as string,
@@ -87,8 +87,54 @@ export class ContractRepository {
           ? activatedAt.toDate()
           : new Date(activatedAt as string | number | Date)
         : undefined,
-      attachments: (data['attachments'] as Contract['attachments']) || []
+      attachments: this.convertFileAttachments((data['attachments'] as Contract['attachments']) || []),
+      parsedData: data['parsedData'] as string | undefined
     } as Contract;
+  }
+
+  /**
+   * Convert file attachments by normalizing uploadedAt timestamp
+   */
+  private convertFileAttachments(files: any[]): FileAttachment[] {
+    if (!Array.isArray(files)) {
+      return [];
+    }
+
+    return files.map(file => {
+      const uploadedAtValue = file?.uploadedAt;
+      let uploadedAt: Date;
+
+      if (uploadedAtValue instanceof Timestamp) {
+        uploadedAt = uploadedAtValue.toDate();
+      } else if (uploadedAtValue instanceof Date) {
+        uploadedAt = uploadedAtValue;
+      } else if (typeof uploadedAtValue === 'string' || typeof uploadedAtValue === 'number') {
+        uploadedAt = new Date(uploadedAtValue);
+      } else {
+        uploadedAt = new Date();
+      }
+
+      return {
+        ...file,
+        uploadedAt
+      };
+    });
+  }
+
+  /**
+   * Serialize file attachments for Firestore writes
+   */
+  private serializeFileAttachments(files: FileAttachment[] = []): any[] {
+    return files.map(file => ({
+      ...file,
+      uploadedAt: Timestamp.fromDate(
+        file.uploadedAt instanceof Date
+          ? file.uploadedAt
+          : typeof file.uploadedAt === 'string' || typeof file.uploadedAt === 'number'
+            ? new Date(file.uploadedAt)
+            : new Date()
+      )
+    }));
   }
 
   /**
@@ -144,13 +190,13 @@ export class ContractRepository {
         status: 'draft' as ContractStatus,
         startDate: Timestamp.fromDate(data.startDate),
         endDate: Timestamp.fromDate(data.endDate),
-        originalFiles: [],
-        createdBy: data.createdBy,
-        createdAt: now,
-        updatedBy: data.createdBy,
-        updatedAt: now,
-        attachments: []
-      };
+         originalFiles: this.serializeFileAttachments(data.originalFiles || []),
+         createdBy: data.createdBy,
+         createdAt: now,
+         updatedBy: data.createdBy,
+         updatedAt: now,
+         attachments: []
+       };
 
       const docRef = await addDoc(contractsRef, contractData);
       const snapshot = await getDoc(docRef);
@@ -277,6 +323,9 @@ export class ContractRepository {
       if (data.startDate !== undefined) updateData['startDate'] = Timestamp.fromDate(data.startDate);
       if (data.endDate !== undefined) updateData['endDate'] = Timestamp.fromDate(data.endDate);
       if (data.terms !== undefined) updateData['terms'] = data.terms;
+      if (data.originalFiles !== undefined) updateData['originalFiles'] = this.serializeFileAttachments(data.originalFiles);
+      if (data.parsedData !== undefined) updateData['parsedData'] = data.parsedData;
+      if (data.lineItems !== undefined) updateData['lineItems'] = data.lineItems;
 
       await updateDoc(docRef, updateData);
 
