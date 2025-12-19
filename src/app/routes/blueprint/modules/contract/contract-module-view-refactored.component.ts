@@ -35,7 +35,7 @@ import { ContractCreationWizardComponent } from './features/create';
 import { ContractDetailDrawerComponent } from './features/detail';
 import { ContractEditModalComponent } from './features/edit';
 import { ContractListComponent } from './features/list';
-import { ContractPreviewModalComponent } from './features/preview';
+import { ContractPreviewModalComponent, ContractParsingModalComponent } from './features/preview';
 
 @Component({
   selector: 'app-contract-module-view',
@@ -333,14 +333,34 @@ export class ContractModuleViewComponent implements OnInit {
   }
 
   /**
-   * Perform AI parsing
+   * Perform AI parsing with progress modal
    */
   private async performParsing(contract: Contract): Promise<void> {
     const file = contract.originalFiles[0];
 
-    this.message.loading('正在使用 AI 解析合約文件...', { nzDuration: 0 });
+    // Create parsing modal
+    const modalRef = this.modalService.create({
+      nzTitle: '',  // Empty string instead of null
+      nzContent: ContractParsingModalComponent,
+      nzData: {
+        contractId: contract.id,
+        fileName: file.fileName
+      },
+      nzWidth: 800,
+      nzFooter: null,
+      nzClosable: false,
+      nzMaskClosable: false
+    });
+
+    // Get component reference
+    const component = modalRef.getContentComponent();
+    if (!component) {
+      this.message.error('無法開啟解析視窗');
+      return;
+    }
 
     try {
+      // Start parsing
       const result = await this.aiParserService.parseContractFromStorage({
         fileId: file.id,
         storagePath: file.storagePath || '',
@@ -349,52 +369,45 @@ export class ContractModuleViewComponent implements OnInit {
         languageHint: 'zh-TW'
       });
 
-      this.message.remove();
+      if (result.success && result.data) {
+        // Show parsed data in modal
+        component.startParsing(result.data);
 
-      if (result.success) {
-        // Store parsed data with contract
-        const parsedDataJson = JSON.stringify(result.data);
+        // Wait for user to confirm or close
+        modalRef.afterClose.subscribe(async (confirmedData) => {
+          if (confirmedData) {
+            // User confirmed parsed data - update contract
+            try {
+              const parsedDataJson = JSON.stringify(confirmedData);
+              
+              // Update contract in facade
+              await this.facade.updateContract(contract.id, {
+                parsedData: parsedDataJson
+              });
 
-        // Update contract with parsed data
-        // Note: In real implementation, this should call a service method
-        contract.parsedData = parsedDataJson;
-
-        this.message.success(`合約解析完成 (信心度: ${result.data.confidenceScore}%)`);
-
-        // Show parsed data preview
-        this.showParsedDataPreview(result.data);
-
-        // Reload contracts to reflect changes
-        await this.loadContracts();
+              this.message.success(`合約解析完成 (信心度: ${confirmedData.confidenceScore}%)`);
+              
+              // Reload contracts to reflect changes
+              await this.loadContracts();
+            } catch (error) {
+              this.message.error('儲存解析資料失敗');
+              console.error('[ContractModuleView]', 'Save parsed data failed', error);
+            }
+          }
+        });
       } else {
-        this.message.error(`解析失敗: ${result.error}`);
+        // Parsing failed
+        component.setError(result.error || '解析失敗，請稍後再試');
       }
     } catch (error) {
-      this.message.remove();
       this.message.error('AI 解析過程發生錯誤');
       console.error('[ContractModuleView]', 'parseContract failed', error);
+      
+      // Show error in modal
+      if (component) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        component.setError(errorMessage);
+      }
     }
-  }
-
-  /**
-   * Show parsed data preview
-   */
-  private showParsedDataPreview(parsedData: any): void {
-    this.modalService.info({
-      nzTitle: '解析結果預覽',
-      nzContent: `
-        <div>
-          <p><strong>信心度：</strong>${parsedData.confidenceScore}%</p>
-          <p><strong>合約編號：</strong>${parsedData.contractNumber || '未識別'}</p>
-          <p><strong>合約名稱：</strong>${parsedData.title || '未識別'}</p>
-          <p><strong>業主：</strong>${parsedData.owner?.name || '未識別'}</p>
-          <p><strong>承商：</strong>${parsedData.contractor?.name || '未識別'}</p>
-          <p><strong>總金額：</strong>${parsedData.financial?.totalAmount ? `$${parsedData.financial.totalAmount.toLocaleString()}` : '未識別'}</p>
-          ${parsedData.warnings && parsedData.warnings.length > 0 ? `<p style="color: #faad14;"><strong>警告：</strong>${parsedData.warnings.join(', ')}</p>` : ''}
-          <p style="margin-top: 16px; color: #8c8c8c;">詳細資料請在合約詳情頁面查看</p>
-        </div>
-      `,
-      nzWidth: 600
-    });
-  }
+}
 }

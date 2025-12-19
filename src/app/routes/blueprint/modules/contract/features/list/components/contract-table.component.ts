@@ -69,17 +69,15 @@ export class ContractTableComponent {
     { title: '結束日期', index: 'endDate', type: 'date', width: 120 },
     {
       title: '操作',
-      width: 260,
+      width: 300,
       buttons: [
         {
-          text: '預覽',
           icon: 'file-pdf',
           tooltip: '預覽合約文件',
           iif: record => this.hasOriginalFile(record as Contract),
           click: record => this.previewContract.emit(record as Contract)
         },
         {
-          text: '解析',
           icon: 'robot',
           tooltip: 'AI 解析合約',
           iif: record => this.hasOriginalFile(record as Contract) && !this.hasParsedData(record as Contract),
