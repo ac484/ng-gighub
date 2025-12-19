@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, output, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input, output, computed, signal } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -46,27 +46,39 @@ import { AgreementService } from './agreement.service';
         <nz-table [nzData]="agreements()" nzSize="small" [nzShowPagination]="false">
           <thead>
             <tr>
-              <th scope="col">名稱</th>
-              <th scope="col">相對方</th>
-              <th scope="col">狀態</th>
-              <th scope="col">生效日</th>
-              <th scope="col">金額</th>
-              <th scope="col" class="text-right">操作</th>
+              <th scope="col">序號</th>
+              <th scope="col">附件</th>
+              <th scope="col">欄位3</th>
+              <th scope="col">欄位4</th>
+              <th scope="col">欄位5</th>
+              <th scope="col">欄位6</th>
             </tr>
           </thead>
           <tbody>
-            @for (agreement of agreements(); track agreement.id) {
+            @for (agreement of agreements(); track agreement.id; let idx = $index) {
               <tr>
-                <td>{{ agreement.title }}</td>
-                <td>{{ agreement.counterparty }}</td>
+                <td>{{ idx + 1 }}</td>
                 <td>
-                  <nz-tag [nzColor]="getStatusColor(agreement.status)">{{ getStatusLabel(agreement.status) }}</nz-tag>
+                  <button
+                    nz-button
+                    nzType="link"
+                    [disabled]="uploadingId() === agreement.id"
+                    (click)="agreement.attachmentUrl ? viewAttachment(agreement.attachmentUrl) : triggerUpload(fileInput, agreement.id)"
+                  >
+                    <span nz-icon [nzType]="agreement.attachmentUrl ? 'eye' : 'plus'"></span>
+                  </button>
+                  <input
+                    #fileInput
+                    type="file"
+                    accept="application/pdf"
+                    style="display: none;"
+                    (change)="onFileSelected($event, agreement.id)"
+                  />
                 </td>
-                <td>{{ agreement.effectiveDate | date: 'yyyy-MM-dd' }}</td>
-                <td>{{ agreement.value ? (agreement.value | number: '1.0-0') : '-' }}</td>
-                <td class="text-right">
-                  <button nz-button nzType="link" (click)="onSelect(agreement)">檢視</button>
-                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
               </tr>
             }
           </tbody>
@@ -107,6 +119,7 @@ export class AgreementModuleViewComponent {
   readonly totalCount = computed(() => this.agreements().length);
   readonly activeCount = computed(() => this.agreements().filter(a => a.status === 'active').length);
   readonly draftCount = computed(() => this.agreements().filter(a => a.status === 'draft').length);
+  uploadingId = signal<string | null>(null);
 
   constructor() {
     effect(() => {
@@ -117,6 +130,33 @@ export class AgreementModuleViewComponent {
 
   onSelect(agreement: Agreement): void {
     this.agreementSelected.emit(agreement);
+  }
+
+  triggerUpload(input: HTMLInputElement, agreementId: string): void {
+    this.uploadingId.set(agreementId);
+    input.click();
+  }
+
+  async onFileSelected(event: Event, agreementId: string): Promise<void> {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    target.value = '';
+    if (!file || !this.blueprintId()) {
+      this.uploadingId.set(null);
+      return;
+    }
+    try {
+      await this.agreementService.uploadAttachment(this.blueprintId(), agreementId, file);
+    } catch (error) {
+      console.error('[AgreementModuleView]', 'Upload failed', error);
+    } finally {
+      this.uploadingId.set(null);
+    }
+  }
+
+  viewAttachment(url: string): void {
+    const viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+    window.open(viewerUrl, '_blank');
   }
 
   getStatusColor(status: Agreement['status']): string {

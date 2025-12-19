@@ -10,6 +10,7 @@ export interface Agreement {
   status: AgreementStatus;
   effectiveDate: Date;
   value?: number;
+  attachmentUrl?: string;
 }
 
 export type AgreementDocument = Omit<Agreement, 'effectiveDate'> & {

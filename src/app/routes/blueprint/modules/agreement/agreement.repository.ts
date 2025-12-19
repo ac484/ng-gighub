@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { collection, DocumentData, Firestore, getDocs, orderBy, query, Timestamp, where } from '@angular/fire/firestore';
+import { collection, doc, DocumentData, Firestore, getDocs, orderBy, query, setDoc, Timestamp, where } from '@angular/fire/firestore';
 import { LoggerService } from '@core/services/logger';
 
 import { Agreement, AgreementDocument } from './agreement.model';
@@ -8,7 +8,8 @@ import { Agreement, AgreementDocument } from './agreement.model';
 export class AgreementRepository {
   private readonly firestore = inject(Firestore);
   private readonly logger = inject(LoggerService);
-  private readonly collectionRef = collection(this.firestore, 'agreements');
+  private readonly collectionPath = 'agreements';
+  private readonly collectionRef = collection(this.firestore, this.collectionPath);
 
   async findByBlueprintId(blueprintId: string): Promise<Agreement[]> {
     try {
@@ -18,6 +19,17 @@ export class AgreementRepository {
     } catch (error) {
       this.logger.error('[AgreementRepository]', 'Failed to load agreements', error as Error, { blueprintId });
       return [];
+    }
+  }
+
+
+  async saveAttachmentUrl(agreementId: string, attachmentUrl: string): Promise<void> {
+    try {
+      const ref = doc(this.firestore, `${this.collectionPath}/${agreementId}`);
+      await setDoc(ref, { attachmentUrl }, { merge: true });
+    } catch (error) {
+      this.logger.error('[AgreementRepository]', 'Failed to save attachment URL', error as Error, { agreementId });
+      throw error;
     }
   }
 
