@@ -84,6 +84,10 @@ export interface UpdateContractDto {
   /** Contract end date */
   endDate?: Date;
 
+  // Files
+  /** Original contract files */
+  originalFiles?: FileAttachment[];
+
   // Line Items
   /** Contract line items */
   lineItems?: ContractLineItem[];
