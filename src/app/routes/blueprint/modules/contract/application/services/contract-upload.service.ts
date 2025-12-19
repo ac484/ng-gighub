@@ -91,7 +91,7 @@ export class ContractUploadService {
         blueprintId,
         contractId,
         fileUrl: fileAttachment.fileUrl,
-        filePath: fileAttachment.storagePath,
+        filePath: fileAttachment.storagePath ?? '',
         fileName: fileAttachment.fileName,
         fileType: fileAttachment.fileType,
         fileSize: fileAttachment.fileSize,

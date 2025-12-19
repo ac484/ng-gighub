@@ -253,7 +253,7 @@ export class ContractModuleViewComponent implements OnInit {
    */
   async deleteContract(contract: Contract): Promise<void> {
     try {
-      await this.service.deleteContract(contract.id);
+      await this.service.deleteContract(this.blueprintId(), contract.id);
       this.message.success(`合約 ${contract.contractNumber} 已刪除`);
       await this.loadContracts();
     } catch (error) {
@@ -336,9 +336,8 @@ export class ContractModuleViewComponent implements OnInit {
   private async performParsing(contract: Contract): Promise<void> {
     const file = contract.originalFiles[0];
 
-    // Create parsing modal
     const modalRef = this.modalService.create({
-      nzTitle: '',  // Empty string instead of null
+      nzTitle: '',
       nzContent: ContractParsingModalComponent,
       nzData: {
         contractId: contract.id,
@@ -350,7 +349,6 @@ export class ContractModuleViewComponent implements OnInit {
       nzMaskClosable: false
     });
 
-    // Get component reference
     const component = modalRef.getContentComponent();
     if (!component) {
       this.message.error('無法開啟解析視窗');
@@ -358,37 +356,14 @@ export class ContractModuleViewComponent implements OnInit {
     }
 
     try {
-      // NOTE: AI parsing logic moved to Cloud Functions
-      // Call processContractUpload Cloud Function instead
       this.message.info('AI 解析功能已移至 Cloud Functions 實作，請使用上傳功能觸發解析');
       modalRef.close();
-      return;
-
-      // The parsing flow should be:
-      // 1. User uploads file -> triggers processContractUpload Cloud Function
-      // 2. Cloud Function performs OCR and parsing
-      // 3. createParseDraft Cloud Function creates normalized draft
-      // 4. User reviews and confirms draft
-      // 5. confirmContract Cloud Function creates final contract
-    } catch (error) {
-              this.message.error('儲存解析資料失敗');
-              console.error('[ContractModuleView]', 'Save parsed data failed', error);
-            }
-          }
-        });
-      } else {
-        // Parsing failed
-        component.setError(result.error || '解析失敗，請稍後再試');
-      }
     } catch (error) {
       this.message.error('AI 解析過程發生錯誤');
       console.error('[ContractModuleView]', 'parseContract failed', error);
-      
-      // Show error in modal
-      if (component) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        component.setError(errorMessage);
-      }
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      component.setError(errorMessage);
     }
-}
+  }
+
 }

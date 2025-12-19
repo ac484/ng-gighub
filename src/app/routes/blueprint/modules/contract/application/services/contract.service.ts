@@ -22,6 +22,7 @@ import { SystemEventType } from '@core/blueprint/events/types/system-event-type.
 
 import type { Contract, ContractStatus, CreateContractDto, UpdateContractDto, ContractFilters, ContractStatistics } from '../../data/models';
 import { ContractRepository } from '../../infrastructure/repositories';
+import { ContractStore } from '../state/contract.store';
 
 /**
  * Cloud Function types
@@ -71,6 +72,7 @@ export class ContractService {
   private readonly contractRepo = inject(ContractRepository);
   private readonly functions = inject(Functions);
   private readonly eventBus = inject(EnhancedEventBusService);
+  private readonly store = inject(ContractStore);
   private readonly logger = inject(LoggerService);
 
   // ============================================================================
@@ -136,6 +138,15 @@ export class ContractService {
     }
   }
 
+  /**
+   * Load contracts and sync store
+   */
+  async loadContracts(blueprintId: string): Promise<Contract[]> {
+    const contracts = await this.getContractsByBlueprint(blueprintId);
+    this.store.setContracts(contracts);
+    return contracts;
+  }
+
   // ============================================================================
   // Create Operations
   // ============================================================================
@@ -143,7 +154,7 @@ export class ContractService {
   /**
    * Create a new contract
    */
-  async createContract(blueprintId: string, dto: CreateContractDto, actorId: string): Promise<Contract> {
+  async createContract(blueprintId: string, dto: CreateContractDto, actorId: string = 'system'): Promise<Contract> {
     this.logger.info('[ContractService]', 'Creating contract', { blueprintId, title: dto.title });
 
     try {
@@ -177,7 +188,7 @@ export class ContractService {
   /**
    * Update an existing contract
    */
-  async updateContract(blueprintId: string, contractId: string, dto: UpdateContractDto, actorId: string): Promise<Contract> {
+  async updateContract(blueprintId: string, contractId: string, dto: UpdateContractDto, actorId: string = 'system'): Promise<Contract> {
     this.logger.info('[ContractService]', 'Updating contract', { blueprintId, contractId });
 
     try {
@@ -210,7 +221,7 @@ export class ContractService {
   /**
    * Update contract status with validation
    */
-  async updateContractStatus(blueprintId: string, contractId: string, newStatus: ContractStatus, actorId: string): Promise<void> {
+  async updateContractStatus(blueprintId: string, contractId: string, newStatus: ContractStatus, actorId: string = 'system'): Promise<void> {
     this.logger.info('[ContractService]', 'Updating contract status', { contractId, newStatus });
 
     try {
@@ -250,7 +261,7 @@ export class ContractService {
   /**
    * Activate a contract (from draft or pending_activation to active)
    */
-  async activateContract(blueprintId: string, contractId: string, actorId: string): Promise<void> {
+  async activateContract(blueprintId: string, contractId: string, actorId: string = 'system'): Promise<void> {
     this.logger.info('[ContractService]', 'Activating contract', { contractId });
 
     try {
@@ -278,7 +289,7 @@ export class ContractService {
   /**
    * Complete a contract (from active to completed)
    */
-  async completeContract(blueprintId: string, contractId: string, actorId: string): Promise<void> {
+  async completeContract(blueprintId: string, contractId: string, actorId: string = 'system'): Promise<void> {
     this.logger.info('[ContractService]', 'Completing contract', { contractId });
 
     try {
@@ -293,7 +304,7 @@ export class ContractService {
   /**
    * Terminate a contract (from active to terminated)
    */
-  async terminateContract(blueprintId: string, contractId: string, actorId: string, reason?: string): Promise<void> {
+  async terminateContract(blueprintId: string, contractId: string, actorId: string = 'system', reason?: string): Promise<void> {
     this.logger.info('[ContractService]', 'Terminating contract', { contractId, reason });
 
     try {
@@ -315,7 +326,7 @@ export class ContractService {
   /**
    * Delete a contract
    */
-  async deleteContract(blueprintId: string, contractId: string, actorId: string): Promise<void> {
+  async deleteContract(blueprintId: string, contractId: string, actorId: string = 'system'): Promise<void> {
     this.logger.info('[ContractService]', 'Deleting contract', { contractId });
 
     try {
@@ -460,11 +471,7 @@ export class ContractService {
       this.logger.info('[ContractService]', 'Contract confirmed successfully', { contractId, draftId });
 
       // Emit domain event
-      this.eventBus.publish({
-        type: SystemEventType.CONTRACT_CONFIRMED,
-        payload: { blueprintId, contractId, draftId },
-        timestamp: new Date()
-      });
+      this.eventBus.emit(SystemEventType.CONTRACT_CREATED, { blueprintId, contractId, draftId });
 
       return contractId;
     } catch (error) {
@@ -476,6 +483,13 @@ export class ContractService {
   // ============================================================================
   // Private Helper Methods
   // ============================================================================
+
+  private validateContractForActivation(contract: Contract): void {
+    this.validateContractData(contract);
+    if (contract.status === 'terminated') {
+      throw new Error('Terminated contracts cannot be activated');
+    }
+  }
 
   private validateContractData(contract: Partial<Contract>): void {
     if (!contract.owner || !contract.contractor) {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input, output, computed } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -19,19 +19,19 @@ import { AgreementService } from './agreement.service';
         <nz-col [nzSpan]="8">
           <div class="stat">
             <div class="stat__label">總數</div>
-            <div class="stat__value">{{ agreements().length }}</div>
+            <div class="stat__value">{{ totalCount() }}</div>
           </div>
         </nz-col>
         <nz-col [nzSpan]="8">
           <div class="stat">
             <div class="stat__label">有效</div>
-            <div class="stat__value">{{ agreements().filter(a => a.status === 'active').length }}</div>
+            <div class="stat__value">{{ activeCount() }}</div>
           </div>
         </nz-col>
         <nz-col [nzSpan]="8">
           <div class="stat">
             <div class="stat__label">草稿</div>
-            <div class="stat__value">{{ agreements().filter(a => a.status === 'draft').length }}</div>
+            <div class="stat__value">{{ draftCount() }}</div>
           </div>
         </nz-col>
       </nz-row>
@@ -104,6 +104,9 @@ export class AgreementModuleViewComponent {
 
   readonly agreements = this.agreementService.agreements;
   readonly loading = this.agreementService.loading;
+  readonly totalCount = computed(() => this.agreements().length);
+  readonly activeCount = computed(() => this.agreements().filter(a => a.status === 'active').length);
+  readonly draftCount = computed(() => this.agreements().filter(a => a.status === 'draft').length);
 
   constructor() {
     effect(() => {

@@ -178,7 +178,7 @@ export class ContractEditModalComponent implements OnInit {
           endDate: formValue.endDate
         };
 
-        await this.service.updateContract(this.modalData.contract!.id, updateData);
+        await this.service.updateContract(this.modalData.blueprintId, this.modalData.contract!.id, updateData);
         this.message.success('合約更新成功');
       } else {
         const createData: CreateContractDto = {
