@@ -1,7 +1,7 @@
 # 合約模組生產就緒實施進度追蹤
 
 **開始日期**: 2025-12-18  
-**實施策略**: 漸進式實施，基於 CONTRACT_MODULE_PRODUCTION_ANALYSIS.md 和 EXECUTIVE_SUMMARY.md  
+**實施策略**: 漸進式實施，基於 docs/analysis/CONTRACT_MODULE_PRODUCTION_ANALYSIS.md 和 docs/architecture/EXECUTIVE_SUMMARY.md  
 **原則**: 奧卡姆剃刀 - 避免過度設計，專注核心問題
 
 ---
@@ -1106,7 +1106,7 @@
 **檔案變更**:
 - `contract-upload.service.spec.ts`: 新增 420 行測試程式碼
 - `contract.facade.spec.ts`: 新增 670 行測試程式碼
-- `IMPLEMENTATION_PROGRESS.md`: 更新進度 (35% 完成)
+- `docs/planning/IMPLEMENTATION_PROGRESS.md`: 更新進度 (35% 完成)
 
 **關鍵實作**:
 - ContractUploadService: Mock Firebase Storage upload tasks
