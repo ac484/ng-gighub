@@ -1,8 +1,12 @@
 /**
- * Contract Module - Shared Components
+ * Blueprint Modules - Public API
+ * 藍圖模組 - 公開 API
+ *
+ * Feature-Based Architecture (功能導向架構)
  */
 
-export * from './contract/contract-creation-wizard.component';
-export * from './contract/contract-detail-drawer.component';
-export * from './contract/contract-modal.component';
-export * from './contract/contract-module-view.component';
+// Contract Module - Feature-Based exports
+export * from './contract';
+
+// Cloud Module - Feature-Based exports
+export * from './cloud';
