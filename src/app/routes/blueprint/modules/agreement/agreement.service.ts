@@ -28,6 +28,11 @@ export class AgreementService {
     }
   }
 
+  async createAgreement(blueprintId: string): Promise<void> {
+    const created = await this.repository.createAgreement({ blueprintId });
+    this._agreements.update(items => [created, ...items]);
+  }
+
   async uploadAttachment(blueprintId: string, agreementId: string, file: File): Promise<string> {
     this._uploading.set(true);
     try {

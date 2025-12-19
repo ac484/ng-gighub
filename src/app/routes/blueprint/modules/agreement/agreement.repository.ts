@@ -11,6 +11,23 @@ export class AgreementRepository {
   private readonly collectionPath = 'agreements';
   private readonly collectionRef = collection(this.firestore, this.collectionPath);
 
+
+  async createAgreement(payload: Partial<Agreement> & { blueprintId: string }): Promise<Agreement> {
+    const ref = doc(this.collectionRef);
+    const now = new Date();
+    const data: AgreementDocument = {
+      blueprintId: payload.blueprintId,
+      title: payload.title || '新協議',
+      counterparty: payload.counterparty || '',
+      status: (payload.status as Agreement['status']) || 'draft',
+      effectiveDate: payload.effectiveDate || now,
+      value: payload.value ?? null as any,
+      attachmentUrl: (payload as any).attachmentUrl
+    } as any;
+    await setDoc(ref, data);
+    return this.toEntity(data as DocumentData, ref.id);
+  }
+
   async findByBlueprintId(blueprintId: string): Promise<Agreement[]> {
     try {
       const q = query(this.collectionRef, where('blueprintId', '==', blueprintId), orderBy('effectiveDate', 'desc'));

@@ -37,7 +37,10 @@ import { AgreementService } from './agreement.service';
       </nz-row>
     </nz-card>
 
-    <nz-card nzTitle="協議列表">
+    <nz-card nzTitle="協議列表" [nzExtra]="createTpl">
+      <ng-template #createTpl>
+        <button nz-button nzType="primary" nzSize="small" (click)="createAgreement()">新增協議</button>
+      </ng-template>
       @if (loading()) {
         <nz-spin nzSimple />
       } @else if (agreements().length === 0) {
@@ -126,6 +129,13 @@ export class AgreementModuleViewComponent {
       const id = this.blueprintId();
       void this.agreementService.loadByBlueprint(id);
     });
+  }
+
+  async createAgreement(): Promise<void> {
+    if (!this.blueprintId()) {
+      return;
+    }
+    await this.agreementService.createAgreement(this.blueprintId());
   }
 
   onSelect(agreement: Agreement): void {
