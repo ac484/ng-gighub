@@ -21,9 +21,9 @@
  */
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal, computed, effect } from '@angular/core';
-import { FirebaseService } from '@core/services/firebase.service';
 import { ContractFacade } from '@core/blueprint/modules/implementations/contract/facades';
 import type { Contract, ContractStatistics } from '@core/blueprint/modules/implementations/contract/models';
+import { FirebaseService } from '@core/services/firebase.service';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS } from '@shared';
 import { NzDrawerService } from 'ng-zorro-antd/drawer';
@@ -112,7 +112,7 @@ export class ContractModuleViewComponent implements OnInit {
     effect(() => {
       const id = this.blueprintId();
       const user = this.firebase.currentUser();
-      
+
       if (id && user) {
         // Initialize facade with blueprintId and userId
         this.facade.initialize(id, user.uid);

@@ -53,13 +53,7 @@ interface BillableItem {
   selector: 'app-finance-module-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    SHARED_IMPORTS,
-    NzEmptyModule,
-    NzStepsModule,
-    NzTimelineModule,
-    NzDescriptionsModule
-  ],
+  imports: [SHARED_IMPORTS, NzEmptyModule, NzStepsModule, NzTimelineModule, NzDescriptionsModule],
   templateUrl: './finance-module-view.component.html',
   styles: [
     `
@@ -213,7 +207,7 @@ export class FinanceModuleViewComponent implements OnInit {
   }));
 
   // 待審核的應收請款單
-  pendingApprovalReceivables = computed(() => 
+  pendingApprovalReceivables = computed(() =>
     this.allReceivableInvoices().filter(inv => inv.status === 'submitted' || inv.status === 'under_review')
   );
 

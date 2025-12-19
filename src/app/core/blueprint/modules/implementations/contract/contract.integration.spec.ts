@@ -54,7 +54,14 @@ describe('Contract Module Integration', () => {
           blueprintId: 'bp-1',
           title: '',
           owner: { id: 'o-1', name: 'Owner', type: 'owner', contactPerson: 'John', contactPhone: '123', contactEmail: 'j@test.com' },
-          contractor: { id: 'c-1', name: 'Contractor', type: 'contractor', contactPerson: 'Jane', contactPhone: '456', contactEmail: 'jane@test.com' },
+          contractor: {
+            id: 'c-1',
+            name: 'Contractor',
+            type: 'contractor',
+            contactPerson: 'Jane',
+            contactPhone: '456',
+            contactEmail: 'jane@test.com'
+          },
           totalAmount: 1000000,
           startDate: new Date('2025-01-01'),
           endDate: new Date('2025-12-31'),
@@ -69,14 +76,23 @@ describe('Contract Module Integration', () => {
           blueprintId: 'bp-1',
           title: 'A'.repeat(201),
           owner: { id: 'o-1', name: 'Owner', type: 'owner', contactPerson: 'John', contactPhone: '123', contactEmail: 'j@test.com' },
-          contractor: { id: 'c-1', name: 'Contractor', type: 'contractor', contactPerson: 'Jane', contactPhone: '456', contactEmail: 'jane@test.com' },
+          contractor: {
+            id: 'c-1',
+            name: 'Contractor',
+            type: 'contractor',
+            contactPerson: 'Jane',
+            contactPhone: '456',
+            contactEmail: 'jane@test.com'
+          },
           totalAmount: 1000000,
           startDate: new Date('2025-01-01'),
           endDate: new Date('2025-12-31'),
           createdBy: 'user-1'
         };
 
-        await expectAsync(service.createContract('bp-1', dto, 'user-1')).toBeRejectedWithError('Contract title must be less than 200 characters');
+        await expectAsync(service.createContract('bp-1', dto, 'user-1')).toBeRejectedWithError(
+          'Contract title must be less than 200 characters'
+        );
       });
 
       it('should reject invalid owner information', async () => {
@@ -84,7 +100,14 @@ describe('Contract Module Integration', () => {
           blueprintId: 'bp-1',
           title: 'Test Contract',
           owner: { id: '', name: '', type: 'owner', contactPerson: '', contactPhone: '', contactEmail: '' },
-          contractor: { id: 'c-1', name: 'Contractor', type: 'contractor', contactPerson: 'Jane', contactPhone: '456', contactEmail: 'jane@test.com' },
+          contractor: {
+            id: 'c-1',
+            name: 'Contractor',
+            type: 'contractor',
+            contactPerson: 'Jane',
+            contactPhone: '456',
+            contactEmail: 'jane@test.com'
+          },
           totalAmount: 1000000,
           startDate: new Date('2025-01-01'),
           endDate: new Date('2025-12-31'),
@@ -99,14 +122,23 @@ describe('Contract Module Integration', () => {
           blueprintId: 'bp-1',
           title: 'Test Contract',
           owner: { id: 'o-1', name: 'Owner', type: 'owner', contactPerson: 'John', contactPhone: '123', contactEmail: 'j@test.com' },
-          contractor: { id: 'c-1', name: 'Contractor', type: 'contractor', contactPerson: 'Jane', contactPhone: '456', contactEmail: 'jane@test.com' },
+          contractor: {
+            id: 'c-1',
+            name: 'Contractor',
+            type: 'contractor',
+            contactPerson: 'Jane',
+            contactPhone: '456',
+            contactEmail: 'jane@test.com'
+          },
           totalAmount: 0,
           startDate: new Date('2025-01-01'),
           endDate: new Date('2025-12-31'),
           createdBy: 'user-1'
         };
 
-        await expectAsync(service.createContract('bp-1', dto, 'user-1')).toBeRejectedWithError('Contract total amount must be greater than zero');
+        await expectAsync(service.createContract('bp-1', dto, 'user-1')).toBeRejectedWithError(
+          'Contract total amount must be greater than zero'
+        );
       });
 
       it('should reject end date before start date', async () => {
@@ -114,14 +146,23 @@ describe('Contract Module Integration', () => {
           blueprintId: 'bp-1',
           title: 'Test Contract',
           owner: { id: 'o-1', name: 'Owner', type: 'owner', contactPerson: 'John', contactPhone: '123', contactEmail: 'j@test.com' },
-          contractor: { id: 'c-1', name: 'Contractor', type: 'contractor', contactPerson: 'Jane', contactPhone: '456', contactEmail: 'jane@test.com' },
+          contractor: {
+            id: 'c-1',
+            name: 'Contractor',
+            type: 'contractor',
+            contactPerson: 'Jane',
+            contactPhone: '456',
+            contactEmail: 'jane@test.com'
+          },
           totalAmount: 1000000,
           startDate: new Date('2025-12-31'),
           endDate: new Date('2025-01-01'),
           createdBy: 'user-1'
         };
 
-        await expectAsync(service.createContract('bp-1', dto, 'user-1')).toBeRejectedWithError('Contract end date must be after start date');
+        await expectAsync(service.createContract('bp-1', dto, 'user-1')).toBeRejectedWithError(
+          'Contract end date must be after start date'
+        );
       });
     });
 
@@ -133,8 +174,22 @@ describe('Contract Module Integration', () => {
           contractNumber: 'CON-0001',
           title: 'Test Contract',
           status: 'draft' as const,
-          owner: { id: 'o-1', name: 'Owner', type: 'owner' as const, contactPerson: 'John', contactPhone: '123', contactEmail: 'j@test.com' },
-          contractor: { id: 'c-1', name: 'Contractor', type: 'contractor' as const, contactPerson: 'Jane', contactPhone: '456', contactEmail: 'jane@test.com' },
+          owner: {
+            id: 'o-1',
+            name: 'Owner',
+            type: 'owner' as const,
+            contactPerson: 'John',
+            contactPhone: '123',
+            contactEmail: 'j@test.com'
+          },
+          contractor: {
+            id: 'c-1',
+            name: 'Contractor',
+            type: 'contractor' as const,
+            contactPerson: 'Jane',
+            contactPhone: '456',
+            contactEmail: 'jane@test.com'
+          },
           totalAmount: 1000000,
           currency: 'TWD',
           signingDate: new Date(),
@@ -164,8 +219,22 @@ describe('Contract Module Integration', () => {
           contractNumber: 'CON-0001',
           title: 'Test Contract',
           status: 'completed' as const,
-          owner: { id: 'o-1', name: 'Owner', type: 'owner' as const, contactPerson: 'John', contactPhone: '123', contactEmail: 'j@test.com' },
-          contractor: { id: 'c-1', name: 'Contractor', type: 'contractor' as const, contactPerson: 'Jane', contactPhone: '456', contactEmail: 'jane@test.com' },
+          owner: {
+            id: 'o-1',
+            name: 'Owner',
+            type: 'owner' as const,
+            contactPerson: 'John',
+            contactPhone: '123',
+            contactEmail: 'j@test.com'
+          },
+          contractor: {
+            id: 'c-1',
+            name: 'Contractor',
+            type: 'contractor' as const,
+            contactPerson: 'Jane',
+            contactPhone: '456',
+            contactEmail: 'jane@test.com'
+          },
           totalAmount: 1000000,
           currency: 'TWD',
           signingDate: new Date(),
@@ -182,7 +251,9 @@ describe('Contract Module Integration', () => {
 
         mockRepo.findByIdOnce.and.returnValue(Promise.resolve(mockContract));
 
-        await expectAsync(service.updateContractStatus('bp-1', 'c-1', 'active', 'user-1')).toBeRejectedWithError(/Invalid status transition/);
+        await expectAsync(service.updateContractStatus('bp-1', 'c-1', 'active', 'user-1')).toBeRejectedWithError(
+          /Invalid status transition/
+        );
       });
     });
   });
@@ -246,7 +317,9 @@ describe('Contract Module Integration', () => {
 
         mockRepo.findByContract.and.returnValue({ toPromise: () => Promise.resolve([]) } as any);
 
-        await expectAsync(service.createWorkItem('bp-1', 'c-1', dto, 'user-1')).toBeRejectedWithError('Work item code must be less than 50 characters');
+        await expectAsync(service.createWorkItem('bp-1', 'c-1', dto, 'user-1')).toBeRejectedWithError(
+          'Work item code must be less than 50 characters'
+        );
       });
 
       it('should reject zero or negative quantity', async () => {
@@ -260,7 +333,9 @@ describe('Contract Module Integration', () => {
 
         mockRepo.findByContract.and.returnValue({ toPromise: () => Promise.resolve([]) } as any);
 
-        await expectAsync(service.createWorkItem('bp-1', 'c-1', dto, 'user-1')).toBeRejectedWithError('Work item quantity must be greater than zero');
+        await expectAsync(service.createWorkItem('bp-1', 'c-1', dto, 'user-1')).toBeRejectedWithError(
+          'Work item quantity must be greater than zero'
+        );
       });
 
       it('should reject duplicate code', async () => {
@@ -291,7 +366,9 @@ describe('Contract Module Integration', () => {
 
         mockRepo.findByContract.and.returnValue({ toPromise: () => Promise.resolve([existingItem]) } as any);
 
-        await expectAsync(service.createWorkItem('bp-1', 'c-1', dto, 'user-1')).toBeRejectedWithError(/Work item with code WI-001 already exists/);
+        await expectAsync(service.createWorkItem('bp-1', 'c-1', dto, 'user-1')).toBeRejectedWithError(
+          /Work item with code WI-001 already exists/
+        );
       });
     });
 
