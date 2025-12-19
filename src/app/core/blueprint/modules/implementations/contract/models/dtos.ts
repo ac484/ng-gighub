@@ -7,7 +7,7 @@
  * @date 2025-12-18
  */
 
-import type { ContractParty, ContractTerm, ContractStatus, ContractLineItem } from './contract.model';
+import type { ContractParty, ContractTerm, ContractStatus, ContractLineItem, FileAttachment } from './contract.model';
 
 /**
  * Create Contract DTO
@@ -47,6 +47,10 @@ export interface CreateContractDto {
   // Terms
   /** Contract terms */
   terms?: ContractTerm[];
+
+  // Files
+  /** Original contract files */
+  originalFiles?: FileAttachment[];
 
   // User
   /** User who creates the contract */

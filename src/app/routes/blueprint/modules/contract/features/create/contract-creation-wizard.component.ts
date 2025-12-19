@@ -21,37 +21,57 @@ import { NzStepsModule } from 'ng-zorro-antd/steps';
 import { BasicInfoStepComponent } from './components/basic-info-step.component';
 import { CompletionStepComponent } from './components/completion-step.component';
 import { ConfirmStepComponent } from './components/confirm-step.component';
+import { ContractUploadStepComponent } from '../upload/contract-upload-step.component';
+import type { FileAttachment } from '@core/blueprint/modules/implementations/contract/models';
 
 /** Step indices */
-const STEP_BASIC_INFO = 0;
-const STEP_CONFIRM = 1;
-const STEP_COMPLETE = 2;
+const STEP_UPLOAD = 0;
+const STEP_BASIC_INFO = 1;
+const STEP_CONFIRM = 2;
+const STEP_COMPLETE = 3;
 
 @Component({
   selector: 'app-contract-creation-wizard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SHARED_IMPORTS, NzStepsModule, BasicInfoStepComponent, ConfirmStepComponent, CompletionStepComponent],
+  imports: [SHARED_IMPORTS, NzStepsModule, ContractUploadStepComponent, BasicInfoStepComponent, ConfirmStepComponent, CompletionStepComponent],
   template: `
     <div class="wizard-container">
       <!-- Steps Progress -->
       <nz-steps [nzCurrent]="currentStep()" nzSize="small" class="mb-lg">
+        <nz-step nzTitle="上傳文件" nzDescription="上傳合約文件（可選）" />
         <nz-step nzTitle="基本資料" nzDescription="填寫合約基本資訊" />
         <nz-step nzTitle="確認資料" nzDescription="檢查合約資料" />
         <nz-step nzTitle="完成" nzDescription="合約建立完成" />
       </nz-steps>
 
-      <!-- Step: Basic Info -->
+      <!-- Step: Upload -->
       @if (currentStep() === 0) {
-        <app-basic-info-step [form]="contractForm" />
+        <app-contract-upload-step
+          [blueprintId]="blueprintId()"
+          [contractId]="tempContractId()"
+          (fileUploaded)="onFileUploaded($event)"
+        />
         <div class="step-actions">
           <button nz-button nzType="default" (click)="cancel()">取消</button>
+          <button nz-button nzType="default" (click)="skipUpload()">跳過</button>
+          <button nz-button nzType="primary" (click)="nextStep()" [disabled]="!canProceedFromUpload()">
+            下一步
+          </button>
+        </div>
+      }
+
+      <!-- Step: Basic Info -->
+      @if (currentStep() === 1) {
+        <app-basic-info-step [form]="contractForm" />
+        <div class="step-actions">
+          <button nz-button nzType="default" (click)="prevStep()">上一步</button>
           <button nz-button nzType="primary" (click)="nextStep()" [disabled]="!contractForm.valid"> 下一步 </button>
         </div>
       }
 
       <!-- Step: Confirm -->
-      @if (currentStep() === 1) {
+      @if (currentStep() === 2) {
         <app-confirm-step [formValue]="contractForm.value" />
         <div class="step-actions">
           <button nz-button nzType="default" (click)="prevStep()">上一步</button>
@@ -60,7 +80,7 @@ const STEP_COMPLETE = 2;
       }
 
       <!-- Step: Complete -->
-      @if (currentStep() === 2) {
+      @if (currentStep() === 3) {
         <app-completion-step [createdContract]="createdContract()" (viewContract)="onViewContract()" (createAnother)="onCreateAnother()" />
       }
     </div>
@@ -92,9 +112,11 @@ export class ContractCreationWizardComponent implements OnInit {
   cancelled = output<void>();
 
   // State
-  currentStep = signal(STEP_BASIC_INFO);
+  currentStep = signal(STEP_UPLOAD);
   submitting = signal(false);
   createdContract = signal<Contract | null>(null);
+  uploadedFile = signal<FileAttachment | null>(null);
+  tempContractId = signal<string>(`temp-${Date.now()}`);
 
   // Form
   contractForm!: FormGroup;
@@ -129,9 +151,32 @@ export class ContractCreationWizardComponent implements OnInit {
    * Navigate to previous step
    */
   prevStep(): void {
-    if (this.currentStep() > STEP_BASIC_INFO) {
+    if (this.currentStep() > STEP_UPLOAD) {
       this.currentStep.update(s => s - 1);
     }
+  }
+
+  /**
+   * Handle file uploaded
+   */
+  onFileUploaded(file: FileAttachment): void {
+    this.uploadedFile.set(file);
+    this.message.success('文件上傳成功');
+  }
+
+  /**
+   * Skip upload step
+   */
+  skipUpload(): void {
+    this.uploadedFile.set(null);
+    this.nextStep();
+  }
+
+  /**
+   * Check if can proceed from upload step
+   */
+  canProceedFromUpload(): boolean {
+    return this.uploadedFile() !== null;
   }
 
   /**
@@ -178,6 +223,7 @@ export class ContractCreationWizardComponent implements OnInit {
         startDate: formValue.startDate,
         endDate: formValue.endDate,
         terms: [],
+        originalFiles: this.uploadedFile() ? [this.uploadedFile()!] : [],
         createdBy: 'current-user-id'
       };
 
