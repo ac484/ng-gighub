@@ -25,6 +25,7 @@ The Blueprint module is the **Container Layer** core of GigHub - it provides the
 - `audit/audit-logs.component.ts` - 稽核日誌檢視器
 - `container/` - 容器儀表板元件
 - `components/` - 共享頁面子元件
+- `modules/` - 模組視圖元件目錄（參考 `modules/AGENTS.md` 了解邊界定義）
 
 **重要變更**:
 - ⚠️ **Models 已移至** `@core/models` - 使用 `import { BlueprintModel } from '@core/models'`
@@ -323,6 +324,7 @@ The Blueprint module is the **Container Layer** core of GigHub - it provides the
 
 **規則**:
 - 必須參考 Root AGENTS.md 獲取專案總覽
+- 必須參考 `modules/AGENTS.md` 了解模組視圖元件的邊界定義
 - 必須參考 Blueprint Architecture 獲取詳細設計
 - 必須參考 Permission System 獲取授權指南
 - 必須參考 Firestore Rules 獲取安全規則
@@ -331,5 +333,5 @@ The Blueprint module is the **Container Layer** core of GigHub - it provides the
 ---
 
 **Module Version**: 1.0.0  
-**Last Updated**: 2025-12-09  
+**Last Updated**: 2025-12-19  
 **Status**: Production Ready

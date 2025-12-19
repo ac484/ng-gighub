@@ -22,7 +22,7 @@ import { AcceptanceModuleViewComponent } from './modules/acceptance-module-view.
 import { CloudModuleViewComponent } from './modules/cloud';
 import { ContractModuleViewComponent } from './modules/contract';
 import { DiaryModuleViewComponent } from './modules/diary';
-import { FinanceModuleViewComponent } from './modules/finance-module-view.component';
+import { FinanceModuleViewComponent } from './modules/finance';
 import { IssuesModuleViewComponent } from './modules/issues-module-view.component';
 import { LogModuleViewComponent } from './modules/log-module-view.component';
 import { MembersModuleViewComponent } from './modules/members';

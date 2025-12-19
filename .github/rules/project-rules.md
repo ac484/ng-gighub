@@ -1,6 +1,6 @@
 # 專案開發規則
 
-> **來源**: 從根目錄 `規則.md` 提取並強化  
+> **來源**: 從 `docs/principles/rules.md` 提取並強化  
 > **目的**: 定義 GigHub 專案的開發規範與任務管理流程
 
 ## 🎯 任務定義格式 (MANDATORY)
@@ -308,5 +308,5 @@ Copilot **MUST NOT**:
 
 **版本**: v1.0  
 **最後更新**: 2025-12-17  
-**來源**: 規則.md  
+**來源**: docs/principles/rules.md  
 **強制執行**: MANDATORY for core rules, SHOULD for best practices

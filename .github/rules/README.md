@@ -14,13 +14,13 @@
    - 檢查清單與驗證機制
 
 2. **`project-rules.md`** - 專案開發規則
-   - 從根目錄 `規則.md` 提取並強化
+   - 從 `docs/principles/rules.md` 提取並強化
    - 任務定義與格式規範
    - 開發檢查清單
    - 禁止行為清單
 
 3. **`architectural-principles.md`** - 架構設計原則
-   - 從根目錄 `原則.md` 提取並強化
+   - 從 `docs/principles/principles.md` 提取並強化
    - 十大設計原則
    - 技術實作考量
    - 安全性與效能規範

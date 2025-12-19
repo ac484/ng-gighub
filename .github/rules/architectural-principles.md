@@ -1,6 +1,6 @@
 # 架構設計原則
 
-> **來源**: 從根目錄 `原則.md` 提取並強化  
+> **來源**: 從 `docs/principles/principles.md` 提取並強化  
 > **目的**: 定義 GigHub 系統的核心架構原則與技術實作標準
 
 ## 核心理念
@@ -526,5 +526,5 @@ export const routes: Routes = [
 
 **版本**: v1.0  
 **最後更新**: 2025-12-17  
-**來源**: 原則.md  
+**來源**: docs/principles/principles.md  
 **強制執行**: MANDATORY for core principles, SHOULD for best practices
