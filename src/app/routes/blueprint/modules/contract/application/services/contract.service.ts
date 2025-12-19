@@ -476,6 +476,8 @@ export class ContractService {
   // ============================================================================
   // Private Helper Methods
   // ============================================================================
+
+  private validateContractData(contract: Partial<Contract>): void {
     if (!contract.owner || !contract.contractor) {
       throw new Error('Contract must have both owner and contractor information');
     }

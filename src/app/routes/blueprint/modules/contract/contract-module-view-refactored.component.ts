@@ -21,9 +21,9 @@
  */
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal, computed, effect } from '@angular/core';
-import { ContractFacade } from './application/facades';
+import { ContractStore } from './application/state';
+import { ContractService } from './application/services';
 import type { Contract, ContractStatistics } from './data/models';
-import { ContractAIParserService } from './application/services';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS } from '@shared';
 import { NzDrawerService } from 'ng-zorro-antd/drawer';
@@ -83,12 +83,12 @@ import { ContractPreviewModalComponent, ContractParsingModalComponent } from './
 export class ContractModuleViewComponent implements OnInit {
   blueprintId = input.required<string>();
 
-  private readonly facade = inject(ContractFacade);
+  private readonly store = inject(ContractStore);
+  private readonly service = inject(ContractService);
   private readonly message = inject(NzMessageService);
   private readonly modalHelper = inject(ModalHelper);
   private readonly drawerService = inject(NzDrawerService);
   private readonly modalService = inject(NzModalService);
-  private readonly aiParserService = inject(ContractAIParserService);
 
   // High-level state
   contracts = signal<Contract[]>([]);
@@ -112,12 +112,10 @@ export class ContractModuleViewComponent implements OnInit {
   });
 
   constructor() {
-    // Effect to initialize facade and reload contracts when blueprintId changes
+    // Effect to load contracts when blueprintId changes
     effect(() => {
       const id = this.blueprintId();
       if (id) {
-        // MUST initialize facade first before any operations
-        this.facade.initialize(id, 'current-user'); // TODO: Replace with actual user ID from auth service
         this.loadContracts();
       }
     });
@@ -138,8 +136,8 @@ export class ContractModuleViewComponent implements OnInit {
 
     this.loading.set(true);
     try {
-      await this.facade.loadContracts();
-      const contractList = [...this.facade.contracts()];
+      await this.service.loadContracts(blueprintId);
+      const contractList = [...this.store.contracts()];
       this.contracts.set(contractList);
     } catch (error) {
       this.message.error('載入合約列表失敗');
@@ -255,7 +253,7 @@ export class ContractModuleViewComponent implements OnInit {
    */
   async deleteContract(contract: Contract): Promise<void> {
     try {
-      await this.facade.deleteContract(contract.id);
+      await this.service.deleteContract(contract.id);
       this.message.success(`合約 ${contract.contractNumber} 已刪除`);
       await this.loadContracts();
     } catch (error) {
@@ -360,36 +358,19 @@ export class ContractModuleViewComponent implements OnInit {
     }
 
     try {
-      // Start parsing
-      const result = await this.aiParserService.parseContractFromStorage({
-        fileId: file.id,
-        storagePath: file.storagePath || '',
-        fileName: file.fileName,
-        documentType: 'construction_contract',
-        languageHint: 'zh-TW'
-      });
+      // NOTE: AI parsing logic moved to Cloud Functions
+      // Call processContractUpload Cloud Function instead
+      this.message.info('AI 解析功能已移至 Cloud Functions 實作，請使用上傳功能觸發解析');
+      modalRef.close();
+      return;
 
-      if (result.success && result.data) {
-        // Show parsed data in modal
-        component.startParsing(result.data);
-
-        // Wait for user to confirm or close
-        modalRef.afterClose.subscribe(async (confirmedData) => {
-          if (confirmedData) {
-            // User confirmed parsed data - update contract
-            try {
-              const parsedDataJson = JSON.stringify(confirmedData);
-              
-              // Update contract in facade
-              await this.facade.updateContract(contract.id, {
-                parsedData: parsedDataJson
-              });
-
-              this.message.success(`合約解析完成 (信心度: ${confirmedData.confidenceScore}%)`);
-              
-              // Reload contracts to reflect changes
-              await this.loadContracts();
-            } catch (error) {
+      // The parsing flow should be:
+      // 1. User uploads file -> triggers processContractUpload Cloud Function
+      // 2. Cloud Function performs OCR and parsing
+      // 3. createParseDraft Cloud Function creates normalized draft
+      // 4. User reviews and confirms draft
+      // 5. confirmContract Cloud Function creates final contract
+    } catch (error) {
               this.message.error('儲存解析資料失敗');
               console.error('[ContractModuleView]', 'Save parsed data failed', error);
             }

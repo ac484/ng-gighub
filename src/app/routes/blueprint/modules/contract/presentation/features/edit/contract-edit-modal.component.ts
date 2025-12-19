@@ -13,7 +13,8 @@ import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@ang
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Auth } from '@angular/fire/auth';
 import { LoggerService } from '@core';
-import { ContractFacade } from '../../../application/facades';
+import { ContractStore } from '../../../application/state';
+import { ContractService } from '../../../application/services';
 import type { Contract, ContractParty } from '../../../data/models';
 import type { CreateContractDto, UpdateContractDto } from '../../../data/models/dtos';
 import { SHARED_IMPORTS } from '@shared';
@@ -73,7 +74,8 @@ export class ContractEditModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly modalRef = inject(NzModalRef);
   private readonly modalData = inject<ContractModalData>(NZ_MODAL_DATA);
-  private readonly facade = inject(ContractFacade);
+  private readonly store = inject(ContractStore);
+  private readonly service = inject(ContractService);
   private readonly auth = inject(Auth);
   private readonly message = inject(NzMessageService);
   private readonly logger = inject(LoggerService);
@@ -86,11 +88,7 @@ export class ContractEditModalComponent implements OnInit {
   form!: FormGroup;
 
   ngOnInit(): void {
-    // Initialize facade with blueprint context
-    const user = this.auth.currentUser;
-    if (user && this.modalData.blueprintId) {
-      this.facade.initialize(this.modalData.blueprintId, user.uid);
-    }
+    // No initialization needed - Store and Service handle their own state
 
     this.initForm();
 
@@ -180,7 +178,7 @@ export class ContractEditModalComponent implements OnInit {
           endDate: formValue.endDate
         };
 
-        await this.facade.updateContract(this.modalData.contract!.id, updateData);
+        await this.service.updateContract(this.modalData.contract!.id, updateData);
         this.message.success('合約更新成功');
       } else {
         const createData: CreateContractDto = {
@@ -196,7 +194,7 @@ export class ContractEditModalComponent implements OnInit {
           createdBy: 'current-user'
         };
 
-        await this.facade.createContract(createData);
+        await this.service.createContract(this.modalData.blueprintId, createData);
         this.message.success('合約建立成功');
       }
 

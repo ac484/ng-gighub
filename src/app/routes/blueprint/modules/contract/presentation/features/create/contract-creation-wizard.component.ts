@@ -11,7 +11,8 @@
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ContractFacade } from '@routes/blueprint/modules/contract/application/facades';
+import { ContractStore } from '@routes/blueprint/modules/contract/application/state';
+import { ContractService } from '@routes/blueprint/modules/contract/application/services';
 import type { Contract, ContractParty } from '@routes/blueprint/modules/contract/data/models';
 import type { CreateContractDto } from '@routes/blueprint/modules/contract/data/models/dtos';
 import { SHARED_IMPORTS } from '@shared';
@@ -101,7 +102,7 @@ const STEP_COMPLETE = 3;
 })
 export class ContractCreationWizardComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
-  private readonly contractFacade = inject(ContractFacade);
+  private readonly contractService = inject(ContractService);
   private readonly message = inject(NzMessageService);
 
   // Inputs
@@ -227,7 +228,7 @@ export class ContractCreationWizardComponent implements OnInit {
         createdBy: 'current-user-id'
       };
 
-      const contract = await this.contractFacade.createContract(createDto);
+      const contract = await this.contractService.createContract(this.blueprintId(), createDto);
       this.createdContract.set(contract);
       this.message.success('合約建立成功');
       this.nextStep();

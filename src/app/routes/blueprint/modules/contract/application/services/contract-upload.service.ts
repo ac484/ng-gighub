@@ -178,6 +178,19 @@ export class ContractUploadService {
   }
 
   /**
+   * Upload contract file (alias for uploadAndProcess for backward compatibility)
+   */
+  async uploadContractFile(
+    blueprintId: string,
+    contractId: string,
+    file: File,
+    uploadedBy?: string
+  ): Promise<FileAttachment> {
+    const result = await this.uploadAndProcess(blueprintId, contractId, file, uploadedBy);
+    return result.fileAttachment;
+  }
+
+  /**
    * Sanitize file name for storage
    */
   private sanitizeFileName(fileName: string): string {
