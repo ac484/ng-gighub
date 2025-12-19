@@ -1,16 +1,17 @@
 /**
- * Issue Modal Component
- * 問題建立/編輯模態元件
+ * Issue Form Component
+ * 問題表單元件
  *
- * ✅ Modern Angular 20 patterns:
- * - Signals for reactive state
- * - Standalone component
- * - inject() for DI
- * - takeUntilDestroyed for cleanup
+ * Purpose: Create/edit issue form in modal
+ * Features: Reactive form with validation, modal integration
+ *
+ * Architecture: Feature Component (High Cohesion)
+ * - Standalone form component
+ * - Modal integration via NZ_MODAL_DATA
+ * - Form validation and submission
  */
 
-import { Component, ChangeDetectionStrategy, OnInit, inject, signal, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FirebaseAuthService, LoggerService } from '@core';
 import type {
@@ -26,7 +27,9 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
 
-interface IssueModalData {
+import { getSeverityOptions, getCategoryOptions } from '../../shared';
+
+interface IssueFormData {
   blueprintId: string;
   issue?: Issue;
 }
@@ -40,7 +43,7 @@ function isValidUser(user: unknown): user is { uid: string } {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-issue-modal',
+  selector: 'app-issue-form',
   standalone: true,
   imports: [SHARED_IMPORTS, NzFormModule],
   template: `
@@ -118,15 +121,14 @@ function isValidUser(user: unknown): user is { uid: string } {
     </form>
   `
 })
-export class IssueModalComponent implements OnInit {
+export class IssueFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly modal = inject(NzModalRef);
   private readonly message = inject(NzMessageService);
   private readonly logger = inject(LoggerService);
   private readonly managementService = inject(IssueManagementService);
   private readonly authService = inject(FirebaseAuthService);
-  private readonly data: IssueModalData = inject(NZ_MODAL_DATA, { optional: true }) || { blueprintId: '' };
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly data: IssueFormData = inject(NZ_MODAL_DATA, { optional: true }) || { blueprintId: '' };
 
   // State
   submitting = signal(false);
@@ -143,19 +145,9 @@ export class IssueModalComponent implements OnInit {
     assignedTo: ['', [Validators.maxLength(100)]]
   });
 
-  // Options
-  severityOptions: Array<{ value: IssueSeverity; label: string }> = [
-    { value: 'critical', label: '嚴重 - 需立即處理' },
-    { value: 'major', label: '重要 - 需儘快處理' },
-    { value: 'minor', label: '輕微 - 可稍後處理' }
-  ];
-
-  categoryOptions: Array<{ value: IssueCategory; label: string }> = [
-    { value: 'quality', label: '品質問題' },
-    { value: 'safety', label: '安全問題' },
-    { value: 'warranty', label: '保固問題' },
-    { value: 'other', label: '其他' }
-  ];
+  // Options from shared utilities
+  severityOptions = getSeverityOptions();
+  categoryOptions = getCategoryOptions();
 
   ngOnInit(): void {
     // If editing, populate form with existing issue data
@@ -246,7 +238,7 @@ export class IssueModalComponent implements OnInit {
       }
     } catch (error) {
       this.message.error(this.isEdit ? '更新問題失敗' : '建立問題失敗');
-      this.logger.error('[IssueModalComponent]', 'Failed to save issue', error as Error);
+      this.logger.error('[IssueFormComponent]', 'Failed to save issue', error as Error);
     } finally {
       this.submitting.set(false);
     }

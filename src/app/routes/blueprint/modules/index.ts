@@ -16,3 +16,6 @@ export * from './acceptance';
 
 // Members Module
 export * from './members';
+
+// Issues Module (Refactored)
+export * from './issues';
