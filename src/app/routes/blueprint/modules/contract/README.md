@@ -1,103 +1,301 @@
-# Contract Module
+# Contract Module (Refactored)
 
-合約管理模組 - 結構化設計遵循單一職責原則
+合約管理模組 - 採用功能導向架構設計
 
-## 模組說明
+## 🎯 架構原則
 
-合約模組透過 **blueprint 詳情頁的 Tab** 顯示（使用 `contract-module-view.component.ts`），與其他模組（財務、安全、品質等）保持一致的使用體驗。因功能複雜度較高，實作細節組織在 `contract/` 子目錄中。
+本模組遵循以下核心原則:
+- **高內聚 (High Cohesion)**: 相關功能組織在同一 feature 中
+- **低耦合 (Low Coupling)**: Features 間透過明確接口溝通
+- **可擴展性 (Extensibility)**: 易於新增 features 或擴展現有功能
+- **可維護性 (Maintainability)**: 清晰結構，小型專注元件
 
-## 目錄結構
-
-```
-modules/
-├── contract-module-view.component.ts       # 主視圖（顯示在 Blueprint Tab 中）
-├── contract-creation-wizard.component.ts   # 建立精靈
-├── contract-detail-drawer.component.ts     # 詳情抽屜
-├── contract-modal.component.ts             # 快速彈窗
-└── contract/                               # 複雜功能實作（未來擴展用）
-    ├── list/                               # 列表相關（預留）
-    ├── detail/                             # 詳情相關（預留）
-    ├── form/                               # 表單相關（預留）
-    └── README.md                           # 說明文件
-```
-
-## 使用方式
-
-### 1. 在 Blueprint 詳情頁顯示
-合約功能整合在藍圖詳情頁的「合約域」Tab 中：
+## 📁 目錄結構 (Feature-Based)
 
 ```
-/blueprints/user/:id  →  Blueprint 詳情頁  →  「合約域」Tab
+contract/
+├── contract-module-view-refactored.component.ts  # 主協調器 (thin orchestrator)
+├── index.ts                                      # Public API
+├── README.md                                     # 本文件
+│
+├── features/                                     # 功能模組
+│   ├── list/                                     # 🔍 列表功能
+│   │   ├── contract-list.component.ts            # Feature 主元件
+│   │   ├── components/
+│   │   │   ├── contract-statistics.component.ts  # 統計卡片
+│   │   │   ├── contract-filters.component.ts     # 搜尋與操作
+│   │   │   └── contract-table.component.ts       # 表格顯示
+│   │   └── index.ts
+│   │
+│   ├── create/                                   # ➕ 建立功能
+│   │   ├── contract-creation-wizard.component.ts # Feature 主元件
+│   │   ├── components/
+│   │   │   ├── basic-info-step.component.ts      # 步驟 1
+│   │   │   ├── confirm-step.component.ts         # 步驟 2
+│   │   │   └── completion-step.component.ts      # 步驟 3
+│   │   └── index.ts
+│   │
+│   ├── detail/                                   # 👁️ 詳情功能
+│   │   ├── contract-detail-drawer.component.ts   # Feature 主元件
+│   │   ├── components/
+│   │   │   ├── basic-info-tab.component.ts       # 基本資訊 Tab
+│   │   │   ├── parties-tab.component.ts          # 合約方 Tab
+│   │   │   ├── attachments-tab.component.ts      # 附件 Tab
+│   │   │   └── history-tab.component.ts          # 歷史記錄 Tab
+│   │   └── index.ts
+│   │
+│   └── edit/                                     # ✏️ 編輯功能
+│       ├── contract-edit-modal.component.ts      # Feature 主元件
+│       ├── components/
+│       │   ├── contract-form.component.ts        # 合約表單
+│       │   ├── owner-form.component.ts           # 業主表單
+│       │   └── contractor-form.component.ts      # 承商表單
+│       └── index.ts
+│
+├── shared/                                       # 🔄 共享元件
+│   ├── components/
+│   │   └── contract-status-badge.component.ts    # 狀態標籤
+│   └── index.ts
+│
+└── [legacy files]                                # 📦 舊版相容檔案
+    ├── contract-module-view.component.ts
+    ├── contract-creation-wizard.component.ts
+    ├── contract-detail-drawer.component.ts
+    └── contract-modal.component.ts
 ```
 
-### 2. 合約 CRUD 操作
-- **查看**: 點擊「查看」按鈕 → 開啟 `ContractDetailDrawerComponent`（右側抽屜）
-- **新增**: 點擊「新增合約」→ 顯示 `ContractCreationWizardComponent`（精靈模式）
-- **編輯**: 點擊「編輯」→ 開啟 `ContractModalComponent`（彈窗編輯）
-- **刪除**: 點擊「刪除」→ 確認對話框
+## 🎨 架構設計
 
-## 資料模型
+### 主協調器 (Main Orchestrator)
 
-### Contract (合約)
+**`ContractModuleViewComponent`** - Thin orchestration layer
+
+責任:
+- 管理高層狀態 (contracts, loading, wizard mode)
+- 協調 features 互動
+- 處理 feature 事件
+
+特點:
+- **Thin Layer**: 最小化邏輯，委託給 features
+- **Event-Driven**: 透過 inputs/outputs 與 features 溝通
+- **Stateful**: 只管理必要的全域狀態
+
+### Features 架構
+
+每個 feature 是自包含的功能模組:
+
+#### 1. List Feature 🔍
+
+**職責**: 顯示合約列表與統計資訊
+
+**元件**:
+- `ContractListComponent` - Feature 協調器
+- `ContractStatisticsComponent` - 統計卡片 (total, by status, by value)
+- `ContractFiltersComponent` - 搜尋與操作按鈕
+- `ContractTableComponent` - ST Table 顯示
+
+**接口**:
 ```typescript
-interface Contract {
-  id: string;
-  blueprintId: string;
-  contractNumber: string;
-  title: string;
-  description?: string;
-  owner: ContractParty;          // 甲方
-  contractor: ContractParty;     // 乙方
-  totalAmount: number;
-  currency: string;
-  lineItems?: ContractLineItem[]; // 合約細項
-  status: ContractStatus;
-  startDate: Date;
-  endDate: Date;
-  originalFiles: FileAttachment[];
-  // ... 其他欄位
+@Input() contracts: Contract[]
+@Input() statistics: ContractStatistics
+@Input() loading: boolean
+@Output() create: void
+@Output() quickCreate: void
+@Output() reload: void
+@Output() viewContract: Contract
+@Output() editContract: Contract
+@Output() deleteContract: Contract
+```
+
+#### 2. Create Feature ➕
+
+**職責**: 引導合約建立流程
+
+**元件**:
+- `ContractCreationWizardComponent` - 精靈協調器
+- `BasicInfoStepComponent` - 基本資訊輸入 (步驟 1)
+- `ConfirmStepComponent` - 資料確認 (步驟 2)
+- `CompletionStepComponent` - 完成通知 (步驟 3)
+
+**接口**:
+```typescript
+@Input() blueprintId: string
+@Output() contractCreated: Contract
+@Output() cancelled: void
+```
+
+#### 3. Detail Feature 👁️
+
+**職責**: 顯示合約詳情與歷史
+
+**元件**:
+- `ContractDetailDrawerComponent` - 抽屜協調器
+- `BasicInfoTabComponent` - 基本資訊 Tab
+- `PartiesTabComponent` - 合約方資訊 Tab
+- `AttachmentsTabComponent` - 附件列表 Tab
+- `HistoryTabComponent` - 歷史記錄 Tab
+
+**接口**:
+```typescript
+@Input() contract: Contract | null
+@Output() edit: Contract
+@Output() activate: Contract
+@Output() download: Contract
+```
+
+#### 4. Edit Feature ✏️
+
+**職責**: 編輯合約資訊
+
+**元件**:
+- `ContractEditModalComponent` - Modal 協調器
+- `ContractFormComponent` - 基本資訊表單
+- `OwnerFormComponent` - 業主資訊表單
+- `ContractorFormComponent` - 承商資訊表單
+
+**接口**:
+```typescript
+// Via Modal Data
+blueprintId: string
+contract?: Contract  // 編輯模式
+```
+
+### 共享元件 🔄
+
+**可重用元件**, 無外部依賴:
+
+- `ContractStatusBadgeComponent` - 狀態標籤顯示
+
+## 📋 使用方式
+
+### 匯入與使用
+
+```typescript
+// 主視圖 (使用重構版本)
+import { ContractModuleViewComponent } from './contract';
+
+// 或獨立使用 features
+import { ContractListComponent } from './contract/features/list';
+import { ContractCreationWizardComponent } from './contract/features/create';
+import { ContractDetailDrawerComponent } from './contract/features/detail';
+import { ContractEditModalComponent } from './contract/features/edit';
+
+// 共享元件
+import { ContractStatusBadgeComponent } from './contract/shared';
+```
+
+### Blueprint 整合
+
+合約模組整合在 Blueprint 詳情頁的 Tab 中:
+
+```
+/blueprints/user/:id  →  Blueprint Detail  →  「合約域」Tab
+                                          ↓
+                          ContractModuleViewComponent
+```
+
+### Feature 互動流程
+
+```
+User Action → Main Orchestrator → Feature Component → Event → Orchestrator → Update State
+```
+
+**範例 - 查看合約**:
+1. User 點擊「查看」
+2. `ContractListComponent` 發出 `viewContract` 事件
+3. Orchestrator 接收事件
+4. Orchestrator 開啟 `ContractDetailDrawerComponent`
+5. User 互動完成，關閉 Drawer
+6. Orchestrator 重新載入列表
+
+## 🧩 擴展性範例
+
+### 新增 Feature
+
+**範例: 新增 "審核" Feature**
+
+1. 建立 feature 目錄:
+```
+features/approval/
+├── contract-approval.component.ts
+├── components/
+│   ├── approval-form.component.ts
+│   └── approval-history.component.ts
+└── index.ts
+```
+
+2. 定義接口:
+```typescript
+@Input() contract: Contract
+@Output() approved: ApprovalResult
+@Output() rejected: ApprovalResult
+```
+
+3. 在 Orchestrator 整合:
+```typescript
+openApproval(contract: Contract): void {
+  // Open approval feature
 }
 ```
 
-### ContractParty (合約方)
-```typescript
-interface ContractParty {
-  id: string;
-  name: string;                  // 名稱
-  contactPerson: string;         // 聯絡人
-  contactPhone: string;          // 電話
-  contactEmail: string;          // 信箱
-  address?: string;
-  taxId?: string;
-}
+### 新增子元件
+
+**範例: 在 List Feature 新增排序**
+
+1. 建立元件:
+```
+features/list/components/contract-sort.component.ts
 ```
 
-### ContractLineItem (合約細項)
+2. 在 ContractListComponent 整合:
 ```typescript
-interface ContractLineItem {
-  id: string;
-  itemNumber: number;            // 號碼
-  itemCode: string;              // 項次
-  name: string;                  // 名稱
-  quantity: number;              // 數量
-  unit: string;                  // 單位
-  unitPrice: number;             // 單價
-  amount: number;                // 金額
-  discountPercent?: number;      // 折扣
-  subtotal: number;              // 小記
-  remarks?: string;              // 備註
-}
+<app-contract-sort (sortChange)="onSortChange($event)" />
 ```
 
-## 元件說明
+## 🎯 設計原則
 
-### ContractModuleViewComponent (主視圖)
-- **位置**: `modules/contract-module-view.component.ts`
-- **用途**: 顯示於 Blueprint 詳情頁的 Tab 中
-- **功能**:
-  - 統計資訊卡片（總計、各狀態數量）
-  - 合約列表（ST Table）
-  - 狀態篩選
+### 單一職責原則 (Single Responsibility)
+- 每個元件只負責一件事
+- 協調器元件只協調，不包含 UI 邏輯
+- 子元件只處理自己的 UI 邏輯
+
+### 開放/封閉原則 (Open/Closed)
+- Features 對擴展開放
+- Features 對修改封閉
+- 新增功能不需修改現有 features
+
+### 依賴反轉原則 (Dependency Inversion)
+- 依賴抽象 (interfaces), 不依賴具體實作
+- Features 透過 inputs/outputs 溝通
+- No direct feature-to-feature dependencies
+
+## 💡 最佳實踐
+
+### 元件大小
+- **Orchestrator**: < 200 lines
+- **Feature Main Component**: < 150 lines
+- **Sub Components**: < 100 lines
+
+### 命名規範
+- Feature folders: lowercase with dash (e.g., `list`, `create`)
+- Components: feature-action.component.ts (e.g., `contract-list.component.ts`)
+- Sub-components: descriptive name (e.g., `contract-statistics.component.ts`)
+
+### 狀態管理
+- **Global State**: Orchestrator (contracts, loading)
+- **Feature State**: Feature main component (currentStep, formData)
+- **Local State**: Sub-components (expanded, selected)
+
+### 事件處理
+- Use outputs for feature → orchestrator communication
+- Use inputs for orchestrator → feature data flow
+- Keep events semantic (e.g., `contractCreated`, not `buttonClicked`)
+
+## 📚 資料模型
+
+[保留原有的資料模型定義...]
+
+
   - 搜尋功能
   - 新增/查看/編輯/刪除操作
 
