@@ -7,7 +7,7 @@
  * @date 2025-12-15
  */
 
-import type { ContractStatus } from '../models';
+import type { ContractStatus } from '../data/models';
 
 /**
  * Contract Module Configuration Interface

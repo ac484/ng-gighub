@@ -8,7 +8,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
-import type { ContractStatus } from '@core/blueprint/modules/implementations/contract/models';
+import type { ContractStatus } from '@routes/blueprint/modules/contract/data/models';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 
 @Component({

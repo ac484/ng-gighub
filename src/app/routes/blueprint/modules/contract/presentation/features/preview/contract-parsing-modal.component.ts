@@ -8,7 +8,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import type { ParsedContractData } from '@core/blueprint/modules/implementations/contract/models';
+import type { ParsedContractData } from '@routes/blueprint/modules/contract/data/models';
 import { SHARED_IMPORTS } from '@shared';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
 import { NzStepsModule } from 'ng-zorro-antd/steps';

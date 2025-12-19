@@ -8,7 +8,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import type { ContractStatistics } from '@core/blueprint/modules/implementations/contract/models';
+import type { ContractStatistics } from '@routes/blueprint/modules/contract/data/models';
 import { SHARED_IMPORTS } from '@shared';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 

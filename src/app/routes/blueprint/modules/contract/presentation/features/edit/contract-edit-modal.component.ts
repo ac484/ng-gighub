@@ -11,11 +11,11 @@
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Auth } from '@angular/fire/auth';
 import { LoggerService } from '@core';
-import { ContractFacade } from '@core/blueprint/modules/implementations/contract/facades';
-import type { Contract, ContractParty } from '@core/blueprint/modules/implementations/contract/models';
-import type { CreateContractDto, UpdateContractDto } from '@core/blueprint/modules/implementations/contract/models/dtos';
-import { FirebaseService } from '@core/services/firebase.service';
+import { ContractFacade } from '../../../application/facades';
+import type { Contract, ContractParty } from '../../../data/models';
+import type { CreateContractDto, UpdateContractDto } from '../../../data/models/dtos';
 import { SHARED_IMPORTS } from '@shared';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -74,7 +74,7 @@ export class ContractEditModalComponent implements OnInit {
   private readonly modalRef = inject(NzModalRef);
   private readonly modalData = inject<ContractModalData>(NZ_MODAL_DATA);
   private readonly facade = inject(ContractFacade);
-  private readonly firebase = inject(FirebaseService);
+  private readonly auth = inject(Auth);
   private readonly message = inject(NzMessageService);
   private readonly logger = inject(LoggerService);
 
@@ -87,7 +87,7 @@ export class ContractEditModalComponent implements OnInit {
 
   ngOnInit(): void {
     // Initialize facade with blueprint context
-    const user = this.firebase.currentUser();
+    const user = this.auth.currentUser;
     if (user && this.modalData.blueprintId) {
       this.facade.initialize(this.modalData.blueprintId, user.uid);
     }

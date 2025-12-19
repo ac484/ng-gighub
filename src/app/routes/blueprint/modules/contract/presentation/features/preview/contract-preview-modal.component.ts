@@ -9,7 +9,7 @@
 
 import { Component, ChangeDetectionStrategy, inject, input, signal } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import type { FileAttachment } from '@core/blueprint/modules/implementations/contract/models';
+import type { FileAttachment } from '@routes/blueprint/modules/contract/data/models';
 import { SHARED_IMPORTS } from '@shared';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
 

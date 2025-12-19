@@ -21,9 +21,9 @@
  */
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal, computed, effect } from '@angular/core';
-import { ContractFacade } from '@core/blueprint/modules/implementations/contract/facades';
-import type { Contract, ContractStatistics } from '@core/blueprint/modules/implementations/contract/models';
-import { ContractAIParserService } from '@core/blueprint/modules/implementations/contract/services';
+import { ContractFacade } from './application/facades';
+import type { Contract, ContractStatistics } from './data/models';
+import { ContractAIParserService } from './application/services';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS } from '@shared';
 import { NzDrawerService } from 'ng-zorro-antd/drawer';
@@ -31,11 +31,11 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 
 // Feature imports - each feature is self-contained
-import { ContractCreationWizardComponent } from './features/create';
-import { ContractDetailDrawerComponent } from './features/detail';
-import { ContractEditModalComponent } from './features/edit';
-import { ContractListComponent } from './features/list';
-import { ContractPreviewModalComponent, ContractParsingModalComponent } from './features/preview';
+import { ContractCreationWizardComponent } from './presentation/features/create';
+import { ContractDetailDrawerComponent } from './presentation/features/detail';
+import { ContractEditModalComponent } from './presentation/features/edit';
+import { ContractListComponent } from './presentation/features/list';
+import { ContractPreviewModalComponent, ContractParsingModalComponent } from './presentation/features/preview';
 
 @Component({
   selector: 'app-contract-module-view',

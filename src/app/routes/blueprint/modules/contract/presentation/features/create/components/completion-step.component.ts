@@ -8,7 +8,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import type { Contract } from '@core/blueprint/modules/implementations/contract/models';
+import type { Contract } from '@routes/blueprint/modules/contract/data/models';
 import { SHARED_IMPORTS } from '@shared';
 import { NzResultModule } from 'ng-zorro-antd/result';
 

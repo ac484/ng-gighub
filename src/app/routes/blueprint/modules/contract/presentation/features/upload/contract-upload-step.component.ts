@@ -8,8 +8,8 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, output, signal, inject } from '@angular/core';
-import type { FileAttachment } from '@core/blueprint/modules/implementations/contract/models';
-import { ContractUploadService } from '@core/blueprint/modules/implementations/contract/services';
+import type { FileAttachment } from '../../../data/models';
+import { ContractUploadService } from '../../../application/services';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzUploadFile, NzUploadChangeParam } from 'ng-zorro-antd/upload';

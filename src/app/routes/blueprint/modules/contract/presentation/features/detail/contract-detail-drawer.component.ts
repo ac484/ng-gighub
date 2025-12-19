@@ -10,7 +10,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, output, computed } from '@angular/core';
-import type { Contract } from '@core/blueprint/modules/implementations/contract/models';
+import type { Contract } from '@routes/blueprint/modules/contract/data/models';
 import { SHARED_IMPORTS } from '@shared';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';

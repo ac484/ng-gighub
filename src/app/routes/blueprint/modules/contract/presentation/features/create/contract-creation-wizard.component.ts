@@ -11,9 +11,9 @@
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ContractFacade } from '@core/blueprint/modules/implementations/contract/facades';
-import type { Contract, ContractParty } from '@core/blueprint/modules/implementations/contract/models';
-import type { CreateContractDto } from '@core/blueprint/modules/implementations/contract/models/dtos';
+import { ContractFacade } from '@routes/blueprint/modules/contract/application/facades';
+import type { Contract, ContractParty } from '@routes/blueprint/modules/contract/data/models';
+import type { CreateContractDto } from '@routes/blueprint/modules/contract/data/models/dtos';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
@@ -22,7 +22,7 @@ import { BasicInfoStepComponent } from './components/basic-info-step.component';
 import { CompletionStepComponent } from './components/completion-step.component';
 import { ConfirmStepComponent } from './components/confirm-step.component';
 import { ContractUploadStepComponent } from '../upload/contract-upload-step.component';
-import type { FileAttachment } from '@core/blueprint/modules/implementations/contract/models';
+import type { FileAttachment } from '@routes/blueprint/modules/contract/data/models';
 
 /** Step indices */
 const STEP_UPLOAD = 0;

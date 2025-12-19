@@ -10,23 +10,47 @@
 
 import type {
   Contract,
-  ContractWorkItem,
   ContractStatusHistory,
   ContractStatistics,
   ContractFilters,
   ContractStatus,
-  ValidationResult,
-  WorkItemProgress,
   FileAttachment
 } from '../models/contract.model';
 import type {
+  ContractWorkItem,
+  WorkItemProgress,
+  CreateWorkItemDto,
+  UpdateWorkItemDto
+} from '../models/work-item.model';
+import type {
   CreateContractDto,
   UpdateContractDto,
-  CreateWorkItemDto,
-  UpdateWorkItemDto,
-  ContractStatusChangeDto,
-  FileUploadDto
+  ContractStatusChangeDto
 } from '../models/dtos';
+
+/**
+ * Validation Result
+ */
+export interface ValidationResult {
+  /** Whether validation passed */
+  valid: boolean;
+  /** Validation errors if any */
+  errors?: string[];
+}
+
+/**
+ * File Upload DTO
+ */
+export interface FileUploadDto {
+  /** File name */
+  fileName: string;
+  /** File type */
+  fileType: string;
+  /** File size in bytes */
+  fileSize: number;
+  /** Uploader ID */
+  uploadedBy: string;
+}
 
 /**
  * Main Contract Module API
