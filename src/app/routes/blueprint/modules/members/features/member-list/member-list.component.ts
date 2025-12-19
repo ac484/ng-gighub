@@ -8,21 +8,22 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { firstValueFrom } from 'rxjs';
 
 /**
- * Blueprint Members Component
- * 藍圖成員元件 - 管理藍圖成員
+ * Member List Component
+ * 成員列表元件 - 顯示和管理藍圖成員列表
  *
  * Features:
- * - Display members list
+ * - Display members list with table
  * - Add new member
  * - Update member role
  * - Remove member
  *
- * Following Occam's Razor: Simple, focused member management
- * ✅ Modernized with AsyncState pattern
+ * Part of Members Module - Feature-based architecture
+ * ✅ High Cohesion: Focused on member list display and management
+ * ✅ Low Coupling: Communicates via clear interfaces
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-blueprint-members',
+  selector: 'app-member-list',
   standalone: true,
   imports: [SHARED_IMPORTS],
   template: `
@@ -57,7 +58,7 @@ import { firstValueFrom } from 'rxjs';
     `
   ]
 })
-export class BlueprintMembersComponent implements OnInit {
+export class MemberListComponent implements OnInit {
   private readonly message = inject(NzMessageService);
   private readonly modal = inject(ModalHelper);
   private readonly logger = inject(LoggerService);
@@ -150,10 +151,10 @@ export class BlueprintMembersComponent implements OnInit {
   private async loadMembers(): Promise<void> {
     try {
       await this.membersState.load(firstValueFrom(this.memberRepository.findByBlueprint(this.blueprintId())));
-      this.logger.info('[BlueprintMembersComponent]', `Loaded ${this.membersState.length()} members`);
+      this.logger.info('[MemberListComponent]', `Loaded ${this.membersState.length()} members`);
     } catch (error) {
       this.message.error('載入成員失敗');
-      this.logger.error('[BlueprintMembersComponent]', 'Failed to load members', error as Error);
+      this.logger.error('[MemberListComponent]', 'Failed to load members', error as Error);
     }
   }
 
@@ -182,10 +183,10 @@ export class BlueprintMembersComponent implements OnInit {
    * 新增成員
    */
   async addMember(): Promise<void> {
-    const { MemberModalComponent } = await import('./member-modal.component');
+    const { MemberFormModalComponent } = await import('../member-form/member-form-modal.component');
     this.modal
       .createStatic(
-        MemberModalComponent,
+        MemberFormModalComponent,
         {
           blueprintId: this.blueprintId(),
           blueprintOwnerType: this.blueprintOwnerType()
@@ -205,10 +206,10 @@ export class BlueprintMembersComponent implements OnInit {
    */
   async editMember(record: any): Promise<void> {
     const member = record as BlueprintMember;
-    const { MemberModalComponent } = await import('./member-modal.component');
+    const { MemberFormModalComponent } = await import('../member-form/member-form-modal.component');
     this.modal
       .createStatic(
-        MemberModalComponent,
+        MemberFormModalComponent,
         {
           blueprintId: this.blueprintId(),
           blueprintOwnerType: this.blueprintOwnerType(),
@@ -236,7 +237,7 @@ export class BlueprintMembersComponent implements OnInit {
       this.loadMembers();
     } catch (error) {
       this.message.error('移除成員失敗');
-      this.logger.error('[BlueprintMembersComponent]', 'Failed to remove member', error as Error);
+      this.logger.error('[MemberListComponent]', 'Failed to remove member', error as Error);
     }
   }
 }

@@ -8,14 +8,21 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
 
 /**
- * Member Modal Component
- * 成員模態元件 - 新增/編輯成員
+ * Member Form Modal Component
+ * 成員表單模態元件 - 新增/編輯成員
  *
- * Following Occam's Razor: Simple form for member management
+ * Features:
+ * - Add new member with validation
+ * - Edit existing member
+ * - Role and permission management
+ *
+ * Part of Members Module - Feature-based architecture
+ * ✅ High Cohesion: Focused on member form operations
+ * ✅ Low Coupling: Clear interface via modal data
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-member-modal',
+  selector: 'app-member-form-modal',
   standalone: true,
   imports: [SHARED_IMPORTS],
   template: `
@@ -85,7 +92,7 @@ import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
     </form>
   `
 })
-export class MemberModalComponent implements OnInit {
+export class MemberFormModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly modal = inject(NzModalRef);
   private readonly message = inject(NzMessageService);
@@ -182,20 +189,6 @@ export class MemberModalComponent implements OnInit {
   }
 
   /**
-   * Populate form with member data (unused, merged into ngOnInit)
-   * 填充表單資料
-   */
-  private populateForm(member: BlueprintMember): void {
-    // This method is kept for compatibility but logic is in ngOnInit
-    this.form.patchValue({
-      accountId: member.accountId,
-      role: member.role,
-      businessRole: member.businessRole,
-      isExternal: member.isExternal || false
-    });
-  }
-
-  /**
    * Submit form
    * 提交表單
    */
@@ -244,7 +237,7 @@ export class MemberModalComponent implements OnInit {
       this.modal.close(true);
     } catch (error) {
       this.message.error(this.isEdit ? '更新成員失敗' : '新增成員失敗');
-      this.logger.error('[MemberModalComponent]', 'Failed to save member', error as Error);
+      this.logger.error('[MemberFormModalComponent]', 'Failed to save member', error as Error);
     } finally {
       this.submitting.set(false);
     }
