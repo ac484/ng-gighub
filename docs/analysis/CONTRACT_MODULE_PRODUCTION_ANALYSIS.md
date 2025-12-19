@@ -92,7 +92,7 @@ Firestore Database
    - ✅ 提供統一業務入口
    - ✅ 整合 Store、Repository 和 EventBus
    - ✅ 處理錯誤與狀態同步
-   - **符合「docs/principles/principles.md」第 8 條: 流程與容器分離**
+   - **符合「原則.md」第 8 條: 流程與容器分離**
 
 2. **Repository 模式**:
    - ✅ 抽象 Firestore 資料存取
@@ -108,7 +108,7 @@ Firestore Database
 
 #### 架構符合度檢查
 
-依據 **「docs/principles/principles.md」十大設計原則** 檢查:
+依據 **「原則.md」十大設計原則** 檢查:
 
 | 原則 | 符合度 | 說明 |
 |-----|--------|------|
@@ -1034,7 +1034,7 @@ test('should create contract from PDF upload', async ({ page }) => {
    - SETC-009 到 SETC-018 系列文件
    - 各模組詳細規格
 
-3. `docs/principles/principles.md` - 系統設計十大原則
+3. `原則.md` - 系統設計十大原則
 
 ⚠️ **缺少的文件**:
 - API 文件 (前端服務 API)

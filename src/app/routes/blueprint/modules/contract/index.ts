@@ -1,10 +1,21 @@
 /**
- * Contract Module - Firebase Functions Integration Components
+ * Contract Module - Public API
+ * 合約模組 - 公開 API
  *
- * Export all Firebase Functions integration components
+ * Feature-Based Architecture (功能導向架構)
+ * - High Cohesion (高內聚性)
+ * - Low Coupling (低耦合性)
+ * - Extensibility (可擴展性)
  */
 
-export { AiDocumentProcessorComponent } from '../../../../shared/components/ai-document-processor.component';
-export { StorageManagerComponent } from '../../../../shared/components/storage-manager.component';
-export { FirestoreOperationsComponent } from '../../../../shared/components/firestore-operations.component';
-export { AiGeneratorComponent } from '../../../../shared/components/ai-generator.component';
+// Main Orchestrator
+export { ContractModuleViewComponent } from './contract-module-view-refactored.component';
+
+// Feature Exports
+export * from './features/list';
+export * from './features/create';
+export * from './features/detail';
+export * from './features/edit';
+
+// Shared Components
+export * from './shared';

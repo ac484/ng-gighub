@@ -18,7 +18,7 @@ export const routes: Routes = [
   },
   {
     path: ':id/members',
-    loadComponent: () => import('./members/blueprint-members.component').then(m => m.BlueprintMembersComponent),
+    loadComponent: () => import('./modules/members').then(m => m.MembersModuleViewComponent),
     data: { title: '成員管理' }
   },
   {
@@ -28,7 +28,7 @@ export const routes: Routes = [
   },
   {
     path: ':id/finance',
-    loadChildren: () => import('./finance/routes').then(m => m.financeRoutes),
+    loadChildren: () => import('./modules/finance/routes').then(m => m.financeRoutes),
     data: { title: '財務管理' }
   }
 ];
