@@ -18,7 +18,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { firstValueFrom } from 'rxjs';
 
 import { ContainerDashboardComponent } from './container/container-dashboard.component';
-import { AcceptanceModuleViewComponent } from './modules/acceptance-module-view.component';
+import { AcceptanceModuleViewComponent } from './modules/acceptance';
 import { CloudModuleViewComponent } from './modules/cloud';
 import { ContractModuleViewComponent } from './modules/contract';
 import { DiaryModuleViewComponent } from './modules/diary';

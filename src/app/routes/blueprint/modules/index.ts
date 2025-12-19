@@ -11,5 +11,8 @@ export * from './contract/contract-detail-drawer.component';
 export * from './contract/contract-modal.component';
 export * from './contract/contract-module-view.component';
 
+// Acceptance Module
+export * from './acceptance';
+
 // Members Module
 export * from './members';
