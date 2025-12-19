@@ -12,6 +12,7 @@
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoggerService } from '@core';
+import { FirebaseService } from '@core/services/firebase.service';
 import { ContractFacade } from '@core/blueprint/modules/implementations/contract/facades';
 import type { Contract, ContractParty } from '@core/blueprint/modules/implementations/contract/models';
 import type { CreateContractDto, UpdateContractDto } from '@core/blueprint/modules/implementations/contract/models/dtos';
@@ -73,6 +74,7 @@ export class ContractEditModalComponent implements OnInit {
   private readonly modalRef = inject(NzModalRef);
   private readonly modalData = inject<ContractModalData>(NZ_MODAL_DATA);
   private readonly facade = inject(ContractFacade);
+  private readonly firebase = inject(FirebaseService);
   private readonly message = inject(NzMessageService);
   private readonly logger = inject(LoggerService);
 
@@ -84,6 +86,12 @@ export class ContractEditModalComponent implements OnInit {
   form!: FormGroup;
 
   ngOnInit(): void {
+    // Initialize facade with blueprint context
+    const user = this.firebase.currentUser();
+    if (user && this.modalData.blueprintId) {
+      this.facade.initialize(this.modalData.blueprintId, user.uid);
+    }
+
     this.initForm();
 
     if (this.modalData.contract) {

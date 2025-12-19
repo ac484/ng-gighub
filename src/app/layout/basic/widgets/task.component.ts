@@ -87,7 +87,8 @@ export class HeaderTaskComponent implements OnInit {
   private currentUserId?: string;
   private unsubscribeRealtime?: () => void;
 
-  ngOnInit(): void {
+  constructor() {
+    // Move effect() to constructor to ensure it's within injection context
     effect(() => {
       const user = this.firebase.currentUser();
       if (!user) {
@@ -107,6 +108,10 @@ export class HeaderTaskComponent implements OnInit {
       this.unsubscribeRealtime = this.notificationStore.subscribeToRealtimeUpdates(user.uid, this.destroyRef);
       void this.notificationStore.loadNotifications(user.uid);
     });
+  }
+
+  ngOnInit(): void {
+    // Initialization handled by effect in constructor
   }
 
   async loadData(): Promise<void> {
