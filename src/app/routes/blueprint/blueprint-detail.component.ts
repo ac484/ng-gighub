@@ -19,6 +19,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { ContainerDashboardComponent } from './container/container-dashboard.component';
 import { AcceptanceModuleViewComponent } from './modules/acceptance';
+import { AgreementModuleViewComponent } from './modules/agreement';
 import { CloudModuleViewComponent } from './modules/cloud';
 import { ContractModuleViewComponent } from './modules/contract';
 import { DiaryModuleViewComponent } from './modules/diary';
@@ -79,6 +80,7 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
     SafetyModuleViewComponent,
     CloudModuleViewComponent,
     IssuesModuleViewComponent,
+    AgreementModuleViewComponent,
     ContractModuleViewComponent,
     WarrantyModuleViewComponent
   ],
@@ -363,6 +365,15 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
             </ng-template>
           </nz-tab>
 
+          <!-- Agreement Domain Tab -->
+          <nz-tab nzTitle="協議">
+            <ng-template nz-tab>
+              @if (blueprint()?.id) {
+                <app-agreement-module-view [blueprintId]="blueprint()!.id" />
+              }
+            </ng-template>
+          </nz-tab>
+
           <!-- Contract Domain Tab -->
           <nz-tab nzTitle="合約">
             <ng-template nz-tab>
@@ -616,6 +627,7 @@ export class BlueprintDetailComponent implements OnInit {
       workflow: '流程域',
       qa: '品質控管域',
       acceptance: '驗收域',
+      agreement: '協議',
       finance: '財務域',
       material: '材料域',
       safety: '安全域',
@@ -646,6 +658,7 @@ export class BlueprintDetailComponent implements OnInit {
       workflow: '自訂流程、狀態機、自動化',
       qa: '檢查表、缺失管理、品質報告',
       acceptance: '驗收申請、審核、初驗、複驗',
+      agreement: '協議管理、簽署、到期追蹤',
       finance: '成本、請款、付款、預算管理',
       material: '材料管理、出入庫、資產追蹤',
       safety: '安全巡檢、風險評估、事故通報',
@@ -676,6 +689,7 @@ export class BlueprintDetailComponent implements OnInit {
       workflow: 'apartment',
       qa: 'safety-certificate',
       acceptance: 'check-circle',
+      agreement: 'file-protect',
       finance: 'dollar',
       material: 'inbox',
       safety: 'safety',
@@ -805,6 +819,7 @@ export class BlueprintDetailComponent implements OnInit {
     { key: 'workflow', name: '流程域', icon: 'apartment' },
     { key: 'qa', name: '品質控管', icon: 'safety-certificate' },
     { key: 'acceptance', name: '驗收域', icon: 'check-circle' },
+    { key: 'agreement', name: '協議', icon: 'file-protect' },
     { key: 'finance', name: '財務域', icon: 'dollar' },
     { key: 'material', name: '材料域', icon: 'inbox' },
     { key: 'safety', name: '安全域', icon: 'safety' },
