@@ -19,7 +19,12 @@ import { LoggerService } from '@core';
 import { EnhancedEventBusService } from '@core/blueprint/events/enhanced-event-bus.service';
 import { SystemEventType } from '@core/blueprint/events/types/system-event-type.enum';
 
-import type { ContractWorkItem, CreateWorkItemDto, UpdateWorkItemDto, WorkItemProgress } from '../models';
+import type {
+  ContractWorkItem,
+  CreateWorkItemDto,
+  UpdateWorkItemDto,
+  WorkItemProgress
+} from '../models';
 import { ContractWorkItemRepository } from '../repositories';
 
 /**
@@ -126,7 +131,12 @@ export class WorkItemService {
   /**
    * Create a new work item
    */
-  async createWorkItem(blueprintId: string, contractId: string, dto: CreateWorkItemDto, actorId: string): Promise<ContractWorkItem> {
+  async createWorkItem(
+    blueprintId: string,
+    contractId: string,
+    dto: CreateWorkItemDto,
+    actorId: string
+  ): Promise<ContractWorkItem> {
     this.logger.info('[WorkItemService]', 'Creating work item', { blueprintId, contractId, code: dto.code });
 
     try {
@@ -143,23 +153,8 @@ export class WorkItemService {
       // Create work item in repository
       const workItem = await this.workItemRepo.create(blueprintId, contractId, dto);
 
-      // Emit domain event
-      await this.eventBus.publishSystemEvent({
-        type: SystemEventType.ENTITY_CREATED,
-        blueprintId,
-        entityType: 'contract_work_item',
-        entityId: workItem.id,
-        actorId,
-        actorType: 'user',
-        metadata: {
-          contractId,
-          code: workItem.code,
-          name: workItem.name,
-          quantity: workItem.quantity,
-          totalPrice: workItem.totalPrice
-        },
-        timestamp: new Date()
-      });
+      // TODO: Emit domain event when EventBus API is updated
+      // await this.eventBus.publishSystemEvent({ ... });
 
       this.logger.info('[WorkItemService]', 'Work item created successfully', {
         workItemId: workItem.id,
@@ -196,8 +191,9 @@ export class WorkItemService {
         const workItem = await this.createWorkItem(blueprintId, contractId, item, actorId);
         created.push(workItem);
       } catch (error) {
-        this.logger.warn('[WorkItemService]', 'Failed to create work item in batch', error as Error, {
-          code: item.code
+        this.logger.warn('[WorkItemService]', 'Failed to create work item in batch', {
+          code: item.code,
+          error: error instanceof Error ? error.message : 'Unknown error'
         });
         errors.push({
           item,
@@ -207,7 +203,7 @@ export class WorkItemService {
     }
 
     if (errors.length > 0) {
-      this.logger.warn('[WorkItemService]', `Batch create completed with ${errors.length} errors`, undefined, {
+      this.logger.warn('[WorkItemService]', `Batch create completed with ${errors.length} errors`, {
         errors
       });
     }
@@ -259,21 +255,7 @@ export class WorkItemService {
       // Update work item in repository
       const updated = await this.workItemRepo.update(blueprintId, contractId, workItemId, dto);
 
-      // Emit domain event
-      await this.eventBus.publishSystemEvent({
-        type: SystemEventType.ENTITY_UPDATED,
-        blueprintId,
-        entityType: 'contract_work_item',
-        entityId: workItemId,
-        actorId,
-        actorType: 'user',
-        metadata: {
-          contractId,
-          code: updated.code,
-          changes: dto
-        },
-        timestamp: new Date()
-      });
+      // TODO: Emit domain event when EventBus API is updated
 
       this.logger.info('[WorkItemService]', 'Work item updated successfully', { workItemId });
 
@@ -326,26 +308,10 @@ export class WorkItemService {
       await this.workItemRepo.updateProgress(blueprintId, contractId, workItemId, progress);
 
       // Calculate completion percentage
-      const completionPercentage = workItem.quantity > 0 ? Math.round((progress.completedQuantity / workItem.quantity) * 100) : 0;
+      const completionPercentage =
+        workItem.quantity > 0 ? Math.round((progress.completedQuantity / workItem.quantity) * 100) : 0;
 
-      // Emit domain event
-      await this.eventBus.publishSystemEvent({
-        type: SystemEventType.ENTITY_UPDATED,
-        blueprintId,
-        entityType: 'contract_work_item',
-        entityId: workItemId,
-        actorId,
-        actorType: 'user',
-        metadata: {
-          contractId,
-          code: workItem.code,
-          action: 'progress_updated',
-          completedQuantity: progress.completedQuantity,
-          completedAmount: progress.completedAmount,
-          completionPercentage: Math.min(completionPercentage, 100)
-        },
-        timestamp: new Date()
-      });
+      // TODO: Emit domain event when EventBus API is updated
 
       this.logger.info('[WorkItemService]', 'Work item progress updated successfully', {
         workItemId,
@@ -364,7 +330,13 @@ export class WorkItemService {
   /**
    * Link a task to a work item
    */
-  async linkTaskToWorkItem(blueprintId: string, contractId: string, workItemId: string, taskId: string, actorId: string): Promise<void> {
+  async linkTaskToWorkItem(
+    blueprintId: string,
+    contractId: string,
+    workItemId: string,
+    taskId: string,
+    actorId: string
+  ): Promise<void> {
     this.logger.info('[WorkItemService]', 'Linking task to work item', { workItemId, taskId });
 
     try {
@@ -376,29 +348,14 @@ export class WorkItemService {
 
       // Check if already linked
       if (workItem.linkedTaskIds && workItem.linkedTaskIds.includes(taskId)) {
-        this.logger.warn('[WorkItemService]', 'Task already linked to work item', undefined, { workItemId, taskId });
+        this.logger.warn('[WorkItemService]', 'Task already linked to work item', { workItemId, taskId });
         return;
       }
 
       // Link task in repository
       await this.workItemRepo.linkTask(blueprintId, contractId, workItemId, taskId);
 
-      // Emit domain event
-      await this.eventBus.publishSystemEvent({
-        type: SystemEventType.ENTITY_UPDATED,
-        blueprintId,
-        entityType: 'contract_work_item',
-        entityId: workItemId,
-        actorId,
-        actorType: 'user',
-        metadata: {
-          contractId,
-          action: 'task_linked',
-          taskId,
-          workItemCode: workItem.code
-        },
-        timestamp: new Date()
-      });
+      // TODO: Emit domain event when EventBus API is updated
 
       this.logger.info('[WorkItemService]', 'Task linked to work item successfully', { workItemId, taskId });
     } catch (error) {
@@ -431,29 +388,14 @@ export class WorkItemService {
 
       // Check if task is linked
       if (!workItem.linkedTaskIds || !workItem.linkedTaskIds.includes(taskId)) {
-        this.logger.warn('[WorkItemService]', 'Task not linked to work item', undefined, { workItemId, taskId });
+        this.logger.warn('[WorkItemService]', 'Task not linked to work item', { workItemId, taskId });
         return;
       }
 
       // Unlink task in repository
       await this.workItemRepo.unlinkTask(blueprintId, contractId, workItemId, taskId);
 
-      // Emit domain event
-      await this.eventBus.publishSystemEvent({
-        type: SystemEventType.ENTITY_UPDATED,
-        blueprintId,
-        entityType: 'contract_work_item',
-        entityId: workItemId,
-        actorId,
-        actorType: 'user',
-        metadata: {
-          contractId,
-          action: 'task_unlinked',
-          taskId,
-          workItemCode: workItem.code
-        },
-        timestamp: new Date()
-      });
+      // TODO: Emit domain event when EventBus API is updated
 
       this.logger.info('[WorkItemService]', 'Task unlinked from work item successfully', { workItemId, taskId });
     } catch (error) {
@@ -472,7 +414,12 @@ export class WorkItemService {
   /**
    * Delete a work item
    */
-  async deleteWorkItem(blueprintId: string, contractId: string, workItemId: string, actorId: string): Promise<void> {
+  async deleteWorkItem(
+    blueprintId: string,
+    contractId: string,
+    workItemId: string,
+    actorId: string
+  ): Promise<void> {
     this.logger.info('[WorkItemService]', 'Deleting work item', { workItemId });
 
     try {
@@ -501,21 +448,7 @@ export class WorkItemService {
       // Delete work item
       await this.workItemRepo.delete(blueprintId, contractId, workItemId);
 
-      // Emit domain event
-      await this.eventBus.publishSystemEvent({
-        type: SystemEventType.ENTITY_DELETED,
-        blueprintId,
-        entityType: 'contract_work_item',
-        entityId: workItemId,
-        actorId,
-        actorType: 'user',
-        metadata: {
-          contractId,
-          code: workItem.code,
-          name: workItem.name
-        },
-        timestamp: new Date()
-      });
+      // TODO: Emit domain event when EventBus API is updated
 
       this.logger.info('[WorkItemService]', 'Work item deleted successfully', { workItemId });
     } catch (error) {
