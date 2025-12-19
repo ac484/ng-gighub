@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { collection, doc, DocumentData, Firestore, getDocs, orderBy, query, setDoc, Timestamp, where } from '@angular/fire/firestore';
+import { collection, doc, addDoc, DocumentData, Firestore, getDocs, orderBy, query, setDoc, Timestamp, where } from '@angular/fire/firestore';
 import { LoggerService } from '@core/services/logger';
 
 import { Agreement, AgreementDocument } from './agreement.model';
@@ -12,8 +12,7 @@ export class AgreementRepository {
   private readonly collectionRef = collection(this.firestore, this.collectionPath);
 
 
-  async createAgreement(payload: Partial<Agreement> & { blueprintId: string }): Promise<Agreement> {
-    const ref = doc(this.collectionRef);
+    async createAgreement(payload: Partial<Agreement> & { blueprintId: string }): Promise<Agreement> {
     const now = new Date();
     const data: AgreementDocument = {
       blueprintId: payload.blueprintId,
@@ -21,11 +20,12 @@ export class AgreementRepository {
       counterparty: payload.counterparty || '',
       status: (payload.status as Agreement['status']) || 'draft',
       effectiveDate: payload.effectiveDate || now,
-      value: payload.value ?? null as any,
+      value: payload.value ?? undefined,
       attachmentUrl: (payload as any).attachmentUrl
-    } as any;
-    await setDoc(ref, data);
-    return this.toEntity(data as DocumentData, ref.id);
+    } as AgreementDocument;
+
+    const docRef = await addDoc(this.collectionRef, data as any);
+    return this.toEntity(data as DocumentData, docRef.id);
   }
 
   async findByBlueprintId(blueprintId: string): Promise<Agreement[]> {
