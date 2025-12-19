@@ -25,7 +25,7 @@ import { DiaryModuleViewComponent } from './modules/diary';
 import { FinanceModuleViewComponent } from './modules/finance-module-view.component';
 import { IssuesModuleViewComponent } from './modules/issues-module-view.component';
 import { LogModuleViewComponent } from './modules/log-module-view.component';
-import { MemberListComponent } from './modules/members';
+import { MembersModuleViewComponent } from './modules/members';
 import { QaModuleViewComponent } from './modules/qa-module-view.component';
 import { SafetyModuleViewComponent } from './modules/safety-module-view.component';
 import { WarrantyModuleViewComponent } from './modules/warranty-module-view.component';
@@ -67,7 +67,7 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
     NzFormModule,
     DatePipe,
     AuditLogsComponent,
-    BlueprintMembersComponent,
+    MembersModuleViewComponent,
     DiaryModuleViewComponent,
     ContainerDashboardComponent,
     TasksComponent,
@@ -286,7 +286,7 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
           <nz-tab nzTitle="成員">
             <ng-template nz-tab>
               @if (blueprint()?.id) {
-                <app-member-list [blueprintId]="blueprint()!.id" [blueprintOwnerType]="blueprint()!.ownerType" />
+                <app-members-module-view [blueprintId]="blueprint()!.id" [blueprintOwnerType]="blueprint()!.ownerType" />
               }
             </ng-template>
           </nz-tab>

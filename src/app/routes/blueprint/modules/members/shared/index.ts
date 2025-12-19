@@ -10,4 +10,5 @@
  * - Member type formatters
  */
 
-// No shared utilities yet - placeholder for future additions
+// Currently empty - placeholder for future shared utilities
+export {};
