@@ -4,6 +4,7 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 import { Agreement } from './agreement.model';
 import { AgreementService } from './agreement.service';
@@ -116,6 +117,7 @@ export class AgreementModuleViewComponent {
   agreementSelected = output<Agreement>();
 
   private readonly agreementService = inject(AgreementService);
+  private readonly messageService = inject(NzMessageService);
 
   readonly agreements = this.agreementService.agreements;
   readonly loading = this.agreementService.loading;
@@ -135,7 +137,13 @@ export class AgreementModuleViewComponent {
     if (!this.blueprintId()) {
       return;
     }
-    await this.agreementService.createAgreement(this.blueprintId());
+    try {
+      const created = await this.agreementService.createAgreement(this.blueprintId());
+      this.messageService.success(`已新增協議 ${created.title}`);
+    } catch (error) {
+      this.messageService.error('新增協議失敗');
+      console.error('[AgreementModuleView]', 'createAgreement failed', error);
+    }
   }
 
   onSelect(agreement: Agreement): void {
