@@ -31,11 +31,7 @@ export interface DiaryStatistics {
         </ng-template>
       </nz-col>
       <nz-col [nzSpan]="6">
-        <nz-statistic
-          [nzValue]="statistics().thisMonth"
-          [nzTitle]="'本月日誌'"
-          [nzValueStyle]="{ color: '#52c41a' }"
-        />
+        <nz-statistic [nzValue]="statistics().thisMonth" [nzTitle]="'本月日誌'" [nzValueStyle]="{ color: '#52c41a' }" />
       </nz-col>
       <nz-col [nzSpan]="6">
         <nz-statistic [nzValue]="statistics().today" [nzTitle]="'今日日誌'" [nzValueStyle]="{ color: '#faad14' }" />

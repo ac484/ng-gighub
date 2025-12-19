@@ -17,10 +17,10 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 
 import { ContractStatusBadgeComponent } from '../../shared';
-import { BasicInfoTabComponent } from './components/basic-info-tab.component';
-import { PartiesTabComponent } from './components/parties-tab.component';
 import { AttachmentsTabComponent } from './components/attachments-tab.component';
+import { BasicInfoTabComponent } from './components/basic-info-tab.component';
 import { HistoryTabComponent } from './components/history-tab.component';
+import { PartiesTabComponent } from './components/parties-tab.component';
 
 @Component({
   selector: 'app-contract-detail-drawer',
@@ -74,10 +74,7 @@ import { HistoryTabComponent } from './components/history-tab.component';
           </nz-tab>
 
           <nz-tab nzTitle="附件">
-            <app-attachments-tab 
-              [contract]="contract()!" 
-              (downloadFile)="onDownloadFile($event)" 
-            />
+            <app-attachments-tab [contract]="contract()!" (downloadFile)="onDownloadFile($event)" />
           </nz-tab>
 
           <nz-tab nzTitle="歷史記錄">

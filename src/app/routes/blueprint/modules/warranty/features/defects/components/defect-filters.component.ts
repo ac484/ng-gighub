@@ -10,8 +10,8 @@
  */
 
 import { Component, ChangeDetectionStrategy, output } from '@angular/core';
-import { SHARED_IMPORTS } from '@shared';
 import type { WarrantyDefectStatus } from '@core/blueprint/modules/implementations/warranty';
+import { SHARED_IMPORTS } from '@shared';
 
 /**
  * 缺失篩選元件

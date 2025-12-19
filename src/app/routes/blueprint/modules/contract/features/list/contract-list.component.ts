@@ -14,21 +14,15 @@ import type { Contract, ContractStatistics } from '@core/blueprint/modules/imple
 import { SHARED_IMPORTS } from '@shared';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 
-import { ContractStatisticsComponent } from './components/contract-statistics.component';
 import { ContractFiltersComponent } from './components/contract-filters.component';
+import { ContractStatisticsComponent } from './components/contract-statistics.component';
 import { ContractTableComponent } from './components/contract-table.component';
 
 @Component({
   selector: 'app-contract-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    SHARED_IMPORTS,
-    NzEmptyModule,
-    ContractStatisticsComponent,
-    ContractFiltersComponent,
-    ContractTableComponent
-  ],
+  imports: [SHARED_IMPORTS, NzEmptyModule, ContractStatisticsComponent, ContractFiltersComponent, ContractTableComponent],
   template: `
     <!-- Statistics -->
     <app-contract-statistics [statistics]="statistics()" />

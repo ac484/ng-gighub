@@ -20,8 +20,8 @@ import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 
-import { DiaryListComponent } from './features/list';
 import { DiaryEditModalComponent } from './features/edit';
+import { DiaryListComponent } from './features/list';
 
 @Component({
   selector: 'app-diary-module-view',

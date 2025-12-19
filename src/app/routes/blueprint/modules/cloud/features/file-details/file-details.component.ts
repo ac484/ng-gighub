@@ -9,11 +9,11 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import type { CloudFile } from '@core/blueprint/modules/implementations/cloud';
 import { SHARED_IMPORTS } from '@shared';
+import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzListModule } from 'ng-zorro-antd/list';
 import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzBadgeModule } from 'ng-zorro-antd/badge';
 
 @Component({
   selector: 'app-file-details',
@@ -33,9 +33,7 @@ import { NzBadgeModule } from 'ng-zorro-antd/badge';
           <nz-descriptions-item nzTitle="類型">
             {{ file()!.mimeType }}
           </nz-descriptions-item>
-          <nz-descriptions-item nzTitle="副檔名">
-            .{{ file()!.extension }}
-          </nz-descriptions-item>
+          <nz-descriptions-item nzTitle="副檔名"> .{{ file()!.extension }} </nz-descriptions-item>
           <nz-descriptions-item nzTitle="上傳者">
             {{ file()!.uploadedBy }}
           </nz-descriptions-item>
@@ -59,13 +57,9 @@ import { NzBadgeModule } from 'ng-zorro-antd/badge';
           <h4>版本資訊</h4>
           @if (file()!.version) {
             <nz-descriptions [nzColumn]="1" [nzSize]="'small'">
-              <nz-descriptions-item nzTitle="目前版本">
-                v{{ file()!.version }}
-              </nz-descriptions-item>
+              <nz-descriptions-item nzTitle="目前版本"> v{{ file()!.version }} </nz-descriptions-item>
               @if (file()!.versionHistory && file()!.versionHistory!.length > 0) {
-                <nz-descriptions-item nzTitle="歷史版本">
-                  {{ file()!.versionHistory!.length }} 個版本
-                </nz-descriptions-item>
+                <nz-descriptions-item nzTitle="歷史版本"> {{ file()!.versionHistory!.length }} 個版本 </nz-descriptions-item>
               }
             </nz-descriptions>
 

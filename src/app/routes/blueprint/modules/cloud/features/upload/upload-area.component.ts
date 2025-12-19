@@ -114,7 +114,7 @@ export class UploadAreaComponent {
   onDragLeave(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    
+
     // Only hide if leaving the document
     if (event.target === document) {
       this.isDraggingOver.set(false);

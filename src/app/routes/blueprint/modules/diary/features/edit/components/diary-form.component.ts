@@ -39,12 +39,7 @@ import { SHARED_IMPORTS } from '@shared';
       <nz-form-item>
         <nz-form-label [nzSpan]="6">描述</nz-form-label>
         <nz-form-control [nzSpan]="14">
-          <textarea
-            nz-input
-            formControlName="description"
-            [nzAutosize]="{ minRows: 3, maxRows: 6 }"
-            placeholder="工作內容描述"
-          ></textarea>
+          <textarea nz-input formControlName="description" [nzAutosize]="{ minRows: 3, maxRows: 6 }" placeholder="工作內容描述"></textarea>
         </nz-form-control>
       </nz-form-item>
 

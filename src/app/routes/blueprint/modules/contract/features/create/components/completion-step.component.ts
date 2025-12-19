@@ -19,18 +19,10 @@ import { NzResultModule } from 'ng-zorro-antd/result';
   imports: [SHARED_IMPORTS, NzResultModule],
   template: `
     <div class="step-content">
-      <nz-result 
-        nzStatus="success" 
-        nzTitle="合約建立成功！" 
-        [nzSubTitle]="'合約編號: ' + createdContract()?.contractNumber"
-      >
+      <nz-result nzStatus="success" nzTitle="合約建立成功！" [nzSubTitle]="'合約編號: ' + createdContract()?.contractNumber">
         <div nz-result-extra>
-          <button nz-button nzType="primary" (click)="viewContract.emit()">
-            查看合約
-          </button>
-          <button nz-button nzType="default" (click)="createAnother.emit()">
-            建立另一筆合約
-          </button>
+          <button nz-button nzType="primary" (click)="viewContract.emit()"> 查看合約 </button>
+          <button nz-button nzType="default" (click)="createAnother.emit()"> 建立另一筆合約 </button>
         </div>
       </nz-result>
     </div>

@@ -8,8 +8,8 @@
 
 import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
-import { NzTreeModule, NzTreeNodeOptions } from 'ng-zorro-antd/tree';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { NzTreeModule, NzTreeNodeOptions } from 'ng-zorro-antd/tree';
 
 @Component({
   selector: 'app-folder-tree',
@@ -26,8 +26,7 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
               <span class="node-title">{{ node.title }}</span>
               @if (node.key !== 'root') {
                 <span class="node-actions" (click)="$event.stopPropagation()">
-                  <button nz-button nzType="text" nzSize="small" nz-tooltip="重新命名" 
-                    (click)="renameFolder.emit(node.key)">
+                  <button nz-button nzType="text" nzSize="small" nz-tooltip="重新命名" (click)="renameFolder.emit(node.key)">
                     <span nz-icon nzType="edit" nzTheme="outline"></span>
                   </button>
                 </span>

@@ -12,18 +12,14 @@
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal, computed, DestroyRef, output, input } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  WarrantyDefectRepository,
-  WarrantyDefectService,
-  DefectStatistics
-} from '@core/blueprint/modules/implementations/warranty';
+import { WarrantyDefectRepository, WarrantyDefectService, DefectStatistics } from '@core/blueprint/modules/implementations/warranty';
 import type { WarrantyDefect, WarrantyDefectStatus } from '@core/blueprint/modules/implementations/warranty';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 
-import { DefectStatisticsComponent } from './components/defect-statistics.component';
 import { DefectFiltersComponent } from './components/defect-filters.component';
+import { DefectStatisticsComponent } from './components/defect-statistics.component';
 import { DefectTableComponent } from './components/defect-table.component';
 
 /**
@@ -38,9 +34,7 @@ import { DefectTableComponent } from './components/defect-table.component';
     <nz-card [nzTitle]="cardTitle" [nzExtra]="cardExtra">
       <ng-template #cardTitle>
         <span style="font-size: 18px; font-weight: 500;">缺失管理</span>
-        <span style="color: #999; font-size: 14px; margin-left: 12px;">
-          保固 #{{ warrantyNumber() }} 的缺失記錄
-        </span>
+        <span style="color: #999; font-size: 14px; margin-left: 12px;"> 保固 #{{ warrantyNumber() }} 的缺失記錄 </span>
       </ng-template>
       <ng-template #cardExtra>
         <button nz-button nzType="primary" (click)="reportDefect.emit()">
@@ -57,11 +51,7 @@ import { DefectTableComponent } from './components/defect-table.component';
       <app-defect-statistics [statistics]="statistics()" />
 
       <!-- 篩選區域 -->
-      <app-defect-filters
-        (statusChange)="onStatusChange($event)"
-        (severityChange)="onSeverityChange($event)"
-        (refresh)="refresh()"
-      />
+      <app-defect-filters (statusChange)="onStatusChange($event)" (severityChange)="onSeverityChange($event)" (refresh)="refresh()" />
 
       <!-- 缺失列表 -->
       <app-defect-table

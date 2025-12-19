@@ -35,17 +35,11 @@ interface WarrantyRepair {
     @if (repairs().length > 0) {
       <nz-list [nzDataSource]="repairs()" nzBordered>
         <nz-list-item *ngFor="let repair of repairs()">
-          <nz-list-item-meta
-            [nzTitle]="repair.repairNumber"
-            [nzDescription]="repair.description"
-          >
-          </nz-list-item-meta>
+          <nz-list-item-meta [nzTitle]="repair.repairNumber" [nzDescription]="repair.description"> </nz-list-item-meta>
           <div>
             狀態：<nz-tag>{{ getStatusText(repair.status) }}</nz-tag>
             @if (repair.repairDate) {
-              <div style="margin-top: 4px;">
-                維修日期：{{ repair.repairDate | date: 'yyyy-MM-dd' }}
-              </div>
+              <div style="margin-top: 4px;"> 維修日期：{{ repair.repairDate | date: 'yyyy-MM-dd' }} </div>
             }
           </div>
         </nz-list-item>

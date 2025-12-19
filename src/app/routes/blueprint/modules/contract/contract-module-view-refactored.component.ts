@@ -29,10 +29,10 @@ import { NzDrawerService } from 'ng-zorro-antd/drawer';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
 // Feature imports - each feature is self-contained
-import { ContractListComponent } from './features/list';
 import { ContractCreationWizardComponent } from './features/create';
 import { ContractDetailDrawerComponent } from './features/detail';
 import { ContractEditModalComponent } from './features/edit';
+import { ContractListComponent } from './features/list';
 
 @Component({
   selector: 'app-contract-module-view',

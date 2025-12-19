@@ -61,20 +61,10 @@ import { NzStatisticModule } from 'ng-zorro-antd/statistic';
     <nz-card nzTitle="合約金額" class="mb-md">
       <nz-row [nzGutter]="16">
         <nz-col [nzSpan]="12">
-          <nz-statistic 
-            [nzValue]="statistics().totalValue" 
-            nzTitle="合約總金額" 
-            nzPrefix="$" 
-            [nzValueStyle]="{ color: '#1890ff' }" 
-          />
+          <nz-statistic [nzValue]="statistics().totalValue" nzTitle="合約總金額" nzPrefix="$" [nzValueStyle]="{ color: '#1890ff' }" />
         </nz-col>
         <nz-col [nzSpan]="12">
-          <nz-statistic 
-            [nzValue]="statistics().activeValue" 
-            nzTitle="生效中金額" 
-            nzPrefix="$" 
-            [nzValueStyle]="{ color: '#52c41a' }" 
-          />
+          <nz-statistic [nzValue]="statistics().activeValue" nzTitle="生效中金額" nzPrefix="$" [nzValueStyle]="{ color: '#52c41a' }" />
         </nz-col>
       </nz-row>
     </nz-card>

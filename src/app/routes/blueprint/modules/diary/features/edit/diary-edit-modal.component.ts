@@ -31,11 +31,7 @@ interface ModalData {
   standalone: true,
   imports: [SHARED_IMPORTS, DiaryFormComponent, DiaryPhotoUploadComponent],
   template: `
-    <app-diary-form
-      [diary]="modalData.diary || null"
-      [isView]="modalData.mode === 'view'"
-      (formReady)="onFormReady($event)"
-    />
+    <app-diary-form [diary]="modalData.diary || null" [isView]="modalData.mode === 'view'" (formReady)="onFormReady($event)" />
 
     <app-diary-photo-upload
       [diary]="modalData.diary || null"
