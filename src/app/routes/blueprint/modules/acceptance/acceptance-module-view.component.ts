@@ -56,7 +56,7 @@ type ViewMode = 'request' | 'review' | 'preliminary' | 're-inspection' | 'conclu
     <nz-card class="mb-md">
       <nz-segmented
         [nzOptions]="viewOptions"
-        [(ngModel)]="activeView"
+        [ngModel]="activeView()"
         (ngModelChange)="onViewChange($event)"
       />
     </nz-card>
