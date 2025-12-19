@@ -13,3 +13,6 @@ export * from './contract/contract-module-view.component';
 
 // Members Module
 export * from './members';
+
+// Issues Module (Refactored)
+export * from './issues';

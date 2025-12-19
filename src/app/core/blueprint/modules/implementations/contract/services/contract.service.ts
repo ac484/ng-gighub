@@ -19,14 +19,7 @@ import { LoggerService } from '@core';
 import { EnhancedEventBusService } from '@core/blueprint/events/enhanced-event-bus.service';
 import { SystemEventType } from '@core/blueprint/events/types/system-event-type.enum';
 
-import type {
-  Contract,
-  ContractStatus,
-  CreateContractDto,
-  UpdateContractDto,
-  ContractFilters,
-  ContractStatistics
-} from '../models';
+import type { Contract, ContractStatus, CreateContractDto, UpdateContractDto, ContractFilters, ContractStatistics } from '../models';
 import { ContractRepository } from '../repositories';
 
 /**
@@ -156,12 +149,7 @@ export class ContractService {
   /**
    * Update an existing contract
    */
-  async updateContract(
-    blueprintId: string,
-    contractId: string,
-    dto: UpdateContractDto,
-    actorId: string
-  ): Promise<Contract> {
+  async updateContract(blueprintId: string, contractId: string, dto: UpdateContractDto, actorId: string): Promise<Contract> {
     this.logger.info('[ContractService]', 'Updating contract', { blueprintId, contractId });
 
     try {
@@ -194,12 +182,7 @@ export class ContractService {
   /**
    * Update contract status with validation
    */
-  async updateContractStatus(
-    blueprintId: string,
-    contractId: string,
-    newStatus: ContractStatus,
-    actorId: string
-  ): Promise<void> {
+  async updateContractStatus(blueprintId: string, contractId: string, newStatus: ContractStatus, actorId: string): Promise<void> {
     this.logger.info('[ContractService]', 'Updating contract status', { contractId, newStatus });
 
     try {
@@ -213,8 +196,7 @@ export class ContractService {
       const allowedTransitions = STATUS_TRANSITIONS[contract.status];
       if (!allowedTransitions.includes(newStatus)) {
         throw new Error(
-          `Invalid status transition from ${contract.status} to ${newStatus}. ` +
-            `Allowed transitions: ${allowedTransitions.join(', ')}`
+          `Invalid status transition from ${contract.status} to ${newStatus}. ` + `Allowed transitions: ${allowedTransitions.join(', ')}`
         );
       }
 
