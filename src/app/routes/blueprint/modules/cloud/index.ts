@@ -1,23 +1,22 @@
 /**
  * Cloud Module - Public API
+ * 雲端模組 - 公開 API
  *
- * Feature-based exports with high cohesion and low coupling
+ * Feature-Based Architecture (功能導向架構)
+ * - High Cohesion (高內聚性)
+ * - Low Coupling (低耦合性)
+ * - Extensibility (可擴展性)
  */
 
-// Main Orchestrator (TODO: Implement refactored version)
-// export { CloudModuleViewComponent } from './cloud-module-view-refactored.component';
+// Main Orchestrator
+export { CloudModuleViewComponent } from './cloud-module-view-refactored.component';
 
 // Feature Exports
 export * from './features/statistics';
 export * from './features/folder-management';
-// TODO: Complete remaining features
-// export * from './features/file-list';
-// export * from './features/file-details';
-// export * from './features/upload';
+export * from './features/file-list';
+export * from './features/file-details';
+export * from './features/upload';
 
-// Shared
+// Shared Utilities
 export * from './shared';
-
-// Legacy (backward compatibility)
-export { CloudModuleViewComponent } from './cloud-module-view.component';
-export { FolderNameInputComponent as FolderNameInputComponentLegacy } from './cloud-module-view.component';
