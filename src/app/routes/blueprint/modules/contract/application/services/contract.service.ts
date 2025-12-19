@@ -15,12 +15,39 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { LoggerService } from '@core';
 import { EnhancedEventBusService } from '@core/blueprint/events/enhanced-event-bus.service';
 import { SystemEventType } from '@core/blueprint/events/types/system-event-type.enum';
 
 import type { Contract, ContractStatus, CreateContractDto, UpdateContractDto, ContractFilters, ContractStatistics } from '../../data/models';
 import { ContractRepository } from '../../infrastructure/repositories';
+
+/**
+ * Cloud Function types
+ */
+interface CreateParseDraftRequest {
+  blueprintId: string;
+  draftId: string;
+}
+
+interface CreateParseDraftResponse {
+  success: boolean;
+  normalizedData?: any;
+  error?: string;
+}
+
+interface ConfirmContractRequest {
+  blueprintId: string;
+  draftId: string;
+  selectedFields: Record<string, any>;
+  confirmedBy?: string;
+}
+
+interface ConfirmContractResponse {
+  success: boolean;
+  contractId: string;
+}
 
 /**
  * Contract Status Transition Rules
@@ -42,6 +69,7 @@ const STATUS_TRANSITIONS: Record<ContractStatus, ContractStatus[]> = {
 @Injectable({ providedIn: 'root' })
 export class ContractService {
   private readonly contractRepo = inject(ContractRepository);
+  private readonly functions = inject(Functions);
   private readonly eventBus = inject(EnhancedEventBusService);
   private readonly logger = inject(LoggerService);
 
@@ -372,10 +400,82 @@ export class ContractService {
     }
   }
 
+  // ============================================================================
+  // Cloud Functions Integration
+  // ============================================================================
+
   /**
-   * Validate contract is ready for activation
+   * Create normalized draft from parsed OCR result
+   * Calls Cloud Function: createParseDraft
    */
-  private validateContractForActivation(contract: Contract): void {
+  async createNormalizedDraft(blueprintId: string, draftId: string): Promise<any> {
+    this.logger.info('[ContractService]', 'Creating normalized draft via Cloud Function', { blueprintId, draftId });
+
+    try {
+      const createDraft = httpsCallable<CreateParseDraftRequest, CreateParseDraftResponse>(this.functions, 'createParseDraft');
+
+      const result = await createDraft({ blueprintId, draftId });
+
+      if (!result.data.success) {
+        throw new Error(result.data.error || 'Failed to create normalized draft');
+      }
+
+      this.logger.info('[ContractService]', 'Normalized draft created successfully', { draftId });
+
+      return result.data.normalizedData;
+    } catch (error) {
+      this.logger.error('[ContractService]', 'Failed to create normalized draft', error as Error, { blueprintId, draftId });
+      throw error;
+    }
+  }
+
+  /**
+   * Confirm contract from draft
+   * Calls Cloud Function: confirmContract
+   */
+  async confirmContractFromDraft(
+    blueprintId: string,
+    draftId: string,
+    selectedFields: Record<string, any>,
+    confirmedBy?: string
+  ): Promise<string> {
+    this.logger.info('[ContractService]', 'Confirming contract via Cloud Function', { blueprintId, draftId });
+
+    try {
+      const confirmContract = httpsCallable<ConfirmContractRequest, ConfirmContractResponse>(this.functions, 'confirmContract');
+
+      const result = await confirmContract({
+        blueprintId,
+        draftId,
+        selectedFields,
+        confirmedBy
+      });
+
+      if (!result.data.success) {
+        throw new Error('Failed to confirm contract');
+      }
+
+      const contractId = result.data.contractId;
+
+      this.logger.info('[ContractService]', 'Contract confirmed successfully', { contractId, draftId });
+
+      // Emit domain event
+      this.eventBus.publish({
+        type: SystemEventType.CONTRACT_CONFIRMED,
+        payload: { blueprintId, contractId, draftId },
+        timestamp: new Date()
+      });
+
+      return contractId;
+    } catch (error) {
+      this.logger.error('[ContractService]', 'Failed to confirm contract', error as Error, { blueprintId, draftId });
+      throw error;
+    }
+  }
+
+  // ============================================================================
+  // Private Helper Methods
+  // ============================================================================
     if (!contract.owner || !contract.contractor) {
       throw new Error('Contract must have both owner and contractor information');
     }

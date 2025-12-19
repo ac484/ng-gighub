@@ -13,6 +13,3 @@ export * from './work-item.service';
 
 // File upload service
 export * from './contract-upload.service';
-
-// AI document parsing service
-export * from './contract-ai-parser.service';

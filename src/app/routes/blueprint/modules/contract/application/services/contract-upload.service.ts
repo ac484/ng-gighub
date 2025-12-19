@@ -1,14 +1,16 @@
 /**
- * Contract Upload Service (Simplified Skeleton)
+ * Contract Upload Service
  *
- * Basic file upload functionality for contract files.
+ * Simplified service that uploads files and calls Cloud Functions.
+ * Heavy processing handled by functions-integration.
  *
  * @author GigHub Development Team
- * @date 2025-12-18
+ * @date 2025-12-19
  */
 
 import { Injectable, inject, signal } from '@angular/core';
 import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 
 import type { FileAttachment } from '../../data/models';
 
@@ -20,9 +22,30 @@ export interface FileValidationResult {
   errors: string[];
 }
 
+/**
+ * Cloud Function request/response types
+ */
+interface ProcessContractUploadRequest {
+  blueprintId: string;
+  contractId: string;
+  fileUrl: string;
+  filePath: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  requestedBy?: string;
+}
+
+interface ProcessContractUploadResponse {
+  success: boolean;
+  draftId: string;
+  status: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ContractUploadService {
   private readonly storage = inject(Storage);
+  private readonly functions = inject(Functions);
 
   // Configuration
   private readonly ACCEPTED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
@@ -33,9 +56,19 @@ export class ContractUploadService {
   readonly uploading = this._uploading.asReadonly();
 
   /**
-   * Upload a single contract file (Basic version)
+   * Upload contract file and trigger Cloud Function processing
+   * 
+   * This method:
+   * 1. Uploads file to Firebase Storage
+   * 2. Calls processContractUpload Cloud Function
+   * 3. Cloud Function handles OCR, parsing, and draft creation
    */
-  async uploadContractFile(blueprintId: string, contractId: string, file: File, uploadedBy = 'current-user'): Promise<FileAttachment> {
+  async uploadAndProcess(
+    blueprintId: string,
+    contractId: string,
+    file: File,
+    uploadedBy?: string
+  ): Promise<{ draftId: string; fileAttachment: FileAttachment }> {
     this._uploading.set(true);
 
     try {
@@ -45,34 +78,67 @@ export class ContractUploadService {
         throw new Error(`Invalid file: ${validation.errors.join(', ')}`);
       }
 
-      // Generate unique file ID
-      const fileId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-      const storagePath = `contracts/${blueprintId}/${contractId}/${fileId}-${this.sanitizeFileName(file.name)}`;
-      const storageRef = ref(this.storage, storagePath);
+      // Upload file to Storage
+      const fileAttachment = await this.uploadFile(blueprintId, contractId, file, uploadedBy);
 
-      // Upload file
-      const uploadTask = uploadBytesResumable(storageRef, file);
-      await uploadTask;
+      // Call Cloud Function to process upload
+      const processUpload = httpsCallable<ProcessContractUploadRequest, ProcessContractUploadResponse>(
+        this.functions,
+        'processContractUpload'
+      );
 
-      // Get download URL
-      const downloadUrl = await getDownloadURL(storageRef);
+      const result = await processUpload({
+        blueprintId,
+        contractId,
+        fileUrl: fileAttachment.fileUrl,
+        filePath: fileAttachment.storagePath,
+        fileName: fileAttachment.fileName,
+        fileType: fileAttachment.fileType,
+        fileSize: fileAttachment.fileSize,
+        requestedBy: uploadedBy
+      });
 
-      // Create file attachment record
-      const fileAttachment: FileAttachment = {
-        id: fileId,
-        fileName: file.name,
-        fileType: file.type,
-        fileSize: file.size,
-        fileUrl: downloadUrl,
-        storagePath,
-        uploadedAt: new Date(),
-        uploadedBy
+      return {
+        draftId: result.data.draftId,
+        fileAttachment
       };
-
-      return fileAttachment;
     } finally {
       this._uploading.set(false);
     }
+  }
+
+  /**
+   * Upload file to Storage only (internal method)
+   */
+  private async uploadFile(
+    blueprintId: string,
+    contractId: string,
+    file: File,
+    uploadedBy = 'current-user'
+  ): Promise<FileAttachment> {
+    // Generate unique file ID
+    const fileId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const storagePath = `contracts/${blueprintId}/${contractId}/${fileId}-${this.sanitizeFileName(file.name)}`;
+    const storageRef = ref(this.storage, storagePath);
+
+    // Upload file
+    const uploadTask = uploadBytesResumable(storageRef, file);
+    await uploadTask;
+
+    // Get download URL
+    const downloadUrl = await getDownloadURL(storageRef);
+
+    // Create file attachment record
+    return {
+      id: fileId,
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: file.size,
+      fileUrl: downloadUrl,
+      storagePath,
+      uploadedAt: new Date(),
+      uploadedBy
+    };
   }
 
   /**
