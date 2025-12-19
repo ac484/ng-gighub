@@ -84,6 +84,7 @@ export class ContractModuleViewComponent implements OnInit {
   blueprintId = input.required<string>();
 
   private readonly facade = inject(ContractFacade);
+  private readonly firebase = inject(FirebaseService);
   private readonly message = inject(NzMessageService);
   private readonly modalHelper = inject(ModalHelper);
   private readonly drawerService = inject(NzDrawerService);
@@ -94,6 +95,7 @@ export class ContractModuleViewComponent implements OnInit {
   contracts = signal<Contract[]>([]);
   loading = signal(false);
   showCreationWizard = signal(false);
+  private facadeInitialized = signal(false);
 
   // Computed statistics
   statistics = computed<ContractStatistics>(() => {
@@ -112,10 +114,15 @@ export class ContractModuleViewComponent implements OnInit {
   });
 
   constructor() {
-    // Effect to reload contracts when blueprintId changes
+    // Effect to initialize facade and reload contracts when blueprintId changes
     effect(() => {
       const id = this.blueprintId();
-      if (id) {
+      const user = this.firebase.currentUser();
+
+      if (id && user) {
+        // Initialize facade with blueprintId and userId
+        this.facade.initialize(id, user.uid);
+        this.facadeInitialized.set(true);
         this.loadContracts();
       }
     });
@@ -130,7 +137,10 @@ export class ContractModuleViewComponent implements OnInit {
    */
   async loadContracts(): Promise<void> {
     const blueprintId = this.blueprintId();
-    if (!blueprintId) return;
+    if (!blueprintId || !this.facadeInitialized()) {
+      console.warn('[ContractModuleView]', 'Cannot load contracts: facade not initialized');
+      return;
+    }
 
     this.loading.set(true);
     try {
