@@ -18,12 +18,13 @@ import { NzFormModule } from 'ng-zorro-antd/form';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SHARED_IMPORTS, NzFormModule],
   template: `
-    <nz-form-item>
-      <nz-form-label [nzSpan]="6" nzRequired>合約名稱</nz-form-label>
-      <nz-form-control [nzSpan]="16" nzErrorTip="請輸入合約名稱（至少 5 個字元）">
-        <input nz-input [formControl]="form().get('title')!" placeholder="輸入合約名稱" />
-      </nz-form-control>
-    </nz-form-item>
+    <div [formGroup]="form()">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzRequired>合約名稱</nz-form-label>
+        <nz-form-control [nzSpan]="16" nzErrorTip="請輸入合約名稱（至少 5 個字元）">
+          <input nz-input formControlName="title" placeholder="輸入合約名稱" />
+        </nz-form-control>
+      </nz-form-item>
 
     <nz-form-item>
       <nz-form-label [nzSpan]="6">描述</nz-form-label>
