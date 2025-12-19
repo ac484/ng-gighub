@@ -37,7 +37,8 @@ export class HeaderNotifyComponent implements OnInit {
   private currentUserId?: string;
   private unsubscribeRealtime?: () => void;
 
-  ngOnInit(): void {
+  constructor() {
+    // Move effect() to constructor to ensure it's within injection context
     effect(() => {
       const user = this.firebase.currentUser();
       if (!user) {
@@ -57,6 +58,10 @@ export class HeaderNotifyComponent implements OnInit {
       void this.notificationStore.loadNotifications(user.uid);
       void this.messaging.init(user.uid);
     });
+  }
+
+  ngOnInit(): void {
+    // Initialization handled by effect in constructor
   }
 
   async loadData(): Promise<void> {
