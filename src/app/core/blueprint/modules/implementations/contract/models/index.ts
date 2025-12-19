@@ -8,3 +8,4 @@
 export * from './contract.model';
 export * from './dtos';
 export * from './work-item.model';
+export * from './parsed-contract-data.model';

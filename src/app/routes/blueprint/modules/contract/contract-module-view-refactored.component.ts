@@ -22,17 +22,20 @@
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal, computed, effect } from '@angular/core';
 import { ContractFacade } from '@core/blueprint/modules/implementations/contract/facades';
+import { ContractAIParserService } from '@core/blueprint/modules/implementations/contract/services';
 import type { Contract, ContractStatistics } from '@core/blueprint/modules/implementations/contract/models';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS } from '@shared';
 import { NzDrawerService } from 'ng-zorro-antd/drawer';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzModalService } from 'ng-zorro-antd/modal';
 
 // Feature imports - each feature is self-contained
 import { ContractCreationWizardComponent } from './features/create';
 import { ContractDetailDrawerComponent } from './features/detail';
 import { ContractEditModalComponent } from './features/edit';
 import { ContractListComponent } from './features/list';
+import { ContractPreviewModalComponent } from './features/preview';
 
 @Component({
   selector: 'app-contract-module-view',
@@ -64,6 +67,8 @@ import { ContractListComponent } from './features/list';
         (viewContract)="viewContract($event)"
         (editContract)="editContract($event)"
         (deleteContract)="deleteContract($event)"
+        (previewContract)="previewContract($event)"
+        (parseContract)="parseContract($event)"
       />
     }
   `,
@@ -82,6 +87,8 @@ export class ContractModuleViewComponent implements OnInit {
   private readonly message = inject(NzMessageService);
   private readonly modalHelper = inject(ModalHelper);
   private readonly drawerService = inject(NzDrawerService);
+  private readonly modalService = inject(NzModalService);
+  private readonly aiParserService = inject(ContractAIParserService);
 
   // High-level state
   contracts = signal<Contract[]>([]);
@@ -272,5 +279,118 @@ export class ContractModuleViewComponent implements OnInit {
   private downloadContract(contract: Contract): void {
     // TODO: Implement contract download
     this.message.info('下載功能開發中');
+  }
+
+  /**
+   * Preview contract document
+   */
+  previewContract(contract: Contract): void {
+    if (!contract.originalFiles || contract.originalFiles.length === 0) {
+      this.message.warning('此合約沒有上傳的文件');
+      return;
+    }
+
+    // Use the first original file for preview
+    const file = contract.originalFiles[0];
+
+    this.modalService.create({
+      nzTitle: `合約文件預覽: ${contract.contractNumber}`,
+      nzContent: ContractPreviewModalComponent,
+      nzData: {
+        file,
+        contractNumber: contract.contractNumber
+      },
+      nzWidth: 1000,
+      nzFooter: null,
+      nzMaskClosable: true
+    });
+  }
+
+  /**
+   * Parse contract with AI
+   */
+  async parseContract(contract: Contract): Promise<void> {
+    if (!contract.originalFiles || contract.originalFiles.length === 0) {
+      this.message.warning('此合約沒有上傳的文件');
+      return;
+    }
+
+    // Check if already parsed
+    if (contract.parsedData) {
+      this.modalService.confirm({
+        nzTitle: '已有解析資料',
+        nzContent: '此合約已有 AI 解析的資料，是否要重新解析？',
+        nzOnOk: () => this.performParsing(contract)
+      });
+      return;
+    }
+
+    await this.performParsing(contract);
+  }
+
+  /**
+   * Perform AI parsing
+   */
+  private async performParsing(contract: Contract): Promise<void> {
+    const file = contract.originalFiles[0];
+
+    this.message.loading('正在使用 AI 解析合約文件...', { nzDuration: 0 });
+
+    try {
+      const result = await this.aiParserService.parseContractFromStorage({
+        fileId: file.id,
+        storagePath: file.storagePath || '',
+        fileName: file.fileName,
+        documentType: 'construction_contract',
+        languageHint: 'zh-TW'
+      });
+
+      this.message.remove();
+
+      if (result.success) {
+        // Store parsed data with contract
+        const parsedDataJson = JSON.stringify(result.data);
+
+        // Update contract with parsed data
+        // Note: In real implementation, this should call a service method
+        contract.parsedData = parsedDataJson;
+
+        this.message.success(`合約解析完成 (信心度: ${result.data.confidenceScore}%)`);
+
+        // Show parsed data preview
+        this.showParsedDataPreview(result.data);
+
+        // Reload contracts to reflect changes
+        await this.loadContracts();
+      } else {
+        this.message.error(`解析失敗: ${result.error}`);
+      }
+    } catch (error) {
+      this.message.remove();
+      this.message.error('AI 解析過程發生錯誤');
+      console.error('[ContractModuleView]', 'parseContract failed', error);
+    }
+  }
+
+  /**
+   * Show parsed data preview
+   */
+  private showParsedDataPreview(parsedData: any): void {
+    this.modalService.info({
+      nzTitle: '解析結果預覽',
+      nzContent: `
+        <div>
+          <p><strong>信心度：</strong>${parsedData.confidenceScore}%</p>
+          <p><strong>合約編號：</strong>${parsedData.contractNumber || '未識別'}</p>
+          <p><strong>合約名稱：</strong>${parsedData.title || '未識別'}</p>
+          <p><strong>業主：</strong>${parsedData.owner?.name || '未識別'}</p>
+          <p><strong>承商：</strong>${parsedData.contractor?.name || '未識別'}</p>
+          <p><strong>總金額：</strong>${parsedData.financial?.totalAmount ? `$${parsedData.financial.totalAmount.toLocaleString()}` : '未識別'}</p>
+          ${parsedData.warnings && parsedData.warnings.length > 0 ? `<p style="color: #faad14;"><strong>警告：</strong>${parsedData.warnings.join(', ')}</p>` : ''}
+          <p style="margin-top: 16px; color: #8c8c8c;">詳細資料請在合約詳情頁面查看</p>
+        </div>
+      `,
+      nzWidth: 600
+    });
   }
 }

@@ -36,6 +36,8 @@ export class ContractTableComponent {
   readonly viewContract = output<Contract>();
   readonly editContract = output<Contract>();
   readonly deleteContract = output<Contract>();
+  readonly previewContract = output<Contract>();
+  readonly parseContract = output<Contract>();
 
   // Table columns definition
   columns: STColumn[] = [
@@ -67,8 +69,22 @@ export class ContractTableComponent {
     { title: '結束日期', index: 'endDate', type: 'date', width: 120 },
     {
       title: '操作',
-      width: 180,
+      width: 260,
       buttons: [
+        {
+          text: '預覽',
+          icon: 'file-pdf',
+          tooltip: '預覽合約文件',
+          iif: record => this.hasOriginalFile(record as Contract),
+          click: record => this.previewContract.emit(record as Contract)
+        },
+        {
+          text: '解析',
+          icon: 'robot',
+          tooltip: 'AI 解析合約',
+          iif: record => this.hasOriginalFile(record as Contract) && !this.hasParsedData(record as Contract),
+          click: record => this.parseContract.emit(record as Contract)
+        },
         {
           text: '查看',
           icon: 'eye',
@@ -94,6 +110,20 @@ export class ContractTableComponent {
       ]
     }
   ];
+
+  /**
+   * Check if contract has original file
+   */
+  private hasOriginalFile(contract: Contract): boolean {
+    return contract.originalFiles && contract.originalFiles.length > 0;
+  }
+
+  /**
+   * Check if contract has parsed data
+   */
+  private hasParsedData(contract: Contract): boolean {
+    return !!contract.parsedData;
+  }
 
   /**
    * Check if contract can be edited
