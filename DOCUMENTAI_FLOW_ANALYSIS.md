@@ -162,7 +162,7 @@ export const processDocumentFromStorage = onCall<ProcessDocumentFromStorageReque
 #### 2.2 環境配置取得
 
 ```typescript
-// 從環境變數讀取處理器配置
+// 從環境變數讀取處理器配置（包含硬編碼預設值）
 let processorConfig;
 try {
   processorConfig = getProcessorConfigFromEnv();
@@ -173,16 +173,25 @@ try {
 }
 ```
 
-**環境變數** (`.env` 文件):
+**硬編碼預設值** (無需設定環境變數):
+```typescript
+// 預設配置（已硬編碼在程式碼中）
+DOCUMENTAI_LOCATION=us
+DOCUMENTAI_PROCESSOR_ID=d8cd080814899dc4
+```
+
+**可選環境變數** (`.env` 文件，用於覆寫預設值):
 ```bash
+# 僅在需要使用不同處理器時設定
 DOCUMENTAI_LOCATION=us
 DOCUMENTAI_PROCESSOR_ID=d8cd080814899dc4
 ```
 
 **重要說明**:
+- **預設配置**: 已硬編碼在程式碼中，無需設定環境變數即可運作
 - **專案 ID**: 自動從 Firebase 運行時環境取得，無需手動配置
 - **認證**: 使用 Application Default Credentials (ADC)，無需服務帳戶金鑰
-- **僅需配置**: 處理器位置和處理器 ID
+- **環境變數**: 可選，用於覆寫硬編碼的預設值
 
 #### 2.3 文件驗證流程
 

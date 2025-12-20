@@ -303,10 +303,15 @@ export function getProcessorConfigFromEnv(): ProcessorConfig {
   // No manual configuration needed - uses Application Default Credentials (ADC)
   const projectId = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT;
   
-  // Firebase Functions v7+: Use environment variables directly
-  // Set these via .env file or Firebase Functions environment configuration
-  const location = process.env.DOCUMENTAI_LOCATION;
-  const processorId = process.env.DOCUMENTAI_PROCESSOR_ID;
+  // ⚠️ HARDCODED VALUES: Fallback to hardcoded configuration
+  // These will be used if environment variables are not set
+  // For production, consider setting these via Firebase Functions environment config
+  const HARDCODED_LOCATION = 'us';
+  const HARDCODED_PROCESSOR_ID = 'd8cd080814899dc4';
+  
+  // Firebase Functions v7+: Use environment variables with hardcoded fallback
+  const location = process.env.DOCUMENTAI_LOCATION || HARDCODED_LOCATION;
+  const processorId = process.env.DOCUMENTAI_PROCESSOR_ID || HARDCODED_PROCESSOR_ID;
   const apiEndpoint = process.env.DOCUMENTAI_API_ENDPOINT;
 
   // Project ID is automatically available in Firebase Cloud Functions
@@ -315,13 +320,12 @@ export function getProcessorConfigFromEnv(): ProcessorConfig {
     throw new Error('Missing GCLOUD_PROJECT environment variable (automatically set in Firebase Cloud Functions)');
   }
 
-  if (!location) {
-    throw new Error('Missing DOCUMENTAI_LOCATION environment variable (set via .env or Firebase Functions config)');
-  }
-
-  if (!processorId) {
-    throw new Error('Missing DOCUMENTAI_PROCESSOR_ID environment variable (set via .env or Firebase Functions config)');
-  }
+  // Log whether using environment variables or hardcoded values
+  console.log('[Document AI Config]', {
+    location: location === HARDCODED_LOCATION ? 'hardcoded' : 'from env',
+    processorId: processorId === HARDCODED_PROCESSOR_ID ? 'hardcoded' : 'from env',
+    projectId: projectId
+  });
 
   return {
     projectId,

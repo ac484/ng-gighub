@@ -149,28 +149,28 @@ resource "google_project_iam_member" "firebase_documentai" {
 - 小文件（150KB）也無法處理
 - 錯誤發生在呼叫 Cloud Function 時，不是超時問題
 
-### 根本原因：Cloud Function 環境變數未設定
+### 根本原因：Cloud Function 環境變數未設定（已解決：使用硬編碼預設值）
 
 #### 問題分析
 
-Cloud Function 需要以下環境變數才能運作：
-- `DOCUMENTAI_LOCATION`: Document AI 處理器所在區域（例如：`us`）
-- `DOCUMENTAI_PROCESSOR_ID`: Document AI 處理器 ID（例如：`d8cd080814899dc4`）
+**✅ 最新版本已包含硬編碼預設值**，無需設定環境變數即可運作：
+- `DOCUMENTAI_LOCATION`: 預設為 `us`
+- `DOCUMENTAI_PROCESSOR_ID`: 預設為 `d8cd080814899dc4`
 
-如果這些環境變數未設定，Cloud Function 會拋出 500 錯誤。
+如果您看到 500 錯誤，現在更可能是 **IAM 權限問題**，而非環境變數問題。
 
-**檢查方式**:
+#### 檢查 IAM 權限（最重要）
+
 ```bash
-# 查看 Cloud Function 日誌
-firebase functions:log --only processDocumentFromStorage --limit 10
-
-# 預期看到的錯誤訊息:
-# Error: Missing DOCUMENTAI_LOCATION environment variable
-# 或
-# Error: Missing DOCUMENTAI_PROCESSOR_ID environment variable
+# 授予 Document AI API 使用者權限
+gcloud projects add-iam-policy-binding elite-chiller-455712-c4 \
+  --member="serviceAccount:elite-chiller-455712-c4@appspot.gserviceaccount.com" \
+  --role="roles/documentai.apiUser"
 ```
 
-#### 解決方案
+#### 可選：覆寫硬編碼的預設值
+
+如果需要使用不同的處理器或區域，可以透過環境變數覆寫預設值：
 
 **方法 1: 使用 .env 檔案（推薦用於開發）**
 
