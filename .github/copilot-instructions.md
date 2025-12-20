@@ -14,6 +14,9 @@ Security, cost control, and maintainability are mandatory.
 - Use Result Pattern for all async error handling
 - Do not introduce REST APIs, HTTP servers, or non-Firebase backends
 - Do not invent infrastructure not present in the repository
+- Implement the minimum code necessary to satisfy the requirement
+- Do not introduce abstractions unless they provide clear, current value
+- Prefer refactoring verbose or indirect code into simpler, equivalent implementations when no behavior change is required
 
 ## 3. Angular 20 Conventions
 - Standalone Components + Signals only
