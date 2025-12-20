@@ -19,10 +19,15 @@ export class AgreementRepository {
       title: payload.title || '新協議',
       counterparty: payload.counterparty || '',
       status: (payload.status as Agreement['status']) || 'draft',
-      effectiveDate: payload.effectiveDate || now,
-      value: payload.value ?? undefined,
-      attachmentUrl: (payload as any).attachmentUrl
+      effectiveDate: payload.effectiveDate || now
     } as AgreementDocument;
+
+    if (payload.value !== undefined && payload.value !== null) {
+      (data as any).value = payload.value;
+    }
+    if ((payload as any).attachmentUrl) {
+      (data as any).attachmentUrl = (payload as any).attachmentUrl;
+    }
 
     const docRef = await addDoc(this.collectionRef, data as any);
     return this.toEntity(data as DocumentData, docRef.id);
