@@ -140,6 +140,50 @@ resource "google_project_iam_member" "firebase_documentai" {
 
 ---
 
+## 🐛 問題排查：解析顯示「解析中」後變回「未解析」
+
+### 問題描述
+
+**症狀**:
+- 點擊「解析」按鈕後顯示「解析中...」
+- 經過一段時間後（約 70 秒）自動變回「未解析」
+- Console 顯示錯誤：`deadline-exceeded`
+
+### 根本原因：客戶端超時限制
+
+#### 問題分析
+
+Document AI 處理複雜 PDF 文件可能需要 2-5 分鐘，但 Firebase Functions SDK 的**預設客戶端超時為 70 秒**，即使後端 Cloud Function 設定了 540 秒（9 分鐘）超時，客戶端仍會在 70 秒後中斷連線。
+
+**超時配置差異**:
+```
+後端 Cloud Function: 540 秒 (9 分鐘) ✅
+客戶端 SDK 預設:     70 秒           ❌ 太短
+Document AI 處理:    2-5 分鐘         ⚠️ 超過預設超時
+```
+
+#### 解決方案
+
+**已修正**: 在 `agreement.service.ts` 中設定客戶端超時為 300 秒（5 分鐘）
+
+```typescript
+private readonly processDocumentFromStorage = httpsCallable<
+  { gcsUri: string; mimeType: string },
+  { success: boolean; result: { [key: string]: unknown } }
+>(this.functions, 'processDocumentFromStorage', { 
+  timeout: 300000  // ✅ 設定為 300 秒（5 分鐘）
+});
+```
+
+**錯誤訊息改善**:
+```typescript
+if (errorCode === 'functions/deadline-exceeded' || errorCode === 'deadline-exceeded') {
+  userMessage = '解析失敗：處理時間過長，文件可能過於複雜。請稍後重試或聯繫管理員。';
+}
+```
+
+---
+
 ## 🐛 問題排查：解析按鈕變灰但無錯誤訊息
 
 ### 問題描述
@@ -286,6 +330,11 @@ severity>=ERROR
 **常見錯誤訊息**:
 
 ```
+# 超時錯誤（最常見）
+Error: deadline-exceeded
+原因: 文件處理時間超過客戶端超時限制（預設 70 秒）
+解決方案: 已將超時設定提升至 300 秒（5 分鐘）
+
 # 權限錯誤
 Error: 7 PERMISSION_DENIED: The caller does not have permission
 

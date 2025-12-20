@@ -186,11 +186,13 @@ export class AgreementModuleViewComponent {
       const errorCode = (error as any)?.code;
 
       let userMessage = '解析失敗';
-      if (errorCode === 'permission-denied') {
+      if (errorCode === 'functions/deadline-exceeded' || errorCode === 'deadline-exceeded') {
+        userMessage = '解析失敗：處理時間過長，文件可能過於複雜。請稍後重試或聯繫管理員。';
+      } else if (errorCode === 'permission-denied' || errorCode === 'functions/permission-denied') {
         userMessage = '解析失敗：權限不足，請檢查 Cloud Function 權限設定';
-      } else if (errorCode === 'failed-precondition') {
+      } else if (errorCode === 'failed-precondition' || errorCode === 'functions/failed-precondition') {
         userMessage = '解析失敗：Cloud Function 配置錯誤，請檢查環境變數';
-      } else if (errorCode === 'unauthenticated') {
+      } else if (errorCode === 'unauthenticated' || errorCode === 'functions/unauthenticated') {
         userMessage = '解析失敗：認證失敗，請重新登入';
       } else if (errorMessage) {
         userMessage = `解析失敗：${errorMessage}`;

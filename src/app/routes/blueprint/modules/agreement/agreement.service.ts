@@ -13,11 +13,13 @@ export class AgreementService {
   private readonly firebase = inject(FirebaseService);
   private readonly functions = inject(Functions);
 
-  // ✅ Create callable during injection context
+  // ✅ Create callable during injection context with extended timeout
+  // Document AI processing can take 2-5 minutes for complex PDFs
+  // Set timeout to 300 seconds (5 minutes) to match backend processing time
   private readonly processDocumentFromStorage = httpsCallable<
     { gcsUri: string; mimeType: string },
     { success: boolean; result: { [key: string]: unknown } }
-  >(this.functions, 'processDocumentFromStorage');
+  >(this.functions, 'processDocumentFromStorage', { timeout: 300000 });
 
   private readonly _agreements = signal<Agreement[]>([]);
   private readonly _loading = signal(false);
