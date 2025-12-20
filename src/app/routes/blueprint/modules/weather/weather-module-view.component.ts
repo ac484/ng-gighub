@@ -60,7 +60,7 @@ import type { WeatherDisplayMode } from './types/weather.types';
 })
 export class WeatherModuleViewComponent {
   // Input signals
-  displayMode = input<WeatherDisplayMode | 'full'>('compact');
+  displayMode = input<WeatherDisplayMode>('compact');
   countyName = input<string>('臺北市');
   stationId = input<string | undefined>(undefined);
   autoRefresh = input<boolean>(false);

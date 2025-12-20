@@ -57,7 +57,7 @@ export class WeatherService {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to fetch forecast';
       this._error.set(errorMsg);
-      this.logger.error('[WeatherService]', 'getForecast failed', error);
+      this.logger.error('[WeatherService]', 'getForecast failed', error as Error);
       return null;
     } finally {
       this._loading.set(false);
@@ -94,7 +94,7 @@ export class WeatherService {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to fetch observation';
       this._error.set(errorMsg);
-      this.logger.error('[WeatherService]', 'getObservation failed', error);
+      this.logger.error('[WeatherService]', 'getObservation failed', error as Error);
       return null;
     } finally {
       this._loading.set(false);
@@ -128,7 +128,7 @@ export class WeatherService {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to fetch alerts';
       this._error.set(errorMsg);
-      this.logger.error('[WeatherService]', 'getAlerts failed', error);
+      this.logger.error('[WeatherService]', 'getAlerts failed', error as Error);
       return [];
     } finally {
       this._loading.set(false);

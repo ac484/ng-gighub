@@ -10,10 +10,13 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, signal, computed, effect, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { SHARED_IMPORTS } from '@shared';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
+import { NzTagModule } from 'ng-zorro-antd/tag';
 import { WeatherService } from '../services/weather.service';
 import type { WeatherDisplayMode, WeatherForecast, WeatherObservation, WeatherAlert } from '../types/weather.types';
 
@@ -21,7 +24,7 @@ import type { WeatherDisplayMode, WeatherForecast, WeatherObservation, WeatherAl
   selector: 'app-weather-card',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SHARED_IMPORTS, NzCardModule, NzStatisticModule, NzAlertModule],
+  imports: [SHARED_IMPORTS, NzCardModule, NzStatisticModule, NzAlertModule, NzDescriptionsModule, NzTagModule, DatePipe],
   template: `
     <nz-card [nzTitle]="title()" [nzExtra]="extraTpl" [nzLoading]="loading()">
       @if (error()) {
@@ -29,16 +32,67 @@ import type { WeatherDisplayMode, WeatherForecast, WeatherObservation, WeatherAl
       } @else {
         @switch (mode()) {
           @case ('forecast') {
-            <app-weather-forecast-view [data]="forecast()" />
+            @if (forecast(); as data) {
+              <nz-descriptions [nzColumn]="2">
+                <nz-descriptions-item nzTitle="縣市">{{ data.locationName }}</nz-descriptions-item>
+                <nz-descriptions-item nzTitle="溫度">{{ data.temperature }}</nz-descriptions-item>
+                <nz-descriptions-item nzTitle="天氣">{{ data.weather }}</nz-descriptions-item>
+                <nz-descriptions-item nzTitle="降雨機率">{{ data.rainProbability }}</nz-descriptions-item>
+                <nz-descriptions-item nzTitle="更新時間" [nzSpan]="2">{{ data.updateTime | date: 'yyyy-MM-dd HH:mm' }}</nz-descriptions-item>
+              </nz-descriptions>
+            }
           }
           @case ('observation') {
-            <app-weather-observation-view [data]="observation()" />
+            @if (observation(); as data) {
+              <nz-descriptions [nzColumn]="2">
+                <nz-descriptions-item nzTitle="測站">{{ data.stationName }}</nz-descriptions-item>
+                <nz-descriptions-item nzTitle="溫度">{{ data.temperature }}°C</nz-descriptions-item>
+                <nz-descriptions-item nzTitle="濕度">{{ data.humidity }}%</nz-descriptions-item>
+                <nz-descriptions-item nzTitle="天氣">{{ data.weather }}</nz-descriptions-item>
+                <nz-descriptions-item nzTitle="觀測時間" [nzSpan]="2">{{ data.observationTime | date: 'yyyy-MM-dd HH:mm' }}</nz-descriptions-item>
+              </nz-descriptions>
+            }
           }
           @case ('alert') {
-            <app-weather-alert-view [alerts]="alerts()" />
+            @if (alerts().length > 0) {
+              @for (alert of alerts(); track alert.title) {
+                <nz-alert 
+                  [nzType]="alert.severity === 'high' ? 'error' : alert.severity === 'medium' ? 'warning' : 'info'"
+                  [nzMessage]="alert.title"
+                  [nzDescription]="alert.description"
+                  nzShowIcon
+                  class="mb-sm"
+                />
+              }
+            } @else {
+              <nz-alert nzType="success" nzMessage="目前無天氣警報" nzShowIcon />
+            }
           }
           @case ('compact') {
-            <app-weather-compact-view [forecast]="forecast()" [observation]="observation()" />
+            <div nz-row [nzGutter]="16">
+              <div nz-col [nzSpan]="12">
+                <h4>天氣預報</h4>
+                @if (forecast(); as data) {
+                  <p><strong>{{ data.locationName }}</strong></p>
+                  <p>溫度: {{ data.temperature }}</p>
+                  <p>天氣: {{ data.weather }}</p>
+                  <p>降雨: {{ data.rainProbability }}</p>
+                } @else {
+                  <p class="text-grey">載入中...</p>
+                }
+              </div>
+              <div nz-col [nzSpan]="12">
+                <h4>即時觀測</h4>
+                @if (observation(); as data) {
+                  <p><strong>{{ data.stationName }}</strong></p>
+                  <p>溫度: {{ data.temperature }}°C</p>
+                  <p>濕度: {{ data.humidity }}%</p>
+                  <p>天氣: {{ data.weather }}</p>
+                } @else {
+                  <p class="text-grey">載入中...</p>
+                }
+              </div>
+            </div>
           }
         }
       }

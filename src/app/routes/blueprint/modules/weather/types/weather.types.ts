@@ -41,7 +41,7 @@ export interface WeatherAlert {
 /**
  * Weather display mode
  */
-export type WeatherDisplayMode = 'forecast' | 'observation' | 'alert' | 'compact';
+export type WeatherDisplayMode = 'full' | 'compact' | 'forecast' | 'observation' | 'alert';
 
 /**
  * Weather service result
