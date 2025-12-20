@@ -7,6 +7,13 @@ applyTo: '**/*.ts, **/*.html, **/*.scss, **/*.css'
 
 > Common patterns cheat sheet - Quick lookup for best practices and anti-patterns
 
+## 🔒 Mandatory Baseline (copilot-instructions.md)
+
+- Treat `.github/copilot-instructions.md` as the source of truth; inherit the three-layer UI → Service → Repository flow and never let components reach Firestore.
+- Use `inject()` for dependencies and signals for state (no NgModules, no constructor DI).
+- Apply the Result Pattern to all async work and prefer minimal, business-scoped modules without inventing new infrastructure or backends.
+- Keep implementations lean—refactor toward simpler equivalents and avoid placeholder APIs or wrappers such as `FirebaseService`.
+
 ## 🎯 Angular 20 Modern Syntax
 
 ### Component Definition

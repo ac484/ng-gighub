@@ -16,6 +16,12 @@ GigHub 是企業級的工地施工進度追蹤管理系統，建立在以下核�
 - 🔹 **權限與安全** (Security & Authorization) - Security Rules 優先
 - 🔹 **長期演進能力** (Long-term Evolution) - 架構彈性，技術可升級
 
+### 全域基線（copilot-instructions.md）
+
+- 以 `.github/copilot-instructions.md` 為最高準則，維持 UI → Service → Repository 分層並僅在 Repository 存取 Firestore。
+- 所有非同步作業採 Result Pattern 回傳結果，避免額外的 FirebaseService 包裝或自訂後端。
+- 依業務能力切分模組，使用 `inject()`/signals，並以最小變更為原則（不引入未批准的基礎設施）。
+
 ## 📐 三層架構 (MANDATORY) 🔴
 
 ### 架構概覽

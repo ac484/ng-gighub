@@ -42,6 +42,26 @@ Detailed implementation guides for GitHub Copilot. These files are loaded on-dem
 | `documentation-standards.instructions.md` | Documentation standards | Creating docs, instructions, prompts |
 | `ai-prompt-engineering-safety-best-practices.instructions.md` | AI prompts | Prompt engineering, safety |
 
+## 🧭 Baseline & Precedence
+
+- `.github/copilot-instructions.md` is the master ruleset (three-layer UI → Service → Repository, Firestore access only through repositories, `inject()` for DI, Result Pattern for async flows, and no unapproved infrastructure/backends).
+- Keep file names in kebab-case with the `.instructions.md` suffix and scope each `applyTo` to the smallest relevant set to avoid cross-file duplication.
+- When guidance overlaps, defer to the canonical file in the table below before adding new content.
+
+## 🗂️ Scope & Deduplication
+
+| Topic | Canonical File | Notes |
+|-------|----------------|-------|
+| Architecture & layering | `ng-gighub-architecture.instructions.md` | Three-layer boundaries; aligns with copilot-instructions baseline. |
+| Firestore data access | `ng-gighub-firestore-repository.instructions.md` | Firestore only via repositories; no FirebaseService; pair with `ng-gighub-security-rules.instructions.md` for permissions. |
+| Signals & state | `ng-gighub-signals-state.instructions.md` | Preferred signal patterns; complements quick-reference snippets. |
+| Security | `security-and-owasp.instructions.md` | General secure coding; use `ng-gighub-security-rules.instructions.md` for rules enforcement. |
+| Accessibility | `a11y.instructions.md` | WCAG 2.2 guidance applied to all UI. |
+| Performance | `performance-optimization.instructions.md` | Frontend/backend/database tuning reference. |
+| AI prompts | `ai-prompt-engineering-safety-best-practices.instructions.md` | Pair with `mcp-tools-usage.instructions.md` for tool workflows. |
+| Documentation | `documentation-standards.instructions.md` | Authoring docs, instructions, and prompts. |
+
+
 ## 🎯 How to Use
 
 ### For GitHub Copilot
@@ -62,7 +82,7 @@ Detailed implementation guides for GitHub Copilot. These files are loaded on-dem
 ## 📊 File Statistics
 
 - **Total Files**: 18 instruction files
-- **Total Lines**: ~6,991 lines (optimized from 7,169)
+- **Total Lines**: ~7,103 lines (includes baseline/dedup updates; optimized from 7,169)
 - **Categories**: 
   - Framework (3 files)
   - GigHub-specific (5 files)
@@ -70,7 +90,7 @@ Detailed implementation guides for GitHub Copilot. These files are loaded on-dem
   - Meta/Documentation (3 files)
   - Reference (2 files)
 
-## 🔄 Recent Optimizations (2025-12-18)
+## 🔄 Recent Optimizations (2025-12-20)
 
 ### Consolidation
 - **Merged**: `instructions.instructions.md` + `markdown.instructions.md` + `prompt.instructions.md`  
@@ -82,6 +102,7 @@ Detailed implementation guides for GitHub Copilot. These files are loaded on-dem
 - **Language**: Converting all files to English for consistency
 
 ### Improvements
+- ✅ Baseline precedence plus deduplication map aligned with copilot-instructions
 - ✅ Clearer structure with quick reference table
 - ✅ Mandatory Context7 integration documented
 - ✅ Compliance verification template added
@@ -89,7 +110,7 @@ Detailed implementation guides for GitHub Copilot. These files are loaded on-dem
 
 ## 📚 Related Documentation
 
-- **Main Instructions**: `../ copilot-instructions.md`
+- **Main Instructions**: `../copilot-instructions.md`
 - **Rules**: `../rules/` (mandatory workflow, project rules, architectural principles)
 - **Constraints**: `../copilot/constraints.md` (forbidden patterns)
 - **Agents**: `../agents/` (specialized agent configurations)
@@ -97,5 +118,5 @@ Detailed implementation guides for GitHub Copilot. These files are loaded on-dem
 ---
 
 **Version**: v1.0  
-**Last Updated**: 2025-12-18  
+**Last Updated**: 2025-12-20  
 **Purpose**: Navigation guide for GigHub instructions directory
