@@ -39,4 +39,28 @@ setGlobalOptions({ maxInstances: 10 });
 // Step 8: Confirm contract and create official document
 export { processContractUpload, createParseDraft, confirmContract } from './contract';
 
+// =============================================================================
+// CWA Weather API Integration Functions
+// =============================================================================
+// Weather forecast functions
+export {
+  getForecast36Hour,
+  getForecast7Day,
+  getTownshipForecast
+} from './weather/functions';
+
+// Weather observation functions
+export {
+  getObservation,
+  get10MinObservation,
+  getRainfallObservation,
+  getUvIndexObservation
+} from './weather/functions';
+
+// Weather alert functions
+export { getWeatherWarnings } from './weather/functions';
+
+// Utility functions
+export { clearCache as clearWeatherCache } from './weather/functions';
+
 logger.info('[functions-integration]', 'Functions loaded successfully');
