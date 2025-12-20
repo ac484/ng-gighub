@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { Functions, httpsCallable } from '@angular/fire/functions';
+import { Functions, httpsCallable, HttpsCallableResult } from '@angular/fire/functions';
 import { getDownloadURL, uploadBytes } from '@angular/fire/storage';
 
 import { FirebaseService } from '@core/services/firebase.service';
@@ -12,6 +12,12 @@ export class AgreementService {
   private readonly repository = inject(AgreementRepository);
   private readonly firebase = inject(FirebaseService);
   private readonly functions = inject(Functions);
+
+  // ✅ Create callable during injection context
+  private readonly processDocumentFromStorage = httpsCallable<
+    { gcsUri: string; mimeType: string },
+    { success: boolean; result: { [key: string]: unknown } }
+  >(this.functions, 'processDocumentFromStorage');
 
   private readonly _agreements = signal<Agreement[]>([]);
   private readonly _loading = signal(false);
@@ -68,12 +74,9 @@ export class AgreementService {
       throw new Error('無法取得檔案路徑');
     }
 
-    const callable = httpsCallable<{ gcsUri: string; mimeType: string }, { [key: string]: unknown }>(
-      this.functions,
-      'processDocumentFromStorage'
-    );
-
-    const result = await callable({ gcsUri, mimeType: 'application/pdf' });
+    // ✅ Use pre-created callable (already in injection context)
+    const result = await this.processDocumentFromStorage({ gcsUri, mimeType: 'application/pdf' });
+    
     const jsonString = JSON.stringify(result.data, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const parsedPath = `agreements/${agreement.id}/parsed.json`;
