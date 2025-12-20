@@ -45,7 +45,7 @@ if (!admin.apps.length) {
  */
 export const batchProcessDocuments = onCall<BatchProcessDocumentsRequest>(
   {
-    region: 'asia-east1',
+    region: 'us-central1',
     memory: '2GiB',
     timeoutSeconds: 540,
     maxInstances: 5

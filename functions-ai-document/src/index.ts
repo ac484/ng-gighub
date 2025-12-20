@@ -26,7 +26,8 @@ import { setGlobalOptions } from 'firebase-functions/v2/options';
 
 // Set global options for all functions
 setGlobalOptions({
-  region: 'asia-east1',
+  // Use a supported Document AI region (multi-region US recommended)
+  region: 'us-central1',
   maxInstances: 10
 });
 

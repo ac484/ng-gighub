@@ -59,7 +59,7 @@ gcloud services enable documentai.googleapis.com --project=YOUR_PROJECT_ID
 Set the required values using Firebase runtime config or `.env` files. These are the **only** configuration values needed - authentication and project ID are handled automatically by Firebase Cloud Functions.
 
 ```bash
-# Set processor location (e.g., 'us', 'eu', 'asia-east1')
+# Set processor location (e.g., 'us', 'eu', 'asia-southeast1')
 firebase functions:config:set documentai.location="us"
 
 # Set processor ID from Cloud Console
@@ -73,6 +73,8 @@ Example `.env` file (stored at `functions-ai-document/.env`):
 DOCUMENTAI_LOCATION=us
 DOCUMENTAI_PROCESSOR_ID=abc123def456
 ```
+
+**Region compatibility**: Document AI supports multi-region `us` and `eu`, plus single regions such as `asia-south1`, `asia-southeast1`, `australia-southeast1`, `europe-west2`, `europe-west3`, and `northamerica-northeast1`. Regions like `asia-east1` (Taiwan) are not supported. Create processors in a supported location and deploy these functions in a matching Cloud Functions region (for example, `us-central1`).
 
 **Authentication Note**: Firebase Cloud Functions automatically use Application Default Credentials (ADC) for Google Cloud API authentication. No service account keys, credentials files, or project ID environment variables need to be configured manually.
 
@@ -146,7 +148,7 @@ console.log('Processing result:', result.data);
 ```bash
 # Get your Firebase project URL
 export PROJECT_ID="your-project-id"
-export REGION="asia-east1"
+export REGION="us-central1"
 export FUNCTION_URL="https://${REGION}-${PROJECT_ID}.cloudfunctions.net/processDocumentFromStorage"
 
 # Get Firebase ID token (requires authentication)
@@ -171,7 +173,7 @@ import requests
 import json
 
 def process_document_from_storage(id_token, gcs_uri, mime_type):
-    url = f"https://asia-east1-{PROJECT_ID}.cloudfunctions.net/processDocumentFromStorage"
+    url = f"https://us-central1-{PROJECT_ID}.cloudfunctions.net/processDocumentFromStorage"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {id_token}"
@@ -239,7 +241,7 @@ console.log('Processing result:', result.data);
 import base64
 
 def process_document_from_content(id_token, file_path, mime_type):
-    url = f"https://asia-east1-{PROJECT_ID}.cloudfunctions.net/processDocumentFromContent"
+    url = f"https://us-central1-{PROJECT_ID}.cloudfunctions.net/processDocumentFromContent"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {id_token}"
@@ -335,7 +337,7 @@ console.log('Batch operation started:', result.data);
 
 ```python
 def batch_process_documents(id_token, input_docs, output_uri):
-    url = f"https://asia-east1-{PROJECT_ID}.cloudfunctions.net/batchProcessDocuments"
+    url = f"https://us-central1-{PROJECT_ID}.cloudfunctions.net/batchProcessDocuments"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {id_token}"

@@ -58,7 +58,7 @@ if (!admin.apps.length) {
  */
 export const processDocumentFromStorage = onCall<ProcessDocumentFromStorageRequest>(
   {
-    region: 'asia-east1',
+    region: 'us-central1',
     memory: '2GiB',
     timeoutSeconds: 540,
     maxInstances: 10
@@ -254,7 +254,7 @@ export const processDocumentFromStorage = onCall<ProcessDocumentFromStorageReque
  */
 export const processDocumentFromContent = onCall<ProcessDocumentFromContentRequest>(
   {
-    region: 'asia-east1',
+    region: 'us-central1',
     memory: '2GiB',
     timeoutSeconds: 540,
     maxInstances: 10
