@@ -19,16 +19,20 @@ Enterprise-grade Google GenAI implementation using the latest `@google/genai` v1
 ```
 functions-ai/
 ├── src/
-│   ├── config/              # Configuration management
-│   │   └── genai.config.ts  # Auto-config from environment
-│   ├── services/            # Business logic
-│   │   └── genai.service.ts # Core GenAI service
-│   ├── functions/           # Cloud Functions
+│   ├── config/                # Configuration management
+│   │   ├── cloud.config.ts    # Shared Google Cloud env parsing
+│   │   ├── aiplatform.config.ts # Base config for @google-cloud/aiplatform
+│   │   ├── vertexai.config.ts # Base config for @google-cloud/vertexai
+│   │   └── genai.config.ts    # Auto-config from environment
+│   ├── services/              # Business logic
+│   │   └── genai.service.ts   # Core GenAI service
+│   ├── functions/             # Cloud Functions
 │   │   └── genai.functions.ts # HTTP/Callable endpoints
-│   ├── types/               # TypeScript types
-│   │   └── genai.types.ts   # Type definitions
-│   ├── utils/               # Utilities
-│   │   └── genai.utils.ts   # Error handling, retry, metrics
+│   ├── types/                 # TypeScript types
+│   │   ├── cloud.types.ts     # Cloud config contracts
+│   │   └── genai.types.ts     # GenAI type definitions
+│   ├── utils/                 # Utilities
+│   │   └── genai.utils.ts     # Error handling, retry, metrics
 │   └── index.ts             # Function exports
 ├── lib/                     # Compiled output
 ├── package.json
@@ -196,6 +200,8 @@ curl https://REGION-PROJECT.cloudfunctions.net/genai-models
 |----------|-------------|---------|
 | `GOOGLE_API_VERSION` | API version | `v1beta` |
 | `GENAI_TIMEOUT` | Timeout (ms) | `60000` |
+| `GOOGLE_CLOUD_API_ENDPOINT` | Override API endpoint for Vertex AI / AI Platform | `${GOOGLE_CLOUD_LOCATION}-aiplatform.googleapis.com` |
+| `GOOGLE_CLOUD_QUOTA_PROJECT` | Optional quota/billing project | _unset_ |
 
 ## 💡 Key Implementation Details
 
@@ -210,6 +216,16 @@ const service = GenAIService.getInstance();
 // Or get configuration details
 const config = getGenAIConfig();
 console.log(config.getConfigSummary());
+```
+
+Shared providers expose base configuration for the other Google AI SDKs as well:
+
+```typescript
+import {getAIPlatformConfig} from './src/config/aiplatform.config';
+import {getVertexAIClient} from './src/config/vertexai.config';
+
+const aiPlatformClientOptions = getAIPlatformConfig().getClientOptions();
+const vertexAI = getVertexAIClient();
 ```
 
 ### Error Handling with Retry
