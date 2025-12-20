@@ -5,20 +5,28 @@
 ## 📋 Prerequisites
 
 - Firebase project with Blaze plan (required for outbound API calls)
+- CWA API key from https://opendata.cwa.gov.tw/
 - Node.js 22.x
 - Firebase CLI installed (`npm install -g firebase-tools`)
 
 ## 🚀 Quick Start
 
-### Step 1: Verify API Key (Testing Phase)
+### Step 1: Get CWA API Key
 
-**Current Status**: API key is hardcoded in the source code for testing purposes.
+1. Visit https://opendata.cwa.gov.tw/
+2. Register for an account
+3. Request API access
+4. Copy your API key
 
-Hardcoded key: `CWA-8055E55C-EBCB-40A2-92F4-8A84399F3A45`
+### Step 2: Configure Secret
 
-**For production**: You'll need to obtain your own API key from https://opendata.cwa.gov.tw/ and configure it as a Firebase secret.
+```bash
+# Set the API key as Firebase secret
+firebase functions:secrets:set CWA_API_KEY
+# Paste your API key when prompted
+```
 
-### Step 2: Build Functions
+### Step 3: Build Functions
 
 ```bash
 cd functions-integration
@@ -26,7 +34,7 @@ npm install
 npm run build
 ```
 
-### Step 3: Deploy
+### Step 4: Deploy
 
 ```bash
 # Deploy all weather functions
@@ -36,7 +44,7 @@ firebase deploy --only functions:weather
 firebase deploy --only functions:getForecast36Hour
 ```
 
-### Step 4: Test
+### Step 5: Test
 
 ```bash
 # View logs
@@ -180,10 +188,8 @@ firebase functions:log --tail
 
 ### Error: CWA_API_KEY not configured
 
-**Testing Phase**: Check that the hardcoded API key in `functions/index.ts` is correct: `CWA-8055E55C-EBCB-40A2-92F4-8A84399F3A45`
-
-**Production**: Set the secret:
 ```bash
+# Set the secret again
 firebase functions:secrets:set CWA_API_KEY
 ```
 
@@ -257,14 +263,14 @@ async getRainfallStatus() {
 
 ## ✅ Checklist
 
-- [x] CWA API key (hardcoded for testing)
+- [ ] CWA API key obtained
+- [ ] Secret configured in Firebase
 - [ ] Functions built successfully
 - [ ] Functions deployed
 - [ ] Tested from client
 - [ ] Error handling implemented
 - [ ] Monitoring set up
 - [ ] Documentation reviewed
-- [ ] TODO: Move API key to environment variables for production
 
 ---
 

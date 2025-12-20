@@ -9,6 +9,7 @@
  */
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { defineSecret } from 'firebase-functions/params';
 import * as logger from 'firebase-functions/logger';
 import { createCwaWeatherService } from '../services';
 import {
@@ -18,20 +19,21 @@ import {
   WeatherApiResponse
 } from '../types';
 
-// Hardcoded CWA API key for testing phase
-// TODO: Move to environment variables in production
-const CWA_API_KEY = 'CWA-8055E55C-EBCB-40A2-92F4-8A84399F3A45';
+// Define secret for CWA API key
+const cwaApiKey = defineSecret('CWA_API_KEY');
 
 /**
  * Get CWA Weather Service instance
  */
 function getWeatherService(): any {
-  if (!CWA_API_KEY) {
+  const apiKey = cwaApiKey.value();
+  
+  if (!apiKey) {
     throw new HttpsError('failed-precondition', 'CWA_API_KEY not configured');
   }
 
   return createCwaWeatherService({
-    apiKey: CWA_API_KEY,
+    apiKey,
     cacheEnabled: true,
     cacheTTL: {
       forecast: 3600, // 1 hour
@@ -64,6 +66,7 @@ function validateAuth(context: any): void {
 export const getForecast36Hour = onCall<Get36HourForecastRequest>(
   {
     region: 'asia-east1',
+    secrets: [cwaApiKey],
     memory: '256MiB',
     timeoutSeconds: 60
   },
@@ -116,6 +119,7 @@ export const getForecast36Hour = onCall<Get36HourForecastRequest>(
 export const getForecast7Day = onCall<{ countyName: string }>(
   {
     region: 'asia-east1',
+    secrets: [cwaApiKey],
     memory: '256MiB',
     timeoutSeconds: 60
   },
@@ -167,6 +171,7 @@ export const getForecast7Day = onCall<{ countyName: string }>(
 export const getTownshipForecast = onCall<{ countyCode: string; townshipName?: string }>(
   {
     region: 'asia-east1',
+    secrets: [cwaApiKey],
     memory: '256MiB',
     timeoutSeconds: 60
   },
@@ -221,6 +226,7 @@ export const getTownshipForecast = onCall<{ countyCode: string; townshipName?: s
 export const getObservation = onCall<GetObservationRequest>(
   {
     region: 'asia-east1',
+    secrets: [cwaApiKey],
     memory: '256MiB',
     timeoutSeconds: 60
   },
@@ -268,6 +274,7 @@ export const getObservation = onCall<GetObservationRequest>(
 export const get10MinObservation = onCall<{ stationId?: string }>(
   {
     region: 'asia-east1',
+    secrets: [cwaApiKey],
     memory: '256MiB',
     timeoutSeconds: 60
   },
@@ -315,6 +322,7 @@ export const get10MinObservation = onCall<{ stationId?: string }>(
 export const getRainfallObservation = onCall<{ stationId?: string }>(
   {
     region: 'asia-east1',
+    secrets: [cwaApiKey],
     memory: '256MiB',
     timeoutSeconds: 60
   },
@@ -362,6 +370,7 @@ export const getRainfallObservation = onCall<{ stationId?: string }>(
 export const getUvIndexObservation = onCall(
   {
     region: 'asia-east1',
+    secrets: [cwaApiKey],
     memory: '256MiB',
     timeoutSeconds: 60
   },
@@ -408,6 +417,7 @@ export const getUvIndexObservation = onCall(
 export const getWeatherWarnings = onCall<GetWeatherAlertRequest>(
   {
     region: 'asia-east1',
+    secrets: [cwaApiKey],
     memory: '256MiB',
     timeoutSeconds: 60
   },
@@ -457,6 +467,7 @@ export const getWeatherWarnings = onCall<GetWeatherAlertRequest>(
 export const clearCache = onCall(
   {
     region: 'asia-east1',
+    secrets: [cwaApiKey],
     memory: '256MiB',
     timeoutSeconds: 60
   },
