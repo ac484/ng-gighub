@@ -7,6 +7,10 @@ applyTo: '**/*.ts, **/*.html, **/*.scss, **/*.css'
 
 > Common patterns cheat sheet - Quick lookup for best practices and anti-patterns
 
+## 🔒 Mandatory Baseline (copilot-instructions.md)
+
+- Follow `.github/copilot-instructions.md`: UI → Service → Repository only, Firestore access in repositories, inject() DI, Result Pattern, and no FirebaseService or extra infrastructure.
+
 ## 🎯 Angular 20 Modern Syntax
 
 ### Component Definition
