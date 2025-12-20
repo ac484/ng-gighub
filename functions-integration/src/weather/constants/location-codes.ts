@@ -274,22 +274,22 @@ export const WEATHER_STATIONS: Record<string, { name: string; lat: number; lon: 
   '466990': { name: '宜蘭', lat: 24.7644, lon: 121.7498 },
   '467080': { name: '蘇澳', lat: 24.5966, lon: 121.8450 },
   '467050': { name: '花蓮', lat: 23.9753, lon: 121.6061 },
-  '467540': { name: '臺中', lat: 24.1469, lon: 120.6839 },
-  '467571': { name: '梧棲', lat: 24.2564, lon: 120.5258 },
-  '467590': { name: '日月潭', lat: 23.8808, lon: 120.9114 },
+  '467530': { name: '臺中', lat: 24.1469, lon: 120.6839 },
+  '467572': { name: '梧棲', lat: 24.2564, lon: 120.5258 },
+  '467580': { name: '日月潭', lat: 23.8808, lon: 120.9114 },
   '467650': { name: '阿里山', lat: 23.5081, lon: 120.8133 },
   '467610': { name: '嘉義', lat: 23.4969, lon: 120.4297 },
   '467660': { name: '玉山', lat: 23.4878, lon: 120.9597 },
-  '467440': { name: '臺南', lat: 22.9936, lon: 120.2025 },
-  '467410': { name: '高雄', lat: 22.5661, lon: 120.3133 },
+  '467550': { name: '臺南', lat: 22.9936, lon: 120.2025 },
+  '467450': { name: '高雄', lat: 22.5661, lon: 120.3133 },
   '467590': { name: '恆春', lat: 22.0022, lon: 120.7467 },
   '467620': { name: '大武', lat: 22.3581, lon: 120.9022 },
-  '467660': { name: '臺東', lat: 22.7539, lon: 121.1508 },
+  '467680': { name: '臺東', lat: 22.7539, lon: 121.1508 },
   '467770': { name: '成功', lat: 23.0978, lon: 121.3736 },
   '466940': { name: '蘭嶼', lat: 22.0372, lon: 121.5564 },
   '467990': { name: '澎湖', lat: 23.5681, lon: 119.5628 },
   '467110': { name: '金門', lat: 24.4325, lon: 118.3128 },
-  '467080': { name: '馬祖', lat: 26.1603, lon: 119.9517 }
+  '467150': { name: '馬祖', lat: 26.1603, lon: 119.9517 }
 };
 
 // ===== Utility Functions =====
@@ -371,7 +371,7 @@ export function searchLocationByName(query: string): Array<{ code: string; name:
   }
   
   // Search townships
-  for (const [countyCode, townships] of Object.entries(TOWNSHIP_CODES)) {
+  for (const [_countyCode, townships] of Object.entries(TOWNSHIP_CODES)) {
     for (const [townshipCode, townshipName] of Object.entries(townships)) {
       if (townshipName.includes(query)) {
         results.push({ code: townshipCode, name: townshipName, type: 'township' });

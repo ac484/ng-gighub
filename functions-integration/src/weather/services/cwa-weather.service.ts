@@ -21,10 +21,7 @@ import {
   RainfallObservation,
   UvIndexObservation,
   WeatherAlert,
-  RadarImage,
-  EarthquakeInfo,
   CachedWeatherData,
-  CwaApiConfig,
   CwaApiResponse
 } from '../types';
 import {
