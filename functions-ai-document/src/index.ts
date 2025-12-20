@@ -15,7 +15,7 @@
  * - Structured logging and monitoring
  * - Security validation and audit trails
  *
- * Required Secrets (set via Firebase CLI):
+ * Required Environment Variables (set via Firebase runtime config or .env):
  * - DOCUMENTAI_LOCATION: Processor location (e.g., 'us', 'eu')
  * - DOCUMENTAI_PROCESSOR_ID: Processor ID from Cloud Console
  *

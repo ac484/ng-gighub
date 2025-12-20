@@ -48,8 +48,7 @@ export const batchProcessDocuments = onCall<BatchProcessDocumentsRequest>(
     region: 'asia-east1',
     memory: '2GiB',
     timeoutSeconds: 540,
-    maxInstances: 5,
-    secrets: ['DOCUMENTAI_LOCATION', 'DOCUMENTAI_PROCESSOR_ID']
+    maxInstances: 5
   },
   async request => {
     const startTime = Date.now();

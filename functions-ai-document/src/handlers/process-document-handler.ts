@@ -61,8 +61,7 @@ export const processDocumentFromStorage = onCall<ProcessDocumentFromStorageReque
     region: 'asia-east1',
     memory: '2GiB',
     timeoutSeconds: 540,
-    maxInstances: 10,
-    secrets: ['DOCUMENTAI_LOCATION', 'DOCUMENTAI_PROCESSOR_ID']
+    maxInstances: 10
   },
   async request => {
     const startTime = Date.now();
@@ -258,8 +257,7 @@ export const processDocumentFromContent = onCall<ProcessDocumentFromContentReque
     region: 'asia-east1',
     memory: '2GiB',
     timeoutSeconds: 540,
-    maxInstances: 10,
-    secrets: ['DOCUMENTAI_LOCATION', 'DOCUMENTAI_PROCESSOR_ID']
+    maxInstances: 10
   },
   async request => {
     const startTime = Date.now();
