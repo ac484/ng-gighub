@@ -26,7 +26,7 @@ import { setGlobalOptions } from 'firebase-functions/v2/options';
 
 // Set global options for all functions
 setGlobalOptions({
-  region: 'asia-east1',
+  region: 'us-central1',
   maxInstances: 10
 });
 
