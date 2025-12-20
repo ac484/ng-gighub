@@ -7748,6 +7748,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"functions-governance@workspace:functions-governance":
+  version: 0.0.0-use.local
+  resolution: "functions-governance@workspace:functions-governance"
+  dependencies:
+    "@typescript-eslint/eslint-plugin": "npm:^5.12.0"
+    "@typescript-eslint/parser": "npm:^5.12.0"
+    eslint: "npm:^8.9.0"
+    eslint-config-google: "npm:^0.14.0"
+    eslint-plugin-import: "npm:^2.25.4"
+    firebase-admin: "npm:^13.6.0"
+    firebase-functions: "npm:^7.0.0"
+    firebase-functions-test: "npm:^3.4.1"
+    typescript: "npm:^5.7.3"
+  languageName: unknown
+  linkType: soft
+
 "functions-have-names@npm:^1.2.3":
   version: 1.2.3
   resolution: "functions-have-names@npm:1.2.3"
@@ -7758,6 +7774,38 @@ __metadata:
 "functions-integration@workspace:functions-integration":
   version: 0.0.0-use.local
   resolution: "functions-integration@workspace:functions-integration"
+  dependencies:
+    "@typescript-eslint/eslint-plugin": "npm:^5.12.0"
+    "@typescript-eslint/parser": "npm:^5.12.0"
+    eslint: "npm:^8.9.0"
+    eslint-config-google: "npm:^0.14.0"
+    eslint-plugin-import: "npm:^2.25.4"
+    firebase-admin: "npm:^13.6.0"
+    firebase-functions: "npm:^7.0.0"
+    firebase-functions-test: "npm:^3.4.1"
+    typescript: "npm:^5.7.3"
+  languageName: unknown
+  linkType: soft
+
+"functions-observability@workspace:functions-observability":
+  version: 0.0.0-use.local
+  resolution: "functions-observability@workspace:functions-observability"
+  dependencies:
+    "@typescript-eslint/eslint-plugin": "npm:^5.12.0"
+    "@typescript-eslint/parser": "npm:^5.12.0"
+    eslint: "npm:^8.9.0"
+    eslint-config-google: "npm:^0.14.0"
+    eslint-plugin-import: "npm:^2.25.4"
+    firebase-admin: "npm:^13.6.0"
+    firebase-functions: "npm:^7.0.0"
+    firebase-functions-test: "npm:^3.4.1"
+    typescript: "npm:^5.7.3"
+  languageName: unknown
+  linkType: soft
+
+"functions-orchestration@workspace:functions-orchestration":
+  version: 0.0.0-use.local
+  resolution: "functions-orchestration@workspace:functions-orchestration"
   dependencies:
     "@typescript-eslint/eslint-plugin": "npm:^5.12.0"
     "@typescript-eslint/parser": "npm:^5.12.0"
