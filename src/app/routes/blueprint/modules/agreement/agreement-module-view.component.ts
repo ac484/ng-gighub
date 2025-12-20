@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, effect, inject, input, output, computed, signal } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
@@ -13,7 +14,7 @@ import { AgreementService } from './agreement.service';
   selector: 'app-agreement-module-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SHARED_IMPORTS, NzTableModule, NzTagModule, NzEmptyModule, NzSpinModule],
+  imports: [SHARED_IMPORTS, NzTableModule, NzTagModule, NzEmptyModule, NzSpinModule, NzIconModule],
   template: `
     <nz-card nzTitle="協議概況" class="mb-md">
       <nz-row [nzGutter]="16">
@@ -52,7 +53,7 @@ import { AgreementService } from './agreement.service';
             <tr>
               <th scope="col">序號</th>
               <th scope="col">附件</th>
-              <th scope="col">欄位3</th>
+              <th scope="col">解析狀態</th>
               <th scope="col">欄位4</th>
               <th scope="col">欄位5</th>
               <th scope="col">欄位6</th>
@@ -80,7 +81,16 @@ import { AgreementService } from './agreement.service';
                     (change)="onFileSelected($event, agreement.id)"
                   />
                 </td>
-                <td></td>
+                <td>
+                  @if (parsingId() === agreement.id) {
+                    <span nz-icon nzType="loading" nzTheme="outline"></span>
+                    <span class="ml-xs">解析中...</span>
+                  } @else if (agreement.parsedJsonUrl) {
+                    <nz-tag nzColor="success">已解析</nz-tag>
+                  } @else {
+                    <nz-tag nzColor="default">未解析</nz-tag>
+                  }
+                </td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -90,9 +100,10 @@ import { AgreementService } from './agreement.service';
                     nzType="link"
                     nzSize="small"
                     [disabled]="!agreement.attachmentUrl || parsingId() === agreement.id"
+                    [nzLoading]="parsingId() === agreement.id"
                     (click)="parse(agreement)"
                   >
-                    解析
+                    {{ parsingId() === agreement.id ? '解析中' : '解析' }}
                   </button>
                   <button nz-button nzType="link" nzSize="small" (click)="edit(agreement)">編輯</button>
                   <button nz-button nzType="link" nzDanger nzSize="small" (click)="remove(agreement)">刪除</button>
@@ -162,15 +173,38 @@ export class AgreementModuleViewComponent {
   }
 
   async parse(agreement: Agreement): Promise<void> {
+    console.log('[AgreementModuleView] Starting parse', { agreementId: agreement.id });
+
     this.parsingId.set(agreement.id);
     try {
       await this.agreementService.parseAttachment(agreement);
       this.messageService.success('解析完成');
+      console.log('[AgreementModuleView] Parse successful');
     } catch (error) {
-      this.messageService.error('解析失敗');
-      console.error('[AgreementModuleView]', 'parse failed', error);
+      // 顯示詳細錯誤訊息
+      const errorMessage = error instanceof Error ? error.message : '未知錯誤';
+      const errorCode = (error as any)?.code;
+
+      let userMessage = '解析失敗';
+      if (errorCode === 'permission-denied') {
+        userMessage = '解析失敗：權限不足，請檢查 Cloud Function 權限設定';
+      } else if (errorCode === 'failed-precondition') {
+        userMessage = '解析失敗：Cloud Function 配置錯誤，請檢查環境變數';
+      } else if (errorCode === 'unauthenticated') {
+        userMessage = '解析失敗：認證失敗，請重新登入';
+      } else if (errorMessage) {
+        userMessage = `解析失敗：${errorMessage}`;
+      }
+
+      this.messageService.error(userMessage);
+      console.error('[AgreementModuleView] Parse failed', {
+        error,
+        errorCode,
+        errorMessage
+      });
     } finally {
       this.parsingId.set(null);
+      console.log('[AgreementModuleView] Parse process ended');
     }
   }
 
