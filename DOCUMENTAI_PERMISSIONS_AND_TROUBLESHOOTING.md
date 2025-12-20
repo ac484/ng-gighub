@@ -153,34 +153,46 @@ resource "google_project_iam_member" "firebase_documentai" {
 
 #### 問題分析
 
-Document AI 處理複雜 PDF 文件可能需要 2-5 分鐘，但 Firebase Functions SDK 的**預設客戶端超時為 70 秒**，即使後端 Cloud Function 設定了 540 秒（9 分鐘）超時，客戶端仍會在 70 秒後中斷連線。
+Document AI 處理複雜或大型 PDF 文件可能需要 **5-8 分鐘**，但 Firebase Functions SDK 的**預設客戶端超時為 70 秒**。即使後端 Cloud Function 設定了 540 秒（9 分鐘）超時，客戶端仍會在超時後中斷連線。
 
-**超時配置差異**:
+**超時配置**:
 ```
-後端 Cloud Function: 540 秒 (9 分鐘) ✅
-客戶端 SDK 預設:     70 秒           ❌ 太短
-Document AI 處理:    2-5 分鐘         ⚠️ 超過預設超時
+後端 Cloud Function: 540 秒 (9 分鐘)  ✅
+客戶端 SDK 預設:     70 秒            ❌ 太短
+客戶端 SDK 設定:     480 秒 (8 分鐘)  ✅ 已修正
+Document AI 處理:    5-8 分鐘         ⚠️ 大型文件需更長時間
 ```
+
+**為何需要 8 分鐘超時**:
+- 複雜 PDF（多頁、掃描品質差、表格多）需要更長處理時間
+- Document AI API 本身可能需要排隊等待
+- 網路傳輸和 Cloud Function 冷啟動時間
 
 #### 解決方案
 
-**已修正**: 在 `agreement.service.ts` 中設定客戶端超時為 300 秒（5 分鐘）
+**已修正**: 在 `agreement.service.ts` 中設定客戶端超時為 480 秒（8 分鐘）
 
 ```typescript
 private readonly processDocumentFromStorage = httpsCallable<
   { gcsUri: string; mimeType: string },
   { success: boolean; result: { [key: string]: unknown } }
 >(this.functions, 'processDocumentFromStorage', { 
-  timeout: 300000  // ✅ 設定為 300 秒（5 分鐘）
+  timeout: 480000  // ✅ 設定為 480 秒（8 分鐘）
 });
 ```
 
 **錯誤訊息改善**:
 ```typescript
 if (errorCode === 'functions/deadline-exceeded' || errorCode === 'deadline-exceeded') {
-  userMessage = '解析失敗：處理時間過長，文件可能過於複雜。請稍後重試或聯繫管理員。';
+  userMessage = '解析失敗：文件處理時間超過 8 分鐘。建議：1) 減小文件大小或複雜度 2) 稍後重試 3) 聯繫管理員檢查後端日誌。';
 }
 ```
+
+**如果仍然超時**:
+1. **檢查文件大小**: 確認 PDF 小於 32MB（Document AI 限制）
+2. **檢查頁數**: 超過 50 頁的文件可能需要更長時間
+3. **檢查後端日誌**: 使用 `firebase functions:log` 查看實際處理時間
+4. **考慮批次處理**: 將大型文件分割為較小的部分
 
 ---
 
@@ -333,7 +345,8 @@ severity>=ERROR
 # 超時錯誤（最常見）
 Error: deadline-exceeded
 原因: 文件處理時間超過客戶端超時限制（預設 70 秒）
-解決方案: 已將超時設定提升至 300 秒（5 分鐘）
+解決方案: 已將超時設定提升至 480 秒（8 分鐘）
+建議: 如仍超時，檢查文件大小（< 32MB）和頁數（< 50 頁）
 
 # 權限錯誤
 Error: 7 PERMISSION_DENIED: The caller does not have permission
