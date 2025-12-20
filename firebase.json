@@ -67,7 +67,7 @@
     },
     {
       "source": "functions-orchestration",
-      "codebase": "functions-observability",
+      "codebase": "functions-orchestration",
       "disallowLegacyRuntimeConfig": true,
       "ignore": [
         "node_modules",
