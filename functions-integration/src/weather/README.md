@@ -86,10 +86,14 @@ yarn install
 
 ### 2. Configure API Key
 
-Set your CWA API key as a Firebase secret:
+**Note**: For testing phase, the API key is currently hardcoded in the source code (`functions/index.ts`). This will be moved to environment variables in production.
+
+Current hardcoded key: `CWA-8055E55C-EBCB-40A2-92F4-8A84399F3A45`
+
+**For production deployment**, set your CWA API key as a Firebase secret:
 
 ```bash
-# Set the secret
+# Set the secret (for future production use)
 firebase functions:secrets:set CWA_API_KEY
 
 # Verify the secret
@@ -369,8 +373,9 @@ Monitor in Firebase Console:
 ## 🔐 Security Best Practices
 
 1. **API Key Protection**
-   - Always use Firebase secrets for API keys
-   - Never commit API keys to version control
+   - **Testing Phase**: API key is currently hardcoded for testing purposes
+   - **Production**: Move to Firebase secrets before production deployment
+   - Never commit production API keys to version control
    - Rotate keys regularly
 
 2. **Authentication**
@@ -402,7 +407,7 @@ Monitor in Firebase Console:
 ```
 Error: CWA_API_KEY not configured
 ```
-**Solution**: Set the secret using `firebase functions:secrets:set CWA_API_KEY`
+**Solution**: Currently the API key is hardcoded for testing. Check `functions/index.ts` for the correct key. For production, set the secret using `firebase functions:secrets:set CWA_API_KEY`
 
 **2. Request Timeout**
 ```
