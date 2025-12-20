@@ -427,11 +427,11 @@ Error: HTTP 429: Too Many Requests
 Enable debug logging:
 
 ```typescript
-// Set environment variable
+// Set environment variable (recommended for Functions v2)
 process.env.DEBUG = 'weather:*';
 
-// Or use Firebase Functions config
-firebase functions:config:set debug.enabled=true
+// Or set via Firebase runtime config to populate process.env.DEBUG
+firebase functions:config:set DEBUG="weather:*"
 ```
 
 ## 📚 References
