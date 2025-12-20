@@ -195,7 +195,8 @@ const firebaseProviders: Array<Provider | EnvironmentProviders> = [
     });
   }),
   provideDatabase(() => getDatabase()),
-  provideFunctions(() => getFunctions(getApp(), 'asia-east1')),
+  // Align Functions client region with deployed Cloud Functions (Document AI)
+  provideFunctions(() => getFunctions(getApp(), 'us-central1')),
   provideMessaging(() => getMessaging()),
   providePerformance(() => getPerformance()),
   provideStorage(() => getStorage()),
