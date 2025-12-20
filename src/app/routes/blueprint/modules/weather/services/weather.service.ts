@@ -27,6 +27,11 @@ export class WeatherService {
   readonly loading = this._loading.asReadonly();
   readonly error = this._error.asReadonly();
 
+  // Create callable functions during initialization
+  private readonly getForecastCallable = httpsCallable<{ countyName: string }, any>(this.functions, 'getForecast36Hour');
+  private readonly getObservationCallable = httpsCallable<{ stationId?: string }, any>(this.functions, 'getObservation');
+  private readonly getAlertsCallable = httpsCallable<{ alertType?: string }, any>(this.functions, 'getWeatherWarnings');
+
   /**
    * Get 36-hour weather forecast by county
    */
@@ -35,8 +40,7 @@ export class WeatherService {
     this._error.set(null);
 
     try {
-      const callable = httpsCallable<{ countyName: string }, any>(this.functions, 'getForecast36Hour');
-      const result = await callable({ countyName });
+      const result = await this.getForecastCallable({ countyName });
 
       if (!result.data?.location?.[0]) {
         throw new Error('No forecast data available');
@@ -72,8 +76,7 @@ export class WeatherService {
     this._error.set(null);
 
     try {
-      const callable = httpsCallable<{ stationId?: string }, any>(this.functions, 'getObservation');
-      const result = await callable({ stationId });
+      const result = await this.getObservationCallable({ stationId });
 
       if (!result.data?.location?.[0]) {
         throw new Error('No observation data available');
@@ -109,8 +112,7 @@ export class WeatherService {
     this._error.set(null);
 
     try {
-      const callable = httpsCallable<{ alertType?: string }, any>(this.functions, 'getWeatherWarnings');
-      const result = await callable({ alertType });
+      const result = await this.getAlertsCallable({ alertType });
 
       if (!result.data?.records?.record) {
         return [];
