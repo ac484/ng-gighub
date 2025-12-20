@@ -187,7 +187,7 @@ export class AgreementModuleViewComponent {
 
       let userMessage = '解析失敗';
       if (errorCode === 'functions/deadline-exceeded' || errorCode === 'deadline-exceeded') {
-        userMessage = '解析失敗：處理時間過長，文件可能過於複雜。請稍後重試或聯繫管理員。';
+        userMessage = '解析失敗：文件處理時間超過 8 分鐘。建議：1) 減小文件大小或複雜度 2) 稍後重試 3) 聯繫管理員檢查後端日誌。';
       } else if (errorCode === 'permission-denied' || errorCode === 'functions/permission-denied') {
         userMessage = '解析失敗：權限不足，請檢查 Cloud Function 權限設定';
       } else if (errorCode === 'failed-precondition' || errorCode === 'functions/failed-precondition') {

@@ -14,12 +14,13 @@ export class AgreementService {
   private readonly functions = inject(Functions);
 
   // ✅ Create callable during injection context with extended timeout
-  // Document AI processing can take 2-5 minutes for complex PDFs
-  // Set timeout to 300 seconds (5 minutes) to match backend processing time
+  // Document AI processing can take 5-8 minutes for complex/large PDFs
+  // Set timeout to 480 seconds (8 minutes) to allow sufficient processing time
+  // Backend Cloud Function has 540 seconds (9 minutes) timeout
   private readonly processDocumentFromStorage = httpsCallable<
     { gcsUri: string; mimeType: string },
     { success: boolean; result: { [key: string]: unknown } }
-  >(this.functions, 'processDocumentFromStorage', { timeout: 300000 });
+  >(this.functions, 'processDocumentFromStorage', { timeout: 480000 });
 
   private readonly _agreements = signal<Agreement[]>([]);
   private readonly _loading = signal(false);
