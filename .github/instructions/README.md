@@ -44,22 +44,22 @@ Detailed implementation guides for GitHub Copilot. These files are loaded on-dem
 
 ## 🧭 Baseline & Precedence
 
-- `.github/copilot-instructions.md` is the master ruleset (three-layer UI → Service → Repository, Firestore access only through repositories, `inject()` for DI, Result Pattern for async flows, and no unapproved infrastructure/backends).
-- Keep file names in kebab-case with the `.instructions.md` suffix and scope each `applyTo` to the smallest relevant set to avoid cross-file duplication.
-- When guidance overlaps, defer to the canonical file in the table below before adding new content.
+- `.github/copilot-instructions.md` is the master ruleset (UI → Service → Repository, Firestore only in repositories, inject() DI, Result Pattern, no extra infra).
+- Keep kebab-case `.instructions.md` names and scope `applyTo` narrowly to avoid overlap.
+- Prefer reusing canonical files below instead of adding new guidance.
 
 ## 🗂️ Scope & Deduplication
 
 | Topic | Canonical File | Notes |
 |-------|----------------|-------|
-| Architecture & layering | `ng-gighub-architecture.instructions.md` | Three-layer boundaries; aligns with copilot-instructions baseline. |
-| Firestore data access | `ng-gighub-firestore-repository.instructions.md` | Firestore only via repositories; no FirebaseService; pair with `ng-gighub-security-rules.instructions.md` for permissions. |
-| Signals & state | `ng-gighub-signals-state.instructions.md` | Preferred signal patterns; complements quick-reference snippets. |
-| Security | `security-and-owasp.instructions.md` | General secure coding; use `ng-gighub-security-rules.instructions.md` for rules enforcement. |
-| Accessibility | `a11y.instructions.md` | WCAG 2.2 guidance applied to all UI. |
-| Performance | `performance-optimization.instructions.md` | Frontend/backend/database tuning reference. |
+| Architecture & layering | `ng-gighub-architecture.instructions.md` | Three-layer boundaries per copilot baseline. |
+| Firestore data access | `ng-gighub-firestore-repository.instructions.md` | Firestore only via repositories; pair with security rules for permissions. |
+| Signals & state | `ng-gighub-signals-state.instructions.md` | Preferred signal patterns. |
+| Security | `security-and-owasp.instructions.md` | General secure coding; pair with security rules for enforcement. |
+| Accessibility | `a11y.instructions.md` | WCAG 2.2 guidance for all UI. |
+| Performance | `performance-optimization.instructions.md` | Frontend/backend/database tuning. |
 | AI prompts | `ai-prompt-engineering-safety-best-practices.instructions.md` | Pair with `mcp-tools-usage.instructions.md` for tool workflows. |
-| Documentation | `documentation-standards.instructions.md` | Authoring docs, instructions, and prompts. |
+| Documentation | `documentation-standards.instructions.md` | Docs, instructions, prompts. |
 
 
 ## 🎯 How to Use
@@ -82,7 +82,7 @@ Detailed implementation guides for GitHub Copilot. These files are loaded on-dem
 ## 📊 File Statistics
 
 - **Total Files**: 18 instruction files
-- **Total Lines**: ~7,103 lines (includes baseline/dedup updates; optimized from 7,169)
+- **Total Lines**: ~7,098 lines (includes recent baseline/dedup trim; optimized from 7,169)
 - **Categories**: 
   - Framework (3 files)
   - GigHub-specific (5 files)

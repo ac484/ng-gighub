@@ -9,10 +9,7 @@ applyTo: '**/*.ts, **/*.html, **/*.scss, **/*.css'
 
 ## 🔒 Mandatory Baseline (copilot-instructions.md)
 
-- Treat `.github/copilot-instructions.md` as the source of truth; inherit the three-layer UI → Service → Repository flow and never let components reach Firestore.
-- Use `inject()` for dependencies and signals for state (no NgModules, no constructor DI).
-- Apply the Result Pattern to all async work and prefer minimal, business-scoped modules without inventing new infrastructure or backends.
-- Keep implementations lean—refactor toward simpler equivalents and avoid placeholder APIs or wrappers such as `FirebaseService`.
+- Follow `.github/copilot-instructions.md`: UI → Service → Repository only, Firestore access in repositories, inject() DI, Result Pattern, and no FirebaseService or extra infrastructure.
 
 ## 🎯 Angular 20 Modern Syntax
 
