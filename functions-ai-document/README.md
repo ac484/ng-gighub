@@ -60,10 +60,10 @@ Set the required values using Firebase runtime config or `.env` files. These are
 
 ```bash
 # Set processor location (e.g., 'us', 'eu', 'asia-east1')
-firebase functions:config:set documentai.location="us"
+firebase functions:config:set DOCUMENTAI_LOCATION="us"
 
 # Set processor ID from Cloud Console
-firebase functions:config:set documentai.processor_id="abc123def456"
+firebase functions:config:set DOCUMENTAI_PROCESSOR_ID="abc123def456"
 ```
 
 **Important**: When prompted, enter the values you noted from step 2.
@@ -80,7 +80,7 @@ DOCUMENTAI_PROCESSOR_ID=abc123def456
 
 ```bash
 # List all runtime config values
-firebase functions:config:get documentai
+firebase functions:config:get DOCUMENTAI_LOCATION DOCUMENTAI_PROCESSOR_ID
 ```
 
 ### 5. Deploy Functions
@@ -562,7 +562,7 @@ The functions implement comprehensive error handling:
 **Issue**: "Missing required environment variable: DOCUMENTAI_LOCATION"
 ```bash
 # Solution: Set the value using runtime config or .env
-firebase functions:config:set documentai.location="us"
+firebase functions:config:set DOCUMENTAI_LOCATION="us"
 ```
 
 **Issue**: "Invalid GCS URI format"

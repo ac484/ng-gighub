@@ -3,8 +3,6 @@
  * Enterprise-standard document validation and processing helpers
  */
 
-import * as functions from 'firebase-functions';
-
 import {
   SUPPORTED_MIME_TYPES,
   SupportedMimeType,
@@ -299,13 +297,8 @@ export function getProcessorConfigFromEnv(): ProcessorConfig {
   // GCLOUD_PROJECT is automatically set by Firebase Cloud Functions runtime
   // No manual configuration needed - uses Application Default Credentials (ADC)
   const projectId = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT;
-  const configFn = (functions as unknown as { config?: () => Record<string, any> }).config;
-  const runtimeConfig = typeof configFn === 'function' ? configFn() : {};
-  const location = process.env.DOCUMENTAI_LOCATION || runtimeConfig?.documentai?.location;
-  const processorId =
-    process.env.DOCUMENTAI_PROCESSOR_ID ||
-    runtimeConfig?.documentai?.processor_id ||
-    runtimeConfig?.documentai?.processorId;
+  const location = process.env.DOCUMENTAI_LOCATION;
+  const processorId = process.env.DOCUMENTAI_PROCESSOR_ID;
   const apiEndpoint = process.env.DOCUMENTAI_API_ENDPOINT;
 
   // Project ID is automatically available in Firebase Cloud Functions

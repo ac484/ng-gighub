@@ -20,7 +20,7 @@ This audit aligns all Cloud Functions packages with the latest Firebase guidance
 - functions-storage
 
 ## Findings
-- Runtime configuration is sourced via `process.env` across packages; no legacy `functions.config()` usage is required for new deployments (a compatibility fallback remains in `functions-ai-document` only).
+- Runtime configuration is sourced via `process.env` across packages; legacy `functions.config()` fallback has been removed.
 - The weather integration README previously referenced `firebase functions:config:set debug.enabled=true`, which does not populate `process.env.DEBUG`. It has been updated to use `DEBUG="weather:*"` per Firebase's environment variable mapping.
 - For new configuration values, prefer `.env` files (loaded by the CLI) or `firebase functions:config:set KEY="value"`, which exposes `KEY` as `process.env.KEY` in Functions v2.
 
