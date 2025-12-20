@@ -155,23 +155,24 @@ canEdit(): boolean {
 
 ## 🔥 Firebase/Firestore Data Access
 
-### Repository Pattern
+### Repository Pattern (Direct Injection)
+
 ```typescript
 import { inject, Injectable } from '@angular/core';
-import { Firestore, collection, query, orderBy } from '@angular/fire/firestore';
+import { Firestore, collection, query, orderBy, getDocs, addDoc } from '@angular/fire/firestore';
 
 @Injectable({ providedIn: 'root' })
 export class TaskRepository {
-  private firestore = inject(Firestore);
-  private tasksCollection = collection(this.firestore, 'tasks');
+  private firestore = inject(Firestore); // ✅ 直接注入
   
-  findAll(): Observable<Task[]> {
-    const q = query(this.tasksCollection, orderBy('createdAt', 'desc'));
-    return collectionData(q, { idField: 'id' }) as Observable<Task[]>;
+  async findAll(): Promise<Task[]> {
+    const q = query(collection(this.firestore, 'tasks'), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
   }
   
   async create(task: Omit<Task, 'id'>): Promise<string> {
-    const docRef = await addDoc(this.tasksCollection, {
+    const docRef = await addDoc(collection(this.firestore, 'tasks'), {
       ...task,
       createdAt: new Date(),
       updatedAt: new Date()

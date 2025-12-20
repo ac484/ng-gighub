@@ -22,6 +22,11 @@ export const routes: Routes = [
     data: { title: '成員管理' }
   },
   {
+    path: ':id/agreement',
+    loadComponent: () => import('./modules/agreement').then(m => m.AgreementModuleViewComponent),
+    data: { title: '協議' }
+  },
+  {
     path: ':id/audit',
     loadComponent: () => import('@core/blueprint/modules/implementations/audit-logs').then(m => m.AuditLogsComponent),
     data: { title: '審計日誌' }

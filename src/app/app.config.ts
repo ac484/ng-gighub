@@ -195,7 +195,7 @@ const firebaseProviders: Array<Provider | EnvironmentProviders> = [
     });
   }),
   provideDatabase(() => getDatabase()),
-  provideFunctions(() => getFunctions()),
+  provideFunctions(() => getFunctions(getApp(), 'asia-east1')),
   provideMessaging(() => getMessaging()),
   providePerformance(() => getPerformance()),
   provideStorage(() => getStorage()),
