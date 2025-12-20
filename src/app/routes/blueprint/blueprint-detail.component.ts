@@ -30,6 +30,7 @@ import { MembersModuleViewComponent } from './modules/members';
 import { QaModuleViewComponent } from './modules/qa';
 import { SafetyModuleViewComponent } from './modules/safety-module-view.component';
 import { WarrantyModuleViewComponent } from './modules/warranty';
+import { WeatherModuleViewComponent } from './modules/weather';
 import { WorkflowModuleViewComponent } from './modules/workflow-module-view.component';
 
 /**
@@ -82,7 +83,8 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
     IssuesModuleViewComponent,
     AgreementModuleViewComponent,
     ContractModuleViewComponent,
-    WarrantyModuleViewComponent
+    WarrantyModuleViewComponent,
+    WeatherModuleViewComponent
   ],
   template: `
     <page-header [title]="blueprint()?.name || '藍圖詳情'" [action]="action" [breadcrumb]="breadcrumb">
@@ -388,6 +390,15 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
             <ng-template nz-tab>
               @if (blueprint()?.id) {
                 <app-warranty-module-view [blueprintId]="blueprint()!.id" />
+              }
+            </ng-template>
+          </nz-tab>
+
+          <!-- Weather Tab -->
+          <nz-tab nzTitle="氣象">
+            <ng-template nz-tab>
+              @if (blueprint()?.id) {
+                <app-weather-module-view displayMode="full" countyName="臺北市" [autoRefresh]="true" />
               }
             </ng-template>
           </nz-tab>
