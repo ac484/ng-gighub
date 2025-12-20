@@ -56,6 +56,7 @@ import { AgreementService } from './agreement.service';
               <th scope="col">欄位4</th>
               <th scope="col">欄位5</th>
               <th scope="col">欄位6</th>
+              <th scope="col">操作</th>
             </tr>
           </thead>
           <tbody>
@@ -83,6 +84,19 @@ import { AgreementService } from './agreement.service';
                 <td></td>
                 <td></td>
                 <td></td>
+                <td class="text-right">
+                  <button
+                    nz-button
+                    nzType="link"
+                    nzSize="small"
+                    [disabled]="!agreement.attachmentUrl || parsingId() === agreement.id"
+                    (click)="parse(agreement)"
+                  >
+                    解析
+                  </button>
+                  <button nz-button nzType="link" nzSize="small" (click)="edit(agreement)">編輯</button>
+                  <button nz-button nzType="link" nzDanger nzSize="small" (click)="remove(agreement)">刪除</button>
+                </td>
               </tr>
             }
           </tbody>
@@ -125,6 +139,7 @@ export class AgreementModuleViewComponent {
   readonly activeCount = computed(() => this.agreements().filter(a => a.status === 'active').length);
   readonly draftCount = computed(() => this.agreements().filter(a => a.status === 'draft').length);
   uploadingId = signal<string | null>(null);
+  parsingId = signal<string | null>(null);
 
   constructor() {
     effect(() => {
@@ -144,6 +159,38 @@ export class AgreementModuleViewComponent {
       this.messageService.error('新增協議失敗');
       console.error('[AgreementModuleView]', 'createAgreement failed', error);
     }
+  }
+
+  async parse(agreement: Agreement): Promise<void> {
+    this.parsingId.set(agreement.id);
+    try {
+      await this.agreementService.parseAttachment(agreement);
+      this.messageService.success('解析完成');
+    } catch (error) {
+      this.messageService.error('解析失敗');
+      console.error('[AgreementModuleView]', 'parse failed', error);
+    } finally {
+      this.parsingId.set(null);
+    }
+  }
+
+  edit(agreement: Agreement): void {
+    const nextTitle = window.prompt('更新協議標題', agreement.title);
+    if (nextTitle && nextTitle.trim() && nextTitle !== agreement.title) {
+      this.agreementService.updateTitle(agreement.id, nextTitle.trim()).catch(error => {
+        this.messageService.error('更新失敗');
+        console.error('[AgreementModuleView]', 'edit failed', error);
+      });
+    }
+  }
+
+  remove(agreement: Agreement): void {
+    const ok = window.confirm('確定刪除這筆協議？');
+    if (!ok) return;
+    this.agreementService.deleteAgreement(agreement.id).catch(error => {
+      this.messageService.error('刪除失敗');
+      console.error('[AgreementModuleView]', 'delete failed', error);
+    });
   }
 
   onSelect(agreement: Agreement): void {

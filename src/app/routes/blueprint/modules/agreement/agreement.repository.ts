@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { collection, doc, addDoc, DocumentData, Firestore, getDocs, orderBy, query, setDoc, Timestamp, where } from '@angular/fire/firestore';
+import { collection, doc, addDoc, deleteDoc, DocumentData, Firestore, getDocs, orderBy, query, setDoc, Timestamp, where } from '@angular/fire/firestore';
 import { LoggerService } from '@core/services/logger';
 
 import { Agreement, AgreementDocument } from './agreement.model';
@@ -28,6 +28,12 @@ export class AgreementRepository {
     if ((payload as any).attachmentUrl) {
       (data as any).attachmentUrl = (payload as any).attachmentUrl;
     }
+    if ((payload as any).attachmentPath) {
+      (data as any).attachmentPath = (payload as any).attachmentPath;
+    }
+    if ((payload as any).parsedJsonUrl) {
+      (data as any).parsedJsonUrl = (payload as any).parsedJsonUrl;
+    }
 
     const docRef = await addDoc(this.collectionRef, data as any);
     return this.toEntity(data as DocumentData, docRef.id);
@@ -45,14 +51,29 @@ export class AgreementRepository {
   }
 
 
-  async saveAttachmentUrl(agreementId: string, attachmentUrl: string): Promise<void> {
+  async updateAgreement(agreementId: string, payload: Partial<Agreement>): Promise<void> {
+    const ref = doc(this.firestore, `${this.collectionPath}/${agreementId}`);
+    await setDoc(ref, payload, { merge: true });
+  }
+
+  async saveAttachmentUrl(agreementId: string, attachmentUrl: string, attachmentPath?: string): Promise<void> {
     try {
       const ref = doc(this.firestore, `${this.collectionPath}/${agreementId}`);
-      await setDoc(ref, { attachmentUrl }, { merge: true });
+      await setDoc(ref, { attachmentUrl, attachmentPath }, { merge: true });
     } catch (error) {
       this.logger.error('[AgreementRepository]', 'Failed to save attachment URL', error as Error, { agreementId });
       throw error;
     }
+  }
+
+  async saveParsedJsonUrl(agreementId: string, parsedJsonUrl: string): Promise<void> {
+    const ref = doc(this.firestore, `${this.collectionPath}/${agreementId}`);
+    await setDoc(ref, { parsedJsonUrl }, { merge: true });
+  }
+
+  async deleteAgreement(agreementId: string): Promise<void> {
+    const ref = doc(this.firestore, `${this.collectionPath}/${agreementId}`);
+    await deleteDoc(ref);
   }
 
   private toEntity(data: DocumentData, id: string): Agreement {
@@ -67,7 +88,10 @@ export class AgreementRepository {
       counterparty: doc.counterparty,
       status: (doc.status as Agreement['status']) ?? 'draft',
       effectiveDate,
-      value: doc.value
+      value: doc.value,
+      attachmentUrl: (doc as any).attachmentUrl,
+      attachmentPath: (doc as any).attachmentPath,
+      parsedJsonUrl: (doc as any).parsedJsonUrl
     };
   }
 }

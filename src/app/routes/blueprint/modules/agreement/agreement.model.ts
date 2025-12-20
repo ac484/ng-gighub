@@ -11,6 +11,8 @@ export interface Agreement {
   effectiveDate: Date;
   value?: number;
   attachmentUrl?: string;
+  attachmentPath?: string;
+  parsedJsonUrl?: string;
 }
 
 export type AgreementDocument = Omit<Agreement, 'effectiveDate'> & {
