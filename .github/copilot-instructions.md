@@ -17,6 +17,10 @@ Security, cost control, and maintainability are mandatory.
 - Implement the minimum code necessary to satisfy the requirement
 - Do not introduce abstractions unless they provide clear, current value
 - Prefer refactoring verbose or indirect code into simpler, equivalent implementations when no behavior change is required
+- Define modules by business capability, not by technical layer
+- Modules communicate only via explicit public interfaces or events
+- Internal implementation of a module may change freely; public interfaces are stable
+- Breaking changes are allowed; do not preserve backward compatibility
 
 ## 3. Angular 20 Conventions
 - Standalone Components + Signals only
