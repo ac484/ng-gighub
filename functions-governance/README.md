@@ -20,3 +20,9 @@
 ## 成本與安全
 - 僅對熱路徑函式設定少量 minInstances，其餘零常駐。
 - 秘密全部由 Secret Manager 提供；嚴格身份驗證與租戶隔離。
+
+## 設計原則（高內聚／低耦合／可擴展）
+- **功能劃分（高內聚）**：模組聚焦「治理」範疇：Secrets、flags、配額/rate limit；不混入觀測、佇列等其它職責。
+- **明確接口（低耦合）**：對外僅暴露 callable/HTTP + 事件輸出（如審計事件）；使用清晰的 request/response schema，避免跨模組直接存取內部資料結構。
+- **內部自由（可演進）**：可在模組內更換資料來源（Secret Manager / Firestore / Remote Config）、快取策略或審計存放位置，對外接口保持穩定。
+- **事件優先**：設定變更或配額觸發審計事件，供 observability/下游同步；避免同步耦合。
