@@ -79,34 +79,10 @@ Detailed implementation guides for GitHub Copilot. These files are loaded on-dem
 3. **Architecture decisions**: Consult `ng-gighub-architecture.instructions.md`
 4. **Tool usage**: Reference `mcp-tools-usage.instructions.md`
 
-## 📊 File Statistics
+## 🏷️ Naming & Alignment
 
-- **Total Files**: 18 instruction files
-- **Total Lines**: ~7,098 lines (includes recent baseline/dedup trim; optimized from 7,169)
-- **Categories**: 
-  - Framework (3 files)
-  - GigHub-specific (5 files)
-  - Best practices (5 files)
-  - Meta/Documentation (3 files)
-  - Reference (2 files)
-
-## 🔄 Recent Optimizations (2025-12-20)
-
-### Consolidation
-- **Merged**: `instructions.instructions.md` + `markdown.instructions.md` + `prompt.instructions.md`  
-  → `documentation-standards.instructions.md` (17% reduction)
-
-### Translation & Optimization
-- **TypeScript guide**: Translated from Chinese to English, reduced by 47%
-- **Main file**: Reduced from 334 to 230 lines (31% reduction)
-- **Language**: Converting all files to English for consistency
-
-### Improvements
-- ✅ Baseline precedence plus deduplication map aligned with copilot-instructions
-- ✅ Clearer structure with quick reference table
-- ✅ Mandatory Context7 integration documented
-- ✅ Compliance verification template added
-- ✅ Token efficiency improved by ~25% (ongoing)
+- Use kebab-case for instruction files and keep default GitHub template naming (e.g., `pull_request_template.md`) to preserve template behavior.
+- Avoid duplicating guidance already covered in `.github/rules/` or `.github/PULL_REQUEST_TEMPLATE/`; reference them instead.
 
 ## 📚 Related Documentation
 
