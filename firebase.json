@@ -51,7 +51,7 @@
     },
     {
       "source": "functions-governance",
-      "codebase": "functions-observability",
+      "codebase": "functions-governance",
       "disallowLegacyRuntimeConfig": true,
       "ignore": [
         "node_modules",
