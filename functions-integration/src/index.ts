@@ -3,13 +3,10 @@
  *
  * Main entry point for all Firebase Cloud Functions.
  *
- * Import function triggers from their respective submodules:
- * - Contract OCR Pipeline (SETC-012)
- *
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  *
  * @author GigHub Development Team
- * @date 2025-12-18
+ * @date 2025-12-20
  */
 
 import * as admin from 'firebase-admin';
@@ -30,14 +27,6 @@ admin.initializeApp();
 // In the v1 API, each function can only serve one request per container, so
 // this will be the maximum concurrent request count.
 setGlobalOptions({ maxInstances: 10 });
-
-// =============================================================================
-// Contract OCR Pipeline Functions (SETC-012)
-// =============================================================================
-// Step 2: Process contract file upload
-// Step 4: Create normalized draft from OCR result
-// Step 8: Confirm contract and create official document
-export { processContractUpload, createParseDraft, confirmContract } from './contract';
 
 // =============================================================================
 // CWA Weather API Integration Functions
