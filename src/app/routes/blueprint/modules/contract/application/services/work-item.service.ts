@@ -16,8 +16,6 @@
 
 import { Injectable, inject } from '@angular/core';
 import { LoggerService } from '@core';
-import { EnhancedEventBusService } from '@core/blueprint/events/enhanced-event-bus.service';
-import { SystemEventType } from '@core/blueprint/events/types/system-event-type.enum';
 
 import type { ContractWorkItem, CreateWorkItemDto, UpdateWorkItemDto, WorkItemProgress } from '../../data/models';
 import { ContractWorkItemRepository } from '../../infrastructure/repositories';
@@ -51,7 +49,6 @@ export interface WorkItemStatistics {
 @Injectable({ providedIn: 'root' })
 export class WorkItemService {
   private readonly workItemRepo = inject(ContractWorkItemRepository);
-  private readonly eventBus = inject(EnhancedEventBusService);
   private readonly logger = inject(LoggerService);
 
   // ============================================================================
@@ -126,7 +123,7 @@ export class WorkItemService {
   /**
    * Create a new work item
    */
-  async createWorkItem(blueprintId: string, contractId: string, dto: CreateWorkItemDto, actorId: string): Promise<ContractWorkItem> {
+  async createWorkItem(blueprintId: string, contractId: string, dto: CreateWorkItemDto, _actorId: string): Promise<ContractWorkItem> {
     this.logger.info('[WorkItemService]', 'Creating work item', { blueprintId, contractId, code: dto.code });
 
     try {
@@ -219,7 +216,7 @@ export class WorkItemService {
     contractId: string,
     workItemId: string,
     dto: UpdateWorkItemDto,
-    actorId: string
+    _actorId: string
   ): Promise<ContractWorkItem> {
     this.logger.info('[WorkItemService]', 'Updating work item', { blueprintId, contractId, workItemId });
 
@@ -264,7 +261,7 @@ export class WorkItemService {
     contractId: string,
     workItemId: string,
     progress: WorkItemProgress,
-    actorId: string
+    _actorId: string
   ): Promise<void> {
     this.logger.info('[WorkItemService]', 'Updating work item progress', {
       workItemId,
@@ -319,7 +316,7 @@ export class WorkItemService {
   /**
    * Link a task to a work item
    */
-  async linkTaskToWorkItem(blueprintId: string, contractId: string, workItemId: string, taskId: string, actorId: string): Promise<void> {
+  async linkTaskToWorkItem(blueprintId: string, contractId: string, workItemId: string, taskId: string, _actorId: string): Promise<void> {
     this.logger.info('[WorkItemService]', 'Linking task to work item', { workItemId, taskId });
 
     try {
@@ -358,7 +355,7 @@ export class WorkItemService {
     contractId: string,
     workItemId: string,
     taskId: string,
-    actorId: string
+    _actorId: string
   ): Promise<void> {
     this.logger.info('[WorkItemService]', 'Unlinking task from work item', { workItemId, taskId });
 
@@ -397,7 +394,7 @@ export class WorkItemService {
   /**
    * Delete a work item
    */
-  async deleteWorkItem(blueprintId: string, contractId: string, workItemId: string, actorId: string): Promise<void> {
+  async deleteWorkItem(blueprintId: string, contractId: string, workItemId: string, _actorId: string): Promise<void> {
     this.logger.info('[WorkItemService]', 'Deleting work item', { workItemId });
 
     try {

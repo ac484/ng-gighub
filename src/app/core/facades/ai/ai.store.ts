@@ -5,7 +5,7 @@
  * 提供響應式的 AI 狀態
  */
 
-import { Injectable, signal, computed, inject, DestroyRef } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { AIChatMessage, AIGenerateTextResponse, AIGenerateChatResponse } from '@core/data-access/ai/ai.types';
 import { AIService } from '@core/services/ai/ai.service';
 
@@ -33,7 +33,6 @@ interface AIState {
 @Injectable({ providedIn: 'root' })
 export class AIStore {
   private aiService = inject(AIService);
-  private destroyRef = inject(DestroyRef);
 
   // Private state
   private _state = signal<AIState>({

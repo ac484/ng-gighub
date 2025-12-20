@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, OnInit, inject, input } from '@angular/core';
-import { BlueprintMember, BlueprintRole, LoggerService } from '@core';
+import { BlueprintMember, LoggerService } from '@core';
 import { BlueprintMemberRepository } from '@core/blueprint/repositories';
 import { STColumn } from '@delon/abc/st';
 import { ModalHelper } from '@delon/theme';

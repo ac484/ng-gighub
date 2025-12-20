@@ -15,7 +15,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, doc, addDoc, Timestamp } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, Timestamp } from '@angular/fire/firestore';
 import { LoggerService } from '@core';
 
 import { EnhancedEventBusService } from '../../../../events/enhanced-event-bus.service';
@@ -327,7 +327,7 @@ export class InvoiceGenerationService {
   /**
    * 生成請款單號
    */
-  private async generateInvoiceNumber(blueprintId: string, invoiceType: InvoiceType): Promise<string> {
+  private async generateInvoiceNumber(_blueprintId: string, invoiceType: InvoiceType): Promise<string> {
     const prefix = invoiceType === 'receivable' ? 'INV' : 'PAY';
     const date = new Date();
     const dateStr = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;

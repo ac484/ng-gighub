@@ -165,7 +165,6 @@ export class TeamMembersComponent implements OnInit {
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
   // Store previous context to restore on destroy (fix navigation bug)

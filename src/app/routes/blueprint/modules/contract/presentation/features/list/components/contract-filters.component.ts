@@ -7,7 +7,7 @@
  * Interface: Emits events for create/reload/search actions
  */
 
-import { Component, ChangeDetectionStrategy, signal, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SHARED_IMPORTS } from '@shared';
 

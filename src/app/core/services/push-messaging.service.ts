@@ -31,7 +31,7 @@
  * }
  * ```
  */
-import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { Messaging, getToken, isSupported, onMessage, MessagePayload } from '@angular/fire/messaging';
 import { FcmTokenRepository } from '@core/data-access/repositories/shared/fcm-token.repository';
 import { NotificationRepository } from '@core/data-access/repositories/shared/notification.repository';
@@ -63,8 +63,6 @@ export class PushMessagingService {
   private readonly notificationRepository = inject(NotificationRepository);
   private readonly fcmTokenRepository = inject(FcmTokenRepository);
   private readonly analytics = inject(NotificationAnalyticsService);
-  private readonly destroyRef = inject(DestroyRef);
-
   // State signals (private)
   private readonly _permission = signal<NotificationPermission | 'unsupported'>(
     typeof Notification === 'undefined' ? 'unsupported' : Notification.permission

@@ -1,6 +1,6 @@
-import { Injectable, inject } from '@angular/core';
-import { collection, query, where, orderBy, limit as firestoreLimit, Timestamp, DocumentData } from '@angular/fire/firestore';
-import { Task, TaskStatus, CreateTaskRequest, UpdateTaskRequest, TaskQueryOptions, AssigneeType } from '@core/types/task/task.types';
+import { Injectable } from '@angular/core';
+import { query, where, orderBy, limit as firestoreLimit, Timestamp, DocumentData } from '@angular/fire/firestore';
+import { Task, TaskStatus, CreateTaskRequest, UpdateTaskRequest, TaskQueryOptions } from '@core/types/task/task.types';
 
 import { FirestoreBaseRepository } from './base/firestore-base.repository';
 

@@ -25,7 +25,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import type { Signal } from '@angular/core';
 import { LoggerService } from '@core';
 
-import type { Contract, ContractFilters, ContractStatus, CreateContractDto, UpdateContractDto } from '../../data/models';
+import type { Contract, ContractFilters, ContractStatus } from '../../data/models';
 
 /**
  * Contract Store State Interface

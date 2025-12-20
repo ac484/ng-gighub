@@ -24,7 +24,6 @@ import { buildTaskHierarchy } from '@core/utils/task-hierarchy.util';
 import { STColumn, STComponent, STData } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 import { provideNzIconsPatch } from 'ng-zorro-antd/icon';
-import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 
 import { TaskAssignModalComponent } from '../components/task-assign-modal/task-assign-modal.component';
@@ -170,7 +169,6 @@ interface TaskTableNode extends STData {
 })
 export class TaskListViewComponent {
   private taskStore = inject(TaskStore);
-  private message = inject(NzMessageService);
   private modal = inject(NzModalService);
 
   @ViewChild('stTable') stTable?: STComponent;

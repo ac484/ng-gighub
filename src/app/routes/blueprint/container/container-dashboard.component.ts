@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
 import { LoggerService } from '@core';
 import { SHARED_IMPORTS } from '@shared';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
@@ -198,8 +197,6 @@ import { NzTimelineModule } from 'ng-zorro-antd/timeline';
   ]
 })
 export class ContainerDashboardComponent implements OnInit {
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
   private readonly logger = inject(LoggerService);
 
   // 狀態

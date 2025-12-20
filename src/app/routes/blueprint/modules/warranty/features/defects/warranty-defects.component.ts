@@ -10,8 +10,7 @@
  * @date 2025-12-19
  */
 
-import { Component, ChangeDetectionStrategy, OnInit, inject, signal, computed, DestroyRef, output, input } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, ChangeDetectionStrategy, OnInit, inject, signal, computed, output, input } from '@angular/core';
 import { WarrantyDefectRepository, WarrantyDefectService, DefectStatistics } from '@core/blueprint/modules/implementations/warranty';
 import type { WarrantyDefect, WarrantyDefectStatus } from '@core/blueprint/modules/implementations/warranty';
 import { SHARED_IMPORTS } from '@shared';
@@ -70,7 +69,6 @@ export class WarrantyDefectsComponent implements OnInit {
   private readonly defectService = inject(WarrantyDefectService);
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
-  private readonly destroyRef = inject(DestroyRef);
 
   /**
    * 藍圖 ID (從父元件傳入)

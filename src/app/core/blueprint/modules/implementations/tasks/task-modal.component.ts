@@ -19,8 +19,6 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Team, Partner, OwnerType, BlueprintMemberType } from '@core';
 import { BlueprintMemberRepository } from '@core/blueprint/repositories/blueprint-member.repository';
-import { PartnerRepository } from '@core/data-access/repositories/shared/partner.repository';
-import { TeamRepository } from '@core/data-access/repositories/shared/team.repository';
 import { getAllowedAssigneeTypes } from '@core/domain/utils';
 import { FirebaseService } from '@core/services/firebase.service';
 import { TaskStore } from '@core/state/stores/task.store';
@@ -282,8 +280,6 @@ export class TaskModalComponent implements OnInit {
   private message = inject(NzMessageService);
   private taskStore = inject(TaskStore);
   private memberRepo = inject(BlueprintMemberRepository);
-  private teamRepo = inject(TeamRepository);
-  private partnerRepo = inject(PartnerRepository);
   private firebaseService = inject(FirebaseService);
 
   // Modal data injected

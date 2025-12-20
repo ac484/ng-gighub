@@ -180,7 +180,7 @@ export class EventBus implements IEventBus {
    * @param type - Event type
    * @param handler - Handler function to remove
    */
-  off<T>(type: string, handler: EventHandler<T>): void {
+  off<T>(type: string, _handler: EventHandler<T>): void {
     // Get all subscriptions for this event type
     const subs = this.subscriptions.get(type);
     if (!subs) return;

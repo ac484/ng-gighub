@@ -222,7 +222,7 @@ export class ContractService {
    * Update contract status with validation
    */
   async updateContractStatus(blueprintId: string, contractId: string, newStatus: ContractStatus, actorId: string = 'system'): Promise<void> {
-    this.logger.info('[ContractService]', 'Updating contract status', { contractId, newStatus });
+    this.logger.info('[ContractService]', 'Updating contract status', { contractId, newStatus, actorId });
 
     try {
       // Get existing contract

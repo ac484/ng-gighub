@@ -50,20 +50,6 @@ export class ContractWorkItemRepository {
   }
 
   /**
-   * Helper to get timestamp in milliseconds from various formats
-   */
-  private getTimeInMs(timestamp: unknown): number {
-    if (!timestamp) return 0;
-    if (typeof (timestamp as Timestamp).toMillis === 'function') {
-      return (timestamp as Timestamp).toMillis();
-    }
-    if (timestamp instanceof Date) {
-      return timestamp.getTime();
-    }
-    return 0;
-  }
-
-  /**
    * Create a new work item
    */
   async create(blueprintId: string, contractId: string, data: CreateWorkItemDto): Promise<ContractWorkItem> {

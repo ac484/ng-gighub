@@ -15,7 +15,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, doc, addDoc, Timestamp } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, Timestamp } from '@angular/fire/firestore';
 import { LoggerService } from '@core';
 
 import { EnhancedEventBusService } from '../../../../events/enhanced-event-bus.service';
@@ -343,7 +343,7 @@ export class PaymentGenerationService {
   /**
    * 生成付款單號
    */
-  private async generatePaymentNumber(blueprintId: string): Promise<string> {
+  private async generatePaymentNumber(_blueprintId: string): Promise<string> {
     const date = new Date();
     const dateStr = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
     const random = Math.random().toString(36).substring(2, 6).toUpperCase();

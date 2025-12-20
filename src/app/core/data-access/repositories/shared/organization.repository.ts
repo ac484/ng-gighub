@@ -10,11 +10,9 @@ import {
   deleteDoc,
   query,
   where,
-  orderBy,
   CollectionReference,
   DocumentReference,
-  Timestamp,
-  QueryConstraint
+  Timestamp
 } from '@angular/fire/firestore';
 import { Organization, LoggerService, OrganizationRole } from '@core';
 import { Observable, from, map, catchError, of } from 'rxjs';

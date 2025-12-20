@@ -14,8 +14,7 @@
  * @date 2025-12-16
  */
 
-import { Injectable, inject, signal, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Injectable, inject, signal } from '@angular/core';
 import { LoggerService } from '@core';
 
 import { EnhancedEventBusService } from '../../../../events/enhanced-event-bus.service';
@@ -40,8 +39,6 @@ import type { Invoice, InvoiceStatus } from '../models/invoice.model';
 export class PaymentStatusTrackingService {
   private readonly logger = inject(LoggerService);
   private readonly eventBus = inject(EnhancedEventBusService);
-  private readonly destroyRef = inject(DestroyRef);
-
   /** 快取的財務摘要 */
   private readonly _financialSummaryCache = signal<Map<string, FinancialSummary>>(new Map());
 

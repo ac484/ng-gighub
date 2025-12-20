@@ -10,7 +10,7 @@
  * @date 2025-12-19
  */
 
-import { Component, ChangeDetectionStrategy, inject, input, output, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import type { Warranty, WarrantyDefect } from '@core/blueprint/modules/implementations/warranty';
 import { SHARED_IMPORTS } from '@shared';
 

@@ -6,7 +6,7 @@
  * Features: File table, search, download, delete
  */
 
-import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import type { CloudFile } from '@core/blueprint/modules/implementations/cloud';
 import { SHARED_IMPORTS } from '@shared';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';

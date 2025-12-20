@@ -11,7 +11,7 @@
  * @date 2025-12-14
  */
 
-import { Component, input, output, computed, inject, ViewChild, effect } from '@angular/core';
+import { Component, input, output, computed, inject, ViewChild } from '@angular/core';
 import { Task } from '@core/domain/types/task/task.types';
 import { TaskStore } from '@core/state/stores/task.store';
 import { SHARED_IMPORTS } from '@shared';

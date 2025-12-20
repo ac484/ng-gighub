@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { collection, doc, addDoc, deleteDoc, DocumentData, Firestore, getDocs, orderBy, query, setDoc, Timestamp, where } from '@angular/fire/firestore';
+import { collection, doc, addDoc, deleteDoc, DocumentData, Firestore, getDocs, query, setDoc, Timestamp, where } from '@angular/fire/firestore';
 import { LoggerService } from '@core/services/logger';
 
 import { Agreement, AgreementDocument } from './agreement.model';

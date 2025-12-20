@@ -22,10 +22,9 @@ import {
   where,
   orderBy,
   Timestamp,
-  CollectionReference,
-  DocumentReference,
-  QueryConstraint,
-  writeBatch
+   CollectionReference,
+   DocumentReference,
+   writeBatch
 } from '@angular/fire/firestore';
 import { LoggerService } from '@core';
 import { ModuleStatus } from '@core/blueprint/modules/module-status.enum';
@@ -69,7 +68,7 @@ export class BlueprintModuleRepository {
   /**
    * Convert Firestore data to BlueprintModuleDocument
    */
-  private toModuleDocument(data: any, id: string, blueprintId: string): BlueprintModuleDocument {
+  private toModuleDocument(data: any, id: string, _blueprintId: string): BlueprintModuleDocument {
     return {
       id,
       moduleType: data.moduleType,

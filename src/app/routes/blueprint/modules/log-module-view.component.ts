@@ -3,7 +3,7 @@
  * 日誌域視圖元件 - 顯示於藍圖詳情頁面的 Tab 中
  */
 
-import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, inject, input } from '@angular/core';
 import { ActivityLogService } from '@core/blueprint/modules/implementations/log/services/activity-log.service';
 import { AttachmentService } from '@core/blueprint/modules/implementations/log/services/attachment.service';
 import { ChangeHistoryService } from '@core/blueprint/modules/implementations/log/services/change-history.service';

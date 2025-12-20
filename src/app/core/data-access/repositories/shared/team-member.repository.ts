@@ -9,7 +9,6 @@ import {
   getDocs,
   query,
   where,
-  orderBy
 } from '@angular/fire/firestore';
 import { TeamMember, TeamRole } from '@core';
 import { Observable, from, map } from 'rxjs';

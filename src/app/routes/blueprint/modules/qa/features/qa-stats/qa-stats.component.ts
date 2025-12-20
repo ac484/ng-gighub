@@ -16,7 +16,7 @@
  * @date 2025-12-19
  */
 
-import { Component, ChangeDetectionStrategy, input, signal, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, signal, OnInit } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 

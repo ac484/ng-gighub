@@ -11,7 +11,6 @@
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Auth } from '@angular/fire/auth';
 import { LoggerService } from '@core';
 import { ContractStore } from '../../../application/state';
 import { ContractService } from '../../../application/services';
@@ -74,9 +73,7 @@ export class ContractEditModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly modalRef = inject(NzModalRef);
   private readonly modalData = inject<ContractModalData>(NZ_MODAL_DATA);
-  private readonly store = inject(ContractStore);
   private readonly service = inject(ContractService);
-  private readonly auth = inject(Auth);
   private readonly message = inject(NzMessageService);
   private readonly logger = inject(LoggerService);
 

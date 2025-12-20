@@ -13,12 +13,11 @@
  * @date 2025-12-16
  */
 
-import { Component, inject, signal, input, output, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, input, output, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { STColumn, STChange } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 
 import type { Invoice, InvoiceStatus, InvoiceType } from '../models/invoice.model';
-import { InvoiceApprovalService } from '../services/invoice-approval.service';
 
 @Component({
   selector: 'app-invoice-list',
@@ -102,8 +101,6 @@ export class InvoiceListComponent implements OnInit {
 
   /** 請款操作事件 */
   readonly invoiceAction = output<{ action: string; invoice: Invoice }>();
-
-  private approvalService = inject(InvoiceApprovalService);
 
   selectedStatus: InvoiceStatus | null = null;
   selectedType: InvoiceType | null = null;

@@ -16,7 +16,7 @@ import {
 } from '@angular/fire/firestore';
 import { BlueprintMember, BlueprintMemberType, OwnerType, LoggerService } from '@core';
 import { isValidMemberTypeForOwner } from '@core/domain/utils';
-import { Observable, from, map, throwError } from 'rxjs';
+import { Observable, from, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -93,7 +93,6 @@ export class BlueprintMemberRepository {
     }
 
     // Validate isExternal flag matches member type
-    const expectedExternal = member.memberType === BlueprintMemberType.PARTNER;
     if (member.memberType === BlueprintMemberType.TEAM && member.isExternal) {
       const errorMsg = '團隊成員不能標記為外部成員';
       this.logger.error('[BlueprintMemberRepository]', errorMsg, new Error(errorMsg));

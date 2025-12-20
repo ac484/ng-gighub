@@ -7,7 +7,7 @@
  * Interface: Modal for viewing contract files
  */
 
-import { Component, ChangeDetectionStrategy, inject, input, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import type { FileAttachment } from '@routes/blueprint/modules/contract/data/models';
 import { SHARED_IMPORTS } from '@shared';

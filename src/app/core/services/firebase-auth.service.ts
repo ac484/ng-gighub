@@ -2,7 +2,7 @@ import { Injectable, inject, Injector, runInInjectionContext } from '@angular/co
 import { Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, User, authState } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { AccountRepository } from '@core/repositories';
-import { DA_SERVICE_TOKEN, ITokenService } from '@delon/auth';
+import { DA_SERVICE_TOKEN } from '@delon/auth';
 import { SettingsService } from '@delon/theme';
 import { Observable, map } from 'rxjs';
 

@@ -11,10 +11,8 @@
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ContractStore } from '@routes/blueprint/modules/contract/application/state';
 import { ContractService } from '@routes/blueprint/modules/contract/application/services';
 import type { Contract, ContractParty } from '@routes/blueprint/modules/contract/data/models';
-import type { CreateContractDto } from '@routes/blueprint/modules/contract/data/models/dtos';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
@@ -28,7 +26,6 @@ import type { FileAttachment } from '@routes/blueprint/modules/contract/data/mod
 /** Step indices */
 const STEP_UPLOAD = 0;
 const STEP_BASIC_INFO = 1;
-const STEP_CONFIRM = 2;
 const STEP_COMPLETE = 3;
 
 @Component({

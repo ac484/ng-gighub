@@ -13,9 +13,8 @@
  * @module layout/basic/widgets
  */
 
-import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { ContextType, Team, Partner, Bot } from '@core';
+import { ContextType, Team, Partner } from '@core';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 

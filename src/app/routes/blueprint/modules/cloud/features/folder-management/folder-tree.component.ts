@@ -6,7 +6,7 @@
  * Features: Tree view, folder selection, rename folder
  */
 
-import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzTreeModule, NzTreeNodeOptions } from 'ng-zorro-antd/tree';

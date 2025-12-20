@@ -287,7 +287,7 @@ export class InvoiceListComponent implements OnInit {
   }
 
   /** 送出審核 */
-  submit(record: Invoice): void {
+  submit(_record: Invoice): void {
     this.modal.confirm({
       nzTitle: '確認送出',
       nzContent: '送出後將進入審核流程，確定要送出嗎？',

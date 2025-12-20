@@ -7,9 +7,7 @@ import {
   deleteObject,
   listAll,
   getMetadata,
-  UploadMetadata,
-  UploadResult as FirebaseUploadResult,
-  ListResult
+  UploadMetadata
 } from '@angular/fire/storage';
 import { FirebaseService } from '@core/services/firebase.service';
 import { LoggerService } from '@core/services/logger';
@@ -169,7 +167,7 @@ export class FirebaseStorageRepository {
    * // Then use: window.open(url, '_blank');
    * ```
    */
-  async downloadFile(bucket: string, path: string, options?: DownloadOptions): Promise<string> {
+  async downloadFile(bucket: string, path: string, _options?: DownloadOptions): Promise<string> {
     try {
       const fullPath = `${bucket}/${path}`;
       this.logger.info('[FirebaseStorageRepository]', `Getting download URL for ${fullPath}`);

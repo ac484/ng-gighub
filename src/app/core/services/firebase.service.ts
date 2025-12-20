@@ -4,7 +4,6 @@ import { Auth, authState, User } from '@angular/fire/auth';
 import { Firestore, collection, doc, CollectionReference, DocumentReference } from '@angular/fire/firestore';
 import { Storage, ref, StorageReference } from '@angular/fire/storage';
 import { LoggerService } from '@core/services/logger';
-import { from } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 /**

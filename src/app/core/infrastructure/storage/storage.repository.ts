@@ -22,7 +22,7 @@ export class StorageRepository {
     return this.firebaseStorage.uploadFile(bucket, path, file, options);
   }
 
-  async downloadFile(bucket: string, path: string, options?: DownloadOptions): Promise<string> {
+  async downloadFile(bucket: string, path: string, _options?: DownloadOptions): Promise<string> {
     return this.firebaseStorage.downloadFile(bucket, path);
   }
 
@@ -30,7 +30,7 @@ export class StorageRepository {
     return this.firebaseStorage.deleteFile(bucket, path);
   }
 
-  async listFiles(bucket: string, folder?: string, options?: ListOptions): Promise<FileObject[]> {
+  async listFiles(bucket: string, folder?: string, _options?: ListOptions): Promise<FileObject[]> {
     return this.firebaseStorage.listFiles(bucket, folder);
   }
 

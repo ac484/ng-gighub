@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { FirebaseAuthService } from '@core';
 import { I18nPipe, SettingsService, User } from '@delon/theme';
 import { WorkspaceContextService } from '@shared';
@@ -46,7 +46,6 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
 })
 export class HeaderUserComponent {
   private readonly settings = inject(SettingsService);
-  private readonly router = inject(Router);
   private readonly firebaseAuth = inject(FirebaseAuthService);
   private readonly workspaceContext = inject(WorkspaceContextService);
 

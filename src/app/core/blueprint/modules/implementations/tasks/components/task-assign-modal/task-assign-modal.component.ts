@@ -11,13 +11,10 @@
  * @date 2025-12-17
  */
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Team, Partner } from '@core';
 import { BlueprintMemberRepository } from '@core/blueprint/repositories/blueprint-member.repository';
-import { PartnerRepository } from '@core/data-access/repositories/shared/partner.repository';
-import { TeamRepository } from '@core/data-access/repositories/shared/team.repository';
-import { FirebaseService } from '@core/services/firebase.service';
 import { TaskStore } from '@core/state/stores/task.store';
 import { BlueprintMember } from '@core/types/blueprint/blueprint.types';
 import { Task, AssigneeType } from '@core/types/task';
@@ -202,8 +199,6 @@ export class TaskAssignModalComponent implements OnInit {
   private message = inject(NzMessageService);
   private taskStore = inject(TaskStore);
   private memberRepository = inject(BlueprintMemberRepository);
-  private teamRepository = inject(TeamRepository);
-  private partnerRepository = inject(PartnerRepository);
   readonly modalData = inject<ModalData>(NZ_MODAL_DATA);
 
   // Expose enum to template

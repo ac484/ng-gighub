@@ -19,7 +19,7 @@ import {
   AuditStatus
 } from '@core/blueprint/modules/implementations/audit-logs';
 import { LogFirestoreRepository } from '@core/data-access/repositories/log-firestore.repository';
-import { Log, CreateLogRequest, UpdateLogRequest, LogPhoto } from '@core/types/log/log.types';
+import { Log, CreateLogRequest, UpdateLogRequest } from '@core/types/log/log.types';
 
 @Injectable({ providedIn: 'root' })
 export class ConstructionLogStore {
@@ -121,7 +121,7 @@ export class ConstructionLogStore {
   /**
    * Update an existing log
    */
-  async updateLog(blueprintId: string, logId: string, request: UpdateLogRequest): Promise<Log> {
+  async updateLog(_blueprintId: string, logId: string, request: UpdateLogRequest): Promise<Log> {
     try {
       await this.repository.update(logId, request);
 
@@ -145,7 +145,7 @@ export class ConstructionLogStore {
   /**
    * Delete a log (soft delete)
    */
-  async deleteLog(blueprintId: string, logId: string): Promise<void> {
+  async deleteLog(_blueprintId: string, logId: string): Promise<void> {
     try {
       await this.repository.delete(logId);
       this._logs.update(logs => logs.filter(log => log.id !== logId));
@@ -159,7 +159,7 @@ export class ConstructionLogStore {
   /**
    * Upload a photo to a log
    */
-  async uploadPhoto(blueprintId: string, logId: string, file: File, caption?: string): Promise<string> {
+  async uploadPhoto(_blueprintId: string, logId: string, file: File, caption?: string): Promise<string> {
     try {
       const photo = await this.repository.uploadPhoto(logId, file, caption);
 
@@ -184,7 +184,7 @@ export class ConstructionLogStore {
   /**
    * Delete a photo from a log
    */
-  async deletePhoto(blueprintId: string, logId: string, photoId: string): Promise<void> {
+  async deletePhoto(_blueprintId: string, logId: string, photoId: string): Promise<void> {
     try {
       await this.repository.deletePhoto(logId, photoId);
 

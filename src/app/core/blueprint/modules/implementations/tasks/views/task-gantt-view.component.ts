@@ -13,7 +13,7 @@
  */
 
 import { CdkDrag, CdkDragEnd } from '@angular/cdk/drag-drop';
-import { Component, input, computed, inject, signal, WritableSignal, DestroyRef } from '@angular/core';
+import { Component, input, computed, inject, signal, WritableSignal } from '@angular/core';
 import { GanttTask } from '@core/domain/types/task/task-view.types';
 import { Task } from '@core/domain/types/task/task.types';
 import { TaskStore } from '@core/state/stores/task.store';
@@ -361,8 +361,6 @@ enum ZoomLevel {
 export class TaskGanttViewComponent {
   private taskStore = inject(TaskStore);
   private message = inject(NzMessageService);
-  private destroyRef = inject(DestroyRef);
-
   // Inputs
   blueprintId = input.required<string>();
 
@@ -535,7 +533,7 @@ export class TaskGanttViewComponent {
   /**
    * Get dependency line position (using task map for O(1) lookup)
    */
-  getDependencyLinePosition(task: GanttTask, depId: string): number {
+  getDependencyLinePosition(_task: GanttTask, depId: string): number {
     const depTask = this.ganttTaskMap().get(depId);
     if (!depTask) return 0;
 
@@ -586,7 +584,7 @@ export class TaskGanttViewComponent {
   /**
    * Get priority color (currently returns default, can be customized via theme)
    */
-  getPriorityColor(ganttTask: GanttTask & { task?: Task }): string {
+  getPriorityColor(_ganttTask: GanttTask & { task?: Task }): string {
     // Currently returns default color
     // Can be extended to check ganttTask.task.priority if needed
     return 'default';

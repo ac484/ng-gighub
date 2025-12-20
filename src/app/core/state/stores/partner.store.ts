@@ -410,7 +410,7 @@ export class PartnerStore {
    * @param partnerId Partner ID (for validation and state update)
    * @param newRole New partner role
    */
-  async updateMemberRole(memberId: string, partnerId: string, newRole: PartnerRole): Promise<void> {
+  async updateMemberRole(memberId: string, _partnerId: string, newRole: PartnerRole): Promise<void> {
     try {
       // Update role in Firestore
       await this.memberRepository.updateRole(memberId, newRole);

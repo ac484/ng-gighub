@@ -7,7 +7,7 @@
  */
 
 import { Injectable, signal, inject } from '@angular/core';
-import { collection, addDoc, doc, getDocs, deleteDoc, updateDoc, query, where, orderBy, Timestamp } from '@angular/fire/firestore';
+import { collection, addDoc, doc, getDocs, deleteDoc, updateDoc, query, where, Timestamp } from '@angular/fire/firestore';
 import { LoggerService } from '@core';
 import { FirebaseStorageRepository } from '@core/infrastructure/storage';
 import { FirebaseService } from '@core/services/firebase.service';
@@ -222,7 +222,7 @@ export class CloudRepository {
   /**
    * Update file path (for folder rename)
    */
-  async updateFilePath(blueprintId: string, fileId: string, newPath: string): Promise<void> {
+  async updateFilePath(_blueprintId: string, fileId: string, newPath: string): Promise<void> {
     this.loading.set(true);
     this.error.set(null);
 

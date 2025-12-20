@@ -140,7 +140,7 @@ export class ContractTableComponent {
   /**
    * Handle table change events
    */
-  handleTableChange(event: STChange): void {
+  handleTableChange(_event: STChange): void {
     // Future: Add sorting, filtering support
   }
 }

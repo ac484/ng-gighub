@@ -38,7 +38,7 @@ export class AgreementService {
     return created;
   }
 
-  async uploadAttachment(blueprintId: string, agreementId: string, file: File): Promise<string> {
+  async uploadAttachment(_blueprintId: string, agreementId: string, file: File): Promise<string> {
     this._uploading.set(true);
     try {
       const path = `agreements/${agreementId}/${file.name}`;

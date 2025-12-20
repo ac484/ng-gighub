@@ -31,7 +31,6 @@ import { IssueDetailsComponent } from './features/issue-details';
 import { IssueFormComponent } from './features/issue-form';
 import { IssueListComponent } from './features/issue-list';
 import { IssueStatisticsComponent } from './features/issue-statistics';
-import { escapeHtml, formatStatusText, formatSeverityText, formatSourceText } from './shared';
 
 @Component({
   selector: 'app-issues-module-view',

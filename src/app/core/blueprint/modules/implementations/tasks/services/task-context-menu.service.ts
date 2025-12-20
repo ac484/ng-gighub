@@ -386,7 +386,7 @@ export class TaskContextMenuService {
    * @returns True if submenu action
    * @private
    */
-  private isSubmenuAction(action: MenuAction): boolean {
+  private isSubmenuAction(_action: MenuAction): boolean {
     // Submenu actions don't close the menu immediately
     return false; // All actions close menu for now
   }
@@ -399,7 +399,7 @@ export class TaskContextMenuService {
    * @returns True if has children (placeholder logic)
    * @private
    */
-  private hasChildren(task: Task): boolean {
+  private hasChildren(_task: Task): boolean {
     // TODO: Implement actual check (query children from repository)
     // For now, assume tasks can have children
     return true;

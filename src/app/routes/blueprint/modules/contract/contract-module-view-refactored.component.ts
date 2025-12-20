@@ -278,7 +278,7 @@ export class ContractModuleViewComponent implements OnInit {
   /**
    * Download contract
    */
-  private downloadContract(contract: Contract): void {
+  private downloadContract(_contract: Contract): void {
     // TODO: Implement contract download
     this.message.info('下載功能開發中');
   }

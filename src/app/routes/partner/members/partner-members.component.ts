@@ -201,7 +201,6 @@ export class PartnerMembersComponent implements OnInit {
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
   private previousContext: { type: ContextType; id: string | null } | null = null;
