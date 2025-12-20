@@ -3,7 +3,8 @@
  * Supports both Gemini Developer API and Vertex AI with environment-based auto-configuration
  */
 
-import { GenAIConfig, GenAIError, GenAIErrorType } from '../types/genai.types';
+import {getGoogleCloudConfig} from './cloud.config';
+import {GenAIConfig, GenAIError, GenAIErrorType} from '../types/genai.types';
 
 /**
  * Environment variables for GenAI configuration
@@ -15,8 +16,6 @@ const ENV_VARS = {
 
   // Vertex AI
   VERTEXAI_ENABLED: 'GOOGLE_GENAI_USE_VERTEXAI',
-  VERTEXAI_PROJECT: 'GOOGLE_CLOUD_PROJECT',
-  VERTEXAI_LOCATION: 'GOOGLE_CLOUD_LOCATION',
 
   // Common
   GENAI_TIMEOUT: 'GENAI_TIMEOUT'
@@ -26,9 +25,7 @@ const ENV_VARS = {
  * Default configuration values
  */
 const DEFAULTS = {
-  timeout: 60000, // 60 seconds
   apiVersion: 'v1beta', // Latest stable API
-  location: 'us-central1', // Default GCP location
   model: 'gemini-2.5-flash' // Latest and fastest model
 };
 
@@ -42,6 +39,7 @@ const DEFAULTS = {
  */
 export class GenAIConfigManager {
   private static instance: GenAIConfigManager;
+  private readonly cloudConfig = getGoogleCloudConfig();
   private config: GenAIConfig;
 
   private constructor() {
@@ -65,28 +63,27 @@ export class GenAIConfigManager {
    */
   private loadConfig(): GenAIConfig {
     const useVertexAI = this.parseBoolean(process.env[ENV_VARS.VERTEXAI_ENABLED]);
+    const timeout = this.cloudConfig.getTimeout();
+    const apiVersion = process.env[ENV_VARS.GEMINI_API_VERSION] || DEFAULTS.apiVersion;
 
     if (useVertexAI) {
       // Vertex AI configuration
       return {
         vertexai: true,
-        project:
-          process.env[ENV_VARS.VERTEXAI_PROJECT] ||
-          process.env.GCP_PROJECT || // Alternative env var
-          process.env.GCLOUD_PROJECT, // Alternative env var
-        location: process.env[ENV_VARS.VERTEXAI_LOCATION] || DEFAULTS.location,
-        apiVersion: process.env[ENV_VARS.GEMINI_API_VERSION] || DEFAULTS.apiVersion,
-        timeout: this.parseTimeout(process.env[ENV_VARS.GENAI_TIMEOUT])
-      };
-    } else {
-      // Gemini Developer API configuration
-      return {
-        vertexai: false,
-        apiKey: process.env[ENV_VARS.GEMINI_API_KEY],
-        apiVersion: process.env[ENV_VARS.GEMINI_API_VERSION] || DEFAULTS.apiVersion,
-        timeout: this.parseTimeout(process.env[ENV_VARS.GENAI_TIMEOUT])
+        project: this.cloudConfig.getRequiredProjectId(),
+        location: this.cloudConfig.getLocation(),
+        apiVersion,
+        timeout
       };
     }
+
+    // Gemini Developer API configuration
+    return {
+      vertexai: false,
+      apiKey: process.env[ENV_VARS.GEMINI_API_KEY],
+      apiVersion,
+      timeout
+    };
   }
 
   /**
@@ -96,15 +93,24 @@ export class GenAIConfigManager {
     if (this.config.vertexai) {
       // Vertex AI requires project and location
       if (!this.config.project) {
-        throw new GenAIError(`Vertex AI requires GOOGLE_CLOUD_PROJECT environment variable`, GenAIErrorType.AUTHENTICATION_ERROR);
+        throw new GenAIError(
+          `Vertex AI requires GOOGLE_CLOUD_PROJECT environment variable`,
+          GenAIErrorType.AUTHENTICATION_ERROR
+        );
       }
       if (!this.config.location) {
-        throw new GenAIError(`Vertex AI requires GOOGLE_CLOUD_LOCATION environment variable`, GenAIErrorType.AUTHENTICATION_ERROR);
+        throw new GenAIError(
+          `Vertex AI requires GOOGLE_CLOUD_LOCATION environment variable`,
+          GenAIErrorType.AUTHENTICATION_ERROR
+        );
       }
     } else {
       // Gemini API requires API key
       if (!this.config.apiKey) {
-        throw new GenAIError(`Gemini API requires GOOGLE_API_KEY environment variable`, GenAIErrorType.AUTHENTICATION_ERROR);
+        throw new GenAIError(
+          `Gemini API requires GOOGLE_API_KEY environment variable`,
+          GenAIErrorType.AUTHENTICATION_ERROR
+        );
       }
     }
   }
@@ -113,7 +119,7 @@ export class GenAIConfigManager {
    * Get current configuration
    */
   public getConfig(): GenAIConfig {
-    return { ...this.config };
+    return {...this.config};
   }
 
   /**
@@ -122,21 +128,19 @@ export class GenAIConfigManager {
    */
   public getSDKConfig(): any {
     const sdkConfig: any = {
-      apiVersion: this.config.apiVersion
+      apiVersion: this.config.apiVersion,
+      httpOptions: {
+        timeout: this.config.timeout
+      }
     };
 
     if (this.config.vertexai) {
       sdkConfig.vertexai = true;
       sdkConfig.project = this.config.project;
       sdkConfig.location = this.config.location;
+      sdkConfig.googleAuthOptions = this.cloudConfig.getGoogleAuthOptions();
     } else {
       sdkConfig.apiKey = this.config.apiKey;
-    }
-
-    if (this.config.timeout) {
-      sdkConfig.httpOptions = {
-        timeout: this.config.timeout
-      };
     }
 
     return sdkConfig;
@@ -162,15 +166,6 @@ export class GenAIConfigManager {
   private parseBoolean(value?: string): boolean {
     if (!value) return false;
     return ['true', '1', 'yes', 'on'].includes(value.toLowerCase());
-  }
-
-  /**
-   * Parse timeout from string
-   */
-  private parseTimeout(value?: string): number {
-    if (!value) return DEFAULTS.timeout;
-    const parsed = parseInt(value, 10);
-    return isNaN(parsed) ? DEFAULTS.timeout : parsed;
   }
 
   /**
