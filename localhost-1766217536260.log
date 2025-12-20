@@ -1,0 +1,150 @@
+inject.js:125 [yoroi/prod] dapp-connector is successfully injected into localhost
+console-transport.ts:23 [INFO] Object
+debug_node.mjs:18311 Angular is running in development mode.
+index.esm2017.js:1498 App Check debug token: 9cf09d05-334c-4969-a385-9fd4ebfc535b. You will need to add it to your app's App Check settings in the Firebase console for it to work.
+content-firebaseappcheck.googleapis.com/v1/projects/elite-chiller-455712-c4/apps/1:7807661688:web:5f96a5fe30b799f31d1f8d:exchangeDebugToken?key=AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI:1   Failed to load resource: the server responded with a status of 403 ()
+index.esm2017.js:78  [2025-12-20T07:57:05.070Z]  @firebase/auth: Auth (11.10.0): Error while retrieving App Check token: FirebaseError: AppCheck: Fetch server returned an HTTP error status. HTTP status: 403. (appCheck/fetch-status-error).
+defaultLogHandler @ index.esm2017.js:78
+inject.js:125 [yoroi/prod] dapp-connector is successfully injected into www.google.com
+console-transport.ts:23 [INFO] Object
+content-firebaseappcheck.googleapis.com/v1/projects/elite-chiller-455712-c4/apps/1:7807661688:web:5f96a5fe30b799f31d1f8d:exchangeDebugToken?key=AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI:1   Failed to load resource: the server responded with a status of 403 ()
+index.esm2017.js:78  [2025-12-20T07:57:06.849Z]  @firebase/auth: Auth (11.10.0): Error while retrieving App Check token: FirebaseError: AppCheck: Fetch server returned an HTTP error status. HTTP status: 403. (appCheck/fetch-status-error).
+defaultLogHandler @ index.esm2017.js:78
+content-firebaseappcheck.googleapis.com/v1/projects/elite-chiller-455712-c4/apps/1:7807661688:web:5f96a5fe30b799f31d1f8d:exchangeDebugToken?key=AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI:1   Failed to load resource: the server responded with a status of 403 ()
+index.esm2017.js:78  [2025-12-20T07:57:07.544Z]  @firebase/auth: Auth (11.10.0): Error while retrieving App Check token: FirebaseError: AppCheck: Fetch server returned an HTTP error status. HTTP status: 403. (appCheck/fetch-status-error).
+defaultLogHandler @ index.esm2017.js:78
+angular-fire.mjs:114  Calling Firebase APIs outside of an Injection context may destabilize your application leading to subtle change-detection and hydration bugs. Find more at https://github.com/angular/angularfire/blob/main/docs/zones.md
+warnOutsideInjectionContext @ angular-fire.mjs:114
+angular-fire.mjs:117  Firebase API called outside injection context: onSnapshot
+warnOutsideInjectionContext @ angular-fire.mjs:117
+angular-fire.mjs:117  Firebase API called outside injection context: getDocs
+warnOutsideInjectionContext @ angular-fire.mjs:117
+angular-fire.mjs:117  Firebase API called outside injection context: onSnapshot
+warnOutsideInjectionContext @ angular-fire.mjs:117
+angular-fire.mjs:117  Firebase API called outside injection context: getDocs
+warnOutsideInjectionContext @ angular-fire.mjs:117
+angular-fire.mjs:117  Firebase API called outside injection context: getDocs
+warnOutsideInjectionContext @ angular-fire.mjs:117
+menu-management.service.ts:66 [MenuManagementService] Config loaded: Object
+basic.component.ts:166 [LayoutBasicComponent] Menu config loaded, setting initial menu
+menu-management.service.ts:103 [MenuManagementService] Menu updated successfully: Object
+workspace-context.service.ts:68 [WorkspaceContextService] 👤 User authenticated: ac7x@pm.me
+console-transport.ts:30  [ERROR] Object
+log @ console-transport.ts:30
+root_effect_scheduler.mjs:3637  ERROR Object
+handleError @ root_effect_scheduler.mjs:3637
+content-firebaseappcheck.googleapis.com/v1/projects/elite-chiller-455712-c4/apps/1:7807661688:web:5f96a5fe30b799f31d1f8d:exchangeDebugToken?key=AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI:1   Failed to load resource: the server responded with a status of 403 ()
+console-transport.ts:30  [ERROR] Object
+log @ console-transport.ts:30
+console-transport.ts:30  [ERROR] Object
+log @ console-transport.ts:30
+console-transport.ts:23 [INFO] Object
+console-transport.ts:23 [INFO] Object
+console-transport.ts:23 [INFO] Object
+workspace-context.service.ts:83 [WorkspaceContextService] ✅ Organizations loaded: 1
+:4200/assets/outline/block.svg:1   Failed to load resource: the server responded with a status of 404 (Not Found)
+zone.js:165  Uncaught Error: [@ant-design/icons-angular]:the icon block-o does not exist or is not registered.
+    at IconNotFoundError (ant-design-icons-angular.mjs:90:10)
+    at ant-design-icons-angular.mjs:233:15
+    at map.js:7:37
+    at OperatorSubscriber2._this._next (OperatorSubscriber.js:15:21)
+    at Subscriber2.next (Subscriber.js:34:18)
+    at Subject.js:41:34
+    at errorContext (errorContext.js:19:9)
+    at Subject2.next (Subject.js:31:9)
+    at Object.next (share.js:46:58)
+    at ConsumerObserver2.next (Subscriber.js:96:33)
+workspace-context.service.ts:97 [WorkspaceContextService] ✅ Teams loaded: 1
+workspace-context.service.ts:98 [WorkspaceContextService] ✅ Partners loaded: 0
+workspace-context.service.ts:312 [WorkspaceContextService] 🔄 Auto-restoring context...
+workspace-context.service.ts:475 [WorkspaceContextService] 💾 Restoring context from localStorage: {"type":"user","id":"YmebcYDwa6dGylG78kZrkRRfFsr2"}
+workspace-context.service.ts:481 [WorkspaceContextService] ✅ Context restored: Object
+angular-fire.mjs:117  Firebase API called outside injection context: getDocs
+warnOutsideInjectionContext @ angular-fire.mjs:117
+console-transport.ts:23 [INFO] Object
+:4200/assets/outline/block.svg:1   Failed to load resource: the server responded with a status of 404 (Not Found)
+zone.js:165  Uncaught Error: [@ant-design/icons-angular]:the icon block-o does not exist or is not registered.
+    at IconNotFoundError (ant-design-icons-angular.mjs:90:10)
+    at ant-design-icons-angular.mjs:233:15
+    at map.js:7:37
+    at OperatorSubscriber2._this._next (OperatorSubscriber.js:15:21)
+    at Subscriber2.next (Subscriber.js:34:18)
+    at Subject.js:41:34
+    at errorContext (errorContext.js:19:9)
+    at Subject2.next (Subject.js:31:9)
+    at Object.next (share.js:46:58)
+    at ConsumerObserver2.next (Subscriber.js:96:33)
+angular-fire.mjs:117  Firebase API called outside injection context: getDoc
+warnOutsideInjectionContext @ angular-fire.mjs:117
+console-transport.ts:23 [INFO] Object
+ng-zorro-antd-core-logger.mjs:26  [NG-ZORRO]: [NG-ZORRO]: <nz-tabset> is deprecated, please use <nz-tabs> instead.
+(匿名) @ ng-zorro-antd-core-logger.mjs:26
+console-transport.ts:23 [INFO] Object
+angular-fire.mjs:117  Firebase API called outside injection context: getDocs
+warnOutsideInjectionContext @ angular-fire.mjs:117
+browser.mjs:1628  Warning: The animation trigger "tabSwitchMotion" is attempting to animate the following not animatable properties: display
+(to check the list of all animatable properties visit https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_animated_properties)
+checkNonAnimatableInTimelines @ browser.mjs:1628
+console-transport.ts:23 [INFO] Object
+console-transport.ts:23 [INFO] Object
+angular-fire.mjs:117  Firebase API called outside injection context: getDocs
+warnOutsideInjectionContext @ angular-fire.mjs:117
+browser.mjs:1628  Warning: The animation trigger "tabSwitchMotion" is attempting to animate the following not animatable properties: display
+(to check the list of all animatable properties visit https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_animated_properties)
+checkNonAnimatableInTimelines @ browser.mjs:1628
+browser.mjs:1628  Warning: The animation trigger "tabSwitchMotion" is attempting to animate the following not animatable properties: display
+(to check the list of all animatable properties visit https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_animated_properties)
+checkNonAnimatableInTimelines @ browser.mjs:1628
+angular-fire.mjs:117  Firebase API called outside injection context: httpsCallable
+warnOutsideInjectionContext @ angular-fire.mjs:117
+content-firebaseappcheck.googleapis.com/v1/projects/elite-chiller-455712-c4/apps/1:7807661688:web:5f96a5fe30b799f31d1f8d:exchangeDebugToken?key=AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI:1   Failed to load resource: the server responded with a status of 403 ()
+:4200/#/blueprints/user/YtZ0aPttzyKw3xxjDljm:1  Access to fetch at 'https://us-central1-elite-chiller-455712-c4.cloudfunctions.net/processDocumentFromStorage' from origin 'http://localhost:4200' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+us-central1-elite-chiller-455712-c4.cloudfunctions.net/processDocumentFromStorage:1   Failed to load resource: net::ERR_FAILED
+agreement-module-view.component.ts:171  [AgreementModuleView] parse failed FirebaseError: internal
+(匿名) @ agreement-module-view.component.ts:171
+angular-fire.mjs:117  Firebase API called outside injection context: httpsCallable
+warnOutsideInjectionContext @ angular-fire.mjs:117
+content-firebaseappcheck.googleapis.com/v1/projects/elite-chiller-455712-c4/apps/1:7807661688:web:5f96a5fe30b799f31d1f8d:exchangeDebugToken?key=AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI:1   Failed to load resource: the server responded with a status of 403 ()
+:4200/#/blueprints/user/YtZ0aPttzyKw3xxjDljm:1  Access to fetch at 'https://us-central1-elite-chiller-455712-c4.cloudfunctions.net/processDocumentFromStorage' from origin 'http://localhost:4200' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+us-central1-elite-chiller-455712-c4.cloudfunctions.net/processDocumentFromStorage:1   Failed to load resource: net::ERR_FAILED
+agreement-module-view.component.ts:171  [AgreementModuleView] parse failed FirebaseError: internal
+(匿名) @ agreement-module-view.component.ts:171
+angular-fire.mjs:117  Firebase API called outside injection context: httpsCallable
+warnOutsideInjectionContext @ angular-fire.mjs:117
+content-firebaseappcheck.googleapis.com/v1/projects/elite-chiller-455712-c4/apps/1:7807661688:web:5f96a5fe30b799f31d1f8d:exchangeDebugToken?key=AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI:1   Failed to load resource: the server responded with a status of 403 ()
+:4200/#/blueprints/user/YtZ0aPttzyKw3xxjDljm:1  Access to fetch at 'https://us-central1-elite-chiller-455712-c4.cloudfunctions.net/processDocumentFromStorage' from origin 'http://localhost:4200' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+us-central1-elite-chiller-455712-c4.cloudfunctions.net/processDocumentFromStorage:1   Failed to load resource: net::ERR_FAILED
+agreement-module-view.component.ts:171  [AgreementModuleView] parse failed FirebaseError: internal
+(匿名) @ agreement-module-view.component.ts:171
+angular-fire.mjs:117  Firebase API called outside injection context: httpsCallable
+warnOutsideInjectionContext @ angular-fire.mjs:117
+content-firebaseappcheck.googleapis.com/v1/projects/elite-chiller-455712-c4/apps/1:7807661688:web:5f96a5fe30b799f31d1f8d:exchangeDebugToken?key=AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI:1   Failed to load resource: the server responded with a status of 403 ()
+:4200/#/blueprints/user/YtZ0aPttzyKw3xxjDljm:1  Access to fetch at 'https://us-central1-elite-chiller-455712-c4.cloudfunctions.net/processDocumentFromStorage' from origin 'http://localhost:4200' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+us-central1-elite-chiller-455712-c4.cloudfunctions.net/processDocumentFromStorage:1   Failed to load resource: net::ERR_FAILED
+agreement-module-view.component.ts:171  [AgreementModuleView] parse failed FirebaseError: internal
+(匿名) @ agreement-module-view.component.ts:171
+angular-fire.mjs:117  Firebase API called outside injection context: httpsCallable
+warnOutsideInjectionContext @ angular-fire.mjs:117
+content-firebaseappcheck.googleapis.com/v1/projects/elite-chiller-455712-c4/apps/1:7807661688:web:5f96a5fe30b799f31d1f8d:exchangeDebugToken?key=AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI:1   Failed to load resource: the server responded with a status of 403 ()
+:4200/#/blueprints/user/YtZ0aPttzyKw3xxjDljm:1  Access to fetch at 'https://us-central1-elite-chiller-455712-c4.cloudfunctions.net/processDocumentFromStorage' from origin 'http://localhost:4200' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+us-central1-elite-chiller-455712-c4.cloudfunctions.net/processDocumentFromStorage:1   Failed to load resource: net::ERR_FAILED
+agreement-module-view.component.ts:171  [AgreementModuleView] parse failed FirebaseError: internal
+(匿名) @ agreement-module-view.component.ts:171
+content-firebaseappcheck.googleapis.com/v1/projects/elite-chiller-455712-c4/apps/1:7807661688:web:5f96a5fe30b799f31d1f8d:exchangeDebugToken?key=AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI:1   Failed to load resource: the server responded with a status of 403 ()
+angular-fire.mjs:117  Firebase API called outside injection context: httpsCallable
+warnOutsideInjectionContext @ angular-fire.mjs:117
+content-firebaseappcheck.googleapis.com/v1/projects/elite-chiller-455712-c4/apps/1:7807661688:web:5f96a5fe30b799f31d1f8d:exchangeDebugToken?key=AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI:1   Failed to load resource: the server responded with a status of 403 ()
+:4200/#/blueprints/user/YtZ0aPttzyKw3xxjDljm:1  Access to fetch at 'https://us-central1-elite-chiller-455712-c4.cloudfunctions.net/processDocumentFromStorage' from origin 'http://localhost:4200' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+us-central1-elite-chiller-455712-c4.cloudfunctions.net/processDocumentFromStorage:1   Failed to load resource: net::ERR_FAILED
+agreement-module-view.component.ts:171  [AgreementModuleView] parse failed FirebaseError: internal
+(匿名) @ agreement-module-view.component.ts:171
+content-firebaseappcheck.googleapis.com/v1/projects/elite-chiller-455712-c4/apps/1:7807661688:web:5f96a5fe30b799f31d1f8d:exchangeDebugToken?key=AIzaSyCJ-eayGjJwBKsNIh3oEAG2GjbfTrvAMEI:1   Failed to load resource: the server responded with a status of 403 ()
+debug_node.mjs:23282  NG0956: The configured tracking expression (track by identity) caused re-creation of the entire collection of size 1. This is an expensive operation requiring destruction and subsequent creation of DOM nodes, directives, components etc. Please review the "track expression" and make sure that it uniquely identifies items in a collection. Find more at https://v20.angular.dev/errors/NG0956
+ɵɵrepeater @ debug_node.mjs:23282
+debug_node.mjs:23282  NG0956: The configured tracking expression (track by identity) caused re-creation of the entire collection of size 10. This is an expensive operation requiring destruction and subsequent creation of DOM nodes, directives, components etc. Please review the "track expression" and make sure that it uniquely identifies items in a collection. Find more at https://v20.angular.dev/errors/NG0956
+ɵɵrepeater @ debug_node.mjs:23282
+[新增] 使用 Copilot in Edge 來解釋主控台錯誤: 點擊
+         
+         以解釋錯誤。
+        深入了解
+        不再顯示
