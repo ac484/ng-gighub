@@ -41,9 +41,10 @@ export class AgreementRepository {
 
   async findByBlueprintId(blueprintId: string): Promise<Agreement[]> {
     try {
-      const q = query(this.collectionRef, where('blueprintId', '==', blueprintId), orderBy('effectiveDate', 'desc'));
+      const q = query(this.collectionRef, where('blueprintId', '==', blueprintId));
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => this.toEntity(doc.data(), doc.id));
+      const items = snapshot.docs.map(doc => this.toEntity(doc.data(), doc.id));
+      return items.sort((a, b) => b.effectiveDate.getTime() - a.effectiveDate.getTime());
     } catch (error) {
       this.logger.error('[AgreementRepository]', 'Failed to load agreements', error as Error, { blueprintId });
       return [];

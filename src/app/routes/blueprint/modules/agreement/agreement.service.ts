@@ -62,7 +62,7 @@ export class AgreementService {
 
     const storageRef = this.firebase.storageRef(agreement.attachmentPath);
     const bucket: string | undefined = (storageRef as any).bucket;
-    const gcsUri = bucket ? `gs://${bucket}/${agreement.attachmentPath}` : undefined;
+    const gcsUri = bucket ? `gs://${bucket}/${agreement.attachmentPath}` : null;
 
     if (!gcsUri) {
       throw new Error('無法取得檔案路徑');
