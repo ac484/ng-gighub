@@ -78,11 +78,25 @@ DOCUMENTAI_PROCESSOR_ID=abc123def456
 
 **Authentication Note**: Firebase Cloud Functions automatically use Application Default Credentials (ADC) for Google Cloud API authentication. No service account keys, credentials files, or project ID environment variables need to be configured manually.
 
+### Configure via Secrets (recommended)
+
+You can store processor settings as Firebase Functions secrets (keeps values out of source control):
+
+```bash
+firebase functions:secrets:set DOCUMENTAI_LOCATION --data="us"
+firebase functions:secrets:set DOCUMENTAI_PROCESSOR_ID --data="d8cd080814899dc4"
+```
+
+> If you prefer runtime config, the function also reads `documentai.location` and `documentai.processor_id` from `functions:config:set`, but secrets are recommended.
+
 ### 4. Verify Configuration
 
 ```bash
 # List all runtime config values
 firebase functions:config:get documentai
+# List secrets
+firebase functions:secrets:get DOCUMENTAI_LOCATION
+firebase functions:secrets:get DOCUMENTAI_PROCESSOR_ID
 ```
 
 ### 5. Deploy Functions
