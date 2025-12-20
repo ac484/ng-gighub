@@ -35,7 +35,7 @@
   "functions": [
     {
       "source": "functions-observability",
-      "codebase": "functions-ai-document",
+      "codebase": "functions-observability",
       "disallowLegacyRuntimeConfig": true,
       "ignore": [
         "node_modules",
@@ -51,7 +51,7 @@
     },
     {
       "source": "functions-governance",
-      "codebase": "functions-ai-document",
+      "codebase": "functions-observability",
       "disallowLegacyRuntimeConfig": true,
       "ignore": [
         "node_modules",
@@ -67,7 +67,7 @@
     },
     {
       "source": "functions-orchestration",
-      "codebase": "functions-ai-document",
+      "codebase": "functions-observability",
       "disallowLegacyRuntimeConfig": true,
       "ignore": [
         "node_modules",
