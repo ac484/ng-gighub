@@ -26,7 +26,7 @@ This Firebase Cloud Function provides automated document processing capabilities
   - Automatic authentication via Application Default Credentials (ADC)
   - No service account setup required
   - Project ID automatically detected from Firebase runtime
-  - Only 2 secrets needed: processor location and processor ID
+  - Only 2 environment values needed: processor location and processor ID
 
 ## Prerequisites
 
@@ -54,37 +54,33 @@ gcloud services enable documentai.googleapis.com --project=YOUR_PROJECT_ID
 4. Choose your location (e.g., "us" or "eu")
 5. Note the **Processor ID** and **Location** - you'll need these
 
-### 3. Configure Firebase Secrets
+### 3. Configure Environment Variables
 
-Set the required secrets using Firebase CLI. These are the **only** configuration values needed - authentication and project ID are handled automatically by Firebase Cloud Functions.
+Set the required values using Firebase runtime config or `.env` files. These are the **only** configuration values needed - authentication and project ID are handled automatically by Firebase Cloud Functions.
 
 ```bash
 # Set processor location (e.g., 'us', 'eu', 'asia-east1')
-firebase functions:secrets:set DOCUMENTAI_LOCATION
+firebase functions:config:set documentai.location="us"
 
 # Set processor ID from Cloud Console
-firebase functions:secrets:set DOCUMENTAI_PROCESSOR_ID
+firebase functions:config:set documentai.processor_id="abc123def456"
 ```
 
 **Important**: When prompted, enter the values you noted from step 2.
 
-Example:
+Example `.env` file (stored at `functions-ai-document/.env`):
 ```bash
-$ firebase functions:secrets:set DOCUMENTAI_LOCATION
-? Enter a value for DOCUMENTAI_LOCATION: us
-
-$ firebase functions:secrets:set DOCUMENTAI_PROCESSOR_ID  
-? Enter a value for DOCUMENTAI_PROCESSOR_ID: abc123def456
+DOCUMENTAI_LOCATION=us
+DOCUMENTAI_PROCESSOR_ID=abc123def456
 ```
 
 **Authentication Note**: Firebase Cloud Functions automatically use Application Default Credentials (ADC) for Google Cloud API authentication. No service account keys, credentials files, or project ID environment variables need to be configured manually.
 
-### 4. Verify Secrets
+### 4. Verify Configuration
 
 ```bash
-# List all secrets
-firebase functions:secrets:access DOCUMENTAI_LOCATION
-firebase functions:secrets:access DOCUMENTAI_PROCESSOR_ID
+# List all runtime config values
+firebase functions:config:get documentai
 ```
 
 ### 5. Deploy Functions
@@ -536,7 +532,7 @@ The functions implement comprehensive error handling:
 | Error Code | Description | Resolution |
 |------------|-------------|------------|
 | `invalid-argument` | Invalid request parameters | Check request format and values |
-| `failed-precondition` | Missing configuration or secrets | Set required secrets via Firebase CLI |
+| `failed-precondition` | Missing configuration values | Ensure required environment variables are set |
 | `permission-denied` | Authentication failure | Provide valid Firebase ID token |
 | `not-found` | Document or resource not found | Verify GCS URI exists |
 | `resource-exhausted` | Rate limit exceeded | Implement retry with exponential backoff |
@@ -545,7 +541,7 @@ The functions implement comprehensive error handling:
 ## Security Best Practices
 
 1. **Authentication**: Always require Firebase Authentication
-2. **Secrets Management**: Use Firebase Functions secrets for sensitive data
+2. **Configuration Management**: Use Firebase Functions runtime config or `.env` files for non-sensitive settings; reserve Secrets for sensitive data
 3. **Access Control**: Implement proper IAM roles and permissions
 4. **Input Validation**: Validate all input parameters
 5. **Audit Logging**: Monitor all processing operations
@@ -563,10 +559,10 @@ The functions implement comprehensive error handling:
 
 ### Common Issues
 
-**Issue**: "Missing required secret: DOCUMENTAI_LOCATION"
+**Issue**: "Missing required environment variable: DOCUMENTAI_LOCATION"
 ```bash
-# Solution: Set the secret using Firebase CLI
-firebase functions:secrets:set DOCUMENTAI_LOCATION
+# Solution: Set the value using runtime config or .env
+firebase functions:config:set documentai.location="us"
 ```
 
 **Issue**: "Invalid GCS URI format"
