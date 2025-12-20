@@ -120,8 +120,10 @@ export const processDocumentFromStorage = onCall<ProcessRequest>(async request =
   }
 
   const projectId = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT;
-  const location = process.env.DOCUMENTAI_LOCATION;
-  const processorId = process.env.DOCUMENTAI_PROCESSOR_ID;
+  const configFn = (require('firebase-functions') as any)?.config;
+  const runtimeConfig = typeof configFn === 'function' ? configFn() : {};
+  const location = process.env.DOCUMENTAI_LOCATION || runtimeConfig?.documentai?.location;
+  const processorId = process.env.DOCUMENTAI_PROCESSOR_ID || runtimeConfig?.documentai?.processor_id || runtimeConfig?.documentai?.processorId;
 
   if (!projectId || !location || !processorId) {
     throw new HttpsError('failed-precondition', 'Missing DOCUMENTAI_LOCATION or DOCUMENTAI_PROCESSOR_ID configuration');
