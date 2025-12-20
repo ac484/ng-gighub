@@ -83,8 +83,8 @@ DOCUMENTAI_PROCESSOR_ID=abc123def456
 You can store processor settings as Firebase Functions secrets (keeps values out of source control):
 
 ```bash
-firebase functions:secrets:set DOCUMENTAI_LOCATION --data="us"
-firebase functions:secrets:set DOCUMENTAI_PROCESSOR_ID --data="d8cd080814899dc4"
+firebase functions:secrets:set DOCUMENTAI_LOCATION "us"
+firebase functions:secrets:set DOCUMENTAI_PROCESSOR_ID "d8cd080814899dc4"
 ```
 
 > If you prefer runtime config, the function also reads `documentai.location` and `documentai.processor_id` from `functions:config:set`, but secrets are recommended.
