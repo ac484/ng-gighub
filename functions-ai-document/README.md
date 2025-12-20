@@ -56,31 +56,32 @@ gcloud services enable documentai.googleapis.com --project=YOUR_PROJECT_ID
 
 ### 3. Configure Environment Variables
 
-Set the required values using Firebase runtime config or `.env` files. These are the **only** configuration values needed - authentication and project ID are handled automatically by Firebase Cloud Functions.
+Set the required values using environment variables via `.env` file. These are the **only** configuration values needed - authentication and project ID are handled automatically by Firebase Cloud Functions.
 
-```bash
-# Set processor location (e.g., 'us', 'eu', 'asia-east1')
-firebase functions:config:set documentai.location="us"
+**Firebase Functions v7+ Migration**: The legacy `firebase functions:config` API has been removed. Use `.env` files instead.
 
-# Set processor ID from Cloud Console
-firebase functions:config:set documentai.processor_id="abc123def456"
-```
-
-**Important**: When prompted, enter the values you noted from step 2.
-
-Example `.env` file (stored at `functions-ai-document/.env`):
+Example `.env` file (create at `functions-ai-document/.env`):
 ```bash
 DOCUMENTAI_LOCATION=us
-DOCUMENTAI_PROCESSOR_ID=abc123def456
+DOCUMENTAI_PROCESSOR_ID=d8cd080814899dc4
 ```
+
+**Important**: 
+- Copy `.env.example` to `.env` and fill in your actual values
+- The `.env` file is gitignored for security
+- Set processor location and ID from step 2
 
 **Authentication Note**: Firebase Cloud Functions automatically use Application Default Credentials (ADC) for Google Cloud API authentication. No service account keys, credentials files, or project ID environment variables need to be configured manually.
 
 ### 4. Verify Configuration
 
 ```bash
-# List all runtime config values
-firebase functions:config:get documentai
+# Check if .env file exists and has correct values
+cat functions-ai-document/.env
+
+# Test the function locally (optional)
+cd functions-ai-document
+npm run serve
 ```
 
 ### 5. Deploy Functions
@@ -561,8 +562,19 @@ The functions implement comprehensive error handling:
 
 **Issue**: "Missing required environment variable: DOCUMENTAI_LOCATION"
 ```bash
-# Solution: Set the value using runtime config or .env
-firebase functions:config:set documentai.location="us"
+# Solution: Create .env file with required values
+cd functions-ai-document
+cp .env.example .env
+# Edit .env and set DOCUMENTAI_LOCATION=us
+```
+
+**Issue**: "functions.config() has been removed in firebase-functions v7"
+```bash
+# Solution: Firebase Functions v7+ removed legacy config API
+# Migrate to .env file:
+# 1. Create functions-ai-document/.env
+# 2. Set DOCUMENTAI_LOCATION and DOCUMENTAI_PROCESSOR_ID
+# 3. Redeploy: firebase deploy --only functions:processDocumentFromStorage
 ```
 
 **Issue**: "Invalid GCS URI format"
