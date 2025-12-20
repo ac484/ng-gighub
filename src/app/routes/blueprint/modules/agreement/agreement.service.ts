@@ -13,14 +13,14 @@ export class AgreementService {
   private readonly firebase = inject(FirebaseService);
   private readonly functions = inject(Functions);
 
-  // ✅ Create callable during injection context with extended timeout
-  // Document AI processing can take 5-8 minutes for complex/large PDFs
-  // Set timeout to 480 seconds (8 minutes) to allow sufficient processing time
-  // Backend Cloud Function has 540 seconds (9 minutes) timeout
+  // ✅ Create callable during injection context with reasonable timeout
+  // Document AI typically processes PDFs in 10-60 seconds for normal documents
+  // Set timeout to 120 seconds (2 minutes) which is sufficient for most cases
+  // If timeout occurs, check backend logs for actual error (likely configuration issue)
   private readonly processDocumentFromStorage = httpsCallable<
     { gcsUri: string; mimeType: string },
     { success: boolean; result: { [key: string]: unknown } }
-  >(this.functions, 'processDocumentFromStorage', { timeout: 480000 });
+  >(this.functions, 'processDocumentFromStorage', { timeout: 120000 });
 
   private readonly _agreements = signal<Agreement[]>([]);
   private readonly _loading = signal(false);

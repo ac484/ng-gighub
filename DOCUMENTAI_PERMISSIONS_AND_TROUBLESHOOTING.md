@@ -140,6 +140,100 @@ resource "google_project_iam_member" "firebase_documentai" {
 
 ---
 
+## 🐛 問題排查：500 Internal Server Error
+
+### 問題描述
+
+**症狀**:
+- Console 顯示：`POST https://asia-east1-xxx.cloudfunctions.net/processDocumentFromStorage 500 (Internal Server Error)`
+- 小文件（150KB）也無法處理
+- 錯誤發生在呼叫 Cloud Function 時，不是超時問題
+
+### 根本原因：Cloud Function 環境變數未設定
+
+#### 問題分析
+
+Cloud Function 需要以下環境變數才能運作：
+- `DOCUMENTAI_LOCATION`: Document AI 處理器所在區域（例如：`us`）
+- `DOCUMENTAI_PROCESSOR_ID`: Document AI 處理器 ID（例如：`d8cd080814899dc4`）
+
+如果這些環境變數未設定，Cloud Function 會拋出 500 錯誤。
+
+**檢查方式**:
+```bash
+# 查看 Cloud Function 日誌
+firebase functions:log --only processDocumentFromStorage --limit 10
+
+# 預期看到的錯誤訊息:
+# Error: Missing DOCUMENTAI_LOCATION environment variable
+# 或
+# Error: Missing DOCUMENTAI_PROCESSOR_ID environment variable
+```
+
+#### 解決方案
+
+**方法 1: 使用 .env 檔案（推薦用於開發）**
+
+1. 在 `functions-ai-document/` 目錄創建 `.env` 檔案:
+```bash
+cd functions-ai-document
+cp .env.example .env
+```
+
+2. 編輯 `.env` 檔案:
+```env
+DOCUMENTAI_LOCATION=us
+DOCUMENTAI_PROCESSOR_ID=d8cd080814899dc4
+```
+
+3. 重新部署 Cloud Function:
+```bash
+firebase deploy --only functions:processDocumentFromStorage
+```
+
+**方法 2: 使用 Firebase CLI 設定環境變數（推薦用於生產）**
+
+```bash
+# 設定環境變數
+firebase functions:config:set \
+  documentai.location="us" \
+  documentai.processor_id="d8cd080814899dc4"
+
+# 查看當前配置
+firebase functions:config:get
+
+# 重新部署 Cloud Function
+firebase deploy --only functions:processDocumentFromStorage
+```
+
+**注意**: 如使用 `functions:config`，需在程式碼中讀取 `functions.config().documentai`
+
+**方法 3: 使用 Google Cloud Console 設定環境變數**
+
+1. 前往 [Cloud Functions Console](https://console.cloud.google.com/functions/list)
+2. 找到 `processDocumentFromStorage` 函式
+3. 點擊「編輯」
+4. 在「執行階段環境變數」區段新增:
+   - `DOCUMENTAI_LOCATION` = `us`
+   - `DOCUMENTAI_PROCESSOR_ID` = `d8cd080814899dc4`
+5. 點擊「部署」
+
+#### 驗證設定
+
+```bash
+# 1. 檢查環境變數是否設定
+firebase functions:config:get
+
+# 2. 查看 Cloud Function 日誌
+firebase functions:log --only processDocumentFromStorage
+
+# 3. 測試解析功能
+# 上傳小檔案（< 1MB）並嘗試解析
+# 如果仍然失敗，檢查日誌查看具體錯誤訊息
+```
+
+---
+
 ## 🐛 問題排查：解析顯示「解析中」後變回「未解析」
 
 ### 問題描述
@@ -149,50 +243,77 @@ resource "google_project_iam_member" "firebase_documentai" {
 - 經過一段時間後（約 70 秒）自動變回「未解析」
 - Console 顯示錯誤：`deadline-exceeded`
 
-### 根本原因：客戶端超時限制
+### 根本原因：實際上不是超時問題
 
 #### 問題分析
 
-Document AI 處理複雜或大型 PDF 文件可能需要 **5-8 分鐘**，但 Firebase Functions SDK 的**預設客戶端超時為 70 秒**。即使後端 Cloud Function 設定了 540 秒（9 分鐘）超時，客戶端仍會在超時後中斷連線。
+**重要**: 如果您看到 `deadline-exceeded` 錯誤，但文件很小（例如 150KB），這**不是**真正的超時問題。真正的問題通常是：
 
-**超時配置**:
+1. **Cloud Function 配置錯誤** (500 錯誤) → 表現為超時
+2. **環境變數未設定** → Cloud Function 無法啟動
+3. **IAM 權限不足** → Document AI API 呼叫失敗
+
+**正常處理時間**:
 ```
-後端 Cloud Function: 540 秒 (9 分鐘)  ✅
-客戶端 SDK 預設:     70 秒            ❌ 太短
-客戶端 SDK 設定:     480 秒 (8 分鐘)  ✅ 已修正
-Document AI 處理:    5-8 分鐘         ⚠️ 大型文件需更長時間
+小文件 (< 1MB, < 10 頁):   10-30 秒
+中型文件 (1-5MB, 10-30 頁): 30-60 秒
+大型文件 (5-32MB, 30-50 頁): 60-120 秒
 ```
 
-**為何需要 8 分鐘超時**:
-- 複雜 PDF（多頁、掃描品質差、表格多）需要更長處理時間
-- Document AI API 本身可能需要排隊等待
-- 網路傳輸和 Cloud Function 冷啟動時間
+**如果超過 2 分鐘仍未完成，這不是正常情況**，請檢查：
+
+#### 排查步驟
+
+**步驟 1: 檢查後端日誌（最重要）**
+
+```bash
+firebase functions:log --only processDocumentFromStorage --limit 20
+```
+
+常見錯誤訊息：
+```
+❌ Missing DOCUMENTAI_LOCATION environment variable
+   → 解決：設定環境變數
+
+❌ Missing DOCUMENTAI_PROCESSOR_ID environment variable
+   → 解決：設定環境變數
+
+❌ 7 PERMISSION_DENIED: The caller does not have permission
+   → 解決：授予 roles/documentai.apiUser 權限
+
+❌ Processor projects/.../processors/xxx not found
+   → 解決：檢查處理器 ID 是否正確
+```
+
+**步驟 2: 確認環境變數已設定**
+
+請參考上方「500 Internal Server Error」章節設定環境變數。
+
+**步驟 3: 檢查 IAM 權限**
+
+請參考本文檔開頭的「Firebase 專案服務帳戶所需權限」章節。
 
 #### 解決方案
 
-**已修正**: 在 `agreement.service.ts` 中設定客戶端超時為 480 秒（8 分鐘）
+**已設定合理的客戶端超時**: 120 秒（2 分鐘）
 
 ```typescript
 private readonly processDocumentFromStorage = httpsCallable<
   { gcsUri: string; mimeType: string },
   { success: boolean; result: { [key: string]: unknown } }
 >(this.functions, 'processDocumentFromStorage', { 
-  timeout: 480000  // ✅ 設定為 480 秒（8 分鐘）
+  timeout: 120000  // ✅ 設定為 120 秒（2 分鐘）
 });
 ```
 
-**錯誤訊息改善**:
-```typescript
-if (errorCode === 'functions/deadline-exceeded' || errorCode === 'deadline-exceeded') {
-  userMessage = '解析失敗：文件處理時間超過 8 分鐘。建議：1) 減小文件大小或複雜度 2) 稍後重試 3) 聯繫管理員檢查後端日誌。';
-}
-```
+這個超時設定對於正常文件（< 32MB, < 50 頁）已經足夠。如果超時，通常表示後端有問題，而不是文件太大。
 
-**如果仍然超時**:
-1. **檢查文件大小**: 確認 PDF 小於 32MB（Document AI 限制）
-2. **檢查頁數**: 超過 50 頁的文件可能需要更長時間
-3. **檢查後端日誌**: 使用 `firebase functions:log` 查看實際處理時間
-4. **考慮批次處理**: 將大型文件分割為較小的部分
+**如果看到 deadline-exceeded 錯誤**:
+
+1. **首先檢查後端日誌** - 這是最重要的步驟
+2. **確認環境變數已設定** - 檢查 DOCUMENTAI_LOCATION 和 DOCUMENTAI_PROCESSOR_ID
+3. **檢查 IAM 權限** - 確認服務帳戶有 roles/documentai.apiUser
+4. **確認處理器 ID 正確** - 應該是 `d8cd080814899dc4`
 
 ---
 
@@ -342,23 +463,36 @@ severity>=ERROR
 **常見錯誤訊息**:
 
 ```
-# 超時錯誤（最常見）
-Error: deadline-exceeded
-原因: 文件處理時間超過客戶端超時限制（預設 70 秒）
-解決方案: 已將超時設定提升至 480 秒（8 分鐘）
-建議: 如仍超時，檢查文件大小（< 32MB）和頁數（< 50 頁）
-
-# 權限錯誤
-Error: 7 PERMISSION_DENIED: The caller does not have permission
+# 500 Internal Server Error（最常見）
+Error: POST https://xxx.cloudfunctions.net/processDocumentFromStorage 500
+原因: Cloud Function 啟動失敗，通常是環境變數未設定
+解決方案: 設定 DOCUMENTAI_LOCATION=us 和 DOCUMENTAI_PROCESSOR_ID=d8cd080814899dc4
+檢查: firebase functions:log --only processDocumentFromStorage
 
 # 環境變數錯誤
 Error: Missing required environment variable: DOCUMENTAI_PROCESSOR_ID
+原因: Cloud Function 環境變數未設定
+解決方案: 設定環境變數（參考本文檔「500 Internal Server Error」章節）
+
+# 權限錯誤
+Error: 7 PERMISSION_DENIED: The caller does not have permission
+原因: Firebase 服務帳戶缺少 Document AI 權限
+解決方案: 授予 roles/documentai.apiUser 角色
 
 # 處理器不存在
 Error: Processor projects/xxx/locations/us/processors/xxx not found
+原因: 處理器 ID 錯誤或處理器未建立
+解決方案: 檢查處理器 ID 是否為 d8cd080814899dc4
+
+# 超時錯誤（罕見）
+Error: deadline-exceeded
+原因: 通常不是真正的超時，而是後端錯誤偽裝成超時
+解決方案: 檢查後端日誌查看真正的錯誤原因
 
 # GCS URI 錯誤
 Error: Invalid GCS URI format
+原因: 文件路徑格式錯誤
+解決方案: 確認 GCS URI 格式為 gs://bucket/path
 ```
 
 ### 步驟 3: 檢查環境變數

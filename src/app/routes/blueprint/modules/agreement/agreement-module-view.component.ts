@@ -186,12 +186,14 @@ export class AgreementModuleViewComponent {
       const errorCode = (error as any)?.code;
 
       let userMessage = '解析失敗';
-      if (errorCode === 'functions/deadline-exceeded' || errorCode === 'deadline-exceeded') {
-        userMessage = '解析失敗：文件處理時間超過 8 分鐘。建議：1) 減小文件大小或複雜度 2) 稍後重試 3) 聯繫管理員檢查後端日誌。';
+      if (errorCode === 'functions/internal' || errorCode === 'internal') {
+        userMessage = '解析失敗：後端伺服器錯誤（500）。請檢查：1) Cloud Function 環境變數是否已設定 (DOCUMENTAI_LOCATION, DOCUMENTAI_PROCESSOR_ID) 2) IAM 權限 3) 後端日誌。';
+      } else if (errorCode === 'functions/deadline-exceeded' || errorCode === 'deadline-exceeded') {
+        userMessage = '解析失敗：處理超時。請檢查：1) 後端日誌查看實際錯誤 2) Cloud Function 是否正常運作 3) Document AI 配額。';
       } else if (errorCode === 'permission-denied' || errorCode === 'functions/permission-denied') {
-        userMessage = '解析失敗：權限不足，請檢查 Cloud Function 權限設定';
+        userMessage = '解析失敗：權限不足。請檢查 Firebase 服務帳戶是否有 Document AI API 使用者角色 (roles/documentai.apiUser)。';
       } else if (errorCode === 'failed-precondition' || errorCode === 'functions/failed-precondition') {
-        userMessage = '解析失敗：Cloud Function 配置錯誤，請檢查環境變數';
+        userMessage = '解析失敗：配置錯誤。請檢查 Cloud Function 環境變數：DOCUMENTAI_LOCATION=us, DOCUMENTAI_PROCESSOR_ID=d8cd080814899dc4';
       } else if (errorCode === 'unauthenticated' || errorCode === 'functions/unauthenticated') {
         userMessage = '解析失敗：認證失敗，請重新登入';
       } else if (errorMessage) {
