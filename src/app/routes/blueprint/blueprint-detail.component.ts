@@ -755,7 +755,16 @@ export class BlueprintDetailComponent implements OnInit {
    * 配置模組
    */
   configureModules(): void {
-    this.message.info('模組配置功能待實作');
+    const id = this.route.snapshot.paramMap.get('id');
+    const segments = this.router.url.split('/').filter(Boolean);
+
+    if (!id || segments.length < 2) {
+      this.message.error('無法導向模組管理');
+      return;
+    }
+
+    const base = `/${segments[0]}/${segments[1]}`;
+    this.router.navigateByUrl(`${base}/${id}/modules`);
   }
 
   /**

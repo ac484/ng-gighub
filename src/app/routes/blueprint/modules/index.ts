@@ -25,3 +25,6 @@ export * from './issues';
 
 // QA Module (Refactored)
 export * from './qa';
+
+// Module Manager
+export * from './manager';

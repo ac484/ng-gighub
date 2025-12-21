@@ -7,6 +7,11 @@ export const routes: Routes = [
     data: { title: '藍圖管理' }
   },
   {
+    path: ':id/modules',
+    loadComponent: () => import('./modules/manager/module-manager.component').then(m => m.ModuleManagerComponent),
+    data: { title: '模組管理' }
+  },
+  {
     path: ':id',
     loadComponent: () => import('./blueprint-detail.component').then(m => m.BlueprintDetailComponent),
     data: { title: '藍圖詳情' }

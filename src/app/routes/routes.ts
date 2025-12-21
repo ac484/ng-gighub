@@ -42,6 +42,7 @@ export const routes: Routes = [
         loadChildren: () => import('./blueprint/routes').then(m => m.routes),
         data: { title: '我的藍圖' }
       },
+      { path: 'module-manager/:id', redirectTo: 'blueprints/user/:id/modules', pathMatch: 'full' },
       {
         path: 'blueprints/organization',
         loadChildren: () => import('./blueprint/routes').then(m => m.routes),
