@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, effect, inject, input, output, computed, signal } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
@@ -10,7 +9,6 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { firstValueFrom } from 'rxjs';
 
 import { Agreement } from './agreement.model';
 import { AgreementService } from './agreement.service';
@@ -247,7 +245,6 @@ export class AgreementModuleViewComponent {
 
   private readonly agreementService = inject(AgreementService);
   private readonly messageService = inject(NzMessageService);
-  private readonly http = inject(HttpClient);
 
   readonly agreements = this.agreementService.agreements;
   readonly loading = this.agreementService.loading;
@@ -411,7 +408,11 @@ export class AgreementModuleViewComponent {
     this.detailError.set(null);
     this.parsedDocument.set(null);
     try {
-      const data = await firstValueFrom(this.http.get<ParsedDocument>(url));
+      const response = await fetch(url, { method: 'GET', headers: {} });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = (await response.json()) as ParsedDocument;
       this.parsedDocument.set(data);
     } catch (error) {
       const message = error instanceof Error ? error.message : '載入解析結果失敗';
