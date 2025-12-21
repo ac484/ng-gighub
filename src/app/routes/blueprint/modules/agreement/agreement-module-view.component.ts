@@ -408,7 +408,8 @@ export class AgreementModuleViewComponent {
     this.detailError.set(null);
     this.parsedDocument.set(null);
     try {
-      const response = await fetch(url, { method: 'GET', headers: {} });
+      const normalizedUrl = url.replace('firebasestorage.app', 'appspot.com');
+      const response = await fetch(normalizedUrl, { method: 'GET', headers: {} });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
