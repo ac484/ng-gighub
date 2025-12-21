@@ -9,6 +9,7 @@
  */
 
 import * as logger from 'firebase-functions/logger';
+
 import { CwaApiError, CwaApiResponse } from '../types';
 
 /**

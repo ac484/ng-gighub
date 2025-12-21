@@ -8,10 +8,12 @@
  * @date 2025-12-20
  */
 
-import * as logger from 'firebase-functions/logger';
 import * as admin from 'firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
+import * as logger from 'firebase-functions/logger';
+
 import { CwaHttpClient, createCwaHttpClient } from './http-client';
+import { API_ENDPOINTS, buildApiUrl, getTownshipForecastEndpoint, DEFAULT_CACHE_TTL } from '../constants';
 import {
   WeatherForecast36Hour,
   WeatherForecast7Day,
@@ -24,12 +26,6 @@ import {
   CachedWeatherData,
   CwaApiResponse
 } from '../types';
-import {
-  API_ENDPOINTS,
-  buildApiUrl,
-  getTownshipForecastEndpoint,
-  DEFAULT_CACHE_TTL
-} from '../constants';
 
 /**
  * CWA Weather Service configuration
@@ -80,6 +76,7 @@ export class CwaWeatherService {
 
   /**
    * Get 36-hour weather forecast by county
+   *
    * @param countyName 縣市名稱 (e.g., "臺北市", "新北市")
    * @param locationName 地區名稱 (optional, for filtering)
    */
@@ -115,6 +112,7 @@ export class CwaWeatherService {
 
   /**
    * Get 7-day weather forecast
+   *
    * @param countyName 縣市名稱
    */
   async get7DayForecast(countyName: string): Promise<CwaApiResponse<WeatherForecast7Day>> {
@@ -145,6 +143,7 @@ export class CwaWeatherService {
 
   /**
    * Get township-level weather forecast
+   *
    * @param countyCode 縣市代碼 (e.g., "63" for 臺北市)
    * @param townshipName 鄉鎮市區名稱 (optional, for filtering)
    */
@@ -190,6 +189,7 @@ export class CwaWeatherService {
 
   /**
    * Get meteorological station observation data
+   *
    * @param stationId 測站ID (optional, returns all stations if not specified)
    */
   async getMeteorologicalObservation(stationId?: string): Promise<CwaApiResponse<MeteorologicalObservation[]>> {
@@ -213,14 +213,15 @@ export class CwaWeatherService {
 
     if (response.success && response.result) {
       // Transform API response to typed format
-      const observations: MeteorologicalObservation[] = response.result.location?.map((loc: any) => ({
-        obsTime: response.result.obsTime || new Date().toISOString(),
-        locationName: loc.locationName,
-        stationId: loc.stationId,
-        lat: parseFloat(loc.lat),
-        lon: parseFloat(loc.lon),
-        weatherElement: loc.weatherElement || []
-      })) || [];
+      const observations: MeteorologicalObservation[] =
+        response.result.location?.map((loc: any) => ({
+          obsTime: response.result.obsTime || new Date().toISOString(),
+          locationName: loc.locationName,
+          stationId: loc.stationId,
+          lat: parseFloat(loc.lat),
+          lon: parseFloat(loc.lon),
+          weatherElement: loc.weatherElement || []
+        })) || [];
 
       await this.saveToCache(cacheKey, observations, this.config.cacheTTL.observation!);
 
@@ -235,6 +236,7 @@ export class CwaWeatherService {
 
   /**
    * Get 10-minute automatic weather station observation
+   *
    * @param stationId 測站ID (optional)
    */
   async get10MinuteObservation(stationId?: string): Promise<CwaApiResponse<Observation10Minute[]>> {
@@ -257,26 +259,27 @@ export class CwaWeatherService {
     const response = await this.httpClient.get<any>(url);
 
     if (response.success && response.result) {
-      const observations: Observation10Minute[] = response.result.location?.map((loc: any) => {
-        const weatherElements: Record<string, any> = {};
-        loc.weatherElement?.forEach((elem: any) => {
-          weatherElements[elem.elementName] = elem.elementValue;
-        });
+      const observations: Observation10Minute[] =
+        response.result.location?.map((loc: any) => {
+          const weatherElements: Record<string, any> = {};
+          loc.weatherElement?.forEach((elem: any) => {
+            weatherElements[elem.elementName] = elem.elementValue;
+          });
 
-        return {
-          obsTime: response.result.obsTime || new Date().toISOString(),
-          stationId: loc.stationId,
-          stationName: loc.locationName,
-          lat: parseFloat(loc.lat),
-          lon: parseFloat(loc.lon),
-          temperature: parseFloat(weatherElements.TEMP) || undefined,
-          humidity: parseFloat(weatherElements.HUMD) || undefined,
-          pressure: parseFloat(weatherElements.PRES) || undefined,
-          windSpeed: parseFloat(weatherElements.WDSD) || undefined,
-          windDirection: parseFloat(weatherElements.WDIR) || undefined,
-          precipitation: parseFloat(weatherElements.H_24R) || undefined
-        };
-      }) || [];
+          return {
+            obsTime: response.result.obsTime || new Date().toISOString(),
+            stationId: loc.stationId,
+            stationName: loc.locationName,
+            lat: parseFloat(loc.lat),
+            lon: parseFloat(loc.lon),
+            temperature: parseFloat(weatherElements.TEMP) || undefined,
+            humidity: parseFloat(weatherElements.HUMD) || undefined,
+            pressure: parseFloat(weatherElements.PRES) || undefined,
+            windSpeed: parseFloat(weatherElements.WDSD) || undefined,
+            windDirection: parseFloat(weatherElements.WDIR) || undefined,
+            precipitation: parseFloat(weatherElements.H_24R) || undefined
+          };
+        }) || [];
 
       await this.saveToCache(cacheKey, observations, this.config.cacheTTL.observation!);
 
@@ -291,6 +294,7 @@ export class CwaWeatherService {
 
   /**
    * Get rainfall observation data
+   *
    * @param stationId 測站ID (optional)
    */
   async getRainfallObservation(stationId?: string): Promise<CwaApiResponse<RainfallObservation[]>> {
@@ -313,29 +317,30 @@ export class CwaWeatherService {
     const response = await this.httpClient.get<any>(url);
 
     if (response.success && response.result) {
-      const observations: RainfallObservation[] = response.result.location?.map((loc: any) => {
-        const weatherElements: Record<string, any> = {};
-        loc.weatherElement?.forEach((elem: any) => {
-          weatherElements[elem.elementName] = elem.elementValue;
-        });
+      const observations: RainfallObservation[] =
+        response.result.location?.map((loc: any) => {
+          const weatherElements: Record<string, any> = {};
+          loc.weatherElement?.forEach((elem: any) => {
+            weatherElements[elem.elementName] = elem.elementValue;
+          });
 
-        return {
-          obsTime: response.result.obsTime || new Date().toISOString(),
-          stationId: loc.stationId,
-          stationName: loc.locationName,
-          lat: parseFloat(loc.lat),
-          lon: parseFloat(loc.lon),
-          rainfall: {
-            now: parseFloat(weatherElements.NOW) || undefined,
-            hour1: parseFloat(weatherElements.H_1R) || undefined,
-            hour3: parseFloat(weatherElements.H_3R) || undefined,
-            hour6: parseFloat(weatherElements.H_6R) || undefined,
-            hour12: parseFloat(weatherElements.H_12R) || undefined,
-            hour24: parseFloat(weatherElements.H_24R) || undefined,
-            day: parseFloat(weatherElements.D_TX) || undefined
-          }
-        };
-      }) || [];
+          return {
+            obsTime: response.result.obsTime || new Date().toISOString(),
+            stationId: loc.stationId,
+            stationName: loc.locationName,
+            lat: parseFloat(loc.lat),
+            lon: parseFloat(loc.lon),
+            rainfall: {
+              now: parseFloat(weatherElements.NOW) || undefined,
+              hour1: parseFloat(weatherElements.H_1R) || undefined,
+              hour3: parseFloat(weatherElements.H_3R) || undefined,
+              hour6: parseFloat(weatherElements.H_6R) || undefined,
+              hour12: parseFloat(weatherElements.H_12R) || undefined,
+              hour24: parseFloat(weatherElements.H_24R) || undefined,
+              day: parseFloat(weatherElements.D_TX) || undefined
+            }
+          };
+        }) || [];
 
       await this.saveToCache(cacheKey, observations, this.config.cacheTTL.observation!);
 
@@ -369,13 +374,14 @@ export class CwaWeatherService {
     const response = await this.httpClient.get<any>(url);
 
     if (response.success && response.result) {
-      const observations: UvIndexObservation[] = response.result.location?.map((loc: any) => ({
-        obsTime: response.result.obsTime || new Date().toISOString(),
-        county: loc.County,
-        uvIndex: parseFloat(loc.UVI),
-        uvLevel: this.getUvLevel(parseFloat(loc.UVI)),
-        description: loc.Description || ''
-      })) || [];
+      const observations: UvIndexObservation[] =
+        response.result.location?.map((loc: any) => ({
+          obsTime: response.result.obsTime || new Date().toISOString(),
+          county: loc.County,
+          uvIndex: parseFloat(loc.UVI),
+          uvLevel: this.getUvLevel(parseFloat(loc.UVI)),
+          description: loc.Description || ''
+        })) || [];
 
       await this.saveToCache(cacheKey, observations, this.config.cacheTTL.observation!);
 
@@ -392,6 +398,7 @@ export class CwaWeatherService {
 
   /**
    * Get active weather warnings
+   *
    * @param alertType 警報類型 (optional)
    */
   async getWeatherWarnings(alertType?: string): Promise<CwaApiResponse<WeatherAlert[]>> {

@@ -1,7 +1,7 @@
-import {VertexAI, VertexInit} from '@google-cloud/vertexai';
+import { VertexAI, VertexInit } from '@google-cloud/vertexai';
 import * as logger from 'firebase-functions/logger';
 
-import {getGoogleCloudConfig} from './cloud.config';
+import { getGoogleCloudConfig } from './cloud.config';
 
 /**
  * Provider for configuring and instantiating @google-cloud/vertexai clients

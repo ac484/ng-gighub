@@ -9,17 +9,17 @@
  */
 
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { 
-  AuditLogRepository, 
-  AuditEventType, 
-  AuditCategory, 
-  AuditSeverity, 
-  AuditStatus, 
-  ActorType 
+import {
+  AuditLogRepository,
+  AuditEventType,
+  AuditCategory,
+  AuditSeverity,
+  AuditStatus,
+  ActorType
 } from '@core/blueprint/modules/implementations/audit-logs';
+import { ModuleStatus } from '@core/blueprint/modules/module-status.enum';
 import { BlueprintModuleRepository } from '@core/blueprint/repositories/blueprint-module.repository';
 import { BlueprintModuleDocument, CreateModuleData, BatchModuleOperationResult } from '@core/domain/models/blueprint-module.model';
-import { ModuleStatus } from '@core/blueprint/modules/module-status.enum';
 import { FirebaseService } from '@core/services/firebase.service';
 import { firstValueFrom } from 'rxjs';
 
@@ -503,7 +503,11 @@ export class ModuleManagerService {
    * Select all modules
    */
   selectAll(): void {
-    const allIds = new Set(this._modules().map(m => m.id).filter((id): id is string => id !== undefined));
+    const allIds = new Set(
+      this._modules()
+        .map(m => m.id)
+        .filter((id): id is string => id !== undefined)
+    );
     this._selectedModules.set(allIds);
   }
 

@@ -1,7 +1,7 @@
-import {ClientOptions} from 'google-gax';
-import {GoogleAuthOptions} from 'google-auth-library';
+import { GoogleAuthOptions } from 'google-auth-library';
+import { ClientOptions } from 'google-gax';
 
-import {AIPlatformConfig, CloudConfigError, CloudConfigErrorType, GoogleCloudConfig} from '../types/cloud.types';
+import { AIPlatformConfig, CloudConfigError, CloudConfigErrorType, GoogleCloudConfig } from '../types/cloud.types';
 
 const ENV_VARS = {
   PROJECT: 'GOOGLE_CLOUD_PROJECT',
@@ -39,8 +39,7 @@ export class GoogleCloudConfigManager {
    * Resolve configuration from environment variables with sane defaults
    */
   private loadConfig(): GoogleCloudConfig {
-    const projectId =
-      process.env[ENV_VARS.PROJECT] || process.env.GCP_PROJECT || process.env.GCLOUD_PROJECT;
+    const projectId = process.env[ENV_VARS.PROJECT] || process.env.GCP_PROJECT || process.env.GCLOUD_PROJECT;
     const location = process.env[ENV_VARS.LOCATION] || DEFAULTS.location;
     const apiEndpoint = process.env[ENV_VARS.API_ENDPOINT] || `${location}-aiplatform.googleapis.com`;
     const quotaProjectId = process.env[ENV_VARS.QUOTA_PROJECT];
@@ -66,7 +65,7 @@ export class GoogleCloudConfigManager {
   }
 
   public getConfig(): GoogleCloudConfig {
-    return {...this.config};
+    return { ...this.config };
   }
 
   public getRequiredProjectId(): string {
@@ -93,7 +92,7 @@ export class GoogleCloudConfigManager {
   }
 
   public getGoogleAuthOptions(): GoogleAuthOptions {
-    const options: GoogleAuthOptions = {projectId: this.getRequiredProjectId()};
+    const options: GoogleAuthOptions = { projectId: this.getRequiredProjectId() };
 
     return options;
   }

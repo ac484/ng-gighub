@@ -32,19 +32,10 @@ setGlobalOptions({ maxInstances: 10 });
 // CWA Weather API Integration Functions
 // =============================================================================
 // Weather forecast functions
-export {
-  getForecast36Hour,
-  getForecast7Day,
-  getTownshipForecast
-} from './weather/functions';
+export { getForecast36Hour, getForecast7Day, getTownshipForecast } from './weather/functions';
 
 // Weather observation functions
-export {
-  getObservation,
-  get10MinObservation,
-  getRainfallObservation,
-  getUvIndexObservation
-} from './weather/functions';
+export { getObservation, get10MinObservation, getRainfallObservation, getUvIndexObservation } from './weather/functions';
 
 // Weather alert functions
 export { getWeatherWarnings } from './weather/functions';

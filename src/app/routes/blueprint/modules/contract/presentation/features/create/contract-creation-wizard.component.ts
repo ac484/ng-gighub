@@ -11,9 +11,9 @@
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ContractStore } from '@routes/blueprint/modules/contract/application/state';
 import { ContractService } from '@routes/blueprint/modules/contract/application/services';
-import type { Contract, ContractParty } from '@routes/blueprint/modules/contract/data/models';
+import { ContractStore } from '@routes/blueprint/modules/contract/application/state';
+import type { Contract, ContractParty, FileAttachment } from '@routes/blueprint/modules/contract/data/models';
 import type { CreateContractDto } from '@routes/blueprint/modules/contract/data/models/dtos';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -23,7 +23,6 @@ import { BasicInfoStepComponent } from './components/basic-info-step.component';
 import { CompletionStepComponent } from './components/completion-step.component';
 import { ConfirmStepComponent } from './components/confirm-step.component';
 import { ContractUploadStepComponent } from '../upload/contract-upload-step.component';
-import type { FileAttachment } from '@routes/blueprint/modules/contract/data/models';
 
 /** Step indices */
 const STEP_UPLOAD = 0;
@@ -35,7 +34,14 @@ const STEP_COMPLETE = 3;
   selector: 'app-contract-creation-wizard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SHARED_IMPORTS, NzStepsModule, ContractUploadStepComponent, BasicInfoStepComponent, ConfirmStepComponent, CompletionStepComponent],
+  imports: [
+    SHARED_IMPORTS,
+    NzStepsModule,
+    ContractUploadStepComponent,
+    BasicInfoStepComponent,
+    ConfirmStepComponent,
+    CompletionStepComponent
+  ],
   template: `
     <div class="wizard-container">
       <!-- Steps Progress -->
@@ -48,17 +54,11 @@ const STEP_COMPLETE = 3;
 
       <!-- Step: Upload -->
       @if (currentStep() === 0) {
-        <app-contract-upload-step
-          [blueprintId]="blueprintId()"
-          [contractId]="tempContractId()"
-          (fileUploaded)="onFileUploaded($event)"
-        />
+        <app-contract-upload-step [blueprintId]="blueprintId()" [contractId]="tempContractId()" (fileUploaded)="onFileUploaded($event)" />
         <div class="step-actions">
           <button nz-button nzType="default" (click)="cancel()">取消</button>
           <button nz-button nzType="default" (click)="skipUpload()">跳過</button>
-          <button nz-button nzType="primary" (click)="nextStep()" [disabled]="!canProceedFromUpload()">
-            下一步
-          </button>
+          <button nz-button nzType="primary" (click)="nextStep()" [disabled]="!canProceedFromUpload()"> 下一步 </button>
         </div>
       }
 

@@ -1,8 +1,8 @@
+import { getAuth, DecodedIdToken, UserRecord } from 'firebase-admin/auth';
+import { region as v1Region } from 'firebase-functions/v1';
 import { setGlobalOptions } from 'firebase-functions/v2';
 import { HttpsError, onRequest } from 'firebase-functions/v2/https';
 import { beforeUserSignedIn } from 'firebase-functions/v2/identity';
-import { region as v1Region } from 'firebase-functions/v1';
-import { getAuth, DecodedIdToken, UserRecord } from 'firebase-admin/auth';
 
 import { initializeFirebaseAdmin, db, serverTimestamp } from '../../functions-shared/src/config/firebase.config';
 import { createLogger } from '../../functions-shared/src/utils/logger.util';
@@ -105,11 +105,7 @@ async function ensureAccountDocument(user: UserRecord, defaultOrgId?: string): P
  * Create a default organization for a new user (idempotent)
  */
 async function ensureDefaultOrganization(user: UserRecord): Promise<string> {
-  const existingOrg = await db()
-    .collection('organizations')
-    .where('created_by', '==', user.uid)
-    .limit(1)
-    .get();
+  const existingOrg = await db().collection('organizations').where('created_by', '==', user.uid).limit(1).get();
 
   if (!existingOrg.empty) {
     return existingOrg.docs[0].id;
@@ -146,14 +142,12 @@ async function ensureOrganizationMembership(orgId: string, uid: string): Promise
     return;
   }
 
-  await db()
-    .collection('organization_members')
-    .add({
-      organization_id: orgId,
-      user_id: uid,
-      role: 'owner',
-      joined_at: serverTimestamp()
-    });
+  await db().collection('organization_members').add({
+    organization_id: orgId,
+    user_id: uid,
+    role: 'owner',
+    joined_at: serverTimestamp()
+  });
 }
 
 /**
@@ -161,18 +155,9 @@ async function ensureOrganizationMembership(orgId: string, uid: string): Promise
  */
 async function buildCapabilityClaims(uid: string): Promise<CapabilityClaims> {
   const [organizationMemberships, teamMemberships, partnerMemberships, accountDoc] = await Promise.all([
-    db()
-      .collection('organization_members')
-      .where('user_id', '==', uid)
-      .get(),
-    db()
-      .collection('team_members')
-      .where('user_id', '==', uid)
-      .get(),
-    db()
-      .collection('partner_members')
-      .where('user_id', '==', uid)
-      .get(),
+    db().collection('organization_members').where('user_id', '==', uid).get(),
+    db().collection('team_members').where('user_id', '==', uid).get(),
+    db().collection('partner_members').where('user_id', '==', uid).get(),
     db().collection('accounts').doc(uid).get()
   ]);
 
@@ -300,9 +285,7 @@ export const refreshAuthClaims = onRequest({ region: REGION, cors: true }, async
   }
 
   const authHeader = typeof req.headers.authorization === 'string' ? req.headers.authorization : null;
-  const token = authHeader && authHeader.startsWith('Bearer ')
-    ? authHeader.replace('Bearer ', '').trim()
-    : null;
+  const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.replace('Bearer ', '').trim() : null;
 
   if (!token) {
     res.status(401).json({ error: 'unauthorized' });

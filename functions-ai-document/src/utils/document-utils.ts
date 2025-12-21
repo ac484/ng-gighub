@@ -302,13 +302,13 @@ export function getProcessorConfigFromEnv(): ProcessorConfig {
   // GCLOUD_PROJECT is automatically set by Firebase Cloud Functions runtime
   // No manual configuration needed - uses Application Default Credentials (ADC)
   const projectId = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT;
-  
+
   // ⚠️ HARDCODED VALUES: Fallback to hardcoded configuration
   // These will be used if environment variables are not set
   // For production, consider setting these via Firebase Functions environment config
   const HARDCODED_LOCATION = 'us';
   const HARDCODED_PROCESSOR_ID = 'd8cd080814899dc4';
-  
+
   // Firebase Functions v7+: Use environment variables with hardcoded fallback
   const location = process.env.DOCUMENTAI_LOCATION || HARDCODED_LOCATION;
   const processorId = process.env.DOCUMENTAI_PROCESSOR_ID || HARDCODED_PROCESSOR_ID;

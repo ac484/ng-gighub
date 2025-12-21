@@ -1,7 +1,7 @@
-import {ClientOptions} from 'google-gax';
+import { ClientOptions } from 'google-gax';
 
-import {AIPlatformConfig} from '../types/cloud.types';
-import {getGoogleCloudConfig} from './cloud.config';
+import { getGoogleCloudConfig } from './cloud.config';
+import { AIPlatformConfig } from '../types/cloud.types';
 
 /**
  * Provider for base configuration shared by @google-cloud/aiplatform clients
@@ -26,11 +26,11 @@ export class AIPlatformConfigProvider {
   }
 
   public getConfig(): AIPlatformConfig {
-    return {...this.config};
+    return { ...this.config };
   }
 
   public getClientOptions(): ClientOptions {
-    return {...this.clientOptions};
+    return { ...this.clientOptions };
   }
 
   public getApiEndpoint(): string {

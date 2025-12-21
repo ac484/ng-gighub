@@ -92,7 +92,7 @@ export const TOWNSHIP_FORECAST_CODES: Record<string, string> = {
 export function getTownshipForecastEndpoint(countyCode: string): ApiEndpoint | null {
   const datasetCode = TOWNSHIP_FORECAST_CODES[countyCode];
   if (!datasetCode) return null;
-  
+
   return {
     path: `/rest/datastore/${datasetCode}`,
     method: 'GET',
@@ -430,17 +430,17 @@ export const API_ENDPOINTS = {
  */
 export function buildApiUrl(endpoint: ApiEndpoint, apiKey: string, params?: Record<string, string>): string {
   const url = new URL(`${CWA_API_BASE_URL}${endpoint.path}`);
-  
+
   // Add authorization
   url.searchParams.set('Authorization', apiKey);
-  
+
   // Add additional parameters
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       url.searchParams.set(key, value);
     });
   }
-  
+
   return url.toString();
 }
 
@@ -456,13 +456,13 @@ export function getEndpointByCode(datasetCode: string): ApiEndpoint | null {
       }
     }
   }
-  
+
   // Check township forecasts
   for (const [countyCode, code] of Object.entries(TOWNSHIP_FORECAST_CODES)) {
     if (code === datasetCode) {
       return getTownshipForecastEndpoint(countyCode);
     }
   }
-  
+
   return null;
 }
