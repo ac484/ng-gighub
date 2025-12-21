@@ -193,55 +193,6 @@
 │  │  │  │      │          system-notification.service.ts
 │  │  │  │      │          task-reminder.service.ts
 │  │  │  │      │
-│  │  │  │      ├─contract
-│  │  │  │      │  │  contract.integration.spec.ts
-│  │  │  │      │  │  contract.module.ts
-│  │  │  │      │  │  index.ts
-│  │  │  │      │  │  module.metadata.ts
-│  │  │  │      │  │  README.md
-│  │  │  │      │  │
-│  │  │  │      │  ├─components
-│  │  │  │      │  │      contract-form.component.html
-│  │  │  │      │  │      contract-form.component.scss
-│  │  │  │      │  │      contract-form.component.ts
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─config
-│  │  │  │      │  │      contract.config.ts
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─exports
-│  │  │  │      │  │      contract-api.interface.ts
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─facades
-│  │  │  │      │  │      contract.facade.ts
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─models
-│  │  │  │      │  │      contract.model.ts
-│  │  │  │      │  │      dtos.ts
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │      parsed-contract-data.model.ts
-│  │  │  │      │  │      work-item.model.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─repositories
-│  │  │  │      │  │      contract.repository.ts
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │      work-item.repository.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─services
-│  │  │  │      │  │      contract-ai-parser.service.ts
-│  │  │  │      │  │      contract-upload.service.ts
-│  │  │  │      │  │      contract.service.ts
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │      README.md
-│  │  │  │      │  │      work-item.service.ts
-│  │  │  │      │  │
-│  │  │  │      │  └─store
-│  │  │  │      │          contract.store.ts
-│  │  │  │      │          index.ts
-│  │  │  │      │
 │  │  │  │      ├─finance
 │  │  │  │      │  │  finance.integration.spec.ts
 │  │  │  │      │  │  finance.module.ts
@@ -812,6 +763,13 @@
 │  │  │      │              acceptance-status-badge.component.ts
 │  │  │      │              index.ts
 │  │  │      │
+│  │  │      ├─agreement
+│  │  │      │      agreement-module-view.component.ts
+│  │  │      │      agreement.model.ts
+│  │  │      │      agreement.repository.ts
+│  │  │      │      agreement.service.ts
+│  │  │      │      index.ts
+│  │  │      │
 │  │  │      ├─cloud
 │  │  │      │  │  cloud-module-view-refactored.component.ts
 │  │  │      │  │  index.ts
@@ -849,60 +807,105 @@
 │  │  │      ├─contract
 │  │  │      │  │  contract-module-view-refactored.component.ts
 │  │  │      │  │  index.ts
-│  │  │      │  │  README.md
+│  │  │      │  │  README.old.md
 │  │  │      │  │
-│  │  │      │  ├─features
-│  │  │      │  │  ├─create
-│  │  │      │  │  │  │  contract-creation-wizard.component.ts
-│  │  │      │  │  │  │  index.ts
-│  │  │      │  │  │  │
-│  │  │      │  │  │  └─components
-│  │  │      │  │  │          basic-info-step.component.ts
-│  │  │      │  │  │          completion-step.component.ts
-│  │  │      │  │  │          confirm-step.component.ts
+│  │  │      │  ├─application
+│  │  │      │  │  │  index.ts
 │  │  │      │  │  │
-│  │  │      │  │  ├─detail
-│  │  │      │  │  │  │  contract-detail-drawer.component.ts
-│  │  │      │  │  │  │  index.ts
-│  │  │      │  │  │  │
-│  │  │      │  │  │  └─components
-│  │  │      │  │  │          attachments-tab.component.ts
-│  │  │      │  │  │          basic-info-tab.component.ts
-│  │  │      │  │  │          history-tab.component.ts
-│  │  │      │  │  │          parties-tab.component.ts
-│  │  │      │  │  │
-│  │  │      │  │  ├─edit
-│  │  │      │  │  │  │  contract-edit-modal.component.ts
-│  │  │      │  │  │  │  index.ts
-│  │  │      │  │  │  │
-│  │  │      │  │  │  └─components
-│  │  │      │  │  │          contract-form.component.ts
-│  │  │      │  │  │          contractor-form.component.ts
-│  │  │      │  │  │          owner-form.component.ts
-│  │  │      │  │  │
-│  │  │      │  │  ├─list
-│  │  │      │  │  │  │  contract-list.component.ts
-│  │  │      │  │  │  │  index.ts
-│  │  │      │  │  │  │
-│  │  │      │  │  │  └─components
-│  │  │      │  │  │          contract-filters.component.ts
-│  │  │      │  │  │          contract-statistics.component.ts
-│  │  │      │  │  │          contract-table.component.ts
-│  │  │      │  │  │
-│  │  │      │  │  ├─preview
-│  │  │      │  │  │      contract-parsing-modal.component.ts
-│  │  │      │  │  │      contract-preview-modal.component.ts
+│  │  │      │  │  ├─services
+│  │  │      │  │  │      contract-upload.service.ts
+│  │  │      │  │  │      contract.service.ts
 │  │  │      │  │  │      index.ts
+│  │  │      │  │  │      README.md
+│  │  │      │  │  │      work-item.service.ts
 │  │  │      │  │  │
-│  │  │      │  │  └─upload
-│  │  │      │  │          contract-upload-step.component.ts
+│  │  │      │  │  └─state
+│  │  │      │  │          contract.store.ts
 │  │  │      │  │          index.ts
 │  │  │      │  │
-│  │  │      │  └─shared
+│  │  │      │  ├─config
+│  │  │      │  │      contract.config.ts
+│  │  │      │  │      index.ts
+│  │  │      │  │
+│  │  │      │  ├─data
+│  │  │      │  │  │  index.ts
+│  │  │      │  │  │
+│  │  │      │  │  ├─interfaces
+│  │  │      │  │  │      contract-api.interface.ts
+│  │  │      │  │  │      index.ts
+│  │  │      │  │  │
+│  │  │      │  │  └─models
+│  │  │      │  │          contract.model.ts
+│  │  │      │  │          dtos.ts
+│  │  │      │  │          index.ts
+│  │  │      │  │          parsed-contract-data.model.ts
+│  │  │      │  │          work-item.model.ts
+│  │  │      │  │
+│  │  │      │  ├─infrastructure
+│  │  │      │  │  │  index.ts
+│  │  │      │  │  │
+│  │  │      │  │  └─repositories
+│  │  │      │  │          contract.repository.ts
+│  │  │      │  │          index.ts
+│  │  │      │  │          work-item.repository.ts
+│  │  │      │  │
+│  │  │      │  └─presentation
 │  │  │      │      │  index.ts
 │  │  │      │      │
-│  │  │      │      └─components
-│  │  │      │              contract-status-badge.component.ts
+│  │  │      │      ├─features
+│  │  │      │      │  │  index.ts
+│  │  │      │      │  │
+│  │  │      │      │  ├─create
+│  │  │      │      │  │  │  contract-creation-wizard.component.ts
+│  │  │      │      │  │  │  index.ts
+│  │  │      │      │  │  │
+│  │  │      │      │  │  └─components
+│  │  │      │      │  │          basic-info-step.component.ts
+│  │  │      │      │  │          completion-step.component.ts
+│  │  │      │      │  │          confirm-step.component.ts
+│  │  │      │      │  │
+│  │  │      │      │  ├─detail
+│  │  │      │      │  │  │  contract-detail-drawer.component.ts
+│  │  │      │      │  │  │  index.ts
+│  │  │      │      │  │  │
+│  │  │      │      │  │  └─components
+│  │  │      │      │  │          attachments-tab.component.ts
+│  │  │      │      │  │          basic-info-tab.component.ts
+│  │  │      │      │  │          history-tab.component.ts
+│  │  │      │      │  │          parties-tab.component.ts
+│  │  │      │      │  │
+│  │  │      │      │  ├─edit
+│  │  │      │      │  │  │  contract-edit-modal.component.ts
+│  │  │      │      │  │  │  index.ts
+│  │  │      │      │  │  │
+│  │  │      │      │  │  └─components
+│  │  │      │      │  │          contract-form.component.ts
+│  │  │      │      │  │          contractor-form.component.ts
+│  │  │      │      │  │          owner-form.component.ts
+│  │  │      │      │  │
+│  │  │      │      │  ├─list
+│  │  │      │      │  │  │  contract-list.component.ts
+│  │  │      │      │  │  │  index.ts
+│  │  │      │      │  │  │
+│  │  │      │      │  │  └─components
+│  │  │      │      │  │          contract-filters.component.ts
+│  │  │      │      │  │          contract-statistics.component.ts
+│  │  │      │      │  │          contract-table.component.ts
+│  │  │      │      │  │
+│  │  │      │      │  ├─preview
+│  │  │      │      │  │      contract-parsing-modal.component.ts
+│  │  │      │      │  │      contract-preview-modal.component.ts
+│  │  │      │      │  │      index.ts
+│  │  │      │      │  │
+│  │  │      │      │  └─upload
+│  │  │      │      │          contract-upload-step.component.ts
+│  │  │      │      │          index.ts
+│  │  │      │      │
+│  │  │      │      └─shared
+│  │  │      │          │  index.ts
+│  │  │      │          │
+│  │  │      │          └─components
+│  │  │      │                  contract-status-badge.component.ts
 │  │  │      │
 │  │  │      ├─diary
 │  │  │      │  │  diary-module-view.component.ts
@@ -1026,45 +1029,59 @@
 │  │  │      │              index.ts
 │  │  │      │              qa-stats.component.ts
 │  │  │      │
-│  │  │      └─warranty
+│  │  │      ├─warranty
+│  │  │      │  │  index.ts
+│  │  │      │  │  README.md
+│  │  │      │  │  routes.ts
+│  │  │      │  │  warranty-module-view.component.ts
+│  │  │      │  │
+│  │  │      │  ├─features
+│  │  │      │  │  ├─defects
+│  │  │      │  │  │  │  index.ts
+│  │  │      │  │  │  │  warranty-defects.component.ts
+│  │  │      │  │  │  │
+│  │  │      │  │  │  └─components
+│  │  │      │  │  │          defect-filters.component.ts
+│  │  │      │  │  │          defect-statistics.component.ts
+│  │  │      │  │  │          defect-table.component.ts
+│  │  │      │  │  │
+│  │  │      │  │  ├─detail
+│  │  │      │  │  │  │  index.ts
+│  │  │      │  │  │  │  warranty-detail-drawer.component.ts
+│  │  │      │  │  │  │
+│  │  │      │  │  │  └─components
+│  │  │      │  │  │          basic-info-tab.component.ts
+│  │  │      │  │  │          defects-tab.component.ts
+│  │  │      │  │  │          repairs-tab.component.ts
+│  │  │      │  │  │
+│  │  │      │  │  └─list
+│  │  │      │  │      │  index.ts
+│  │  │      │  │      │  warranty-list.component.ts
+│  │  │      │  │      │
+│  │  │      │  │      └─components
+│  │  │      │  │              warranty-filters.component.ts
+│  │  │      │  │              warranty-statistics.component.ts
+│  │  │      │  │              warranty-table.component.ts
+│  │  │      │  │
+│  │  │      │  └─shared
+│  │  │      │      │  index.ts
+│  │  │      │      │
+│  │  │      │      └─components
+│  │  │      │              warranty-status-badge.component.ts
+│  │  │      │
+│  │  │      └─weather
 │  │  │          │  index.ts
 │  │  │          │  README.md
-│  │  │          │  routes.ts
-│  │  │          │  warranty-module-view.component.ts
+│  │  │          │  weather-module-view.component.ts
 │  │  │          │
-│  │  │          ├─features
-│  │  │          │  ├─defects
-│  │  │          │  │  │  index.ts
-│  │  │          │  │  │  warranty-defects.component.ts
-│  │  │          │  │  │
-│  │  │          │  │  └─components
-│  │  │          │  │          defect-filters.component.ts
-│  │  │          │  │          defect-statistics.component.ts
-│  │  │          │  │          defect-table.component.ts
-│  │  │          │  │
-│  │  │          │  ├─detail
-│  │  │          │  │  │  index.ts
-│  │  │          │  │  │  warranty-detail-drawer.component.ts
-│  │  │          │  │  │
-│  │  │          │  │  └─components
-│  │  │          │  │          basic-info-tab.component.ts
-│  │  │          │  │          defects-tab.component.ts
-│  │  │          │  │          repairs-tab.component.ts
-│  │  │          │  │
-│  │  │          │  └─list
-│  │  │          │      │  index.ts
-│  │  │          │      │  warranty-list.component.ts
-│  │  │          │      │
-│  │  │          │      └─components
-│  │  │          │              warranty-filters.component.ts
-│  │  │          │              warranty-statistics.component.ts
-│  │  │          │              warranty-table.component.ts
+│  │  │          ├─components
+│  │  │          │      weather-card.component.ts
 │  │  │          │
-│  │  │          └─shared
-│  │  │              │  index.ts
-│  │  │              │
-│  │  │              └─components
-│  │  │                      warranty-status-badge.component.ts
+│  │  │          ├─services
+│  │  │          │      weather.service.ts
+│  │  │          │
+│  │  │          └─types
+│  │  │                  weather.types.ts
 │  │  │
 │  │  ├─dashboard
 │  │  │      AGENTS.md
