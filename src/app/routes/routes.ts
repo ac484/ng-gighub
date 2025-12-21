@@ -58,7 +58,7 @@ export const routes: Routes = [
           },
           {
             path: 'monitoring',
-            loadChildren: () => import('./monitoring/routes').then(m => m.routes),
+            loadChildren: () => import('./admin/monitoring/routes').then(m => m.routes),
             data: { title: '系統監控' }
           }
         ]
@@ -74,12 +74,6 @@ export const routes: Routes = [
         path: 'ai-assistant',
         loadComponent: () => import('./ai-assistant/ai-assistant.component').then(m => m.AIAssistantComponent),
         data: { title: 'AI 助理' }
-      },
-      // Backward compatibility redirects
-      {
-        path: 'monitoring',
-        redirectTo: 'admin/monitoring',
-        pathMatch: 'full'
       }
     ]
   },
