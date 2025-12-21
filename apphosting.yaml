@@ -53,3 +53,6 @@ env:
 
   - variable: FIREBASE_VAPID_KEY
     value: 'BMfTfys7cErI2JVFmjkWSeCb7ClvFklQ4r69lWGIYT2dSq5VD2eguZlckvdq2QJhdGskeyUg0G6RcC8WmlBztFY'
+
+  - variable: CWA_API_KEY
+    secret: CWA-8055E55C-EBCB-40A2-92F4-8A84399F3A45
