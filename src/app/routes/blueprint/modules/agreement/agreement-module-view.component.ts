@@ -9,6 +9,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { Storage, getDownloadURL, ref } from '@angular/fire/storage';
 
 import { Agreement } from './agreement.model';
 import { AgreementService } from './agreement.service';
@@ -245,6 +246,7 @@ export class AgreementModuleViewComponent {
 
   private readonly agreementService = inject(AgreementService);
   private readonly messageService = inject(NzMessageService);
+  private readonly storage = inject(Storage);
 
   readonly agreements = this.agreementService.agreements;
   readonly loading = this.agreementService.loading;
@@ -409,7 +411,9 @@ export class AgreementModuleViewComponent {
     this.parsedDocument.set(null);
     try {
       const normalizedUrl = this.normalizeStorageUrl(url);
-      const response = await fetch(normalizedUrl, { method: 'GET', headers: {} });
+      const storageRef = ref(this.storage, normalizedUrl);
+      const downloadUrl = await getDownloadURL(storageRef);
+      const response = await fetch(downloadUrl, { method: 'GET', headers: {} });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
