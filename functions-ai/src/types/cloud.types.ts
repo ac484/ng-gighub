@@ -34,7 +34,10 @@ export enum CloudConfigErrorType {
  * Custom error for configuration issues
  */
 export class CloudConfigError extends Error {
-  constructor(message: string, public readonly type: CloudConfigErrorType) {
+  constructor(
+    message: string,
+    public readonly type: CloudConfigErrorType
+  ) {
     super(message);
     this.name = 'CloudConfigError';
   }

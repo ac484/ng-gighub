@@ -1,5 +1,17 @@
 import { Injectable, inject } from '@angular/core';
-import { collection, doc, addDoc, deleteDoc, DocumentData, Firestore, getDocs, orderBy, query, setDoc, Timestamp, where } from '@angular/fire/firestore';
+import {
+  collection,
+  doc,
+  addDoc,
+  deleteDoc,
+  DocumentData,
+  Firestore,
+  getDocs,
+  query,
+  setDoc,
+  Timestamp,
+  where
+} from '@angular/fire/firestore';
 import { LoggerService } from '@core/services/logger';
 
 import { Agreement, AgreementDocument } from './agreement.model';
@@ -11,8 +23,7 @@ export class AgreementRepository {
   private readonly collectionPath = 'agreements';
   private readonly collectionRef = collection(this.firestore, this.collectionPath);
 
-
-    async createAgreement(payload: Partial<Agreement> & { blueprintId: string }): Promise<Agreement> {
+  async createAgreement(payload: Partial<Agreement> & { blueprintId: string }): Promise<Agreement> {
     const now = new Date();
     const data: AgreementDocument = {
       blueprintId: payload.blueprintId,
@@ -34,6 +45,9 @@ export class AgreementRepository {
     if ((payload as any).parsedJsonUrl) {
       (data as any).parsedJsonUrl = (payload as any).parsedJsonUrl;
     }
+    if ((payload as any).parsedJsonPath) {
+      (data as any).parsedJsonPath = (payload as any).parsedJsonPath;
+    }
 
     const docRef = await addDoc(this.collectionRef, data as any);
     return this.toEntity(data as DocumentData, docRef.id);
@@ -51,7 +65,6 @@ export class AgreementRepository {
     }
   }
 
-
   async updateAgreement(agreementId: string, payload: Partial<Agreement>): Promise<void> {
     const ref = doc(this.firestore, `${this.collectionPath}/${agreementId}`);
     await setDoc(ref, payload, { merge: true });
@@ -67,9 +80,13 @@ export class AgreementRepository {
     }
   }
 
-  async saveParsedJsonUrl(agreementId: string, parsedJsonUrl: string): Promise<void> {
+  async saveParsedJsonUrl(agreementId: string, parsedJsonUrl: string, parsedJsonPath?: string): Promise<void> {
     const ref = doc(this.firestore, `${this.collectionPath}/${agreementId}`);
-    await setDoc(ref, { parsedJsonUrl }, { merge: true });
+    const payload: Partial<Agreement> = { parsedJsonUrl };
+    if (parsedJsonPath) {
+      payload.parsedJsonPath = parsedJsonPath;
+    }
+    await setDoc(ref, payload, { merge: true });
   }
 
   async deleteAgreement(agreementId: string): Promise<void> {
@@ -81,6 +98,8 @@ export class AgreementRepository {
     const doc = data as AgreementDocument;
     const effectiveDateRaw = doc.effectiveDate ?? new Date();
     const effectiveDate = effectiveDateRaw instanceof Timestamp ? effectiveDateRaw.toDate() : new Date(effectiveDateRaw);
+    const parsedJsonUrl = (doc as any).parsedJsonUrl;
+    const parsedJsonPath = (doc as any).parsedJsonPath ?? (parsedJsonUrl ? `agreements/${id}/parsed.json` : undefined);
 
     return {
       id,
@@ -92,7 +111,8 @@ export class AgreementRepository {
       value: doc.value,
       attachmentUrl: (doc as any).attachmentUrl,
       attachmentPath: (doc as any).attachmentPath,
-      parsedJsonUrl: (doc as any).parsedJsonUrl
+      parsedJsonUrl,
+      parsedJsonPath
     };
   }
 }

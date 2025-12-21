@@ -11,8 +11,8 @@
 import { Component, OnInit, inject, signal, computed, DestroyRef, input, effect } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BlueprintModuleDocument } from '@core/domain/models/blueprint-module.model';
 import { ModuleStatus } from '@core/blueprint/modules/module-status.enum';
+import { BlueprintModuleDocument } from '@core/domain/models/blueprint-module.model';
 import { STColumn, STData } from '@delon/abc/st';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS } from '@shared';
@@ -29,7 +29,7 @@ import { ModuleManagerService } from './module-manager.service';
   standalone: true,
   imports: [SHARED_IMPORTS, ModuleCardComponent],
   template: `
-    <page-header [title]="'模組管理'" >
+    <page-header [title]="'模組管理'">
       <ng-template #extra>
         <button nz-button nzType="primary" (click)="registerModule()">
           <span nz-icon nzType="plus" nzTheme="outline"></span>

@@ -1,6 +1,6 @@
 /**
  * Contract Module - Presentation Layer
- * 
+ *
  * Public exports for UI components and features
  */
 

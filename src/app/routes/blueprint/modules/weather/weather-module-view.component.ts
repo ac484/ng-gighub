@@ -12,6 +12,7 @@
 
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
+
 import { WeatherCardComponent } from './components/weather-card.component';
 import type { WeatherDisplayMode } from './types/weather.types';
 

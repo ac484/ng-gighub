@@ -12,6 +12,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { LoggerService } from '@core/services/logger';
+
 import type { WeatherForecast, WeatherObservation, WeatherAlert } from '../types/weather.types';
 
 @Injectable({ providedIn: 'root' })

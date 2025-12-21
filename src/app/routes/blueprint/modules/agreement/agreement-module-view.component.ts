@@ -140,7 +140,7 @@ import { AgreementService } from './agreement.service';
 })
 export class AgreementModuleViewComponent {
   blueprintId = input.required<string>();
-  agreementSelected = output<Agreement>();
+  readonly agreementSelected = output<Agreement>();
 
   private readonly agreementService = inject(AgreementService);
   private readonly messageService = inject(NzMessageService);
@@ -235,7 +235,17 @@ export class AgreementModuleViewComponent {
   }
 
   onSelect(agreement: Agreement): void {
-    this.agreementSelected.emit(agreement);
+    const parsedPath = agreement.parsedJsonPath ?? `agreements/${agreement.id}/parsed.json`;
+
+    if (!agreement.parsedJsonUrl) {
+      this.messageService.info(`解析檔案預期路徑：${parsedPath}（尚未生成解析結果）`);
+      this.agreementSelected.emit({ ...agreement, parsedJsonPath: parsedPath });
+      return;
+    }
+
+    this.messageService.info(`解析檔案路徑：${parsedPath}`, { nzDuration: 6000 });
+    window.open(agreement.parsedJsonUrl, '_blank');
+    this.agreementSelected.emit({ ...agreement, parsedJsonPath: parsedPath });
   }
 
   triggerUpload(input: HTMLInputElement, agreementId: string): void {

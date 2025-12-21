@@ -20,7 +20,14 @@ import { LoggerService } from '@core';
 import { EnhancedEventBusService } from '@core/blueprint/events/enhanced-event-bus.service';
 import { SystemEventType } from '@core/blueprint/events/types/system-event-type.enum';
 
-import type { Contract, ContractStatus, CreateContractDto, UpdateContractDto, ContractFilters, ContractStatistics } from '../../data/models';
+import type {
+  Contract,
+  ContractStatus,
+  CreateContractDto,
+  UpdateContractDto,
+  ContractFilters,
+  ContractStatistics
+} from '../../data/models';
 import { ContractRepository } from '../../infrastructure/repositories';
 import { ContractStore } from '../state/contract.store';
 
@@ -154,7 +161,7 @@ export class ContractService {
   /**
    * Create a new contract
    */
-  async createContract(blueprintId: string, dto: CreateContractDto, actorId: string = 'system'): Promise<Contract> {
+  async createContract(blueprintId: string, dto: CreateContractDto, actorId = 'system'): Promise<Contract> {
     this.logger.info('[ContractService]', 'Creating contract', { blueprintId, title: dto.title });
 
     try {
@@ -188,7 +195,7 @@ export class ContractService {
   /**
    * Update an existing contract
    */
-  async updateContract(blueprintId: string, contractId: string, dto: UpdateContractDto, actorId: string = 'system'): Promise<Contract> {
+  async updateContract(blueprintId: string, contractId: string, dto: UpdateContractDto, actorId = 'system'): Promise<Contract> {
     this.logger.info('[ContractService]', 'Updating contract', { blueprintId, contractId });
 
     try {
@@ -221,7 +228,7 @@ export class ContractService {
   /**
    * Update contract status with validation
    */
-  async updateContractStatus(blueprintId: string, contractId: string, newStatus: ContractStatus, actorId: string = 'system'): Promise<void> {
+  async updateContractStatus(blueprintId: string, contractId: string, newStatus: ContractStatus, actorId = 'system'): Promise<void> {
     this.logger.info('[ContractService]', 'Updating contract status', { contractId, newStatus });
 
     try {
@@ -261,7 +268,7 @@ export class ContractService {
   /**
    * Activate a contract (from draft or pending_activation to active)
    */
-  async activateContract(blueprintId: string, contractId: string, actorId: string = 'system'): Promise<void> {
+  async activateContract(blueprintId: string, contractId: string, actorId = 'system'): Promise<void> {
     this.logger.info('[ContractService]', 'Activating contract', { contractId });
 
     try {
@@ -289,7 +296,7 @@ export class ContractService {
   /**
    * Complete a contract (from active to completed)
    */
-  async completeContract(blueprintId: string, contractId: string, actorId: string = 'system'): Promise<void> {
+  async completeContract(blueprintId: string, contractId: string, actorId = 'system'): Promise<void> {
     this.logger.info('[ContractService]', 'Completing contract', { contractId });
 
     try {
@@ -304,7 +311,7 @@ export class ContractService {
   /**
    * Terminate a contract (from active to terminated)
    */
-  async terminateContract(blueprintId: string, contractId: string, actorId: string = 'system', reason?: string): Promise<void> {
+  async terminateContract(blueprintId: string, contractId: string, actorId = 'system', reason?: string): Promise<void> {
     this.logger.info('[ContractService]', 'Terminating contract', { contractId, reason });
 
     try {
@@ -326,7 +333,7 @@ export class ContractService {
   /**
    * Delete a contract
    */
-  async deleteContract(blueprintId: string, contractId: string, actorId: string = 'system'): Promise<void> {
+  async deleteContract(blueprintId: string, contractId: string, actorId = 'system'): Promise<void> {
     this.logger.info('[ContractService]', 'Deleting contract', { contractId });
 
     try {
