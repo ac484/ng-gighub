@@ -22,12 +22,14 @@ describe('WeatherApiService', () => {
     httpMock.verify();
   });
 
-  it('should mark CWA requests as anonymous to avoid auth headers', () => {
+  it('should use anonymous context and avoid auth headers while keeping query params', () => {
     service.getCityForecast('臺中市').subscribe();
 
     const req = httpMock.expectOne(request => request.url.includes(CWA_API_CONFIG.datasets.cityForecast));
 
     expect(req.request.context.get(ALLOW_ANONYMOUS)).toBeTrue();
+    expect(req.request.headers.has('Authorization')).toBeFalse();
+    expect(req.request.headers.has('token')).toBeFalse();
     expect(req.request.params.get('Authorization')).toBe(CWA_API_CONFIG.apiKey);
     expect(req.request.params.get('locationName')).toBe('臺中市');
 
