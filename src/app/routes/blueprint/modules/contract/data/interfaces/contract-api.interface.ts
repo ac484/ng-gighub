@@ -16,17 +16,8 @@ import type {
   ContractStatus,
   FileAttachment
 } from '../models/contract.model';
-import type {
-  ContractWorkItem,
-  WorkItemProgress,
-  CreateWorkItemDto,
-  UpdateWorkItemDto
-} from '../models/work-item.model';
-import type {
-  CreateContractDto,
-  UpdateContractDto,
-  ContractStatusChangeDto
-} from '../models/dtos';
+import type { CreateContractDto, UpdateContractDto, ContractStatusChangeDto } from '../models/dtos';
+import type { ContractWorkItem, WorkItemProgress, CreateWorkItemDto, UpdateWorkItemDto } from '../models/work-item.model';
 
 /**
  * Validation Result

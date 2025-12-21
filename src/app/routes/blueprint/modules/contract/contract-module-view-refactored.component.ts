@@ -21,14 +21,15 @@
  */
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal, computed, effect } from '@angular/core';
-import { ContractStore } from './application/state';
-import { ContractService } from './application/services';
-import type { Contract, ContractStatistics } from './data/models';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS } from '@shared';
 import { NzDrawerService } from 'ng-zorro-antd/drawer';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
+
+import { ContractService } from './application/services';
+import { ContractStore } from './application/state';
+import type { Contract, ContractStatistics } from './data/models';
 
 // Feature imports - each feature is self-contained
 import { ContractCreationWizardComponent } from './presentation/features/create';
@@ -365,5 +366,4 @@ export class ContractModuleViewComponent implements OnInit {
       component.setError(errorMessage);
     }
   }
-
 }

@@ -10,13 +10,9 @@
  */
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Auth } from '@angular/fire/auth';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoggerService } from '@core';
-import { ContractStore } from '../../../application/state';
-import { ContractService } from '../../../application/services';
-import type { Contract, ContractParty } from '../../../data/models';
-import type { CreateContractDto, UpdateContractDto } from '../../../data/models/dtos';
 import { SHARED_IMPORTS } from '@shared';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -25,6 +21,10 @@ import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
 import { ContractFormComponent } from './components/contract-form.component';
 import { ContractorFormComponent } from './components/contractor-form.component';
 import { OwnerFormComponent } from './components/owner-form.component';
+import { ContractService } from '../../../application/services';
+import { ContractStore } from '../../../application/state';
+import type { Contract, ContractParty } from '../../../data/models';
+import type { CreateContractDto, UpdateContractDto } from '../../../data/models/dtos';
 
 interface ContractModalData {
   blueprintId: string;

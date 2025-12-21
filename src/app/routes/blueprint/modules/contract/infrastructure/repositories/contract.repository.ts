@@ -190,13 +190,13 @@ export class ContractRepository {
         status: 'draft' as ContractStatus,
         startDate: Timestamp.fromDate(data.startDate),
         endDate: Timestamp.fromDate(data.endDate),
-         originalFiles: this.serializeFileAttachments(data.originalFiles || []),
-         createdBy: data.createdBy,
-         createdAt: now,
-         updatedBy: data.createdBy,
-         updatedAt: now,
-         attachments: []
-       };
+        originalFiles: this.serializeFileAttachments(data.originalFiles || []),
+        createdBy: data.createdBy,
+        createdAt: now,
+        updatedBy: data.createdBy,
+        updatedAt: now,
+        attachments: []
+      };
 
       const docRef = await addDoc(contractsRef, contractData);
       const snapshot = await getDoc(docRef);

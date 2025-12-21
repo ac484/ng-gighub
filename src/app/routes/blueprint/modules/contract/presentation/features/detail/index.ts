@@ -11,3 +11,4 @@ export { BasicInfoTabComponent } from './components/basic-info-tab.component';
 export { PartiesTabComponent } from './components/parties-tab.component';
 export { AttachmentsTabComponent } from './components/attachments-tab.component';
 export { HistoryTabComponent } from './components/history-tab.component';
+export { ParsedResultTabComponent } from './components/parsed-result-tab.component';

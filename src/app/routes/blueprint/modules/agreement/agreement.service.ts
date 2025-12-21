@@ -1,7 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Functions, httpsCallable, HttpsCallableResult } from '@angular/fire/functions';
 import { getDownloadURL, uploadBytes } from '@angular/fire/storage';
-
 import { FirebaseService } from '@core/services/firebase.service';
 
 import { Agreement } from './agreement.model';
@@ -19,7 +18,7 @@ export class AgreementService {
   // If timeout occurs, check backend logs for actual error (likely configuration issue)
   private readonly processDocumentFromStorage = httpsCallable<
     { gcsUri: string; mimeType: string },
-    { success: boolean; result: { [key: string]: unknown } }
+    { success: boolean; result: Record<string, unknown> }
   >(this.functions, 'processDocumentFromStorage', { timeout: 120000 });
 
   private readonly _agreements = signal<Agreement[]>([]);
@@ -55,9 +54,7 @@ export class AgreementService {
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       await this.repository.saveAttachmentUrl(agreementId, url, path);
-      this._agreements.update(items =>
-        items.map(a => (a.id === agreementId ? { ...a, attachmentUrl: url, attachmentPath: path } : a))
-      );
+      this._agreements.update(items => items.map(a => (a.id === agreementId ? { ...a, attachmentUrl: url, attachmentPath: path } : a)));
       return url;
     } finally {
       this._uploading.set(false);
@@ -117,9 +114,7 @@ export class AgreementService {
       console.log('[AgreementService] Repository updated');
 
       // 更新本地狀態
-      this._agreements.update(items =>
-        items.map(item => (item.id === agreement.id ? { ...item, parsedJsonUrl: parsedUrl } : item))
-      );
+      this._agreements.update(items => items.map(item => (item.id === agreement.id ? { ...item, parsedJsonUrl: parsedUrl } : item)));
 
       console.log('[AgreementService] Parse completed successfully');
     } catch (error) {

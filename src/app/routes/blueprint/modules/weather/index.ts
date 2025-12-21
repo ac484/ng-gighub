@@ -16,10 +16,4 @@ export { WeatherCardComponent } from './components/weather-card.component';
 export { WeatherService } from './services/weather.service';
 
 // Types for consumers
-export type {
-  WeatherForecast,
-  WeatherObservation,
-  WeatherAlert,
-  WeatherDisplayMode,
-  WeatherResult
-} from './types/weather.types';
+export type { WeatherForecast, WeatherObservation, WeatherAlert, WeatherDisplayMode, WeatherResult } from './types/weather.types';

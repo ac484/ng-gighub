@@ -30,6 +30,11 @@
                 "glob": "**/*",
                 "input": "public"
               },
+              {
+                "glob": "parsed.json",
+                "input": ".",
+                "output": "/"
+              },
               "src/assets",
               "src/favicon.ico"
             ],
@@ -114,6 +119,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "parsed.json",
+                "input": ".",
+                "output": "/"
               },
               "src/assets"
             ]

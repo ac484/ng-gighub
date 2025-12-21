@@ -20,6 +20,7 @@ import { ContractStatusBadgeComponent } from '../../shared';
 import { AttachmentsTabComponent } from './components/attachments-tab.component';
 import { BasicInfoTabComponent } from './components/basic-info-tab.component';
 import { HistoryTabComponent } from './components/history-tab.component';
+import { ParsedResultTabComponent } from './components/parsed-result-tab.component';
 import { PartiesTabComponent } from './components/parties-tab.component';
 
 @Component({
@@ -35,7 +36,8 @@ import { PartiesTabComponent } from './components/parties-tab.component';
     BasicInfoTabComponent,
     PartiesTabComponent,
     AttachmentsTabComponent,
-    HistoryTabComponent
+    HistoryTabComponent,
+    ParsedResultTabComponent
   ],
   template: `
     <div class="contract-detail-drawer">
@@ -75,6 +77,10 @@ import { PartiesTabComponent } from './components/parties-tab.component';
 
           <nz-tab nzTitle="附件">
             <app-attachments-tab [contract]="contract()!" (downloadFile)="onDownloadFile($event)" />
+          </nz-tab>
+
+          <nz-tab nzTitle="解析結果">
+            <app-parsed-result-tab [contract]="contract()!" />
           </nz-tab>
 
           <nz-tab nzTitle="歷史記錄">
