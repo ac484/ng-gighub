@@ -1,15 +1,16 @@
 # 氣象模組實施指南 (Weather Module Implementation Guide)
 
-> 本指南提供詳細的實施步驟與程式碼範例，協助開發者快速實作氣象模組。
+> 本指南提供詳細的實施步驟與程式碼範例，協助開發者快速實作**完全自主的氣象模組**。
 
 ## 📋 目錄
 
 1. [環境準備](#環境準備)
 2. [目錄結構建立](#目錄結構建立)
-3. [共享工具實作](#共享工具實作)
-4. [功能組件實作](#功能組件實作)
-5. [主協調器實作](#主協調器實作)
-6. [測試與驗證](#測試與驗證)
+3. [核心層實作](#核心層實作)
+4. [共享工具實作](#共享工具實作)
+5. [功能組件實作](#功能組件實作)
+6. [主協調器實作](#主協調器實作)
+7. [測試與驗證](#測試與驗證)
 
 ---
 
@@ -23,6 +24,7 @@
 {
   "@angular/core": "^20.3.0",
   "@angular/common": "^20.3.0",
+  "@angular/common/http": "^20.3.0",
   "ng-zorro-antd": "^20.3.1",
   "rxjs": "~7.8.0"
 }
@@ -74,6 +76,9 @@ export const environment = {
 ```bash
 cd src/app/routes/blueprint/modules/weather
 
+# 建立核心目錄
+mkdir -p core/services core/models core/config
+
 # 建立功能目錄
 mkdir -p features/forecast-display
 mkdir -p features/location-selector
@@ -87,54 +92,569 @@ mkdir -p shared/utils
 ### 預期結構
 
 ```
-weather/
+weather/                                 # 完全自主的氣象模組
 ├── WEATHER_MODULE_DESIGN.md
 ├── README.md
-├── IMPLEMENTATION_GUIDE.md          # 本文件
-├── weather-module-view.component.ts (待實作)
-├── index.ts                         (待實作)
+├── IMPLEMENTATION_GUIDE.md            # 本文件
+├── weather-module-view.component.ts   (待實作)
+├── index.ts                           (待實作)
 │
-├── features/
-│   ├── forecast-display/
-│   │   ├── forecast-display.component.ts
-│   │   ├── forecast-display.component.html
-│   │   ├── forecast-display.component.less
+├── core/                              # 核心層
+│   ├── services/
+│   │   ├── weather-api.service.ts
+│   │   ├── cache.service.ts
 │   │   └── index.ts
-│   ├── location-selector/
-│   │   └── ...
-│   ├── construction-suitability/
-│   │   └── ...
-│   └── weather-alerts/
-│       └── ...
+│   ├── models/
+│   │   ├── weather.model.ts
+│   │   ├── api-response.model.ts
+│   │   └── index.ts
+│   └── config/
+│       ├── api.config.ts
+│       ├── constants.ts
+│       └── index.ts
 │
-└── shared/
-    ├── utils/
-    │   ├── weather-formatters.ts
-    │   ├── weather-icons.ts
-    │   └── index.ts
-    └── index.ts
+├── features/                          # 功能模組
+│   ├── forecast-display/
+│   ├── location-selector/
+│   ├── construction-suitability/
+│   └── weather-alerts/
+│
+└── shared/                            # 共享工具
+    └── utils/
+        ├── formatters.ts
+        ├── icons.ts
+        ├── calculators.ts
+        └── index.ts
+```
+
+---
+
+## 🏗️ 核心層實作
+
+### 1. API 配置 (core/config/api.config.ts)
+
+```typescript
+/**
+ * CWA API Configuration
+ * 中央氣象署 API 配置
+ */
+
+import { environment } from 'src/environments/environment';
+
+export const CWA_API_CONFIG = {
+  /** API Base URL */
+  baseUrl: 'https://opendata.cwa.gov.tw/api/v1/rest/datastore',
+  
+  /** API Authorization Key */
+  apiKey: environment.CWA_API_KEY,
+  
+  /** HTTP 請求逾時時間 (毫秒) */
+  timeout: 30000,
+  
+  /** 重試次數 */
+  retryAttempts: 3,
+  
+  /** 資料集 ID */
+  datasets: {
+    /** 一般天氣預報-今明36小時天氣預報 */
+    cityForecast: 'F-C0032-001',
+    
+    /** 地震報告-顯著有感地震報告 */
+    earthquakeReport: 'E-A0016-001',
+    
+    /** 自動氣象站-氣象觀測資料 */
+    weatherStation: 'O-A0001-001'
+  }
+} as const;
+```
+
+### 2. 常數定義 (core/config/constants.ts)
+
+```typescript
+/**
+ * Weather Module Constants
+ * 氣象模組常數
+ */
+
+/** 台灣縣市代碼對照表 */
+export const COUNTY_CODES: Record<string, string> = {
+  '臺北市': '063',
+  '新北市': '065',
+  '桃園市': '068',
+  '臺中市': '066',
+  '臺南市': '067',
+  '高雄市': '064',
+  '基隆市': '010',
+  '新竹市': '018',
+  '嘉義市': '020',
+  '新竹縣': '004',
+  '苗栗縣': '005',
+  '彰化縣': '007',
+  '南投縣': '008',
+  '雲林縣': '009',
+  '嘉義縣': '010',
+  '屏東縣': '013',
+  '宜蘭縣': '002',
+  '花蓮縣': '015',
+  '臺東縣': '014',
+  '澎湖縣': '016',
+  '金門縣': '017',
+  '連江縣': '019'
+};
+
+/** 所有縣市名稱列表 */
+export const ALL_COUNTIES = Object.keys(COUNTY_CODES);
+
+/** 天氣現象代碼對照表 */
+export const WEATHER_CODES: Record<string, string> = {
+  '1': '晴',
+  '2': '多雲',
+  '3': '陰',
+  '4': '多雲時晴',
+  '5': '多雲時陰',
+  '6': '陰時多雲',
+  '7': '晴時多雲',
+  '8': '陰短暫雨',
+  '9': '陰時多雲短暫雨',
+  '10': '多雲短暫雨',
+  // ... 更多代碼
+};
+
+/** 快取時間設定 (毫秒) */
+export const CACHE_TTL = {
+  /** 天氣預報快取時間: 3 小時 */
+  forecast: 3 * 60 * 60 * 1000,
+  
+  /** 地震資訊快取時間: 5 分鐘 */
+  earthquake: 5 * 60 * 1000,
+  
+  /** 觀測資料快取時間: 10 分鐘 */
+  observation: 10 * 60 * 1000
+} as const;
+```
+
+### 3. 資料模型 (core/models/weather.model.ts)
+
+```typescript
+/**
+ * Weather Data Models
+ * 天氣資料模型
+ */
+
+/** 天氣預報資料 */
+export interface WeatherForecast {
+  /** 地點名稱 */
+  locationName: string;
+  
+  /** 開始時間 (ISO 8601) */
+  startTime: string;
+  
+  /** 結束時間 (ISO 8601) */
+  endTime: string;
+  
+  /** 天氣描述 */
+  weatherDescription: string;
+  
+  /** 天氣現象代碼 */
+  weatherCode?: string;
+  
+  /** 溫度資訊 */
+  temperature: {
+    min: number;
+    max: number;
+    unit?: string;
+  };
+  
+  /** 降雨機率 (%) */
+  rainProbability: number;
+  
+  /** 相對濕度 (%) */
+  humidity?: number;
+  
+  /** 風速 (m/s) */
+  windSpeed?: number;
+}
+
+/** 地震資訊 */
+export interface EarthquakeInfo {
+  /** 地震編號 */
+  earthquakeNo: string;
+  
+  /** 發震時間 (ISO 8601) */
+  originTime: string;
+  
+  /** 震央位置描述 */
+  epicenterLocation: string;
+  
+  /** 芮氏規模 */
+  magnitude: number;
+  
+  /** 地震深度 (km) */
+  depth: number;
+  
+  /** 報告內容 */
+  reportContent?: string;
+}
+
+/** 施工適宜度評估 */
+export interface ConstructionSuitability {
+  /** 評估分數 (0-100) */
+  score: number;
+  
+  /** 適宜度等級 */
+  level: 'excellent' | 'good' | 'fair' | 'poor' | 'dangerous';
+  
+  /** 評估因素 */
+  factors: {
+    rainfall: { value: number; impact: number; description: string };
+    temperature: { value: number; impact: number; description: string };
+    wind: { value: number; impact: number; description: string };
+    weather: { value: string; impact: number; description: string };
+  };
+  
+  /** 建議 */
+  recommendations: string[];
+  
+  /** 警告 */
+  warnings: string[];
+}
+```
+
+### 4. API 回應模型 (core/models/api-response.model.ts)
+
+```typescript
+/**
+ * CWA API Response Models
+ * 中央氣象署 API 回應模型
+ */
+
+/** CWA API 標準回應結構 */
+export interface CwaApiResponse {
+  success: string;
+  result?: {
+    resource_id: string;
+    fields: Array<{ id: string; type: string }>;
+  };
+  records: CwaRecords;
+}
+
+/** CWA 記錄結構 */
+export interface CwaRecords {
+  datasetDescription?: string;
+  location: CwaLocation[];
+}
+
+/** CWA 地點資料 */
+export interface CwaLocation {
+  locationName: string;
+  geocode?: string;
+  lat?: string;
+  lon?: string;
+  weatherElement: CwaWeatherElement[];
+}
+
+/** CWA 氣象要素 */
+export interface CwaWeatherElement {
+  elementName: string;
+  description?: string;
+  time: CwaTimeData[];
+}
+
+/** CWA 時間資料 */
+export interface CwaTimeData {
+  startTime: string;
+  endTime: string;
+  parameter: CwaParameter;
+}
+
+/** CWA 參數 */
+export interface CwaParameter {
+  parameterName: string;
+  parameterValue?: string;
+  parameterUnit?: string;
+}
+```
+
+### 5. 記憶體快取服務 (core/services/cache.service.ts)
+
+```typescript
+/**
+ * Cache Service
+ * 記憶體快取服務
+ */
+
+import { Injectable } from '@angular/core';
+
+interface CacheEntry<T> {
+  data: T;
+  expiry: number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class CacheService {
+  private cache = new Map<string, CacheEntry<any>>();
+  
+  /**
+   * 取得快取資料
+   */
+  get<T>(key: string): T | null {
+    const entry = this.cache.get(key);
+    
+    if (!entry) {
+      return null;
+    }
+    
+    // 檢查是否過期
+    if (Date.now() > entry.expiry) {
+      this.cache.delete(key);
+      return null;
+    }
+    
+    return entry.data as T;
+  }
+  
+  /**
+   * 設定快取資料
+   * @param key 快取鍵
+   * @param data 資料
+   * @param ttl 存活時間 (毫秒)
+   */
+  set<T>(key: string, data: T, ttl: number): void {
+    this.cache.set(key, {
+      data,
+      expiry: Date.now() + ttl
+    });
+  }
+  
+  /**
+   * 刪除快取
+   */
+  delete(key: string): void {
+    this.cache.delete(key);
+  }
+  
+  /**
+   * 清除所有快取
+   */
+  clear(): void {
+    this.cache.clear();
+  }
+  
+  /**
+   * 清除過期快取
+   */
+  clearExpired(): number {
+    let count = 0;
+    const now = Date.now();
+    
+    for (const [key, entry] of this.cache.entries()) {
+      if (now > entry.expiry) {
+        this.cache.delete(key);
+        count++;
+      }
+    }
+    
+    return count;
+  }
+  
+  /**
+   * 取得快取統計
+   */
+  stats(): { size: number; keys: string[] } {
+    return {
+      size: this.cache.size,
+      keys: Array.from(this.cache.keys())
+    };
+  }
+}
+```
+
+### 6. CWA API 服務 (core/services/weather-api.service.ts)
+
+```typescript
+/**
+ * Weather API Service
+ * 中央氣象署 API 服務
+ */
+
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, map, retry, timeout, tap } from 'rxjs/operators';
+
+import { CacheService } from './cache.service';
+import { CWA_API_CONFIG, CACHE_TTL } from '../config';
+import type { CwaApiResponse, WeatherForecast, EarthquakeInfo } from '../models';
+
+@Injectable({ providedIn: 'root' })
+export class WeatherApiService {
+  private readonly http = inject(HttpClient);
+  private readonly cache = inject(CacheService);
+  
+  /**
+   * 取得縣市天氣預報
+   */
+  getCityForecast(locationName: string): Observable<WeatherForecast[]> {
+    const cacheKey = `forecast_${locationName}`;
+    
+    // 檢查快取
+    const cached = this.cache.get<WeatherForecast[]>(cacheKey);
+    if (cached) {
+      console.log('[WeatherApi] Cache hit:', cacheKey);
+      return of(cached);
+    }
+    
+    // 呼叫 CWA API
+    const params = new HttpParams()
+      .set('Authorization', CWA_API_CONFIG.apiKey)
+      .set('locationName', locationName);
+    
+    const url = `${CWA_API_CONFIG.baseUrl}/${CWA_API_CONFIG.datasets.cityForecast}`;
+    
+    return this.http.get<CwaApiResponse>(url, { params }).pipe(
+      timeout(CWA_API_CONFIG.timeout),
+      retry(CWA_API_CONFIG.retryAttempts),
+      map(response => this.transformToWeatherForecast(response)),
+      tap(data => {
+        this.cache.set(cacheKey, data, CACHE_TTL.forecast);
+        console.log('[WeatherApi] Data cached:', cacheKey);
+      }),
+      catchError(this.handleError)
+    );
+  }
+  
+  /**
+   * 取得地震報告
+   */
+  getEarthquakeReport(limit = 10): Observable<EarthquakeInfo[]> {
+    const cacheKey = `earthquake_${limit}`;
+    
+    // 檢查快取
+    const cached = this.cache.get<EarthquakeInfo[]>(cacheKey);
+    if (cached) {
+      console.log('[WeatherApi] Cache hit:', cacheKey);
+      return of(cached);
+    }
+    
+    // 呼叫 CWA API
+    const params = new HttpParams()
+      .set('Authorization', CWA_API_CONFIG.apiKey)
+      .set('limit', limit.toString());
+    
+    const url = `${CWA_API_CONFIG.baseUrl}/${CWA_API_CONFIG.datasets.earthquakeReport}`;
+    
+    return this.http.get<CwaApiResponse>(url, { params }).pipe(
+      timeout(CWA_API_CONFIG.timeout),
+      retry(CWA_API_CONFIG.retryAttempts),
+      map(response => this.transformToEarthquakeInfo(response)),
+      tap(data => {
+        this.cache.set(cacheKey, data, CACHE_TTL.earthquake);
+        console.log('[WeatherApi] Data cached:', cacheKey);
+      }),
+      catchError(this.handleError)
+    );
+  }
+  
+  /**
+   * 轉換 API 回應為天氣預報模型
+   */
+  private transformToWeatherForecast(response: CwaApiResponse): WeatherForecast[] {
+    const forecasts: WeatherForecast[] = [];
+    
+    if (!response.records?.location) {
+      return forecasts;
+    }
+    
+    response.records.location.forEach(location => {
+      const wxElement = location.weatherElement.find(el => el.elementName === 'Wx');
+      const minTElement = location.weatherElement.find(el => el.elementName === 'MinT');
+      const maxTElement = location.weatherElement.find(el => el.elementName === 'MaxT');
+      const popElement = location.weatherElement.find(el => el.elementName === 'PoP' || el.elementName === 'PoP12h');
+      
+      if (wxElement && wxElement.time.length > 0) {
+        wxElement.time.forEach((timeData, index) => {
+          const minT = minTElement?.time[index];
+          const maxT = maxTElement?.time[index];
+          const pop = popElement?.time[index];
+          
+          forecasts.push({
+            locationName: location.locationName,
+            startTime: timeData.startTime,
+            endTime: timeData.endTime,
+            weatherDescription: timeData.parameter.parameterName,
+            weatherCode: timeData.parameter.parameterValue,
+            temperature: {
+              min: minT ? parseInt(minT.parameter.parameterName, 10) : 0,
+              max: maxT ? parseInt(maxT.parameter.parameterName, 10) : 0,
+              unit: minT?.parameter.parameterUnit || 'C'
+            },
+            rainProbability: pop ? parseInt(pop.parameter.parameterName, 10) : 0
+          });
+        });
+      }
+    });
+    
+    return forecasts;
+  }
+  
+  /**
+   * 轉換 API 回應為地震資訊模型
+   */
+  private transformToEarthquakeInfo(response: CwaApiResponse): EarthquakeInfo[] {
+    // 實作地震資訊轉換邏輯
+    // 此處簡化處理，實際需根據 API 回應結構調整
+    return [];
+  }
+  
+  /**
+   * 錯誤處理
+   */
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = '發生未知錯誤';
+    
+    if (error.error instanceof ErrorEvent) {
+      // 客戶端或網路錯誤
+      errorMessage = `網路錯誤: ${error.error.message}`;
+    } else {
+      // 後端回傳錯誤
+      switch (error.status) {
+        case 400:
+          errorMessage = '請求參數錯誤';
+          break;
+        case 401:
+          errorMessage = 'API 授權失敗，請檢查 API Key';
+          break;
+        case 403:
+          errorMessage = '無權限存取此資料集';
+          break;
+        case 404:
+          errorMessage = '找不到指定的資料集';
+          break;
+        case 429:
+          errorMessage = '請求過於頻繁，請稍後再試';
+          break;
+        case 500:
+        case 503:
+          errorMessage = '氣象署服務暫時無法使用';
+          break;
+        default:
+          errorMessage = `HTTP 錯誤: ${error.status}`;
+      }
+    }
+    
+    console.error('[WeatherApi] Error:', errorMessage, error);
+    return throwError(() => new Error(errorMessage));
+  }
+}
 ```
 
 ---
 
 ## 🛠️ 共享工具實作
 
-### 1. 格式化工具 (weather-formatters.ts)
+### 1. 格式化工具 (shared/utils/formatters.ts)
 
 ```typescript
-/**
- * Weather Formatters
- * 天氣資料格式化工具
- */
-
-/**
- * 格式化溫度
- * @param temp 溫度值
- * @param unit 溫度單位 (預設 'C')
- */
-export function formatTemperature(temp: number, unit: string = 'C'): string {
-  return `${temp}°${unit}`;
-}
 
 /**
  * 格式化溫度範圍
