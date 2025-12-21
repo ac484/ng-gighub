@@ -14,5 +14,9 @@ export const environment = {
     refreshTokenType: 'auth-refresh'
   },
   interceptorFns: [mockInterceptor],
-  firebaseMessagingPublicKey: 'BMfTfys7cErI2JVFmjkWSeCb7ClvFklQ4r69lWGIYT2dSq5VD2eguZlckvdq2QJhdGskeyUg0G6RcC8WmlBztFY'
-} as Environment & { firebaseMessagingPublicKey: string };
+  firebaseMessagingPublicKey: 'BMfTfys7cErI2JVFmjkWSeCb7ClvFklQ4r69lWGIYT2dSq5VD2eguZlckvdq2QJhdGskeyUg0G6RcC8WmlBztFY',
+  cwa: {
+    apiKey: 'CWB-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', // Replace with actual CWA API Key
+    baseUrl: 'https://opendata.cwa.gov.tw/api/v1/rest/datastore'
+  }
+} as Environment & { firebaseMessagingPublicKey: string; cwa: { apiKey: string; baseUrl: string } };

@@ -2,21 +2,26 @@
  * Weather Service
  * 氣象服務
  *
- * Purpose: Call functions-integration weather APIs
- * Architecture: Service layer for weather data
+ * Purpose: Provide weather data with caching and transformation
+ * Architecture: Business logic service for weather data
  *
- * ✅ High Cohesion: Single responsibility - weather data fetching
- * ✅ Low Coupling: Communicates via Firebase callable functions
+ * ✅ High Cohesion: Single responsibility - weather data management
+ * ✅ Low Coupling: Uses injected dependencies (API client, cache)
+ * ✅ Extensible: Easy to add new weather data types
  */
 
 import { Injectable, inject, signal } from '@angular/core';
-import { Functions, httpsCallable } from '@angular/fire/functions';
 import { LoggerService } from '@core/services/logger';
+import { CwaApiClient } from './cwa-api.client';
+import { WeatherCacheService } from './weather-cache.service';
+import { WEATHER_ELEMENTS } from '../types/cwa-api.types';
 import type { WeatherForecast, WeatherObservation, WeatherAlert } from '../types/weather.types';
+import type { CwaLocation, WeatherElement } from '../types/cwa-api.types';
 
 @Injectable({ providedIn: 'root' })
 export class WeatherService {
-  private readonly functions = inject(Functions);
+  private readonly apiClient = inject(CwaApiClient);
+  private readonly cache = inject(WeatherCacheService);
   private readonly logger = inject(LoggerService);
 
   // State signals
@@ -27,37 +32,45 @@ export class WeatherService {
   readonly loading = this._loading.asReadonly();
   readonly error = this._error.asReadonly();
 
-  // Create callable functions during initialization
-  private readonly getForecastCallable = httpsCallable<{ countyName: string }, any>(this.functions, 'getForecast36Hour');
-  private readonly getObservationCallable = httpsCallable<{ stationId?: string }, any>(this.functions, 'getObservation');
-  private readonly getAlertsCallable = httpsCallable<{ alertType?: string }, any>(this.functions, 'getWeatherWarnings');
-
   /**
    * Get 36-hour weather forecast by county
    */
-  async getForecast(countyName: string): Promise<WeatherForecast | null> {
+  async getForecast(countyName: string, useCache = true): Promise<WeatherForecast | null> {
     this._loading.set(true);
     this._error.set(null);
 
-    try {
-      const result = await this.getForecastCallable({ countyName });
+    const cacheKey = `forecast_36h_${countyName}`;
 
-      if (!result.data?.location?.[0]) {
+    try {
+      // Check cache first
+      if (useCache) {
+        const cached = this.cache.get<WeatherForecast>(cacheKey);
+        if (cached) {
+          this.logger.debug('[WeatherService]', `Using cached forecast for ${countyName}`);
+          this._loading.set(false);
+          return cached;
+        }
+      }
+
+      // Fetch from API
+      this.logger.debug('[WeatherService]', `Fetching forecast for ${countyName}`);
+      const response = await this.apiClient.getForecast36Hour({
+        locationName: countyName
+      });
+
+      if (!response.records?.location?.[0]) {
         throw new Error('No forecast data available');
       }
 
-      const location = result.data.location[0];
-      const weather = location.weatherElement?.find((e: any) => e.elementName === 'Wx')?.time?.[0]?.parameter?.parameterName || 'N/A';
-      const temp = location.weatherElement?.find((e: any) => e.elementName === 'T')?.time?.[0]?.parameter?.parameterName || 'N/A';
-      const rain = location.weatherElement?.find((e: any) => e.elementName === 'PoP')?.time?.[0]?.parameter?.parameterName || 'N/A';
+      // Transform to our format
+      const forecast = this.transformForecast(response.records.location[0]);
 
-      return {
-        locationName: location.locationName,
-        temperature: temp,
-        weather,
-        rainProbability: rain,
-        updateTime: new Date()
-      };
+      // Cache the result
+      if (useCache && forecast) {
+        this.cache.set(cacheKey, forecast, this.cache.defaultTTL.FORECAST);
+      }
+
+      return forecast;
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to fetch forecast';
       this._error.set(errorMsg);
@@ -71,29 +84,42 @@ export class WeatherService {
   /**
    * Get current weather observation
    */
-  async getObservation(stationId?: string): Promise<WeatherObservation | null> {
+  async getObservation(stationId?: string, useCache = true): Promise<WeatherObservation | null> {
     this._loading.set(true);
     this._error.set(null);
 
-    try {
-      const result = await this.getObservationCallable({ stationId });
+    const cacheKey = `observation_${stationId || 'all'}`;
 
-      if (!result.data?.location?.[0]) {
+    try {
+      // Check cache first
+      if (useCache) {
+        const cached = this.cache.get<WeatherObservation>(cacheKey);
+        if (cached) {
+          this.logger.debug('[WeatherService]', `Using cached observation`);
+          this._loading.set(false);
+          return cached;
+        }
+      }
+
+      // Fetch from API
+      this.logger.debug('[WeatherService]', `Fetching observation${stationId ? ` for ${stationId}` : ''}`);
+      const response = await this.apiClient.getMeteorologicalObservation({
+        stationId
+      });
+
+      if (!response.records?.location?.[0]) {
         throw new Error('No observation data available');
       }
 
-      const location = result.data.location[0];
-      const temp = location.weatherElement?.find((e: any) => e.elementName === 'TEMP')?.elementValue || 0;
-      const humidity = location.weatherElement?.find((e: any) => e.elementName === 'HUMD')?.elementValue || 0;
-      const weather = location.weatherElement?.find((e: any) => e.elementName === 'Weather')?.elementValue || 'N/A';
+      // Transform to our format
+      const observation = this.transformObservation(response.records.location[0]);
 
-      return {
-        stationName: location.locationName,
-        temperature: parseFloat(temp) || 0,
-        humidity: parseFloat(humidity) || 0,
-        weather,
-        observationTime: new Date()
-      };
+      // Cache the result
+      if (useCache && observation) {
+        this.cache.set(cacheKey, observation, this.cache.defaultTTL.OBSERVATION);
+      }
+
+      return observation;
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to fetch observation';
       this._error.set(errorMsg);
@@ -107,26 +133,46 @@ export class WeatherService {
   /**
    * Get active weather warnings
    */
-  async getAlerts(alertType?: string): Promise<WeatherAlert[]> {
+  async getAlerts(alertType?: string, useCache = true): Promise<WeatherAlert[]> {
     this._loading.set(true);
     this._error.set(null);
 
-    try {
-      const result = await this.getAlertsCallable({ alertType });
+    const cacheKey = `alerts_${alertType || 'all'}`;
 
-      if (!result.data?.records?.record) {
+    try {
+      // Check cache first
+      if (useCache) {
+        const cached = this.cache.get<WeatherAlert[]>(cacheKey);
+        if (cached) {
+          this.logger.debug('[WeatherService]', `Using cached alerts`);
+          this._loading.set(false);
+          return cached;
+        }
+      }
+
+      // Fetch from API
+      this.logger.debug('[WeatherService]', 'Fetching weather alerts');
+      const response = await this.apiClient.getWeatherWarnings(
+        alertType ? { alertType } : {}
+      );
+
+      if (!response.records?.record) {
         return [];
       }
 
-      const records = Array.isArray(result.data.records.record) ? result.data.records.record : [result.data.records.record];
+      // Transform to our format
+      const records = Array.isArray(response.records.record) 
+        ? response.records.record 
+        : [response.records.record];
 
-      return records.map((record: any) => ({
-        type: record.datasetInfo?.datasetName || 'N/A',
-        title: record.hazardConditions?.hazards?.info?.phenomena || 'Weather Alert',
-        description: record.hazardConditions?.hazards?.info?.headline || 'N/A',
-        effectiveTime: new Date(record.hazardConditions?.hazards?.info?.effective || Date.now()),
-        severity: this.mapSeverity(record.hazardConditions?.hazards?.info?.severity)
-      }));
+      const alerts = records.map(record => this.transformAlert(record));
+
+      // Cache the result
+      if (useCache && alerts.length > 0) {
+        this.cache.set(cacheKey, alerts, this.cache.defaultTTL.ALERT);
+      }
+
+      return alerts;
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to fetch alerts';
       this._error.set(errorMsg);
@@ -135,6 +181,102 @@ export class WeatherService {
     } finally {
       this._loading.set(false);
     }
+  }
+
+  /**
+   * Clear all cached weather data
+   */
+  clearCache(): void {
+    this.cache.clearAll();
+    this.logger.info('[WeatherService]', 'Cache cleared');
+  }
+
+  /**
+   * Clear expired cache entries
+   */
+  clearExpiredCache(): number {
+    return this.cache.clearExpired();
+  }
+
+  /**
+   * Transform CWA forecast location to our format
+   */
+  private transformForecast(location: CwaLocation): WeatherForecast {
+    const wxElement = this.findElement(location.weatherElement, WEATHER_ELEMENTS.Wx);
+    const tempElement = this.findElement(location.weatherElement, WEATHER_ELEMENTS.T);
+    const popElement = this.findElement(location.weatherElement, WEATHER_ELEMENTS.PoP);
+
+    return {
+      locationName: location.locationName,
+      temperature: this.getElementValue(tempElement, '0'),
+      weather: this.getElementValue(wxElement, 'N/A'),
+      rainProbability: this.getElementValue(popElement, '0'),
+      updateTime: new Date()
+    };
+  }
+
+  /**
+   * Transform CWA observation location to our format
+   */
+  private transformObservation(location: CwaLocation): WeatherObservation {
+    const tempElement = this.findElement(location.weatherElement, WEATHER_ELEMENTS.TEMP);
+    const humdElement = this.findElement(location.weatherElement, WEATHER_ELEMENTS.HUMD);
+    const weatherElement = this.findElement(location.weatherElement, WEATHER_ELEMENTS.Weather);
+
+    return {
+      stationName: location.locationName,
+      temperature: this.parseFloat(this.getElementValue(tempElement, '0')),
+      humidity: this.parseFloat(this.getElementValue(humdElement, '0')),
+      weather: this.getElementValue(weatherElement, 'N/A'),
+      observationTime: new Date()
+    };
+  }
+
+  /**
+   * Transform CWA alert record to our format
+   */
+  private transformAlert(record: any): WeatherAlert {
+    return {
+      type: record.datasetInfo?.datasetName || 'N/A',
+      title: record.hazardConditions?.hazards?.info?.phenomena || 'Weather Alert',
+      description: record.hazardConditions?.hazards?.info?.headline || 'N/A',
+      effectiveTime: new Date(record.hazardConditions?.hazards?.info?.effective || Date.now()),
+      severity: this.mapSeverity(record.hazardConditions?.hazards?.info?.severity)
+    };
+  }
+
+  /**
+   * Find weather element by name
+   */
+  private findElement(elements: WeatherElement[], name: string): WeatherElement | undefined {
+    return elements.find(el => el.elementName === name);
+  }
+
+  /**
+   * Get element value (from time array or direct elementValue)
+   */
+  private getElementValue(element: WeatherElement | undefined, defaultValue: string): string {
+    if (!element) return defaultValue;
+    
+    // Try to get from time array first
+    if (element.time && element.time.length > 0) {
+      return element.time[0].parameter.parameterName || defaultValue;
+    }
+    
+    // Try direct elementValue
+    if (element.elementValue !== undefined) {
+      return String(element.elementValue);
+    }
+    
+    return defaultValue;
+  }
+
+  /**
+   * Parse float safely
+   */
+  private parseFloat(value: string): number {
+    const parsed = Number.parseFloat(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
   }
 
   /**
