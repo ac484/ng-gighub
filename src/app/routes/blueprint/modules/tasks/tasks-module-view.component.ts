@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
+import { LoggerService } from '@core/services/logger';
 import { FormsModule } from '@angular/forms';
 import { SHARED_IMPORTS } from '@shared';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -135,6 +136,7 @@ import { TasksService } from './tasks.service';
 export class TasksModuleViewComponent {
   blueprintId = input.required<string>();
 
+  private readonly logger = inject(LoggerService);
   private readonly tasksService = inject(TasksService);
   private readonly message = inject(NzMessageService);
 
@@ -175,7 +177,7 @@ export class TasksModuleViewComponent {
       this.newStatus.set('in-progress');
     } catch (error) {
       this.message.error('新增任務失敗');
-      console.error('[TasksModuleViewComponent] createTask failed', error);
+      this.logger.error('[TasksModuleViewComponent] createTask failed', error as Error);
     } finally {
       this.submitting.set(false);
     }
@@ -188,7 +190,7 @@ export class TasksModuleViewComponent {
       this.message.success('已刪除任務');
     } catch (error) {
       this.message.error('刪除任務失敗');
-      console.error('[TasksModuleViewComponent] deleteTask failed', error);
+      this.logger.error('[TasksModuleViewComponent] deleteTask failed', error as Error);
     }
   }
 

@@ -42,7 +42,7 @@ export class TasksRepository {
       status: payload.status,
       createdAt: now
     };
-    const docRef = await addDoc(this.collectionRef, data as unknown as DocumentData);
+    const docRef = await addDoc(this.collectionRef, data as DocumentData);
     return this.toEntity(data as DocumentData, docRef.id);
   }
 
