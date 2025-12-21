@@ -30,12 +30,19 @@ export class WeatherApiService {
       return of(cached);
     }
 
-    // 呼叫 CWA API
+    // 檢查 API Key
+    if (!CWA_API_CONFIG.apiKey) {
+      return throwError(() => new Error('未設定 CWA API Key，請在環境變數中設定'));
+    }
+
+    // 呼叫 CWA API - Authorization 參數必須在 URL 中
     const params = new HttpParams()
       .set('Authorization', CWA_API_CONFIG.apiKey)
       .set('locationName', locationName);
 
     const url = `${CWA_API_CONFIG.baseUrl}/${CWA_API_CONFIG.datasets.cityForecast}`;
+
+    console.log('[WeatherApi] Fetching forecast for:', locationName, 'URL:', url);
 
     return this.http.get<CwaApiResponse>(url, { params }).pipe(
       timeout(CWA_API_CONFIG.timeout),
@@ -62,12 +69,19 @@ export class WeatherApiService {
       return of(cached);
     }
 
+    // 檢查 API Key
+    if (!CWA_API_CONFIG.apiKey) {
+      return throwError(() => new Error('未設定 CWA API Key，請在環境變數中設定'));
+    }
+
     // 呼叫 CWA API
     const params = new HttpParams()
       .set('Authorization', CWA_API_CONFIG.apiKey)
       .set('limit', limit.toString());
 
     const url = `${CWA_API_CONFIG.baseUrl}/${CWA_API_CONFIG.datasets.earthquakeReport}`;
+
+    console.log('[WeatherApi] Fetching earthquake report, limit:', limit);
 
     return this.http.get<CwaApiResponse>(url, { params }).pipe(
       timeout(CWA_API_CONFIG.timeout),
