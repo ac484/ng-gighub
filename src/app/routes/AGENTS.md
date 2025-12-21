@@ -1,248 +1,98 @@
-# Routes Module Agent Guide
+# Routes 模組 Agent 指南
 
-The Routes module organizes all feature modules in the GigHub application using lazy-loading for optimal performance.
+Scope: 本文件位於 src/app/routes，針對 Routes（路由）模組的 Agent 使用者說明。此處定義 Agents 在路由層的職責與允許的內容範圍 —— 你現在位於路由層（Layer: Routes / Routing）。
 
-## Module Purpose
+## Purpose / Responsibility
 
-The routes directory contains:
-- **Feature modules** organized by business domain
-- **Lazy-loaded routes** for performance optimization
-- **Module-level guards** for access control
-- **Nested routing** for complex features
-- **Module-specific AGENTS.md** for detailed context
+本模組負責：
+- 管理應用程式的主要路由配置（主路由、認證路由、異常路由）
+- 定義與註冊懶載入的功能模組路由
+- 提供模組等級的守衛（guards）與路由相關共通服務
+- 維護 routing 相關的 AGENTS 文件與範式，確保所有 feature module 遵循標準路由模式
 
-## Routes Structure
+## Hard Rules / Constraints
 
-```
-src/app/routes/
-├── routes.ts                   # Main routing configuration
-├── blueprint/                  # Blueprint container module (AGENTS.md)
-├── dashboard/                  # Dashboard views
-├── passport/                   # Authentication flows
-└── exception/                  # Error pages
-```
+必須非常嚴格遵守以下紅線：
+- NO UI components: 本文件與此目錄不得包含 UI 元件或呈現邏輯
+- NO feature-specific logic: 不得放入功能專屬商業邏輯（例如任務、日誌、品質等）
+- NO direct Firebase access outside adapters: 禁止在此層直接呼叫 Firestore / Firebase；只有經由 repository/adapters 例外
 
-## Main Routing Configuration
+其他強制性限制：
+- 使用 Three-Layer Architecture（UI → Service → Repository）；Routes 只管理路由與跨模組守衛/服務
+- 不得建立 FirebaseService wrapper
+- 依賴注入必須使用 inject()（不要用 constructor injection）
+- 所有非同步錯誤處理使用 Result Pattern
+- 前端不得直接呼叫 Vertex AI；AI 呼叫僅透過 functions-ai
 
-**規則**:
-- 主路由配置檔案位於 `src/app/routes/routes.ts`
-- 根路徑必須使用 `LayoutBasicComponent` 並使用 `authGuard` 保護
-- 預設路由必須重定向到 `dashboard`
-- 所有功能模組必須使用懶載入模式
-- 認證路由必須使用 `LayoutPassportComponent`
-- 異常路由不需要認證
-- catch-all 路由必須重定向到 `/exception/404`
+## Allowed / Expected Content
 
-## Feature Module Patterns
+可接受放置於此模組目錄的內容：
+- 路由配置檔（routes.ts）與懶載入模組參考
+- Singleton services 關於路由/導航的共通服務（例如 Breadcrumb 計算、導航助手）
+- Guards（authGuard、permissionGuard、moduleEnabledGuard）及其 AGENTS 註解
+- Global interceptors 或 Router 相關的 cross-cutting concerns（例如導覽載入指示器）
+- 模組層級的 AGENTS.md 與路由設計範例
 
-### Module Routing Template
+不允許但可參考的內容：
+- feature components、頁面呈現、直接的資料存取或複雜業務邏輯
 
-**規則**:
-- 每個功能模組必須遵循標準路由模式
-- 列表路由使用空路徑 `''`
-- 詳情路由使用 `:id` 參數
-- 編輯路由使用 `:id/edit` 路徑
-- 所有路由必須設定 `title` 資料屬性
-- 需要權限的路由必須使用 `permissionGuard`
+## Structure / Organization
 
-### Lazy Loading Benefits
+建議目錄結構（此結構為推薦且在本模組中維護）：
+- routes.ts                          # 主路由配置（必須存在）
+- services/                          # routing helpers、breadcrumb、navigation services
+- guards/                            # authGuard、permissionGuard、moduleEnabledGuard
+- interceptors/                      # optional: routing-related interceptors
+- blueprint/                          # 範例子模組目錄（每個複雜模組應有自己的 AGENTS.md）
+- AGENTS.md                          # 本檔案
 
-**規則**:
-1. 必須使用懶載入以減少初始套件大小
-2. 必須僅在需要時載入功能
-3. 必須利用 Webpack 程式碼分割
-4. 必須改善快取策略（未變更的模組保持快取）
+範例規範（摘要）：
+- 主路由必須使用 LayoutBasicComponent 並以 authGuard 保護
+- 登入路由使用 LayoutPassportComponent
+- 異常路由（/exception/*）不需認證
+- 所有 feature module 必須懶載入且在 routes.ts 中註冊
+- 路由資料（data）必須包含 title，並可選 breadcrumb、permission、module、showInMenu、icon、order
 
-### Route Data
+## Integration / Dependencies
 
-**規則**:
-- 必須使用路由 `data` 傳遞配置
-- 必須包含 `title`（頁面標題）
-- 可以包含 `breadcrumb`（麵包屑標籤）
-- 可以包含 `permission`（所需權限）
-- 可以包含 `module`（模組 ID，用於功能標誌）
-- 可以包含 `showInMenu`（是否在側邊欄選單顯示）
-- 可以包含 `icon`（選單圖示）
-- 可以包含 `order`（選單順序）
+允許與此模組互動的技術/相依：
+- Angular DI（僅使用 inject()）
+- 使用 @angular/fire 官方 adapter 與 repository pattern（不得直接呼叫 Firestore）
+- Guards 與 services 可以依賴 Core services（透過明確介面）
+- 前端不得包含任何 API key 或直接呼叫雲端 AI；AI 與 OCR 相關工作必須透過 functions-ai 或 functions-ai-document
+- 模組間不得有 feature-to-feature 的循環匯入；僅透過公開介面或事件通訊
 
-## Route Guards
+## Best Practices / Guidelines
 
-### Authentication Guard
+品質指引（非強制，但強烈建議）：
+- 優先使用組合（composition）而非繼承
+- 使 services 保持無狀態（stateless）以利重用與測試
+- 守衛順序應為：驗證 (auth) → 權限 (permission) → 模組啟用 (module enabled)
+- 使用 signals + standalone components（專案慣例）在路由相關元件中保存狀態
+- 對於需重複的權限檢查，請實作快取以降低 Firestore 查詢頻率
+- 所有路由變更都應處理導航錯誤並提供回饋（例如 redirect 或顯示錯誤頁面）
 
-**規則**:
-- 必須檢查用戶是否已認證
-- 如果未認證，必須重定向到登入頁面並帶上返回 URL
-- 必須使用 `inject()` 注入服務
+## Related Docs / References
 
-### Permission Guard
+- ../shared/AGENTS.md
+- ../environments/AGENTS.md
+- ./blueprint/AGENTS.md (Blueprint 模組專用說明)
+- ../../AGENTS.md (專案總覽)
+- docs/architecture/ (路由與模組設計參考)
 
-**規則**:
-- 必須檢查用戶是否具有所需權限
-- 如果沒有權限，必須重定向到 `/exception/403`
-- 必須從路由參數中取得資源 ID
-- 必須使用 `PermissionService` 檢查權限
+## Metadata
 
-### Module Enabled Guard
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
 
-**規則**:
-- 必須檢查藍圖是否啟用了指定模組
-- 如果模組未啟用，必須重定向到藍圖詳情頁面並帶上錯誤查詢參數
-- 必須從路由參數中取得 `blueprintId`
-- 必須查詢 Firestore 檢查 `enabled_modules` 陣列
+<!-- 保留原始主要路由要點作為快速參考（摘要，不取代完整文件） -->
 
-### Guard Composition
+簡要快速參考：
+- 主路由檔案：src/app/routes/routes.ts
+- 路由模式：列表 ''、詳情 ':id'、編輯 ':id/edit'
+- 守衛範例：authGuard、permissionGuard、moduleEnabledGuard，並允許守衛組合
+- 導覽範例：router.navigate(['/blueprint', blueprintId])；相對導航建議使用 relativeTo
+- 麵包屑：使用 computed() 計算，並由 PageHeaderComponent 顯示
 
-**規則**:
-- 可以組合多個守衛：`[authGuard, permissionGuard('edit'), moduleEnabledGuard('task')]`
-- 守衛執行順序：認證 → 權限 → 模組啟用
-- 所有守衛必須通過才能存取路由
-
-## Module Organization
-
-### Foundation Layer Routes
-
-**規則**:
-- `/account/profile` - 用戶個人資料
-- `/account/settings` - 用戶設定
-- `/organization` - 組織列表
-- `/organization/:id` - 組織詳情
-- `/organization/:id/teams` - 團隊管理
-
-### Container Layer Routes
-
-**規則**:
-- `/blueprint` - 藍圖列表
-- `/blueprint/:id` - 藍圖詳情
-- `/blueprint/:id/members` - 成員管理
-- `/blueprint/:id/audit` - 稽核日誌
-- `/blueprint/:id/settings` - 藍圖設定
-
-### Business Layer Routes
-
-**規則**:
-- `/blueprint/:blueprintId/tasks` - 任務管理
-- `/blueprint/:blueprintId/diary` - 施工日誌
-- `/blueprint/:blueprintId/quality` - 品質控制
-- `/blueprint/:blueprintId/financial` - 財務管理
-- `/blueprint/:blueprintId/files` - 檔案管理
-
-## Navigation Patterns
-
-### Hierarchical Navigation
-
-**規則**:
-- 從藍圖列表到詳情：`router.navigate(['/blueprint', blueprintId])`
-- 從藍圖詳情到任務：`router.navigate(['/blueprint', blueprintId, 'tasks'])`
-- 從任務列表到詳情：`router.navigate(['/blueprint', blueprintId, 'tasks', taskId])`
-
-### Relative Navigation
-
-**規則**:
-- 向上導航一層：`router.navigate(['../'], { relativeTo: this.route })`
-- 導航到兄弟路由：`router.navigate(['../audit'], { relativeTo: this.route })`
-- 帶查詢參數導航：`router.navigate(['/blueprint'], { queryParams: { status: 'active' } })`
-
-### Programmatic Navigation
-
-**規則**:
-- 必須使用 `inject(Router)` 注入路由器
-- 必須使用 `inject(ActivatedRoute)` 注入當前路由
-- 可以使用 `window.history.back()` 返回上一頁
-- 必須處理導航錯誤
-
-## Route Parameters
-
-### Reading Route Parameters
-
-**規則**:
-- 可以使用 `route.snapshot.paramMap.get('id')` 一次性讀取
-- 可以使用 `route.paramMap.subscribe()` 響應式讀取
-- 必須使用 `signal()` 儲存路由參數
-- 必須在參數變更時重新載入資料
-
-### Reading Query Parameters
-
-**規則**:
-- 可以使用 `route.snapshot.queryParamMap.get('status')` 一次性讀取
-- 可以使用 `route.queryParamMap.subscribe()` 響應式讀取
-- 必須使用查詢參數進行篩選和分頁
-
-## Breadcrumbs
-
-**規則**:
-- 必須使用 `computed()` 計算麵包屑
-- 麵包屑必須包含首頁、父級路由和當前路由
-- 必須使用 `PageHeaderComponent` 顯示麵包屑
-- 最後一項不能有路徑（當前頁面）
-
-## Module-Specific AGENTS.md
-
-**規則**:
-- 每個主要功能模組必須有自己的 `AGENTS.md`
-- Blueprint 模組：`src/app/routes/blueprint/AGENTS.md`
-- 未來模組（Task、Diary、Quality）也必須建立 `AGENTS.md`
-
-## Adding New Routes
-
-**規則**:
-1. 必須建立模組目錄：`src/app/routes/[module-name]/`
-2. 必須建立路由檔案：`routes.ts`
-3. 必須建立元件（使用 `ng generate component --standalone`）
-4. 必須在主路由中註冊（`src/app/routes/routes.ts`）
-5. 如果適用，必須加入側邊欄選單
-6. 複雜模組必須建立 `AGENTS.md`
-
-## Best Practices
-
-### Route Design
-
-**規則**:
-1. 所有功能模組必須使用懶載入
-2. 路由路徑必須簡單且描述性
-3. 路由區段必須使用 kebab-case
-4. 相關路由必須邏輯巢狀
-5. 避免深度巢狀（最多 3-4 層）
-
-### Guards
-
-**規則**:
-1. 必須仔細排序守衛（認證優先，然後權限）
-2. 必須快取權限檢查（避免重複資料庫查詢）
-3. 必須提供回饋（守衛失敗時顯示清楚的錯誤訊息）
-4. 必須測試邊緣情況（處理缺失 ID、過期工作階段）
-
-### Navigation
-
-**規則**:
-1. 盡可能使用相對導航
-2. 如果需要，必須保留查詢參數：`{ queryParamsHandling: 'preserve' }`
-3. 必須處理導航錯誤
-4. 必須提供載入狀態（導航期間顯示載入器）
-
-### Module Organization
-
-**規則**:
-1. 相關功能必須分組在同一目錄
-2. 複雜功能必須建立模組級 `AGENTS.md`
-3. 模組間必須使用一致的命名
-4. 通用元件必須透過 shared 模組共享
-
-## Troubleshooting
-
-**規則**:
-- 如果路由未找到，必須檢查路由路徑拼寫、驗證模組是否在主路由中註冊、檢查守衛是否阻擋存取、確保懶載入模組匯出路由
-- 如果守衛阻擋存取，必須驗證用戶是否已認證、檢查用戶是否具有所需權限、確保藍圖中啟用了模組、檢查守衛邏輯是否有錯誤
-- 如果麵包屑未顯示，必須驗證路由配置中的麵包屑資料、檢查元件是否使用 `PageHeaderComponent`、確保麵包屑項目格式正確
-- 如果模組未載入，必須檢查瀏覽器控制台錯誤、驗證匯入路徑是否正確、確保模組匯出路由常數、檢查是否有循環依賴
-
-## Related Documentation
-
-- **[Root AGENTS.md](../../AGENTS.md)** - Project-wide context
-- **[Blueprint Module](./blueprint/AGENTS.md)** - Blueprint specifics
-- **[Core Services](../core/AGENTS.md)** - Guards and services
-
----
-
-**Module Version**: 1.0.0  
-**Last Updated**: 2025-12-09  
-**Status**: Active Development
+更多詳細路由設計與範例請參考同目錄下各模組的 AGENTS.md（如 blueprint）。
