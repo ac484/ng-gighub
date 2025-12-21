@@ -4,7 +4,8 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpErrorResponse, HttpContext } from '@angular/common/http';
+import { ALLOW_ANONYMOUS } from '@delon/auth';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, retry, timeout, tap } from 'rxjs/operators';
 
@@ -16,6 +17,7 @@ import type { CwaApiResponse, WeatherForecast, EarthquakeInfo } from '../models'
 export class WeatherApiService {
   private readonly http = inject(HttpClient);
   private readonly cache = inject(CacheService);
+  private readonly anonymousContext = new HttpContext().set(ALLOW_ANONYMOUS, true);
 
   /**
    * 取得縣市天氣預報
@@ -44,7 +46,7 @@ export class WeatherApiService {
 
     console.log('[WeatherApi] Fetching forecast for:', locationName, 'URL:', url);
 
-    return this.http.get<CwaApiResponse>(url, { params }).pipe(
+    return this.http.get<CwaApiResponse>(url, { params, context: this.anonymousContext }).pipe(
       timeout(CWA_API_CONFIG.timeout),
       retry(CWA_API_CONFIG.retryAttempts),
       map(response => this.transformToWeatherForecast(response)),
@@ -83,7 +85,7 @@ export class WeatherApiService {
 
     console.log('[WeatherApi] Fetching earthquake report, limit:', limit);
 
-    return this.http.get<CwaApiResponse>(url, { params }).pipe(
+    return this.http.get<CwaApiResponse>(url, { params, context: this.anonymousContext }).pipe(
       timeout(CWA_API_CONFIG.timeout),
       retry(CWA_API_CONFIG.retryAttempts),
       map(response => this.transformToEarthquakeInfo(response)),
