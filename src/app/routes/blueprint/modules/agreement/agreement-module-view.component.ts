@@ -1,20 +1,59 @@
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, effect, inject, input, output, computed, signal } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzDrawerModule } from 'ng-zorro-antd/drawer';
+import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { firstValueFrom } from 'rxjs';
 
 import { Agreement } from './agreement.model';
 import { AgreementService } from './agreement.service';
+
+interface ParsedEntity {
+  type: string;
+  mentionText?: string;
+  normalizedValue?: string;
+  confidence?: number;
+}
+
+interface ParsedResult {
+  text?: string;
+  pages?: Array<{ pageNumber: number; paragraphs?: string[] }>;
+  entities?: ParsedEntity[];
+  metadata?: {
+    processorVersion?: string;
+    processingTime?: number;
+    pageCount?: number;
+    mimeType?: string;
+  };
+}
+
+interface ParsedDocument {
+  success?: boolean;
+  result?: ParsedResult;
+}
 
 @Component({
   selector: 'app-agreement-module-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SHARED_IMPORTS, NzTableModule, NzTagModule, NzEmptyModule, NzSpinModule, NzIconModule],
+  imports: [
+    SHARED_IMPORTS,
+    NzTableModule,
+    NzTagModule,
+    NzEmptyModule,
+    NzSpinModule,
+    NzIconModule,
+    NzDrawerModule,
+    NzDescriptionsModule,
+    NzAlertModule
+  ],
   template: `
     <nz-card nzTitle="協議概況" class="mb-md">
       <nz-row [nzGutter]="16">
@@ -115,6 +154,52 @@ import { AgreementService } from './agreement.service';
         </nz-table>
       }
     </nz-card>
+
+    <nz-drawer
+      [nzVisible]="detailVisible()"
+      nzWidth="720"
+      nzTitle="協議詳情"
+      [nzClosable]="true"
+      (nzOnClose)="closeDetail()"
+    >
+      <ng-container *nzDrawerContent>
+        @if (detailLoading()) {
+          <div class="drawer-center">
+            <nz-spin nzTip="載入解析結果..." />
+          </div>
+        } @else if (detailError()) {
+          <nz-alert nzType="error" [nzMessage]="detailError()" nzShowIcon />
+        } @else if (parsedDocument(); as parsed) {
+          <nz-descriptions nzColumn="2" nzBordered>
+            <nz-descriptions-item nzTitle="解析結果">{{ parsed.success ? '成功' : '失敗' }}</nz-descriptions-item>
+            <nz-descriptions-item nzTitle="頁數">
+              {{ parsed.result?.metadata?.pageCount ?? parsed.result?.pages?.length ?? 0 }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="處理時間(ms)">
+              {{ parsed.result?.metadata?.processingTime ?? '—' }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="檔案類型">
+              {{ parsed.result?.metadata?.mimeType || '—' }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="文件號碼">{{ getEntityValue('document_id') || '—' }}</nz-descriptions-item>
+            <nz-descriptions-item nzTitle="專案代碼">{{ getEntityValue('project_id') || '—' }}</nz-descriptions-item>
+            <nz-descriptions-item nzTitle="報價日期">{{ getEntityValue('quote_date') || '—' }}</nz-descriptions-item>
+            <nz-descriptions-item nzTitle="文件日期">{{ getEntityValue('document_date') || '—' }}</nz-descriptions-item>
+            <nz-descriptions-item nzTitle="付款條件">{{ getEntityValue('payment_terms') || '—' }}</nz-descriptions-item>
+            <nz-descriptions-item nzTitle="交貨條款">{{ getEntityValue('delivery_terms') || '—' }}</nz-descriptions-item>
+            <nz-descriptions-item nzTitle="總價">{{ getEntityValue('total') || '—' }}</nz-descriptions-item>
+            <nz-descriptions-item nzTitle="稅金">{{ getEntityValue('tax') || '—' }}</nz-descriptions-item>
+            <nz-descriptions-item nzTitle="幣別">{{ getEntityValue('currency') || '—' }}</nz-descriptions-item>
+          </nz-descriptions>
+
+          <nz-card nzTitle="全文預覽" class="mt-md">
+            <pre class="parsed-text">{{ textPreview() }}</pre>
+          </nz-card>
+        } @else {
+          <nz-empty nzNotFoundContent="尚無解析結果" />
+        }
+      </ng-container>
+    </nz-drawer>
   `,
   styles: [
     `
@@ -135,6 +220,24 @@ import { AgreementService } from './agreement.service';
       .text-right {
         text-align: right;
       }
+
+      .drawer-center {
+        display: flex;
+        justify-content: center;
+        padding: 24px 0;
+      }
+
+      .parsed-text {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 360px;
+        overflow: auto;
+      }
+
+      .mt-md {
+        margin-top: 16px;
+      }
     `
   ]
 })
@@ -144,6 +247,7 @@ export class AgreementModuleViewComponent {
 
   private readonly agreementService = inject(AgreementService);
   private readonly messageService = inject(NzMessageService);
+  private readonly http = inject(HttpClient);
 
   readonly agreements = this.agreementService.agreements;
   readonly loading = this.agreementService.loading;
@@ -152,6 +256,16 @@ export class AgreementModuleViewComponent {
   readonly draftCount = computed(() => this.agreements().filter(a => a.status === 'draft').length);
   uploadingId = signal<string | null>(null);
   parsingId = signal<string | null>(null);
+  detailVisible = signal(false);
+  detailLoading = signal(false);
+  detailError = signal<string | null>(null);
+  parsedDocument = signal<ParsedDocument | null>(null);
+  selectedAgreement = signal<Agreement | null>(null);
+  textPreview = computed(() => {
+    const text = this.parsedDocument()?.result?.text ?? '';
+    if (!text) return '—';
+    return text.length > 600 ? `${text.slice(0, 600)}…` : text;
+  });
 
   constructor() {
     effect(() => {
@@ -232,8 +346,15 @@ export class AgreementModuleViewComponent {
     });
   }
 
-  onSelect(agreement: Agreement): void {
+  async onSelect(agreement: Agreement): Promise<void> {
     this.agreementSelected.emit(agreement);
+    if (!agreement.parsedJsonUrl) {
+      this.messageService.warning('尚未解析，請先執行「解析」後再檢視');
+      return;
+    }
+    this.selectedAgreement.set(agreement);
+    this.detailVisible.set(true);
+    await this.loadParsedDocument(agreement.parsedJsonUrl);
   }
 
   triggerUpload(input: HTMLInputElement, agreementId: string): void {
@@ -279,5 +400,33 @@ export class AgreementModuleViewComponent {
       expired: '到期'
     };
     return map[status] ?? status;
+  }
+
+  closeDetail(): void {
+    this.detailVisible.set(false);
+  }
+
+  private async loadParsedDocument(url: string): Promise<void> {
+    this.detailLoading.set(true);
+    this.detailError.set(null);
+    this.parsedDocument.set(null);
+    try {
+      const data = await firstValueFrom(this.http.get<ParsedDocument>(url));
+      this.parsedDocument.set(data);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '載入解析結果失敗';
+      this.detailError.set(message);
+      this.messageService.error('無法載入解析結果');
+    } finally {
+      this.detailLoading.set(false);
+    }
+  }
+
+  getEntityValue(type: string): string | null {
+    const entities = this.parsedDocument()?.result?.entities;
+    if (!entities || entities.length === 0) return null;
+    const value = entities.find(item => item.type === type)?.mentionText ?? '';
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
   }
 }
