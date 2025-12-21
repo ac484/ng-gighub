@@ -1,261 +1,101 @@
-# GigHub Documentation
 
-> **專案**: GigHub - 工程施工進度追蹤管理系統  
-> **技術棧**: Angular 20 + @angular/fire + Firestore + ng-alain  
-> **最後更新**: 2025-12-19
+# ng-gighub-docs — 文件總覽（規範化版）
 
-## 📚 文檔導覽
-
-### 核心文檔
-
-| 文檔 | 說明 | 適用對象 |
-|------|------|----------|
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | 系統架構總覽、C4 圖表、技術決策 | 架構師、資深開發者 |
-| [discussions/](./discussions/) | 專案規劃、任務分解、核心開發規範 | 全體開發者 |
-| [discussions/⭐.md](./discussions/⭐.md) | 核心開發規範與原則 | **必讀** - 所有開發者 |
-| [principles/](./principles/) | 系統設計原則與規則 | 架構師、開發者 |
+此資料夾包含 GigHub 專案的設計與操作文件，依業務能力模組化組織。文件以清楚的目錄與命名慣例呈現，供開發、維運與稽核使用。
 
 ---
 
-## 🎯 快速開始
-
-### 開發者必讀
-1. **核心規範**: 閱讀 `discussions/⭐.md`
-2. **架構理解**: 閱讀 `ARCHITECTURE.md`
-3. **系統原則**: 閱讀 `principles/principles.md`
-4. **任務規劃**: 查看 `discussions/SETC-*.md` 系列文檔
-
-### Copilot Agent 指引
-- **核心規範來源**: `discussions/⭐.md`
-- **任務模板**: `discussions/` 中的 SETC 系列
-- **架構參考**: `ARCHITECTURE.md`
-- **Custom Agents**: 參見 `../.github/agents/`
-- **Custom Instructions**: 參見 `../.github/instructions/`
-
----
-
-## 📁 文檔結構
+## 主要目錄
 
 ```
-docs/
-├── README.md                    # 本文檔 - 導覽指南
-├── ARCHITECTURE.md              # 系統架構總覽 (高層次)
-├── TREE.md                      # 專案檔案結構樹狀圖
-├── analysis/                    # 專案分析文檔
-│   ├── CODE_OPTIMIZATION_ANALYSIS.md
-│   ├── CONTRACT_MODULE_PRODUCTION_ANALYSIS.md
-│   ├── CONTRACT-PARSING-GAP-ANALYSIS.md
-│   ├── OCR-PDF-PARSING-ANALYSIS.md
-│   ├── OCR_WORKFLOW_README.md
-│   ├── ORPHANED_FILES_ANALYSIS.md
-│   ├── PARTNER_MODULE_SUMMARY.md
-│   ├── PROJECT_ANALYSIS_SUMMARY.md
-│   ├── TREE_OPTIMIZATION_SUMMARY.md
-│   ├── VISUAL_COMPARISON.md
-│   └── IMPLEMENTATION_SUMMARY.md
-├── architecture/                # 詳細架構設計文檔
-│   ├── README.md
-│   ├── EXECUTIVE_SUMMARY.md
-│   ├── Contract-AI-Integration_Architecture.md
-│   ├── firebase-adapter-implementation-roadmap.md
-│   └── firebase-adapter-pattern-proposal.md
-├── design/                      # 設計決策與模型文檔
-│   ├── blueprint-ownership-membership.md
-│   └── partner-member-management-modernization.md
-├── discussions/                 # 專案規劃與開發指引
-│   ├── README.md
-│   ├── 00-core/                 # 核心文檔
-│   ├── 01-overview/             # SETC 工作流程定義
-│   ├── 02-planning/             # 規劃文檔
-│   ├── 03-implementation/       # 實施文檔
-│   ├── 10-issue-module/         # 問題模組任務
-│   ├── 20-contract-module/      # 合約模組任務
-│   ├── 30-automation/           # 自動化任務
-│   ├── 40-finance/              # 財務模組任務
-│   ├── 50-warranty-module/      # 保固模組任務
-│   ├── 60-defect-module/        # 缺失模組任務
-│   ├── 70-task-module/          # 任務模組任務
-│   └── 80-acceptance-module/    # 驗收模組任務
-├── planning/                    # 實施計劃文檔
-│   ├── IMPLEMENTATION_PROGRESS.md
-│   └── PHASE2_IMPLEMENTATION_PLAN.md
-├── principles/                  # 系統設計原則
-│   ├── principles.md            # 核心設計原則 (十大原則)
-│   └── rules.md                 # 開發規則
-├── ui-theme/                    # UI主題設計
-│   ├── README.md
-│   ├── BEST_PRACTICES.md
-│   ├── COLOR_SYSTEM.md
-│   ├── COMPONENTS.md
-│   ├── IMPLEMENTATION_GUIDE.md
-│   ├── MIGRATION.md
-│   ├── TESTING.md
-│   └── XUANWU_THEME.md
-└── Archived/                    # 已歸檔的文檔
-    └── SETC-000-*.md            # 舊版任務文檔
+api/                     # API
+├─ interface-spec/        # API 介面規格
+architecture/            # 系統架構
+data-model/              # 資料模型
+deployment/              # 部署
+design/                  # 設計
+functions/               # 函數
+getting-started/         # 快速開始
+operations/              # 維運
+overview/                # 總覽
+principles/              # 原則
+security/                # 安全
+ui-theme/                # 主題
+```
+
+### 目錄說明
+
+* **api/**：外部與內部 API 規格、版本控制與變更記錄
+* **api/interface-spec/**：JSON、Firestore 資料結構與契約（契約導向實作指南）
+* **architecture/**：系統高階架構圖、三層架構（UI → Service → Repository）與模組邊界
+* **data-model/**：Firestore collection 結構、索引與資料關聯圖
+* **deployment/**：Firebase 部署流程、CI/CD 指南、資源計價與成本控制
+* **design/**：介面流程、UI 元件設計原則、可存取性與主題指引
+* **functions/**：Firebase Functions（含 functions-ai、functions-ai-document）使用規範、權限與測試方法
+* **getting-started/**：開發者上手指引、環境設定、本地啟動步驟與測試指令
+* **operations/**：監控、日誌、錯誤處理、備援與跑版回報流程
+* **overview/**：專案摘要、核心目標、範圍與關鍵限制
+* **principles/**：編碼、架構與安全原則（含 Three-Layer、Repository pattern、Signals、inject() 等）
+* **security/**：Firestore Security Rules、Firebase Auth 驗證流程、機密管理、前端安全限制
+* **ui-theme/**：主題變數、樣式指南與 Angular Signals 範例
+
+---
+
+## 檔案命名規範
+
+1. **統一格式**：`序號-模組-說明.md`
+
+   * 例：`01-api-overview.md`、`02-api-interface-spec.md`
+2. **規格檔**：
+
+   * JSON Schema：`*.schema.json`
+   * API 契約：`*.contract.md`
+3. **序號**：章節檔以序號開頭維持順序
+4. **版本化**：多版本放子資料夾 `v1/`、`v2/`，首頁維護變更摘要
+5. **說明**：英文短語描述文件核心內容，避免過長
+
+---
+
+## 結構與維護規範
+
+* 資料夾以 **業務能力** 為單位，對外暴露穩定文件
+* 文件變更需在 PR 中附上摘要、影響範圍與相關實作檔案連結
+* 文件保持最小但完整，只加入當前必要資訊，避免未實作設計
+* 安全與合規事項在相關模組文件明確標註
+
+  * 例：functions-ai 使用限制、OCR 使用 functions-ai-document 流程
+* 重要文件（架構、部署、安全）每 6 個月檢視一次並紀錄變更
+
+---
+
+## 聯絡與貢獻
+
+* 補充或修改文件請開 PR，描述目的與影響範圍
+* 文件審查者列表請在 repo README 指定
+
+---
+
+## 建議起始檔名範例
+
+```
+01-api-overview.md
+02-api-interface-spec.md
+03-api-architecture-system-diagram.md
+04-api-data-model-firestore-schema.md
+05-api-deployment-firebase-ci-cd.md
+06-api-design-ui-flow.md
+07-api-design-ui-components.md
+08-api-ui-theme-variables.md
+09-api-ui-theme-angular-signals.md
+10-api-functions-ai-guidelines.md
+11-api-functions-ai-document-workflow.md
+12-api-getting-started-environment-setup.md
+13-api-getting-started-local-testing.md
+14-api-operations-monitoring-logs.md
+15-api-operations-error-handling.md
+16-api-security-firestore-rules.md
+17-api-security-authentication.md
+18-api-security-secret-management.md
 ```
 
 ---
-
-## 🤖 GitHub Copilot 資源
-
-GigHub 專案配置了豐富的 Copilot 增強功能，所有配置位於 `.github/` 目錄：
-
-### Custom Agents
-位置: `../.github/agents/`
-- **context7.agent.md** - 查詢官方文檔
-- **arch.agent.md** - 架構設計助手
-- **janitor.agent.md** - 程式碼清理
-- 更多...查看 `../.github/agents/README.md`
-
-### Custom Instructions
-位置: `../.github/instructions/`
-- **angular.instructions.md** - Angular 開發標準
-- **typescript-5-es2022.instructions.md** - TypeScript 規範
-- **ng-gighub-*.instructions.md** - GigHub 專案規範
-- 更多...查看 `.github/copilot-instructions.md`
-
-### Project Rules
-位置: `../.github/rules/`
-- 強制性工作流程
-- 架構原則
-- 專案規則
-- 執行政策
-
----
-
-## ⭐ 核心開發規範
-
-### 必要工具 (MANDATORY)
-每個任務開始前必須使用：
-1. **context7** - 查詢官方文件與最佳實踐
-2. **sequential-thinking** - 邏輯分析與問題拆解
-3. **software-planning-tool** - 制定實施計畫
-
-### 架構原則
-- **奧卡姆剃刀**: KISS, YAGNI, MVP, SRP, 80/20 法則
-- **三層架構**: UI → Service → Repository → Firestore
-- **Repository 模式**: 禁止直接操作 Firestore
-- **事件驅動**: 模組間透過 BlueprintEventBus 通訊
-- **生命週期**: Constructor (inject only) → ngOnInit (logic) → ngOnDestroy (cleanup)
-
-### 禁止行為
-- ❌ 建立 NgModule (使用 Standalone Components)
-- ❌ 使用 `any` 類型
-- ❌ 直接操作 Firestore (使用 Repository)
-- ❌ 手動訂閱管理 (使用 takeUntilDestroyed)
-- ❌ Constructor 中執行業務邏輯
-
-> 詳細規範請參閱 `discussions/⭐.md`
-
----
-
-## 🏗️ 系統架構
-
-### 技術棧
-- **前端**: Angular 20.3.0 (Standalone + Signals + 新控制流)
-- **UI 框架**: ng-alain 20.1.0 + ng-zorro-antd 20.3.1
-- **後端**: Firebase/Firestore 20.0.1 (@angular/fire)
-- **狀態管理**: Angular Signals
-- **語言**: TypeScript 5.9 / ES2022
-
-### 核心架構模式
-1. **Blueprint 模組化系統** - 插件化架構，動態載入模組
-2. **混合 Repository 策略** - 平衡集中式與分散式
-3. **事件驅動通訊** - 模組透過事件總線交互
-4. **上下文傳遞** - User → Organization → Blueprint → Module
-
-> 詳細架構請參閱 `ARCHITECTURE.md`
-
----
-
-## 📋 任務規劃系統
-
-### SETC 任務系列
-`discussions/` 目錄包含 69 個詳細任務規劃文檔，涵蓋：
-
-**模組開發** (SETC-001 ~ SETC-008):
-- Issue 模組基礎建設
-- Repository 層實作
-- 核心服務開發
-- UI 元件與測試
-
-**合約管理** (SETC-009 ~ SETC-017):
-- 合約模組基礎
-- 上傳解析服務
-- 工項管理
-- 事件整合
-
-**工作流程** (SETC-018 ~ SETC-023):
-- 事件總線增強
-- 工作流程編排器
-- 跨模組自動化
-
-**財務模組** (SETC-024 ~ SETC-031):
-- 發票管理
-- 付款流程
-- 預算會計
-
-**保固模組** (SETC-032 ~ SETC-039):
-- 保固期管理
-- 瑕疵管理
-- 維修管理
-
-**驗收模組** (SETC-054 ~ SETC-061):
-- 驗收請求
-- 初驗與複驗
-- 驗收結案
-
-> 完整清單請查看 `discussions/SETC-MASTER-INDEX.md`
-
----
-
-## 🔗 相關資源
-
-### 專案檔案
-- **核心規範**: `/⭐.md` (專案根目錄)
-- **Copilot 配置**: `/.github/agents/gighub-unified.agent.md`
-- **快速參考**: `/.github/instructions/quick-reference.instructions.md`
-
-### 外部資源
-- [Angular 官方文檔](https://angular.dev)
-- [ng-alain 官方文檔](https://ng-alain.com)
-- [Firebase 官方文檔](https://firebase.google.com/docs)
-- [ng-zorro-antd 官方文檔](https://ng.ant.design)
-
----
-
-## 📝 文檔維護
-
-### 更新原則
-- **核心規範** (`⭐.md`): 重大架構變更時更新
-- **任務文檔** (`SETC-*.md`): 任務完成後標記狀態
-- **架構文檔** (`ARCHITECTURE.md`): 架構調整時同步更新
-
-### 維護者
-- **Architecture Team**: 負責核心架構文檔
-- **Development Team**: 負責任務執行文檔
-
----
-
-## ❓ 常見問題
-
-### Q: 如何開始新功能開發？
-1. 閱讀 `discussions/⭐.md` 理解核心規範
-2. 查看 `ARCHITECTURE.md` 理解系統架構
-3. 在 `discussions/` 找相關 SETC 任務參考
-4. 使用必要工具：context7 + sequential-thinking + software-planning-tool
-
-### Q: 為什麼沒有其他目錄了？
-專案已從 Supabase 遷移至 @angular/fire，舊的 Supabase 相關文檔已移除。歷史文檔已歸檔刪除，僅保留對 Copilot Agent 有用的核心規劃文檔。
-
-### Q: 如何找到特定功能的實作指引？
-1. 搜尋 `discussions/SETC-*.md` 找相關任務
-2. 查看 `discussions/TREE.md` 了解專案結構
-3. 參考 `discussions/⭐.md` 的開發規範
-
----
-
-**維護日期**: 2025-12-16  
-**文檔版本**: 3.0 (Streamlined)  
-**變更說明**: 大幅精簡，移除過時與 Supabase 相關文檔，僅保留 Copilot Agent 必要內容
