@@ -3,7 +3,6 @@ import { Component, ChangeDetectionStrategy, OnInit, inject } from '@angular/cor
 import { ActivatedRoute, Router } from '@angular/router';
 import { Blueprint, LoggerService } from '@core';
 import { AuditLogsComponent } from '@core/blueprint/modules/implementations/audit-logs';
-import { TasksComponent } from '@core/blueprint/modules/implementations/tasks/tasks.component';
 import { BlueprintService } from '@core/blueprint/services';
 import { SHARED_IMPORTS, createAsyncState } from '@shared';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
@@ -30,6 +29,7 @@ import { ModuleManagerComponent } from './modules/manager/module-manager.compone
 import { MembersModuleViewComponent } from './modules/members';
 import { QaModuleViewComponent } from './modules/qa';
 import { SafetyModuleViewComponent } from './modules/safety-module-view.component';
+import { TasksModuleViewComponent } from './modules/tasks';
 import { WarrantyModuleViewComponent } from './modules/warranty';
 import { WeatherModuleViewComponent } from './modules/weather';
 import { WorkflowModuleViewComponent } from './modules/workflow-module-view.component';
@@ -75,7 +75,6 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
     ModuleManagerComponent,
     DiaryModuleViewComponent,
     ContainerDashboardComponent,
-    TasksComponent,
     LogModuleViewComponent,
     WorkflowModuleViewComponent,
     QaModuleViewComponent,
@@ -86,6 +85,7 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
     IssuesModuleViewComponent,
     AgreementModuleViewComponent,
     ContractModuleViewComponent,
+    TasksModuleViewComponent,
     WarrantyModuleViewComponent,
     WeatherModuleViewComponent
   ],
@@ -275,7 +275,7 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
           <nz-tab nzTitle="任務">
             <ng-template nz-tab>
               @if (blueprint()?.id) {
-                <app-tasks [blueprintId]="blueprint()!.id" [blueprintOwnerType]="blueprint()!.ownerType" />
+                <app-tasks-module-view [blueprintId]="blueprint()!.id" />
               }
             </ng-template>
           </nz-tab>

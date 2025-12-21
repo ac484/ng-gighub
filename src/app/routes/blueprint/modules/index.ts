@@ -17,6 +17,9 @@ export * from './acceptance';
 // Agreement Module
 export * from './agreement';
 
+// Tasks Module
+export * from './tasks';
+
 // Members Module
 export * from './members';
 
