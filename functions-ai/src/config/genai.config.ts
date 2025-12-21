@@ -3,8 +3,8 @@
  * Supports both Gemini Developer API and Vertex AI with environment-based auto-configuration
  */
 
-import {getGoogleCloudConfig} from './cloud.config';
-import {GenAIConfig, GenAIError, GenAIErrorType} from '../types/genai.types';
+import { getGoogleCloudConfig } from './cloud.config';
+import { GenAIConfig, GenAIError, GenAIErrorType } from '../types/genai.types';
 
 /**
  * Environment variables for GenAI configuration
@@ -93,24 +93,15 @@ export class GenAIConfigManager {
     if (this.config.vertexai) {
       // Vertex AI requires project and location
       if (!this.config.project) {
-        throw new GenAIError(
-          `Vertex AI requires GOOGLE_CLOUD_PROJECT environment variable`,
-          GenAIErrorType.AUTHENTICATION_ERROR
-        );
+        throw new GenAIError(`Vertex AI requires GOOGLE_CLOUD_PROJECT environment variable`, GenAIErrorType.AUTHENTICATION_ERROR);
       }
       if (!this.config.location) {
-        throw new GenAIError(
-          `Vertex AI requires GOOGLE_CLOUD_LOCATION environment variable`,
-          GenAIErrorType.AUTHENTICATION_ERROR
-        );
+        throw new GenAIError(`Vertex AI requires GOOGLE_CLOUD_LOCATION environment variable`, GenAIErrorType.AUTHENTICATION_ERROR);
       }
     } else {
       // Gemini API requires API key
       if (!this.config.apiKey) {
-        throw new GenAIError(
-          `Gemini API requires GOOGLE_API_KEY environment variable`,
-          GenAIErrorType.AUTHENTICATION_ERROR
-        );
+        throw new GenAIError(`Gemini API requires GOOGLE_API_KEY environment variable`, GenAIErrorType.AUTHENTICATION_ERROR);
       }
     }
   }
@@ -119,7 +110,7 @@ export class GenAIConfigManager {
    * Get current configuration
    */
   public getConfig(): GenAIConfig {
-    return {...this.config};
+    return { ...this.config };
   }
 
   /**

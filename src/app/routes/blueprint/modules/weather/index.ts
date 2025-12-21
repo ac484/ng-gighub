@@ -19,21 +19,9 @@ export { WeatherService } from './services/weather.service';
 export { WeatherCacheService } from './services/weather-cache.service';
 
 // Types for consumers
-export type {
-  WeatherForecast,
-  WeatherObservation,
-  WeatherAlert,
-  WeatherDisplayMode,
-  WeatherResult
-} from './types/weather.types';
+export type { WeatherForecast, WeatherObservation, WeatherAlert, WeatherDisplayMode, WeatherResult } from './types/weather.types';
 
 // CWA API types (for advanced usage)
-export type {
-  CwaApiResponse,
-  CwaForecastResponse,
-  CwaObservationResponse,
-  ForecastParams,
-  ObservationParams
-} from './types/cwa-api.types';
+export type { CwaApiResponse, CwaForecastResponse, CwaObservationResponse, ForecastParams, ObservationParams } from './types/cwa-api.types';
 
 export { CWA_API_ENDPOINTS, WEATHER_ELEMENTS, COUNTY_CODES } from './types/cwa-api.types';

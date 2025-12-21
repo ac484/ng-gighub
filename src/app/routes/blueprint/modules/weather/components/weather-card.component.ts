@@ -9,14 +9,15 @@
  * ✅ Minimal & Reusable: Single responsibility component
  */
 
-import { Component, ChangeDetectionStrategy, input, signal, computed, effect, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { Component, ChangeDetectionStrategy, input, signal, computed, effect, inject } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
-import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
+import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+
 import { WeatherService } from '../services/weather.service';
 import type { WeatherDisplayMode, WeatherForecast, WeatherObservation, WeatherAlert } from '../types/weather.types';
 
@@ -38,7 +39,9 @@ import type { WeatherDisplayMode, WeatherForecast, WeatherObservation, WeatherAl
                 <nz-descriptions-item nzTitle="溫度">{{ data.temperature }}</nz-descriptions-item>
                 <nz-descriptions-item nzTitle="天氣">{{ data.weather }}</nz-descriptions-item>
                 <nz-descriptions-item nzTitle="降雨機率">{{ data.rainProbability }}</nz-descriptions-item>
-                <nz-descriptions-item nzTitle="更新時間" [nzSpan]="2">{{ data.updateTime | date: 'yyyy-MM-dd HH:mm' }}</nz-descriptions-item>
+                <nz-descriptions-item nzTitle="更新時間" [nzSpan]="2">{{
+                  data.updateTime | date: 'yyyy-MM-dd HH:mm'
+                }}</nz-descriptions-item>
               </nz-descriptions>
             }
           }
@@ -49,14 +52,16 @@ import type { WeatherDisplayMode, WeatherForecast, WeatherObservation, WeatherAl
                 <nz-descriptions-item nzTitle="溫度">{{ data.temperature }}°C</nz-descriptions-item>
                 <nz-descriptions-item nzTitle="濕度">{{ data.humidity }}%</nz-descriptions-item>
                 <nz-descriptions-item nzTitle="天氣">{{ data.weather }}</nz-descriptions-item>
-                <nz-descriptions-item nzTitle="觀測時間" [nzSpan]="2">{{ data.observationTime | date: 'yyyy-MM-dd HH:mm' }}</nz-descriptions-item>
+                <nz-descriptions-item nzTitle="觀測時間" [nzSpan]="2">{{
+                  data.observationTime | date: 'yyyy-MM-dd HH:mm'
+                }}</nz-descriptions-item>
               </nz-descriptions>
             }
           }
           @case ('alert') {
             @if (alerts().length > 0) {
               @for (alert of alerts(); track alert.title) {
-                <nz-alert 
+                <nz-alert
                   [nzType]="alert.severity === 'high' ? 'error' : alert.severity === 'medium' ? 'warning' : 'info'"
                   [nzMessage]="alert.title"
                   [nzDescription]="alert.description"
@@ -73,7 +78,9 @@ import type { WeatherDisplayMode, WeatherForecast, WeatherObservation, WeatherAl
               <div nz-col [nzSpan]="12">
                 <h4>天氣預報</h4>
                 @if (forecast(); as data) {
-                  <p><strong>{{ data.locationName }}</strong></p>
+                  <p
+                    ><strong>{{ data.locationName }}</strong></p
+                  >
                   <p>溫度: {{ data.temperature }}</p>
                   <p>天氣: {{ data.weather }}</p>
                   <p>降雨: {{ data.rainProbability }}</p>
@@ -84,7 +91,9 @@ import type { WeatherDisplayMode, WeatherForecast, WeatherObservation, WeatherAl
               <div nz-col [nzSpan]="12">
                 <h4>即時觀測</h4>
                 @if (observation(); as data) {
-                  <p><strong>{{ data.stationName }}</strong></p>
+                  <p
+                    ><strong>{{ data.stationName }}</strong></p
+                  >
                   <p>溫度: {{ data.temperature }}°C</p>
                   <p>濕度: {{ data.humidity }}%</p>
                   <p>天氣: {{ data.weather }}</p>
@@ -225,7 +234,9 @@ export class WeatherCardComponent {
         </nz-col>
       </nz-row>
       <p class="mt-md"><strong>天氣狀況:</strong> {{ data()!.weather }}</p>
-      <p class="text-grey"><small>更新時間: {{ data()!.updateTime | date: 'short' }}</small></p>
+      <p class="text-grey"
+        ><small>更新時間: {{ data()!.updateTime | date: 'short' }}</small></p
+      >
     } @else {
       <nz-empty nzNotFoundContent="無預報資料" />
     }
@@ -255,7 +266,9 @@ export class WeatherForecastViewComponent {
           <p><strong>天氣:</strong><br />{{ data()!.weather }}</p>
         </nz-col>
       </nz-row>
-      <p class="text-grey mt-md"><small>觀測時間: {{ data()!.observationTime | date: 'short' }}</small></p>
+      <p class="text-grey mt-md"
+        ><small>觀測時間: {{ data()!.observationTime | date: 'short' }}</small></p
+      >
     } @else {
       <nz-empty nzNotFoundContent="無觀測資料" />
     }
@@ -315,13 +328,17 @@ export class WeatherAlertViewComponent {
       @if (forecast()) {
         <nz-col [nzSpan]="12">
           <nz-statistic nzTitle="預報溫度" [nzValue]="forecast()!.temperature" nzSuffix="°C" />
-          <p class="text-grey"><small>{{ forecast()!.weather }}</small></p>
+          <p class="text-grey"
+            ><small>{{ forecast()!.weather }}</small></p
+          >
         </nz-col>
       }
       @if (observation()) {
         <nz-col [nzSpan]="12">
           <nz-statistic nzTitle="即時溫度" [nzValue]="observation()!.temperature" nzSuffix="°C" />
-          <p class="text-grey"><small>濕度: {{ observation()!.humidity }}%</small></p>
+          <p class="text-grey"
+            ><small>濕度: {{ observation()!.humidity }}%</small></p
+          >
         </nz-col>
       }
     </nz-row>

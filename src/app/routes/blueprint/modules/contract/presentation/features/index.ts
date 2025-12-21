@@ -1,6 +1,6 @@
 /**
  * Contract Module - Presentation Features
- * 
+ *
  * Feature-based UI organization
  */
 

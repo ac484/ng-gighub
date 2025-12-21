@@ -10,12 +10,13 @@
  * ✅ Extensible: Easy to add new API endpoints
  */
 
-import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { firstValueFrom, throwError } from 'rxjs';
-import { timeout, retry, catchError } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
 import { LoggerService } from '@core/services/logger';
 import { environment } from '@env/environment';
+import { firstValueFrom, throwError } from 'rxjs';
+import { timeout, retry, catchError } from 'rxjs/operators';
+
 import type {
   CwaApiResponse,
   CwaForecastResponse,
@@ -38,21 +39,21 @@ export class CwaApiClient {
   private readonly http = inject(HttpClient);
   private readonly logger = inject(LoggerService);
   private readonly config = environment.cwa;
-  
+
   /**
    * Get 36-hour forecast by county
    */
   async getForecast36Hour(params: ForecastParams): Promise<CwaApiResponse<CwaForecastResponse>> {
     return this.get<CwaForecastResponse>('F-C0032-001', params);
   }
-  
+
   /**
    * Get 7-day forecast by county
    */
   async getForecast7Day(params: ForecastParams): Promise<CwaApiResponse<CwaForecastResponse>> {
     return this.get<CwaForecastResponse>('F-C0032-005', params);
   }
-  
+
   /**
    * Get township forecast
    */
@@ -60,42 +61,42 @@ export class CwaApiClient {
     const datasetId = `F-D0047-${countyCode}`;
     return this.get<CwaForecastResponse>(datasetId, params);
   }
-  
+
   /**
    * Get meteorological station observation
    */
   async getMeteorologicalObservation(params: ObservationParams): Promise<CwaApiResponse<CwaObservationResponse>> {
     return this.get<CwaObservationResponse>('O-A0001-001', params);
   }
-  
+
   /**
    * Get 10-minute automatic observation
    */
   async get10MinuteObservation(params: ObservationParams): Promise<CwaApiResponse<CwaObservationResponse>> {
     return this.get<CwaObservationResponse>('O-A0003-001', params);
   }
-  
+
   /**
    * Get rainfall observation
    */
   async getRainfallObservation(params: ObservationParams): Promise<CwaApiResponse<CwaObservationResponse>> {
     return this.get<CwaObservationResponse>('O-A0002-001', params);
   }
-  
+
   /**
    * Get UV index observation
    */
   async getUvIndexObservation(): Promise<CwaApiResponse<CwaObservationResponse>> {
     return this.get<CwaObservationResponse>('O-A0005-001', {});
   }
-  
+
   /**
    * Get general weather warnings
    */
   async getWeatherWarnings(params: Record<string, string> = {}): Promise<CwaApiResponse<any>> {
     return this.get<any>('W-C0033-001', params);
   }
-  
+
   /**
    * Generic GET request to CWA API
    */
@@ -103,18 +104,18 @@ export class CwaApiClient {
     try {
       // Build HTTP params
       let httpParams = new HttpParams().set('Authorization', this.config.apiKey);
-      
+
       // Add additional params
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined) {
           httpParams = httpParams.set(key, value);
         }
       });
-      
+
       const url = `${this.config.baseUrl}/${datasetId}`;
-      
+
       this.logger.debug('[CwaApiClient]', `GET ${url}`, params);
-      
+
       // Make HTTP request with retry and timeout
       const response = await firstValueFrom(
         this.http.get<CwaApiResponse<T>>(url, { params: httpParams }).pipe(
@@ -126,7 +127,7 @@ export class CwaApiClient {
           catchError(this.handleError.bind(this))
         )
       );
-      
+
       this.logger.debug('[CwaApiClient]', `Response received for ${datasetId}`);
       return response;
     } catch (error) {
@@ -134,13 +135,13 @@ export class CwaApiClient {
       throw error;
     }
   }
-  
+
   /**
    * Handle HTTP errors
    */
   private handleError(error: HttpErrorResponse) {
     let errorMessage = '發生未知錯誤';
-    
+
     if (error.error instanceof ErrorEvent) {
       // Client-side or network error
       errorMessage = `網路錯誤: ${error.error.message}`;
@@ -168,7 +169,7 @@ export class CwaApiClient {
           errorMessage = `HTTP ${error.status}: ${error.message}`;
       }
     }
-    
+
     this.logger.error('[CwaApiClient]', errorMessage, error);
     return throwError(() => new Error(errorMessage));
   }

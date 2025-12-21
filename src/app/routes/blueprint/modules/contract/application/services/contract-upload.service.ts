@@ -9,8 +9,8 @@
  */
 
 import { Injectable, inject, signal } from '@angular/core';
-import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Functions, httpsCallable } from '@angular/fire/functions';
+import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 
 import type { FileAttachment } from '../../data/models';
 
@@ -57,7 +57,7 @@ export class ContractUploadService {
 
   /**
    * Upload contract file and trigger Cloud Function processing
-   * 
+   *
    * This method:
    * 1. Uploads file to Firebase Storage
    * 2. Calls processContractUpload Cloud Function
@@ -110,12 +110,7 @@ export class ContractUploadService {
   /**
    * Upload file to Storage only (internal method)
    */
-  private async uploadFile(
-    blueprintId: string,
-    contractId: string,
-    file: File,
-    uploadedBy = 'current-user'
-  ): Promise<FileAttachment> {
+  private async uploadFile(blueprintId: string, contractId: string, file: File, uploadedBy = 'current-user'): Promise<FileAttachment> {
     // Generate unique file ID
     const fileId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const storagePath = `contracts/${blueprintId}/${contractId}/${fileId}-${this.sanitizeFileName(file.name)}`;
@@ -180,12 +175,7 @@ export class ContractUploadService {
   /**
    * Upload contract file (alias for uploadAndProcess for backward compatibility)
    */
-  async uploadContractFile(
-    blueprintId: string,
-    contractId: string,
-    file: File,
-    uploadedBy?: string
-  ): Promise<FileAttachment> {
+  async uploadContractFile(blueprintId: string, contractId: string, file: File, uploadedBy?: string): Promise<FileAttachment> {
     const result = await this.uploadAndProcess(blueprintId, contractId, file, uploadedBy);
     return result.fileAttachment;
   }

@@ -263,7 +263,7 @@ export const TOWNSHIP_CODES: Record<string, Record<string, string>> = {
 export const WEATHER_STATIONS: Record<string, { name: string; lat: number; lon: number }> = {
   '466920': { name: '臺北', lat: 25.0408, lon: 121.5135 },
   '467410': { name: '板橋', lat: 24.9976, lon: 121.4405 },
-  '467440': { name: '淡水', lat: 25.1650, lon: 121.4492 },
+  '467440': { name: '淡水', lat: 25.165, lon: 121.4492 },
   '466880': { name: '基隆', lat: 25.1338, lon: 121.7403 },
   '466900': { name: '鞍部', lat: 25.1826, lon: 121.5297 },
   '467060': { name: '彭佳嶼', lat: 25.6281, lon: 122.0792 },
@@ -272,7 +272,7 @@ export const WEATHER_STATIONS: Record<string, { name: string; lat: number; lon: 
   '467540': { name: '苗栗', lat: 24.5665, lon: 120.8214 },
   '467571': { name: '苗栗(國一)', lat: 24.5033, lon: 120.7747 },
   '466990': { name: '宜蘭', lat: 24.7644, lon: 121.7498 },
-  '467080': { name: '蘇澳', lat: 24.5966, lon: 121.8450 },
+  '467080': { name: '蘇澳', lat: 24.5966, lon: 121.845 },
   '467050': { name: '花蓮', lat: 23.9753, lon: 121.6061 },
   '467530': { name: '臺中', lat: 24.1469, lon: 120.6839 },
   '467572': { name: '梧棲', lat: 24.2564, lon: 120.5258 },
@@ -362,14 +362,14 @@ export function getAllCountyNames(): string[] {
  */
 export function searchLocationByName(query: string): Array<{ code: string; name: string; type: 'county' | 'township' }> {
   const results: Array<{ code: string; name: string; type: 'county' | 'township' }> = [];
-  
+
   // Search counties
   for (const [code, name] of Object.entries(COUNTY_CODES)) {
     if (name.includes(query)) {
       results.push({ code, name, type: 'county' });
     }
   }
-  
+
   // Search townships
   for (const [_countyCode, townships] of Object.entries(TOWNSHIP_CODES)) {
     for (const [townshipCode, townshipName] of Object.entries(townships)) {
@@ -378,6 +378,6 @@ export function searchLocationByName(query: string): Array<{ code: string; name:
       }
     }
   }
-  
+
   return results;
 }

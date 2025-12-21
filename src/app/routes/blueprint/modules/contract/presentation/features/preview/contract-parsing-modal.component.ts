@@ -10,9 +10,9 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import type { ParsedContractData } from '@routes/blueprint/modules/contract/data/models';
 import { SHARED_IMPORTS } from '@shared';
+import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
-import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 
 /**
  * Modal data interface
@@ -48,7 +48,7 @@ type ParsingStatus = 'pending' | 'processing' | 'completed' | 'failed';
             <nz-spin nzSimple [nzSize]="'large'" />
             <h4>{{ processingMessage() }}</h4>
             <p class="hint">這可能需要幾秒鐘時間，請稍候...</p>
-            
+
             <!-- Progress Steps -->
             <nz-steps [nzCurrent]="currentStep()" nzSize="small" class="mt-lg">
               <nz-step nzTitle="文件上傳" nzDescription="正在準備文件" />
@@ -61,11 +61,7 @@ type ParsingStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
         @if (status() === 'completed') {
           <!-- Success State -->
-          <nz-result
-            nzStatus="success"
-            nzTitle="解析成功"
-            nzSubTitle="合約已成功解析，請檢視解析結果"
-          >
+          <nz-result nzStatus="success" nzTitle="解析成功" nzSubTitle="合約已成功解析，請檢視解析結果">
             <div nz-result-extra>
               <!-- Parsed Data Summary -->
               @if (parsedData()) {
@@ -107,13 +103,7 @@ type ParsingStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
                   <!-- Warnings -->
                   @if (parsedData()!.warnings && parsedData()!.warnings!.length > 0) {
-                    <nz-alert
-                      nzType="warning"
-                      nzMessage="注意事項"
-                      [nzDescription]="warningsTemplate"
-                      [nzShowIcon]="true"
-                      class="mt-md"
-                    />
+                    <nz-alert nzType="warning" nzMessage="注意事項" [nzDescription]="warningsTemplate" [nzShowIcon]="true" class="mt-md" />
                     <ng-template #warningsTemplate>
                       <ul class="warnings-list">
                         @for (warning of parsedData()!.warnings; track $index) {
@@ -130,15 +120,9 @@ type ParsingStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
         @if (status() === 'failed') {
           <!-- Error State -->
-          <nz-result
-            nzStatus="error"
-            nzTitle="解析失敗"
-            [nzSubTitle]="errorMessage()"
-          >
+          <nz-result nzStatus="error" nzTitle="解析失敗" [nzSubTitle]="errorMessage()">
             <div nz-result-extra>
-              <button nz-button nzType="primary" (click)="retry()">
-                重試
-              </button>
+              <button nz-button nzType="primary" (click)="retry()"> 重試 </button>
             </div>
           </nz-result>
         }
@@ -147,20 +131,12 @@ type ParsingStatus = 'pending' | 'processing' | 'completed' | 'failed';
       <!-- Footer Actions -->
       <div class="modal-footer">
         @if (status() === 'completed') {
-          <button nz-button nzType="primary" (click)="confirmParsedData()">
-            確認並套用
-          </button>
-          <button nz-button nzType="default" (click)="closeModal()">
-            稍後處理
-          </button>
+          <button nz-button nzType="primary" (click)="confirmParsedData()"> 確認並套用 </button>
+          <button nz-button nzType="default" (click)="closeModal()"> 稍後處理 </button>
         } @else if (status() === 'failed') {
-          <button nz-button nzType="default" (click)="closeModal()">
-            關閉
-          </button>
+          <button nz-button nzType="default" (click)="closeModal()"> 關閉 </button>
         } @else {
-          <button nz-button nzType="default" [disabled]="true">
-            處理中...
-          </button>
+          <button nz-button nzType="default" [disabled]="true"> 處理中... </button>
         }
       </div>
     </div>

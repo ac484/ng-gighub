@@ -8,8 +8,8 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import type { Contract } from '@routes/blueprint/modules/contract/data/models';
 import { STColumn, STChange } from '@delon/abc/st';
+import type { Contract } from '@routes/blueprint/modules/contract/data/models';
 import { SHARED_IMPORTS } from '@shared';
 
 @Component({

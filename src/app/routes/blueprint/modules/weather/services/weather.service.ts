@@ -12,11 +12,12 @@
 
 import { Injectable, inject, signal } from '@angular/core';
 import { LoggerService } from '@core/services/logger';
+
 import { CwaApiClient } from './cwa-api.client';
 import { WeatherCacheService } from './weather-cache.service';
 import { WEATHER_ELEMENTS } from '../types/cwa-api.types';
-import type { WeatherForecast, WeatherObservation, WeatherAlert } from '../types/weather.types';
 import type { CwaLocation, WeatherElement } from '../types/cwa-api.types';
+import type { WeatherForecast, WeatherObservation, WeatherAlert } from '../types/weather.types';
 
 @Injectable({ providedIn: 'root' })
 export class WeatherService {
@@ -152,18 +153,14 @@ export class WeatherService {
 
       // Fetch from API
       this.logger.debug('[WeatherService]', 'Fetching weather alerts');
-      const response = await this.apiClient.getWeatherWarnings(
-        alertType ? { alertType } : {}
-      );
+      const response = await this.apiClient.getWeatherWarnings(alertType ? { alertType } : {});
 
       if (!response.records?.record) {
         return [];
       }
 
       // Transform to our format
-      const records = Array.isArray(response.records.record) 
-        ? response.records.record 
-        : [response.records.record];
+      const records = Array.isArray(response.records.record) ? response.records.record : [response.records.record];
 
       const alerts = records.map(record => this.transformAlert(record));
 
@@ -257,17 +254,17 @@ export class WeatherService {
    */
   private getElementValue(element: WeatherElement | undefined, defaultValue: string): string {
     if (!element) return defaultValue;
-    
+
     // Try to get from time array first
     if (element.time && element.time.length > 0) {
       return element.time[0].parameter.parameterName || defaultValue;
     }
-    
+
     // Try direct elementValue
     if (element.elementValue !== undefined) {
       return String(element.elementValue);
     }
-    
+
     return defaultValue;
   }
 

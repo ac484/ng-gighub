@@ -8,16 +8,12 @@
  * @date 2025-12-20
  */
 
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
-import { defineSecret } from 'firebase-functions/params';
 import * as logger from 'firebase-functions/logger';
+import { defineSecret } from 'firebase-functions/params';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
+
 import { createCwaWeatherService } from '../services';
-import {
-  Get36HourForecastRequest,
-  GetObservationRequest,
-  GetWeatherAlertRequest,
-  WeatherApiResponse
-} from '../types';
+import { Get36HourForecastRequest, GetObservationRequest, GetWeatherAlertRequest, WeatherApiResponse } from '../types';
 
 // Define secret for CWA API key
 const cwaApiKey = defineSecret('CWA_API_KEY');
@@ -27,7 +23,7 @@ const cwaApiKey = defineSecret('CWA_API_KEY');
  */
 function getWeatherService(): any {
   const apiKey = cwaApiKey.value();
-  
+
   if (!apiKey) {
     throw new HttpsError('failed-precondition', 'CWA_API_KEY not configured');
   }
@@ -70,7 +66,7 @@ export const getForecast36Hour = onCall<Get36HourForecastRequest>(
     memory: '256MiB',
     timeoutSeconds: 60
   },
-  async (request) => {
+  async request => {
     validateAuth(request);
 
     const { countyName, locationName } = request.data;
@@ -123,7 +119,7 @@ export const getForecast7Day = onCall<{ countyName: string }>(
     memory: '256MiB',
     timeoutSeconds: 60
   },
-  async (request) => {
+  async request => {
     validateAuth(request);
 
     const { countyName } = request.data;
@@ -175,7 +171,7 @@ export const getTownshipForecast = onCall<{ countyCode: string; townshipName?: s
     memory: '256MiB',
     timeoutSeconds: 60
   },
-  async (request) => {
+  async request => {
     validateAuth(request);
 
     const { countyCode, townshipName } = request.data;
@@ -230,7 +226,7 @@ export const getObservation = onCall<GetObservationRequest>(
     memory: '256MiB',
     timeoutSeconds: 60
   },
-  async (request) => {
+  async request => {
     validateAuth(request);
 
     const { stationId } = request.data;
@@ -278,7 +274,7 @@ export const get10MinObservation = onCall<{ stationId?: string }>(
     memory: '256MiB',
     timeoutSeconds: 60
   },
-  async (request) => {
+  async request => {
     validateAuth(request);
 
     const { stationId } = request.data;
@@ -326,7 +322,7 @@ export const getRainfallObservation = onCall<{ stationId?: string }>(
     memory: '256MiB',
     timeoutSeconds: 60
   },
-  async (request) => {
+  async request => {
     validateAuth(request);
 
     const { stationId } = request.data;
@@ -374,7 +370,7 @@ export const getUvIndexObservation = onCall(
     memory: '256MiB',
     timeoutSeconds: 60
   },
-  async (request) => {
+  async request => {
     validateAuth(request);
 
     logger.info('[weather-getUvIndexObservation]', {
@@ -421,7 +417,7 @@ export const getWeatherWarnings = onCall<GetWeatherAlertRequest>(
     memory: '256MiB',
     timeoutSeconds: 60
   },
-  async (request) => {
+  async request => {
     validateAuth(request);
 
     const { alertType } = request.data;
@@ -471,7 +467,7 @@ export const clearCache = onCall(
     memory: '256MiB',
     timeoutSeconds: 60
   },
-  async (request) => {
+  async request => {
     validateAuth(request);
 
     // Check if user has admin privileges
