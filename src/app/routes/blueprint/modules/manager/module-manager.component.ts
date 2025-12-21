@@ -421,7 +421,7 @@ export class ModuleManagerComponent implements OnInit {
 
     try {
       const result = await this.service.batchUpdateEnabled(ids, true);
-      this.message.success(`成功啟用 ${result.successful.length} 個模組`);
+      this.message.success(`成功啟用 ${result.success.length} 個模組`);
       if (result.failed.length > 0) {
         this.message.warning(`${result.failed.length} 個模組啟用失敗`);
       }
@@ -440,7 +440,7 @@ export class ModuleManagerComponent implements OnInit {
 
     try {
       const result = await this.service.batchUpdateEnabled(ids, false);
-      this.message.success(`成功停用 ${result.successful.length} 個模組`);
+      this.message.success(`成功停用 ${result.success.length} 個模組`);
       if (result.failed.length > 0) {
         this.message.warning(`${result.failed.length} 個模組停用失敗`);
       }
