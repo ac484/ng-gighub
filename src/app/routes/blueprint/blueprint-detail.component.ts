@@ -410,7 +410,7 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
           <nz-tab nzTitle="氣象">
             <ng-template nz-tab>
               @if (blueprint()?.id) {
-                <app-weather-module-view displayMode="full" countyName="臺北市" [autoRefresh]="true" />
+                <app-weather-module-view />
               }
             </ng-template>
           </nz-tab>

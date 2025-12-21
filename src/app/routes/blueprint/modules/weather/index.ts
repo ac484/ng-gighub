@@ -1,19 +1,21 @@
 /**
  * Weather Module Public API
- * 氣象模組公開介面
- *
- * Export only what other modules need to consume
- * Internal implementation can change freely
+ * 氣象模組公開接口
  */
 
 // Main component
-export { WeatherModuleViewComponent } from './weather-module-view.component';
+export * from './weather-module-view.component';
 
-// Reusable card component for embedding
-export { WeatherCardComponent } from './components/weather-card.component';
+// Core
+export * from './core/config';
+export * from './core/models';
+export * from './core/services';
 
-// Service for direct API calls (if needed)
-export { WeatherService } from './services/weather.service';
+// Shared utilities
+export * from './shared/utils';
 
-// Types for consumers
-export type { WeatherForecast, WeatherObservation, WeatherAlert, WeatherDisplayMode, WeatherResult } from './types/weather.types';
+// Features
+export * from './features/location-selector';
+export * from './features/forecast-display';
+export * from './features/construction-suitability';
+export * from './features/weather-alerts';

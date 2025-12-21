@@ -14,5 +14,8 @@ export const environment = {
     refreshTokenType: 'auth-refresh'
   },
   interceptorFns: [mockInterceptor],
-  firebaseMessagingPublicKey: 'BMfTfys7cErI2JVFmjkWSeCb7ClvFklQ4r69lWGIYT2dSq5VD2eguZlckvdq2QJhdGskeyUg0G6RcC8WmlBztFY'
-} as Environment & { firebaseMessagingPublicKey: string };
+  firebaseMessagingPublicKey: 'BMfTfys7cErI2JVFmjkWSeCb7ClvFklQ4r69lWGIYT2dSq5VD2eguZlckvdq2QJhdGskeyUg0G6RcC8WmlBztFY',
+  // CWA API Key - 開發環境請設定實際 API Key
+  // 正式環境將從 Firebase App Hosting secrets 載入
+  CWA_API_KEY: 'CWA-8055E55C-EBCB-40A2-92F4-8A84399F3A45' // 中央氣象署 API 授權碼
+} as Environment & { firebaseMessagingPublicKey: string; CWA_API_KEY: string };
