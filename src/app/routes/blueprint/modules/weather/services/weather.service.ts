@@ -3,25 +3,53 @@
  * 氣象服務
  *
  * Purpose: Provide weather data with caching and transformation
- * Architecture: Business logic service for weather data
+ * Architecture: Business logic service calling Firebase Cloud Functions
  *
  * ✅ High Cohesion: Single responsibility - weather data management
- * ✅ Low Coupling: Uses injected dependencies (API client, cache)
+ * ✅ Low Coupling: Uses Firebase Functions (no direct API dependency)
  * ✅ Extensible: Easy to add new weather data types
  */
 
 import { Injectable, inject, signal } from '@angular/core';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { LoggerService } from '@core/services/logger';
 
-import { CwaApiClient } from './cwa-api.client';
 import { WeatherCacheService } from './weather-cache.service';
-import { WEATHER_ELEMENTS } from '../types/cwa-api.types';
-import type { CwaLocation, WeatherElement } from '../types/cwa-api.types';
 import type { WeatherForecast, WeatherObservation, WeatherAlert } from '../types/weather.types';
+
+/**
+ * Cloud Function Request Types
+ */
+interface ForecastRequest {
+  countyName: string;
+  locationName?: string;
+}
+
+interface ObservationRequest {
+  stationId?: string;
+}
+
+interface AlertRequest {
+  alertType?: string;
+  activeOnly?: boolean;
+}
+
+/**
+ * Cloud Function Response Type
+ */
+interface CloudFunctionResponse<T> {
+  success: boolean;
+  data: T;
+  cached?: boolean;
+  error?: {
+    code: string;
+    message: string;
+  };
+}
 
 @Injectable({ providedIn: 'root' })
 export class WeatherService {
-  private readonly apiClient = inject(CwaApiClient);
+  private readonly functions = inject(Functions);
   private readonly cache = inject(WeatherCacheService);
   private readonly logger = inject(LoggerService);
 
@@ -53,18 +81,22 @@ export class WeatherService {
         }
       }
 
-      // Fetch from API
+      // Call Cloud Function
       this.logger.debug('[WeatherService]', `Fetching forecast for ${countyName}`);
-      const response = await this.apiClient.getForecast36Hour({
-        locationName: countyName
-      });
+      
+      const getForecast36Hour = httpsCallable<ForecastRequest, CloudFunctionResponse<any>>(
+        this.functions,
+        'getForecast36Hour'
+      );
+      
+      const result = await getForecast36Hour({ countyName });
 
-      if (!response.records?.location?.[0]) {
+      if (!result.data.success || !result.data.data?.records?.location?.[0]) {
         throw new Error('No forecast data available');
       }
 
       // Transform to our format
-      const forecast = this.transformForecast(response.records.location[0]);
+      const forecast = this.transformForecast(result.data.data.records.location[0]);
 
       // Cache the result
       if (useCache && forecast) {
@@ -102,18 +134,22 @@ export class WeatherService {
         }
       }
 
-      // Fetch from API
+      // Call Cloud Function
       this.logger.debug('[WeatherService]', `Fetching observation${stationId ? ` for ${stationId}` : ''}`);
-      const response = await this.apiClient.getMeteorologicalObservation({
-        stationId
-      });
+      
+      const getObservation = httpsCallable<ObservationRequest, CloudFunctionResponse<any>>(
+        this.functions,
+        'getObservation'
+      );
+      
+      const result = await getObservation({ stationId });
 
-      if (!response.records?.location?.[0]) {
+      if (!result.data.success || !result.data.data?.records?.location?.[0]) {
         throw new Error('No observation data available');
       }
 
       // Transform to our format
-      const observation = this.transformObservation(response.records.location[0]);
+      const observation = this.transformObservation(result.data.data.records.location[0]);
 
       // Cache the result
       if (useCache && observation) {
@@ -151,18 +187,24 @@ export class WeatherService {
         }
       }
 
-      // Fetch from API
+      // Call Cloud Function
       this.logger.debug('[WeatherService]', 'Fetching weather alerts');
-      const response = await this.apiClient.getWeatherWarnings(alertType ? { alertType } : {});
+      
+      const getWeatherWarnings = httpsCallable<AlertRequest, CloudFunctionResponse<any>>(
+        this.functions,
+        'getWeatherWarnings'
+      );
+      
+      const result = await getWeatherWarnings({ alertType, activeOnly: true });
 
-      if (!response.records?.record) {
+      if (!result.data.success || !result.data.data?.records?.record) {
         return [];
       }
 
       // Transform to our format
-      const records: unknown[] = Array.isArray(response.records.record) 
-        ? response.records.record 
-        : [response.records.record];
+      const records: unknown[] = Array.isArray(result.data.data.records.record) 
+        ? result.data.data.records.record 
+        : [result.data.data.records.record];
 
       const alerts = records.map((record: unknown) => this.transformAlert(record));
 
@@ -197,13 +239,29 @@ export class WeatherService {
     return this.cache.clearExpired();
   }
 
+  // ===== Private Helper Constants =====
+
+  /**
+   * Weather element codes
+   */
+  private readonly WEATHER_ELEMENTS = {
+    Wx: 'Wx',
+    T: 'T',
+    PoP: 'PoP',
+    TEMP: 'TEMP',
+    HUMD: 'HUMD',
+    Weather: 'Weather'
+  } as const;
+
+  // ===== Private Helper Methods =====
+
   /**
    * Transform CWA forecast location to our format
    */
-  private transformForecast(location: CwaLocation): WeatherForecast {
-    const wxElement = this.findElement(location.weatherElement, WEATHER_ELEMENTS.Wx);
-    const tempElement = this.findElement(location.weatherElement, WEATHER_ELEMENTS.T);
-    const popElement = this.findElement(location.weatherElement, WEATHER_ELEMENTS.PoP);
+  private transformForecast(location: any): WeatherForecast {
+    const wxElement = this.findElement(location.weatherElement, this.WEATHER_ELEMENTS.Wx);
+    const tempElement = this.findElement(location.weatherElement, this.WEATHER_ELEMENTS.T);
+    const popElement = this.findElement(location.weatherElement, this.WEATHER_ELEMENTS.PoP);
 
     return {
       locationName: location.locationName,
@@ -217,10 +275,10 @@ export class WeatherService {
   /**
    * Transform CWA observation location to our format
    */
-  private transformObservation(location: CwaLocation): WeatherObservation {
-    const tempElement = this.findElement(location.weatherElement, WEATHER_ELEMENTS.TEMP);
-    const humdElement = this.findElement(location.weatherElement, WEATHER_ELEMENTS.HUMD);
-    const weatherElement = this.findElement(location.weatherElement, WEATHER_ELEMENTS.Weather);
+  private transformObservation(location: any): WeatherObservation {
+    const tempElement = this.findElement(location.weatherElement, this.WEATHER_ELEMENTS.TEMP);
+    const humdElement = this.findElement(location.weatherElement, this.WEATHER_ELEMENTS.HUMD);
+    const weatherElement = this.findElement(location.weatherElement, this.WEATHER_ELEMENTS.Weather);
 
     return {
       stationName: location.locationName,
@@ -248,14 +306,14 @@ export class WeatherService {
   /**
    * Find weather element by name
    */
-  private findElement(elements: WeatherElement[], name: string): WeatherElement | undefined {
-    return elements.find(el => el.elementName === name);
+  private findElement(elements: any[], name: string): any {
+    return elements.find((el: any) => el.elementName === name);
   }
 
   /**
    * Get element value (from time array or direct elementValue)
    */
-  private getElementValue(element: WeatherElement | undefined, defaultValue: string): string {
+  private getElementValue(element: any, defaultValue: string): string {
     if (!element) return defaultValue;
 
     // Try to get from time array first
