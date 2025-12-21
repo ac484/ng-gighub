@@ -433,7 +433,7 @@ export class AgreementModuleViewComponent {
   }
 
   private normalizeStorageUrl(url: string): string {
-    let normalized = url.replace('firebasestorage.app', 'appspot.com');
+    let normalized = url.replace(/&amp;/g, '&').replace('firebasestorage.app', 'appspot.com');
     normalized = normalized.replace(/b\/([^/]+)\.firebasestorage\.app\//, 'b/$1.appspot.com/');
     if (!normalized.includes('alt=media')) {
       normalized += (normalized.includes('?') ? '&' : '?') + 'alt=media';
