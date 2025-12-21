@@ -105,6 +105,7 @@ import { AgreementService } from './agreement.service';
                   >
                     {{ parsingId() === agreement.id ? '解析中' : '解析' }}
                   </button>
+                  <button nz-button nzType="link" nzSize="small" (click)="onSelect(agreement)">檢視</button>
                   <button nz-button nzType="link" nzSize="small" (click)="edit(agreement)">編輯</button>
                   <button nz-button nzType="link" nzDanger nzSize="small" (click)="remove(agreement)">刪除</button>
                 </td>
