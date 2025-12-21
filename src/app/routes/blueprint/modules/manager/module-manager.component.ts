@@ -8,9 +8,8 @@
  * @date 2025-12-11
  */
 
-import { Component, OnInit, inject, signal, computed, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, inject, signal, computed, effect, input } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { BlueprintModuleDocument, ModuleStatus } from '@core/models/blueprint-module.model';
 import { STColumn, STData } from '@delon/abc/st';
 import { ModalHelper } from '@delon/theme';
@@ -203,20 +202,17 @@ import { ModuleManagerService } from './module-manager.service';
     `
   ]
 })
-export class ModuleManagerComponent implements OnInit {
+export class ModuleManagerComponent {
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
   private service = inject(ModuleManagerService);
   private modal = inject(ModalHelper);
   private message = inject(NzMessageService);
-  private destroyRef = inject(DestroyRef);
 
   // Component state
   searchText = '';
   statusFilter: 'all' | 'enabled' | 'disabled' | 'failed' = 'all';
   viewMode: 'grid' | 'table' = 'grid';
-  blueprintId = signal<string>('');
-  blueprintName = signal<string>('Blueprint');
+  blueprintId = input<string>('');
 
   // Service state
   loading = this.service.loading;
@@ -347,20 +343,18 @@ export class ModuleManagerComponent implements OnInit {
     }
   ];
 
-  ngOnInit(): void {
-    // Get blueprint ID from route
-    this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
-      const id = params['id'];
+  constructor() {
+    effect(() => {
+      const id = this.blueprintId() || this.route.snapshot.paramMap.get('id');
       if (id) {
-        this.blueprintId.set(id);
-        this.loadModules();
+        void this.loadModules(id);
       }
     });
   }
 
-  async loadModules(): Promise<void> {
+  private async loadModules(id: string): Promise<void> {
     try {
-      await this.service.loadModules(this.blueprintId());
+      await this.service.loadModules(id);
     } catch {
       this.message.error('載入模組失敗');
     }
