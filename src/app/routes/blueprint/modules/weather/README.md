@@ -4,15 +4,16 @@
 
 A minimal, highly cohesive weather module for displaying Taiwan CWA weather data. Designed for embedding in dashboards, overviews, and other modules.
 
-**✨ New Architecture**: Direct CWA API integration with local caching (no Firebase Functions dependency)
+**✨ Architecture**: Firebase Cloud Functions integration with client-side caching
 
 ## Architecture Principles
 
 ✅ **High Cohesion**: Single responsibility - weather data display  
-✅ **Low Coupling**: Independent service layer with clear interfaces  
+✅ **Low Coupling**: Uses Firebase Cloud Functions (no direct API dependency)  
 ✅ **Extensible**: Easy to add new weather data types  
-✅ **Minimal Code**: Achieves functionality with minimal implementation
-✅ **Direct Integration**: Uses HttpClient to call CWA API directly
+✅ **Secure**: API keys managed via Firebase Secrets  
+✅ **CORS-Free**: Cloud Functions act as proxy to CWA API  
+✅ **Cached**: Multi-layer caching (client + Firebase Functions)
 
 ## Module Structure
 
@@ -23,7 +24,6 @@ weather/
 │   └── cwa-api.types.ts           # CWA API models and constants
 ├── services/
 │   ├── weather.service.ts         # Main business logic service
-│   ├── cwa-api.client.ts          # HTTP client for CWA API
 │   └── weather-cache.service.ts   # Local cache management
 ├── components/
 │   └── weather-card.component.ts  # Reusable card component
@@ -32,36 +32,79 @@ weather/
 └── README.md                      # This file
 ```
 
+## Architecture Flow
+
+```
+┌─────────────┐
+│  Component  │
+└──────┬──────┘
+       │
+       ↓
+┌──────────────────┐
+│ WeatherService   │ ← Client-side cache
+└──────┬───────────┘
+       │
+       ↓ httpsCallable()
+┌──────────────────────────────┐
+│ Firebase Cloud Functions     │
+│ (functions-integration)      │
+│  - getForecast36Hour         │
+│  - getObservation            │
+│  - getWeatherWarnings        │
+└──────┬───────────────────────┘
+       │
+       ↓ fetch() + API Key
+┌──────────────────────────────┐
+│ CWA OpenData API             │
+│ opendata.cwa.gov.tw          │
+└──────────────────────────────┘
+```
+
 ## Architecture Layers
 
-### 1. Infrastructure Layer
-- **CwaApiClient**: Direct HTTP communication with CWA OpenData API
-- **WeatherCacheService**: LocalStorage-based cache with TTL
-
-### 2. Business Logic Layer
-- **WeatherService**: Orchestrates API calls and cache management
-- Transforms CWA API responses to simplified domain models
-
-### 3. Presentation Layer
+### 1. Presentation Layer
 - **WeatherModuleViewComponent**: Full weather display
 - **WeatherCardComponent**: Reusable compact widget
 
-## Configuration
+### 2. Business Logic Layer
+- **WeatherService**: 
+  - Calls Firebase Cloud Functions via `httpsCallable()`
+  - Manages client-side cache with TTL
+  - Transforms responses to simplified domain models
 
-### Environment Variables
+### 3. Infrastructure Layer (Backend)
+- **Firebase Cloud Functions** (in `functions-integration/src/weather/`)
+  - Handles CWA API authentication (API key in Firebase Secrets)
+  - Implements retry logic and error handling
+  - Provides CORS-free proxy to CWA API
 
-```typescript
-// src/environments/environment.ts
-export const environment = {
-  // ...
-  cwa: {
-    apiKey: 'CWB-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', // Your CWA API Key
-    baseUrl: 'https://opendata.cwa.gov.tw/api/v1/rest/datastore'
-  }
-};
+## Prerequisites
+
+### 1. Firebase Cloud Functions Deployment
+
+The weather module requires Firebase Cloud Functions to be deployed:
+
+```bash
+# Navigate to functions-integration
+cd functions-integration
+
+# Install dependencies
+yarn install
+
+# Set CWA API key as Firebase secret
+firebase functions:secrets:set CWA_API_KEY
+
+# Deploy weather functions
+firebase deploy --only functions:getForecast36Hour,functions:getObservation,functions:getWeatherWarnings
 ```
 
-**⚠️ Important**: Replace `CWB-XXXXXXXX...` with your actual CWA API key from https://opendata.cwa.gov.tw/
+### 2. Get CWA API Key
+
+Register at https://opendata.cwa.gov.tw/ to obtain your API key.
+
+## Configuration
+
+No frontend configuration needed! API key is securely stored in Firebase Secrets.
 
 ## Usage
 
@@ -119,13 +162,13 @@ export const environment = {
 
 ## API Integration
 
-### Direct CWA API Calls
+### Firebase Cloud Functions
 
-This module now uses **direct HTTP calls** to CWA OpenData API:
+This module uses **Firebase Cloud Functions** as a proxy to CWA OpenData API:
 
 ```typescript
 export class WeatherService {
-  private readonly apiClient = inject(CwaApiClient);
+  private readonly functions = inject(Functions);
   private readonly cache = inject(WeatherCacheService);
   
   async getForecast(countyName: string): Promise<WeatherForecast | null> {
@@ -133,17 +176,35 @@ export class WeatherService {
     const cached = this.cache.get<WeatherForecast>(`forecast_${countyName}`);
     if (cached) return cached;
     
-    // Fetch from CWA API
-    const response = await this.apiClient.getForecast36Hour({ locationName: countyName });
+    // Call Cloud Function
+    const getForecast36Hour = httpsCallable<ForecastRequest, CloudFunctionResponse<any>>(
+      this.functions,
+      'getForecast36Hour'
+    );
+    
+    const result = await getForecast36Hour({ countyName });
     
     // Transform and cache
-    const forecast = this.transformForecast(response.records.location[0]);
+    const forecast = this.transformForecast(result.data.data.records.location[0]);
     this.cache.set(`forecast_${countyName}`, forecast, 3600); // 1 hour TTL
     
     return forecast;
   }
 }
 ```
+
+### Available Cloud Functions
+
+| Function | Purpose | Parameters |
+|----------|---------|------------|
+| `getForecast36Hour` | 36-hour forecast | `{ countyName: string }` |
+| `getForecast7Day` | 7-day forecast | `{ countyName: string }` |
+| `getTownshipForecast` | Township forecast | `{ countyCode: string, townshipName?: string }` |
+| `getObservation` | Current weather | `{ stationId?: string }` |
+| `get10MinObservation` | 10-min observation | `{ stationId?: string }` |
+| `getRainfallObservation` | Rainfall data | `{ stationId?: string }` |
+| `getUvIndexObservation` | UV index | `{}` |
+| `getWeatherWarnings` | Weather alerts | `{ alertType?: string }` |
 
 ### Cache Management
 
@@ -262,15 +323,17 @@ export class CustomWeatherComponent {
 - All errors are caught and displayed in the UI
 - Loading states are managed with signals
 - Error messages are user-friendly
-- Automatic retry with exponential backoff (3 attempts)
-- Timeout protection (30 seconds)
+- Automatic retry logic handled by Cloud Functions (exponential backoff)
+- Timeout protection (30 seconds per function call)
 
 ## Performance
 
 - **Lazy loading**: Module loads only when needed
 - **Signal-based reactivity**: Minimal re-renders
 - **OnPush change detection**: Maximum efficiency
-- **Local caching**: Reduces API calls by 70-90%
+- **Multi-layer caching**: 
+  - Client-side: LocalStorage with TTL
+  - Backend: Firebase Functions cache (optional)
 - **Cache-first strategy**: Instant data display for repeat visits
 - **Optional auto-refresh**: Configurable interval
 
@@ -286,41 +349,93 @@ fixture.detectChanges();
 
 ## Security Considerations
 
-⚠️ **API Key Exposure**: The CWA API key is included in the frontend bundle and visible in network requests. This is acceptable for:
-- Free/public API keys with no cost
-- Internal tools with limited access
-- Development/demo environments
+✅ **API Key Security**: The CWA API key is stored securely in Firebase Secrets, not in frontend code or version control.
 
-For production environments with sensitive or paid API keys, consider:
-- Using Firebase Functions as a proxy (previous architecture)
-- Implementing backend API gateway
-- IP/domain restrictions (if supported by CWA)
+✅ **CORS Protection**: Firebase Cloud Functions act as a proxy, eliminating browser CORS restrictions.
+
+✅ **Rate Limiting**: Backend Cloud Functions can implement rate limiting to protect against abuse.
+
+⚠️ **Authentication**: Cloud Functions require Firebase Authentication. Unauthenticated users cannot access weather data.
 
 ## Dependencies
 
-- `@angular/common/http` - HttpClient for API calls
+- `@angular/fire/functions` - Firebase Cloud Functions integration
+- `@angular/common/http` - HttpClient (not used directly for CWA API)
 - `ng-zorro-antd` - UI components
 - `@core/services/logger` - Logging service
 - `@shared` - Shared utilities
 
-## Migration from Firebase Functions
+## Troubleshooting
 
-**Old Architecture** (via Functions):
-```
-Angular → Firebase Functions → CWA API → Cache (Firestore)
+### ❌ "CORS policy" error
+
+**Cause**: Frontend trying to call CWA API directly (old architecture)
+
+**Solution**: 
+1. Verify `weather.service.ts` is using `httpsCallable()` from `@angular/fire/functions`
+2. Check that `cwa-api.client.ts` has been removed from the frontend
+3. Ensure Firebase Cloud Functions are deployed
+
+### ❌ "unauthenticated" error
+
+**Cause**: User is not logged in to Firebase
+
+**Solution**: Weather module requires Firebase Authentication. Ensure user is signed in.
+
+### ❌ "CWA_API_KEY not configured" error
+
+**Cause**: API key secret not set in Firebase
+
+**Solution**:
+```bash
+firebase functions:secrets:set CWA_API_KEY
+# Enter your CWA API key when prompted
 ```
 
-**New Architecture** (Direct):
+### ❌ "Failed to fetch forecast" error
+
+**Cause**: Multiple possible causes
+
+**Debug Steps**:
+1. Check Firebase Functions logs: `firebase functions:log`
+2. Verify CWA API is accessible: https://opendata.cwa.gov.tw/
+3. Check API key validity at CWA website
+4. Ensure Functions are deployed and running
+
+### ⚠️ Slow performance
+
+**Possible Causes**:
+- Cold start (first Cloud Function invocation)
+- No client-side cache hit
+- CWA API slow response
+
+**Optimization**:
+- Enable client-side caching (default)
+- Consider pre-warming Functions for frequently accessed data
+- Increase cache TTL if acceptable
+
+## Architecture Comparison
+
+**Before** (Direct CWA API):
 ```
-Angular → CWA API → Cache (LocalStorage)
+Frontend → CWA API → ❌ CORS Error
 ```
 
-**Changes**:
-- ✅ No Firebase Functions dependency
-- ✅ No Firestore caching needed
-- ✅ Reduced latency (no Functions hop)
-- ✅ Zero Firebase costs
-- ⚠️ API key visible in frontend
+**After** (Firebase Cloud Functions):
+```
+Frontend → Firebase Functions → CWA API → ✅ Success
+```
+
+**Benefits**:
+- ✅ No CORS issues
+- ✅ Secure API key management
+- ✅ Backend caching and retry logic
+- ✅ Centralized error handling
+- ✅ Rate limiting control
+
+**Trade-offs**:
+- Additional latency (Functions cold start: ~1-2s first time)
+- Firebase Functions cost (but within free tier for typical usage)
 
 ## Future Enhancements
 
@@ -332,13 +447,12 @@ Angular → CWA API → Cache (LocalStorage)
 - [ ] Customizable themes
 - [ ] Mobile-optimized views
 - [ ] Service Worker offline caching
-- [ ] IndexedDB for larger cache
 
 ## Notes
 
 - Module is **read-only** - no weather data modification
-- No authentication required for CWA API
-- API key configured in environment variables
+- Authentication required via Firebase Auth
+- API key managed securely in Firebase Secrets
 - Data cached locally in browser LocalStorage
 - Refresh intervals should be ≥ 5 minutes to respect API rate limits
-- CWA API rate limit: ~1,000-5,000 requests/day (depends on key type)
+- Firebase Functions provide automatic scaling and availability
