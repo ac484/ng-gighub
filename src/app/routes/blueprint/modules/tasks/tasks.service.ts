@@ -9,9 +9,11 @@ export class TasksService {
 
   private readonly _tasks = signal<Task[]>([]);
   private readonly _loading = signal(false);
+  private readonly _error = signal<string | null>(null);
 
   readonly tasks = this._tasks.asReadonly();
   readonly loading = this._loading.asReadonly();
+  readonly error = this._error.asReadonly();
   readonly totalCount = computed(() => this._tasks().length);
   readonly completedCount = computed(() => this._tasks().filter(task => task.status === 'completed').length);
   readonly inProgressCount = computed(() => this._tasks().filter(task => task.status === 'in-progress').length);
@@ -20,9 +22,13 @@ export class TasksService {
   async loadTasks(blueprintId: string): Promise<void> {
     if (!blueprintId) return;
     this._loading.set(true);
+    this._error.set(null);
     try {
       const tasks = await this.repository.findByBlueprintId(blueprintId);
       this._tasks.set(tasks);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '載入任務失敗';
+      this._error.set(message);
     } finally {
       this._loading.set(false);
     }

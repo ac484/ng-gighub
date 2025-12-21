@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, effect, inject, input, signal } from '@angular/core';
 import { LoggerService } from '@core/services/logger';
 import { FormsModule } from '@angular/forms';
 import { SHARED_IMPORTS } from '@shared';
@@ -69,6 +69,10 @@ import { TasksService } from './tasks.service';
         <button nz-button nzType="primary" nzSize="large" [nzLoading]="submitting()" (click)="createTask()">新增任務</button>
       </div>
 
+      @if (error()) {
+        <div class="mt-sm" role="alert" style="color: #d4380d;">{{ error() }}</div>
+      }
+
       @if (loading()) {
         <div class="mt-md text-center">
           <nz-spin nzSimple />
@@ -133,7 +137,7 @@ import { TasksService } from './tasks.service';
     `
   ]
 })
-export class TasksModuleViewComponent {
+export class TasksModuleViewComponent implements OnInit {
   blueprintId = input.required<string>();
 
   private readonly logger = inject(LoggerService);
@@ -142,6 +146,7 @@ export class TasksModuleViewComponent {
 
   readonly tasks = this.tasksService.tasks;
   readonly loading = this.tasksService.loading;
+  readonly error = this.tasksService.error;
   readonly totalCount = this.tasksService.totalCount;
   readonly completedCount = this.tasksService.completedCount;
   readonly inProgressCount = this.tasksService.inProgressCount;
@@ -151,7 +156,7 @@ export class TasksModuleViewComponent {
   newStatus = signal<TaskStatus>('in-progress');
   submitting = signal(false);
 
-  constructor() {
+  ngOnInit(): void {
     effect(() => {
       const id = this.blueprintId();
       if (id) {

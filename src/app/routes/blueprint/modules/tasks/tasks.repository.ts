@@ -30,7 +30,7 @@ export class TasksRepository {
       return snapshot.docs.map(docSnap => this.toEntity(docSnap.data(), docSnap.id));
     } catch (error) {
       this.logger.error('[TasksRepository]', 'Failed to load tasks', error as Error, { blueprintId });
-      return [];
+      throw error;
     }
   }
 
@@ -42,8 +42,9 @@ export class TasksRepository {
       status: payload.status,
       createdAt: now
     };
-    const docRef = await addDoc(this.collectionRef, data as DocumentData);
-    return this.toEntity(data as DocumentData, docRef.id);
+    const docData = data as DocumentData;
+    const docRef = await addDoc(this.collectionRef, docData);
+    return this.toEntity(docData, docRef.id);
   }
 
   async deleteTask(taskId: string): Promise<void> {
