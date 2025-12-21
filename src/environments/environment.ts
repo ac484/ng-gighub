@@ -14,5 +14,6 @@ export const environment = {
     refreshTokenType: 'auth-refresh'
   },
   interceptorFns: [mockInterceptor],
-  firebaseMessagingPublicKey: 'BMfTfys7cErI2JVFmjkWSeCb7ClvFklQ4r69lWGIYT2dSq5VD2eguZlckvdq2QJhdGskeyUg0G6RcC8WmlBztFY'
-} as Environment & { firebaseMessagingPublicKey: string };
+  firebaseMessagingPublicKey: 'BMfTfys7cErI2JVFmjkWSeCb7ClvFklQ4r69lWGIYT2dSq5VD2eguZlckvdq2QJhdGskeyUg0G6RcC8WmlBztFY',
+  CWA_API_KEY: '' // 中央氣象署 API 授權碼 (需申請)
+} as Environment & { firebaseMessagingPublicKey: string; CWA_API_KEY: string };
