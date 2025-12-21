@@ -102,10 +102,10 @@ export class CwaApiClient {
    */
   private async get<T>(datasetId: string, params: Record<string, string | undefined>): Promise<CwaApiResponse<T>> {
     try {
-      // Build HTTP params
-      let httpParams = new HttpParams().set('Authorization', this.config.apiKey);
+      // Build HTTP params (NOT including Authorization - that goes in header)
+      let httpParams = new HttpParams();
 
-      // Add additional params
+      // Add query params
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined) {
           httpParams = httpParams.set(key, value);
@@ -117,15 +117,23 @@ export class CwaApiClient {
       this.logger.debug('[CwaApiClient]', `GET ${url}`, params);
 
       // Make HTTP request with retry and timeout
+      // Authorization must be sent as HTTP header, not query parameter
       const response = await firstValueFrom(
-        this.http.get<CwaApiResponse<T>>(url, { params: httpParams }).pipe(
-          timeout(HTTP_CONFIG.timeout),
-          retry({
-            count: HTTP_CONFIG.retryAttempts,
-            delay: HTTP_CONFIG.retryDelay
-          }),
-          catchError(this.handleError.bind(this))
-        )
+        this.http
+          .get<CwaApiResponse<T>>(url, {
+            params: httpParams,
+            headers: {
+              Authorization: this.config.apiKey
+            }
+          })
+          .pipe(
+            timeout(HTTP_CONFIG.timeout),
+            retry({
+              count: HTTP_CONFIG.retryAttempts,
+              delay: HTTP_CONFIG.retryDelay
+            }),
+            catchError(this.handleError.bind(this))
+          )
       );
 
       this.logger.debug('[CwaApiClient]', `Response received for ${datasetId}`);
