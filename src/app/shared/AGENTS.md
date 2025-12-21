@@ -1,3 +1,44 @@
+# Shared Module Agent Guide
+
+## Title + Scope
+Scope: Shared UI components and utilities under src/app/shared.
+
+## Purpose / Responsibility
+Provide reusable, presentation-focused components and shared utilities without embedding feature-specific logic.
+
+## Hard Rules / Constraints
+- NO feature-specific logic; keep shared pieces generic.
+- NO direct Firebase access outside adapters/repositories.
+- NO new UI components outside shared scope unless requested; keep components standalone.
+
+## Allowed / Expected Content
+- Reusable UI components, pipes, and directives.
+- Shared utilities and styles consumed across features.
+- Documentation/tests describing usage.
+
+## Structure / Organization
+- components/, directives/, pipes/, services (as referenced), and barrel exports per convention.
+
+## Integration / Dependencies
+- Use Angular standalone components and signals; dependency injection via inject().
+- Consume data via services passed in from parent features; do not couple to repositories directly.
+
+## Best Practices / Guidelines
+- Maintain accessibility, provide inputs/outputs for configurability, and avoid stateful singletons unless necessary.
+- Keep styling consistent with design system (ng-zorro/ng-alain).
+
+## Related Docs / References
+- ./services/AGENTS.md (Shared services)
+- ../routes/AGENTS.md
+- ../core/AGENTS.md
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
 ---
 Title + Scope
 
@@ -359,6 +400,6 @@ export class ExampleComponent {}
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-09  
 **Status**: Production Ready

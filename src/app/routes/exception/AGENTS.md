@@ -1,5 +1,52 @@
 # Exception Module Agent Guide
 
+## Title + Scope
+Scope: Standardized exception and error pages under src/app/routes/exception for GigHub.
+
+## Purpose / Responsibility
+Provide consistent error routing and UI for forbidden, not-found, server error, and testing routes without leaking business logic.
+
+## Hard Rules / Constraints
+- NO UI components beyond exception pages and their routing unless explicitly required.
+- NO feature-specific logic; keep views generic and reusable.
+- NO direct Firebase access outside adapters/repositories.
+- Use inject() for DI and respect three-layer architecture.
+
+## Allowed / Expected Content
+- Exception routes and components for 403/404/500 and trigger pages.
+- Shared helpers or styles supporting these views.
+- Tests and docs verifying navigation and guard redirection behavior.
+
+## Structure / Organization
+- routes.ts for module routing
+- exception.component.ts for reusable exception display
+- trigger.component.ts for manual error testing
+- Additional assets under this folder as documented below
+
+## Integration / Dependencies
+- Uses ng-zorro-antd Result components for layout where applicable.
+- Guards may redirect here; integrate via router only.
+- No cross-feature dependencies beyond routing contracts.
+
+## Best Practices / Guidelines
+- Keep messages clear, provide navigation actions, and ensure accessibility.
+- Maintain stateless components with signals for any UI state.
+- Localize text through existing i18n patterns.
+
+## Related Docs / References
+- ../AGENTS.md (Routes guidance)
+- ../../AGENTS.md (App)
+- ../../../core/AGENTS.md (Core services)
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
+# Exception Module Agent Guide
+
 The Exception module provides standardized error pages for HTTP and application errors in GigHub.
 
 ## Module Purpose
@@ -168,6 +215,6 @@ src/app/routes/exception/
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-09  
 **Status**: Production Ready

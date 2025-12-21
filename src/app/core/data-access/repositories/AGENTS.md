@@ -1,5 +1,49 @@
 # Core Repositories Agent Guide
 
+## Title + Scope
+Scope: Unified data access layer under src/app/core/data-access/repositories for GigHub entities.
+
+## Purpose / Responsibility
+Define repository responsibilities, enforce the repository pattern, and ensure consistent Firestore access, validation, and logging.
+
+## Hard Rules / Constraints
+- NO UI components.
+- NO feature-specific logic; repositories handle data access only.
+- NO direct Firebase access outside these adapters; other layers must consume repositories.
+- Use inject() for DI and avoid creating FirebaseService wrappers.
+
+## Allowed / Expected Content
+- Repository implementations for core entities, shared query utilities, and related documentation/tests.
+- Data validation, mapping, and error handling tied to persistence concerns.
+
+## Structure / Organization
+- Individual repository files (account, audit-log, organization, team, log, task, storage, etc.).
+- index.ts for public exports.
+- Supporting helpers located alongside repositories as needed.
+
+## Integration / Dependencies
+- Use @angular/fire Firestore APIs via repository methods only.
+- Log operations via LoggerService; propagate domain errors through core error types.
+- No business logic; services/facades orchestrate repositories.
+
+## Best Practices / Guidelines
+- Provide standard CRUD/query APIs, handle errors with Result pattern, and avoid logging sensitive data.
+- Keep methods pure where possible and validate inputs before writes.
+
+## Related Docs / References
+- ../AGENTS.md (Core overview)
+- ../../blueprint/AGENTS.md (Blueprint repositories/services)
+- ../../services/AGENTS.md
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
+# Core Repositories Agent Guide
+
 The Core Repositories directory contains unified data access layer for all entities in the GigHub application.
 
 ## Module Purpose
@@ -211,6 +255,6 @@ export class AccountRepository {
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-11  
 **Status**: Active

@@ -1,76 +1,50 @@
----
-Title + Scope
+# App Module Agent Guide
 
-Scope: App module documentation and agent guidance.
+## Title + Scope
+Scope: App module documentation and agent guidance covering everything under src/app/ as the entry point of the GigHub Angular application.
 
----
+## Purpose / Responsibility
+Defines responsibilities and boundaries for AI agents working in src/app/. Agents must keep bootstrap minimal, enforce architecture rules, and ensure cross-cutting concerns stay consistent.
 
-Purpose / Responsibility
+## Hard Rules / Constraints
+- NO UI components unless explicitly requested.
+- NO feature-specific logic outside designated feature or domain areas.
+- NO direct Firebase access outside adapters and repositories.
+- Prefer inject() over constructor injection; use standalone components and signals.
 
-Defines responsibilities and boundaries for AI agents working in src/app/.
+## Allowed / Expected Content
+- Singleton services, global interceptors, and cross-cutting concerns.
+- Routing, guards, and configuration needed for application bootstrap.
+- Tests and documentation related to these areas.
 
----
-
-Hard Rules / Constraints
-
-Hard Rules:
-- NO UI components
-- NO feature-specific logic
-- NO direct Firebase access outside adapters
-
----
-
-Allowed / Expected Content
-
-Allowed:
-- Singleton services
-- Global interceptors
-- Cross-cutting concerns
-
----
-
-Structure / Organization
-
-Structure:
+## Structure / Organization
 - services/
 - guards/
 - interceptors/
+- repositories/ when justified
+- app bootstrap and configuration files (app.component.ts, app.config.ts)
 
----
+## Integration / Dependencies
+- Angular DI only; use @angular/fire adapters via repositories/services.
+- No feature-to-feature imports beyond public interfaces; all AI calls via approved functions.
 
-Integration / Dependencies
+## Best Practices / Guidelines
+- Prefer composition over inheritance and keep services stateless where possible.
+- Use Signals, ChangeDetectionStrategy.OnPush, and Result pattern for async work.
+- Maintain strict TypeScript usage and avoid NgModules/any types.
 
-Integration:
-- Angular DI only
-- Uses @angular/fire adapters
-- No feature-to-feature imports
-
----
-
-Best Practices / Guidelines
-
-Guidelines:
-- Prefer composition over inheritance
-- Keep services stateless where possible
-
----
-
-Related Docs / References
-
+## Related Docs / References
 - ../shared/AGENTS.md
 - ../environments/AGENTS.md
+- Root AGENTS.md
+- docs/architecture/
 
----
-
-Metadata
-
+## Metadata
 Version: 1.1.0
 Status: Active
 Audience: AI Coding Agents
 
 ---
-
-# App Module Agent Guide
 
 The App module is the **entry point** of the GigHub application, responsible for bootstrapping and configuring the entire Angular application.
 
@@ -311,6 +285,6 @@ The App module is the **entry point** of the GigHub application, responsible for
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-09  
 **Status**: Production Ready

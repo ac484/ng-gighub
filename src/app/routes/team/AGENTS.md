@@ -1,5 +1,50 @@
 # Team Module Agent Guide
 
+## Title + Scope
+Scope: Team collaboration features under src/app/routes/team, including team management, membership, and permissions.
+
+## Purpose / Responsibility
+Guide agents implementing team routing, services, and data interactions while preserving organization/blueprint boundaries and role-based access.
+
+## Hard Rules / Constraints
+- NO UI components beyond team module scope unless explicitly required.
+- NO feature-specific logic outside team collaboration responsibilities.
+- NO direct Firebase access outside adapters/repositories; use approved data access layers.
+- Maintain multi-tenant safety and use inject() for DI.
+
+## Allowed / Expected Content
+- Team routing definitions, guards, and services coordinating team/member flows.
+- Documentation and tests for team data models and permissions.
+- Shared helpers for team dashboards and member assignment that stay within this module.
+
+## Structure / Organization
+- routes.ts for team routes
+- members/ folder for member management components
+- Additional feature folders as documented below
+
+## Integration / Dependencies
+- Interact with organization/blueprint services through public interfaces.
+- Use Angular DI (inject()) and repository pattern for Firestore operations.
+- No cross-feature imports without explicit contracts.
+
+## Best Practices / Guidelines
+- Enforce role checks consistently, use signals for state, and keep services stateless when possible.
+- Validate inputs, apply Result pattern for async flows, and avoid duplicating data models.
+
+## Related Docs / References
+- ../AGENTS.md (Routes)
+- ../../AGENTS.md (App)
+- ../../../core/AGENTS.md (Core services)
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
+# Team Module Agent Guide
+
 The Team module manages team collaboration within organizations in GigHub (Foundation Layer).
 
 ## Module Purpose
@@ -154,6 +199,6 @@ src/app/routes/team/
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-09  
 **Status**: Active Development

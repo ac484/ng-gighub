@@ -1,5 +1,51 @@
 # Blueprint Module Agent Guide
 
+## Title + Scope
+Scope: Container-layer Blueprint module under src/app/routes/blueprint, covering project workspaces, membership, and module configuration.
+
+## Purpose / Responsibility
+Define how agents manage blueprint lists, detail dashboards, membership, and module configuration while respecting multi-tenant boundaries and permissions.
+
+## Hard Rules / Constraints
+- NO UI components beyond blueprint module scope unless explicitly required.
+- NO feature-specific logic outside blueprint container responsibilities.
+- NO direct Firebase access outside adapters/repositories; use core blueprint services/repositories.
+- Follow three-layer architecture and inject() for DI.
+
+## Allowed / Expected Content
+- Blueprint routes, dashboards, membership management flows, and module wiring documented below.
+- Shared components and services that coordinate blueprint-level operations.
+- Tests and docs for permissions, module activation, and audit logging.
+
+## Structure / Organization
+- routes.ts plus blueprint-list/detail/modal components
+- members/, audit/, container/, components/, modules/ folders (see below for details)
+- Core models and repositories consumed from @core namespaces.
+
+## Integration / Dependencies
+- Interact with @core/blueprint repositories/services for data.
+- Use Angular DI; avoid feature-to-feature imports.
+- No direct calls to Firebase or external AI from UI.
+
+## Best Practices / Guidelines
+- Enforce permission checks for all actions, use signals for UI state, and align with Result pattern.
+- Keep components lean; push business logic into services.
+
+## Related Docs / References
+- ./modules/AGENTS.md (module boundaries)
+- ../AGENTS.md (Routes)
+- ../../AGENTS.md (App)
+- ../../../core/blueprint/AGENTS.md (Core blueprint services)
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
+# Blueprint Module Agent Guide
+
 The Blueprint module is the **Container Layer** core of GigHub - it provides the logical container for all project-related data and operations.
 
 ## Module Purpose
@@ -332,6 +378,6 @@ The Blueprint module is the **Container Layer** core of GigHub - it provides the
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-19  
 **Status**: Production Ready

@@ -1,5 +1,46 @@
 # Core Errors Agent Guide
 
+## Title + Scope
+Scope: Custom error classes and error handling conventions under src/app/core/errors.
+
+## Purpose / Responsibility
+Provide typed error hierarchy, context metadata, and severity guidance for GigHub core and feature modules.
+
+## Hard Rules / Constraints
+- NO UI components.
+- NO feature-specific business logic; errors should remain generic and domain-specific only as defined.
+- NO direct Firebase access; errors wrap repository/service outcomes.
+
+## Allowed / Expected Content
+- Base and specialized error classes, severity enums, and related utilities.
+- Public exports and documentation for error usage.
+
+## Structure / Organization
+- blueprint-error.ts, permission-denied-error.ts, validation-error.ts, module-not-found-error.ts, index.ts
+- AGENTS.md describing usage boundaries.
+
+## Integration / Dependencies
+- Errors consumed by services/repositories; avoid cross-feature coupling.
+- Logging handled by core logger; do not log sensitive data in error constructors.
+
+## Best Practices / Guidelines
+- Maintain structured context data, use Result pattern for propagation, and keep errors serializable when possible.
+- Use discriminated unions or enums for error codes.
+
+## Related Docs / References
+- ../AGENTS.md (Core overview)
+- ../services/AGENTS.md
+- ../../routes/AGENTS.md
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
+# Core Errors Agent Guide
+
 The Core Errors module defines custom error classes for the GigHub application.
 
 ## Module Purpose
@@ -95,7 +136,7 @@ src/app/core/errors/
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-09  
 **Status**: Production Ready
 

@@ -1,3 +1,45 @@
+# Styles Agent Guide
+
+## Title + Scope
+Scope: Global styles, theming, and style utilities under src/styles.
+
+## Purpose / Responsibility
+Describe how agents should manage global SCSS, theming tokens, and shared style utilities without introducing business logic.
+
+## Hard Rules / Constraints
+- NO UI components or feature-specific styling here.
+- NO direct Firebase access (styles only).
+- Maintain design system consistency and avoid inline secrets or data.
+
+## Allowed / Expected Content
+- Global variables, mixins, themes, and shared style utilities.
+- Reset/normalize styles and typography tokens.
+- Documentation for theming strategy.
+
+## Structure / Organization
+- SCSS partials grouped by purpose (variables, mixins, themes, utilities).
+- Entry points for global styles consumed by Angular builds.
+
+## Integration / Dependencies
+- Compatible with ng-zorro/ng-alain theming; imported via angular.json configuration.
+- Do not import application code; keep styles decoupled.
+
+## Best Practices / Guidelines
+- Ensure WCAG-compliant contrast, support responsive design, and avoid duplication.
+- Prefer CSS custom properties/SCSS variables for theme tokens.
+
+## Related Docs / References
+- ../app/AGENTS.md
+- ../shared/AGENTS.md
+- docs/architecture/ and design system notes
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
 ---
 Title + Scope
 

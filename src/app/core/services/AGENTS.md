@@ -1,5 +1,52 @@
 # Core Services Agent Guide
 
+## Title + Scope
+Scope: Core application-wide singleton services under src/app/core/services.
+
+## Purpose / Responsibility
+Clarify which services belong in Core vs Shared, and guide implementation of infrastructure-level services like authentication, logging, and telemetry.
+
+## Hard Rules / Constraints
+- NO UI components.
+- NO feature-specific logic.
+- NO direct Firebase access outside adapters/repositories; core services must delegate to repositories when needed.
+- Distinguish infrastructure (core/services) from business (shared/services).
+
+## Allowed / Expected Content
+- Authentication, logging, telemetry, and other infrastructure singleton services.
+- Service interfaces shared across modules.
+- Documentation and tests for these services.
+
+## Structure / Organization
+- firebase-auth.service.ts
+- logger/
+- supabase.service.ts
+- Additional infrastructure service folders as documented below.
+
+## Integration / Dependencies
+- Angular DI via inject(); use @angular/fire adapters where applicable.
+- No feature-to-feature imports; expose public interfaces only.
+- Supabase usage limited to read-only statistics.
+
+## Best Practices / Guidelines
+- Keep services stateless where possible; use signals only when needed.
+- Use Result pattern for async work and avoid logging sensitive data.
+- Enforce single responsibility and environment-aware configurations.
+
+## Related Docs / References
+- ../AGENTS.md (Core overview)
+- ../../shared/services/AGENTS.md (Shared services)
+- ../../routes/AGENTS.md (Routes)
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
+# Core Services Agent Guide
+
 The Core Services module contains essential singleton services used across the entire GigHub application.
 
 ## ⚠️ Important: Core Services vs Shared Services
@@ -94,6 +141,6 @@ The Core Services module contains essential singleton services used across the e
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-09  
 **Status**: Production Ready

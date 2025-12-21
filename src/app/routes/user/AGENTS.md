@@ -1,5 +1,46 @@
 # User Module Agent Guide
 
+## Title + Scope
+Scope: User profile and account management routes under src/app/routes/user.
+
+## Purpose / Responsibility
+Guide user-related pages, services, and routing while keeping security and permissions aligned with GigHub rules.
+
+## Hard Rules / Constraints
+- NO UI components beyond user module scope unless required.
+- NO feature-specific logic outside user account/profile responsibilities.
+- NO direct Firebase access outside adapters; use repositories/services instead.
+
+## Allowed / Expected Content
+- User profile pages, account settings flows, and supporting services/stores.
+- Tests and documentation for user routes and permissions.
+
+## Structure / Organization
+- routes.ts for user routes
+- Components for profile/settings as structured below
+
+## Integration / Dependencies
+- Use Angular DI with inject(); consume auth/account services via public interfaces.
+- No feature-to-feature imports; adhere to repository pattern.
+
+## Best Practices / Guidelines
+- Use signals for state, validate inputs, and respect Result pattern for async operations.
+- Preserve accessibility and keep components lean.
+
+## Related Docs / References
+- ../AGENTS.md (Routes)
+- ../../AGENTS.md (App)
+- ../../../core/AGENTS.md (Core services)
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
+# User Module Agent Guide
+
 The User module manages individual user profiles and settings in GigHub (Foundation Layer).
 
 ## Module Purpose
@@ -157,6 +198,6 @@ src/app/routes/user/
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-09  
 **Status**: Active Development

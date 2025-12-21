@@ -1,3 +1,42 @@
+# Core Networking Agent Guide
+
+## Title + Scope
+Scope: Networking utilities and HTTP concerns under src/app/core/net.
+
+## Purpose / Responsibility
+Document networking helpers, interceptors, and configurations that support application-wide HTTP behaviors.
+
+## Hard Rules / Constraints
+- NO UI components.
+- NO feature-specific logic; keep networking concerns generic.
+- NO direct Firebase access outside repositories/adapters.
+
+## Allowed / Expected Content
+- HTTP helpers, interceptors, and networking utilities shared across the app.
+- Documentation/tests for these cross-cutting concerns.
+
+## Structure / Organization
+- net-related services and interceptors housed under this directory with an index/barrel as needed.
+
+## Integration / Dependencies
+- Use Angular HttpClient and DI with inject(); avoid feature-to-feature imports.
+- Interact with auth/permission services via public interfaces only.
+
+## Best Practices / Guidelines
+- Apply Result pattern for async operations, log via LoggerService without sensitive data, and keep interceptors composable.
+
+## Related Docs / References
+- ../AGENTS.md (Core overview)
+- ../services/AGENTS.md
+- ../../routes/AGENTS.md
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
 # Core Network Agent Guide
 
 The Core Network module provides HTTP interceptors and network-related utilities for the GigHub application.
@@ -75,7 +114,7 @@ src/app/core/net/
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-09  
 **Status**: Production Ready
 

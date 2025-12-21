@@ -1,5 +1,49 @@
 # Blueprint Core Module Agent Guide
 
+## Title + Scope
+Scope: Core blueprint infrastructure under src/app/core/blueprint, including configuration, context, events, and module registry.
+
+## Purpose / Responsibility
+Provide core services and infrastructure enabling blueprint containers, modules, and events while enforcing multi-tenant boundaries.
+
+## Hard Rules / Constraints
+- NO UI components.
+- NO feature-specific logic beyond blueprint infrastructure responsibilities.
+- NO direct Firebase access outside repositories/adapters dedicated to blueprint data.
+- Adhere to three-layer architecture and inject() DI.
+
+## Allowed / Expected Content
+- Blueprint configuration, container, context, events, and module registry implementations.
+- Module metadata and interfaces for blueprint modules.
+- Documentation/tests supporting blueprint core behaviors.
+
+## Structure / Organization
+- config/, container/, context/, events/, modules/ (with implementations), index.ts
+- AGENTS.md (this file) describing boundaries and usage.
+
+## Integration / Dependencies
+- Consume repositories from core data-access as needed; expose public APIs for routes/services.
+- Event bus integration for cross-module communication.
+- No direct external AI calls or unauthorized dependencies.
+
+## Best Practices / Guidelines
+- Keep services stateless where possible and enforce permission checks at boundaries.
+- Use Result pattern, signals where appropriate, and avoid duplicating models.
+
+## Related Docs / References
+- ../AGENTS.md (Core overview)
+- ../../routes/blueprint/AGENTS.md (Blueprint route module)
+- ../../core/data-access/repositories/AGENTS.md
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
+# Blueprint Core Module Agent Guide
+
 The Blueprint Core module provides core infrastructure and services for Blueprint functionality at the application core level.
 
 ## Module Purpose
@@ -139,7 +183,7 @@ src/app/core/blueprint/
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-09  
 **Status**: Active Development
 

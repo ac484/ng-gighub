@@ -1,5 +1,48 @@
 # Blueprint Modules Directory Agent Guide
 
+## Title + Scope
+Scope: UI view components for Blueprint modules under src/app/routes/blueprint/modules.
+
+## Purpose / Responsibility
+Define boundaries for module view components displayed inside the Blueprint container while keeping business logic in core implementations.
+
+## Hard Rules / Constraints
+- NO UI components outside module view scope; keep logic minimal and presentational.
+- NO feature-specific business logic or data access here; move to @core/blueprint modules/implementations.
+- NO direct Firebase access; repositories handle Firestore interactions.
+
+## Allowed / Expected Content
+- Module view components and their templates/styles.
+- Module-specific modals used only within the view.
+- Barrel exports and submodule directories with documentation.
+
+## Structure / Organization
+- Module view components named `[module]-module-view.component.*`.
+- index.ts barrel for exports.
+- Subdirectories per complex module with README/AGENTS as needed.
+
+## Integration / Dependencies
+- Consume data via services/facades provided by core blueprint modules.
+- Use Angular DI and signals in components; avoid cross-feature imports.
+
+## Best Practices / Guidelines
+- Keep components presentational, using inputs/outputs and signals.
+- Reuse shared UI patterns and maintain accessibility.
+
+## Related Docs / References
+- ../AGENTS.md (Blueprint module)
+- ../../../core/blueprint/AGENTS.md
+- ../../../shared/AGENTS.md
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
+# Blueprint Modules Directory Agent Guide
+
 This directory contains **UI view components** for Blueprint modules. These are presentation-layer components that display module-specific content within the Blueprint container.
 
 ## Directory Purpose
