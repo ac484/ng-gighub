@@ -1,191 +1,95 @@
----
+Title: Source Directory – AGENTS.md
 
-# Source Directory – AGENTS.md
-
-This document defines **how AI coding agents must treat the `src/` directory**.  
-It describes **responsibilities, boundaries, and forbidden actions**.
-
-This is **not** a tutorial.
+Scope: This file defines how AI coding agents must treat the src/ directory and what is permitted inside it. It specifies responsibilities, boundaries, and forbidden actions for agents operating at the repository root level.
 
 ---
 
-## 1. Directory Purpose
+1. Purpose / Responsibility
 
-The `src/` directory is the **root of all application source code**.
+Purpose: The src/ directory is the root of all application source code. It contains application bootstrap and runtime entry, Angular application code, global styles and assets, environment configuration, and global TypeScript definitions. All business logic MUST live under src/app/. Agents should treat src/ as infrastructure, not domain.
 
-It contains:
-- Application bootstrap and runtime entry
-- Angular application code
-- Global styles and assets
-- Environment configuration
-- Global TypeScript definitions
-
-No business logic should exist outside `src/app/`.
+Responsibility: Ensure bootstrap files remain minimal and declarative, prevent business logic leakage into infrastructure files, and guide the agent to defer feature decisions to src/app/.
 
 ---
 
-## 2. Directory Structure
+2. Hard Rules / Constraints
 
-src/ ├── AGENTS.md                    # This file ├── main.ts                      # Application bootstrap entry ├── index.html                   # HTML entry point ├── typings.d.ts                 # Global type definitions ├── style-icons.ts               # Manual icon registry ├── style-icons-auto.ts          # Auto-generated icon registry ├── styles.less                  # Global stylesheet entry ├── app/                         # Angular application source (AGENTS.md) ├── assets/                      # Static assets ├── environments/                # Environment configs (AGENTS.md) └── styles/                      # Global styles & themes (AGENTS.md)
+Hard Rules (must follow):
+- NO UI components in this file or at src/ root. UI components belong under src/app/.
+- NO feature-specific business logic outside src/app/.
+- NO direct Firebase access outside repository adapters (repositories are the only layer allowed to access Firestore).
+- DO NOT add business logic to main.ts, index.html, or environment files.
+- DO NOT modify auto-generated files (e.g., style-icons-auto.ts) manually.
 
----
-
-## 3. Key File Rules
-
-### 3.1 main.ts
-
-**Purpose**: Application bootstrap only.
-
-**Rules**
-- MUST be the **single** application entry point
-- MUST use `bootstrapApplication()`
-- MUST bootstrap `AppComponent` with `appConfig`
-- MUST handle bootstrap errors
-- MUST NOT contain business logic
-- MUST NOT contain feature imports
+These constraints are the primary safety checks to prevent architectural, security, or deployment problems.
 
 ---
 
-### 3.2 index.html
+3. Allowed / Expected Content
 
-**Purpose**: HTML shell only.
+Allowed content under src/ (infrastructure-level):
+- Singleton services that are infrastructure-oriented (not feature behavior)
+- Global interceptors and cross-cutting concerns (logging, error handling, telemetry)
+- Global TypeScript declarations and typings that do NOT contain domain models
+- Global styles, assets, and environment configuration (no secrets)
+- Bootstrapping code that remains minimal and framework-agnostic
 
-**Rules**
-- MUST include `<app-root>`
-- MUST include required meta tags
-- MUST include favicon reference
-- MUST remain framework-agnostic
-- MUST NOT include application logic
-
----
-
-### 3.3 typings.d.ts
-
-**Purpose**: Global TypeScript declarations.
-
-**Rules**
-- MAY declare global interfaces or types
-- MAY extend third-party library typings
-- MUST avoid naming collisions with application models
-- MUST NOT contain domain or business types
+Expected agent behavior: Validate inputs, prefer composition over inheritance for shared utilities, and minimize surface area for changes.
 
 ---
 
-### 3.4 style-icons.ts
+4. Structure / Organization
 
-**Purpose**: Explicit icon registration.
+Recommended organization to reduce ad-hoc files and drift:
+- services/       # singleton infrastructure services
+- guards/         # global guards not tied to a single feature
+- interceptors/   # HTTP / cross-cutting interceptors (infrastructure-only)
+- assets/         # static assets: images, fonts, icons
+- environments/   # environment-specific configs (no secrets)
+- styles/         # global style themes and variables
 
-**Rules**
-- MUST define icons used by the application
-- MUST export icon definitions for ng-alain
-- MUST remain in sync with `style-icons-auto.ts`
-- MUST NOT include application logic
-
----
-
-### 3.5 style-icons-auto.ts
-
-**Purpose**: Auto-generated icon registry.
-
-**Rules**
-- MUST NOT be manually edited
-- MAY be regenerated by tooling
-- MUST be treated as read-only
+Notes: No business logic should exist outside src/app/. Keep file placement intentionally conservative.
 
 ---
 
-### 3.6 styles.less
+5. Integration / Dependencies
 
-**Purpose**: Global style entry point.
-
-**Rules**
-- MUST import global theme and style definitions
-- MUST NOT contain component-specific styles
-- MUST NOT include business-related selectors
-
----
-
-## 4. Subdirectory Responsibilities
-
-### app/
-
-- Contains **all Angular application logic**
-- Feature behavior, state, and domain rules live here
-- Governed by `src/app/AGENTS.md`
+Integration rules:
+- Use Angular DI only (inject() over constructor injection where repository conventions require it).
+- Use @angular/fire adapters where Firebase interaction is needed, but only within repository adapters under src/app/.
+- No feature-to-feature imports; modules communicate via explicit public interfaces or events.
+- Frontend must never contain API keys or call external AI services directly (AI calls via functions-ai and OCR via functions-ai-document only).
 
 ---
 
-### assets/
+6. Best Practices / Guidelines
 
-- Static files only (images, fonts, icons)
-- No scripts, logic, or configuration
-- Must be safe for CDN delivery
-
----
-
-### environments/
-
-- Environment-specific configuration only
-- No secrets, no runtime logic
-- Governed by `src/environments/AGENTS.md`
+Guidelines (not all mandatory but recommended):
+- Prefer composition over inheritance for shared utilities and services.
+- Keep services stateless where possible; explicit state belongs to feature modules under src/app/.
+- Use bootstrapApplication() in main.ts and keep it minimal (no feature imports).
+- Respect TypeScript strict mode and linting rules defined in the repository.
+- Prefer batch writes for Firestore when applicable for cost control.
 
 ---
 
-### styles/
+7. Related Docs / References
 
-- Global styles, themes, variables
-- No component or feature logic
-- Governed by `src/styles/AGENTS.md`
-
----
-
-## 5. Global Rules for `src/`
-
-**Rules**
-1. All business logic MUST live under `src/app/`
-2. No feature logic is allowed at `src/` root
-3. Bootstrap files MUST remain minimal and declarative
-4. Global styles MUST NOT leak business intent
-5. Environment files MUST NOT contain logic
-6. TypeScript strict mode MUST be respected
-7. Angular project structure MUST remain conventional
+Helpful references for agents and humans:
+- src/app/AGENTS.md  # Application-level agent rules
+- src/environments/AGENTS.md  # Environment configuration rules
+- docs/architecture/  # Architectural guidance
+- docs/security/  # Security guidance and Firestore rules
 
 ---
 
-## 6. AI Agent Constraints
+8. Metadata
 
-### Forbidden Actions
-
-- Adding business logic outside `src/app/`
-- Importing feature code into `main.ts`
-- Modifying auto-generated files manually
-- Introducing runtime logic into `index.html`
-- Placing domain models in `typings.d.ts`
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
 
 ---
 
-### Required Behavior
-
-- Treat `src/` as infrastructure, not domain
-- Defer all feature decisions to `app/`
-- Preserve bootstrap simplicity
-- Respect subdirectory AGENTS.md boundaries
-
----
-
-## 7. Related Documentation
-
-- **Application Root**: `src/app/AGENTS.md`
-- **Environment Config**: `src/environments/AGENTS.md`
-- **Global Styles**: `src/styles/AGENTS.md`
-
----
-
-**Version**: 1.1.0  
-**Last Updated**: 2025-12-21  
-**Scope**: `src/` directory  
-**Audience**: GitHub Copilot Agent / AI Coding Agents
-
-
----
+Notes: This file replaces previous layouts and enforces a strict ordering of sections to make agent responsibilities and constraints explicit. Keep this file synchronized with other AGENTS.md files across the repo.
 
