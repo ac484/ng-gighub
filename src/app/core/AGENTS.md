@@ -1,3 +1,44 @@
+# Core Module Agent Guide
+
+## Title + Scope
+Scope: Core module under src/app/core providing application-wide services, repositories, guards, and infrastructure.
+
+## Purpose / Responsibility
+Explain core-layer responsibilities, ensuring shared infrastructure is consistent and feature-agnostic.
+
+## Hard Rules / Constraints
+- NO UI components.
+- NO feature-specific logic.
+- NO direct Firebase access outside repositories/adapters.
+- Follow three-layer architecture and inject() DI with Result pattern for async work.
+
+## Allowed / Expected Content
+- Singleton services, interceptors, guards, repositories, errors, and startup logic.
+- Cross-cutting concerns that serve the entire application.
+
+## Structure / Organization
+- models/, repositories/, stores/, services/, blueprint/, errors/, startup/, guards/, i18n/, index.ts as documented below.
+
+## Integration / Dependencies
+- Use @angular/fire via repositories; no Vertex AI calls from frontend.
+- No feature-to-feature imports; communicate via public interfaces/events.
+
+## Best Practices / Guidelines
+- Prefer composition, keep services stateless, use signals for stateful services, and avoid logging sensitive data.
+
+## Related Docs / References
+- ../routes/AGENTS.md
+- ../shared/AGENTS.md
+- ../../AGENTS.md (root)
+- docs/architecture/
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
 # Core Services Agent Guide
 
 Scope: Core module — application-wide singleton services, guards, interceptors and infrastructure for GigHub.

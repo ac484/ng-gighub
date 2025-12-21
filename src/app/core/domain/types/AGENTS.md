@@ -1,3 +1,43 @@
+# Core Domain Types Agent Guide
+
+## Title + Scope
+Scope: Shared domain types and utilities under src/app/core/domain/types.
+
+## Purpose / Responsibility
+Provide reusable type aliases, enums, and helpers supporting domain models without embedding business logic.
+
+## Hard Rules / Constraints
+- NO UI components.
+- NO feature-specific logic.
+- NO direct Firebase access; types should remain framework-agnostic.
+
+## Allowed / Expected Content
+- Domain type aliases, enums, utility types, and validation helpers.
+- Documentation and tests for these shared types.
+
+## Structure / Organization
+- Individual type files grouped by concern; barrel exports as needed.
+
+## Integration / Dependencies
+- Consumed by models, services, repositories, and stores; avoid circular dependencies.
+- Keep dependencies minimal and avoid runtime imports when possible.
+
+## Best Practices / Guidelines
+- Prefer strict typing, discriminated unions, and readonly structures.
+- Keep helpers pure and side-effect free.
+
+## Related Docs / References
+- ../models/AGENTS.md
+- ../../AGENTS.md (Core overview)
+- ../../services/AGENTS.md
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
 # Core Types Agent Guide
 
 The Core Types module defines all core TypeScript type definitions, interfaces, and enums used across the GigHub application.
@@ -110,7 +150,7 @@ src/app/core/types/
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-09  
 **Status**: Production Ready
 

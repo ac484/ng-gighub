@@ -1,5 +1,47 @@
 # Organization Module Agent Guide
 
+## Title + Scope
+Scope: Organization management features under src/app/routes/organization.
+
+## Purpose / Responsibility
+Describe responsibilities for organization CRUD, member management, and related routing without breaking multi-tenant boundaries.
+
+## Hard Rules / Constraints
+- NO UI components beyond organization module scope unless required.
+- NO feature-specific logic outside organization ownership/collaboration.
+- NO direct Firebase access outside repositories/adapters; use services for data.
+
+## Allowed / Expected Content
+- Routes, components, and services for organizations and members.
+- Permission checks and event publishing tied to organization actions.
+- Documentation/tests for organization flows.
+
+## Structure / Organization
+- routes.ts for organization routes
+- Components and subfolders for lists, detail, and members as documented below
+
+## Integration / Dependencies
+- Interact with @core services (organization, blueprint) through public APIs.
+- Use Angular DI with inject(); keep repository access encapsulated.
+
+## Best Practices / Guidelines
+- Enforce role/permission checks, use signals for UI state, and keep services stateless when possible.
+- Apply Result pattern and avoid duplication of models.
+
+## Related Docs / References
+- ../AGENTS.md (Routes)
+- ../../AGENTS.md (App)
+- ../../../core/AGENTS.md (Core services)
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
+# Organization Module Agent Guide
+
 The Organization module manages multi-tenant organization features in GigHub (Foundation Layer).
 
 ## Module Purpose
@@ -145,6 +187,6 @@ src/app/routes/organization/
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-09  
 **Status**: Active Development

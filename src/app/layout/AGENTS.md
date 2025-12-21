@@ -1,3 +1,47 @@
+# Layout Module Agent Guide
+
+## Title + Scope
+Scope: Layout-level UI structure under src/app/layout, covering Basic/Blank/Passport layouts and related cross-cutting UI coordination.
+
+## Purpose / Responsibility
+Define responsibilities for layout containers, shared UI structure, and integration points without embedding feature logic.
+
+## Hard Rules / Constraints
+- NO UI components beyond layout containers and shared chrome defined here.
+- NO feature-specific logic.
+- NO direct Firebase access outside adapters/repositories.
+- Enforce three-layer architecture and Result pattern for async flows.
+
+## Allowed / Expected Content
+- Layout services/guards/interceptors managing navigation chrome, theme, and responsive behavior.
+- Public interfaces and types for layout contracts.
+- Documentation/tests for layout behaviors.
+
+## Structure / Organization
+- services/, guards/, interceptors/, adapters/ (Firebase access only via adapters), docs/ as described below.
+- Layout components for Basic/Blank/Passport containers.
+
+## Integration / Dependencies
+- Angular DI with inject(); consume core/shared services via public APIs.
+- Do not couple directly to Firestore; use adapters.
+
+## Best Practices / Guidelines
+- Use signals for UI state (sidebar, breakpoints), composition over inheritance, and takeUntilDestroyed() for subscriptions.
+- Minimize surface area and keep services stateless when possible.
+
+## Related Docs / References
+- ../shared/AGENTS.md
+- ../core/AGENTS.md
+- ../routes/AGENTS.md
+- docs/architecture/
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
 # Layout Module Agent Guide — Scope
 
 Scope: 這個文件針對位於應用程式層（Layout 模組）的 Agent。你現在所在的層級：UI 佈局與跨切面佈局協調（非業務邏輯）。

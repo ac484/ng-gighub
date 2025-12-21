@@ -1,5 +1,51 @@
 # Passport Module Agent Guide
 
+## Title + Scope
+Scope: Authentication and user onboarding routes under src/app/routes/passport, covering login, registration, lock screen, and OAuth callback flows.
+
+## Purpose / Responsibility
+Ensure authentication experiences use Firebase Auth correctly, keep onboarding flows consistent, and align routing/guards with GigHub security expectations.
+
+## Hard Rules / Constraints
+- NO UI components unrelated to authentication or outside this module.
+- NO feature-specific logic outside auth/onboarding scope.
+- NO direct Firebase access outside adapters; use FirebaseAuth services and repositories for data.
+- Use inject() for DI and preserve standalone component patterns.
+
+## Allowed / Expected Content
+- Auth route definitions and guards for guest/authenticated flows.
+- Authentication helpers, services, and facades tied to login/register/reset/lock flows.
+- Tests and documentation supporting these auth experiences.
+
+## Structure / Organization
+- routes.ts for passport routes
+- login/, register/, register-result/, lock/, callback components as defined below
+- Keep module assets and docs under this directory.
+
+## Integration / Dependencies
+- Firebase Authentication via @angular/fire/auth.
+- Angular DI with inject(); guards may depend on shared auth services.
+- No feature-to-feature imports; interact through public auth interfaces only.
+
+## Best Practices / Guidelines
+- Use signals for loading/error state, reactive forms for credentials, and handle Firebase error codes gracefully.
+- Maintain clear navigation (return URLs) and keyboard accessibility.
+- Follow Result pattern and avoid storing secrets client-side.
+
+## Related Docs / References
+- ../AGENTS.md (Routes guidance)
+- ../../AGENTS.md (App module guidance)
+- ../../../core/AGENTS.md (Core services)
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
+# Passport Module Agent Guide
+
 The Passport module handles all authentication and user onboarding flows for GigHub using Firebase Authentication (@angular/fire/auth).
 
 ## Module Purpose
@@ -173,6 +219,6 @@ src/app/routes/passport/
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-09  
 **Status**: Production Ready

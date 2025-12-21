@@ -1,5 +1,47 @@
 # Shared Services Agent Guide
 
+## Title + Scope
+Scope: Shared business services under src/app/shared/services used across multiple features.
+
+## Purpose / Responsibility
+Guide creation and maintenance of reusable business services that encapsulate domain logic shared by multiple modules.
+
+## Hard Rules / Constraints
+- NO UI components.
+- NO feature-specific logic that belongs in a dedicated feature module.
+- NO direct Firebase access outside repositories/adapters.
+- Distinguish shared services from core infrastructure services.
+
+## Allowed / Expected Content
+- Reusable domain services, permission helpers, and validators used by multiple features.
+- Documentation/tests supporting these services.
+
+## Structure / Organization
+- Service files grouped by domain capability; barrel exports as needed.
+- Keep co-located types/interfaces within the service folder when appropriate.
+
+## Integration / Dependencies
+- Use Angular DI with inject(); rely on repositories for persistence.
+- Avoid cross-feature cycles; expose clear public interfaces.
+
+## Best Practices / Guidelines
+- Keep services stateless where possible, use signals judiciously, and follow Result pattern for async work.
+- Validate inputs and avoid logging sensitive data.
+
+## Related Docs / References
+- ../AGENTS.md (Shared module)
+- ../../core/services/AGENTS.md (Core vs Shared distinction)
+- ../../routes/AGENTS.md
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
+# Shared Services Agent Guide
+
 The Shared Services module contains reusable business logic services used across multiple feature modules in the GigHub application.
 
 ## ⚠️ Important: Shared Services vs Core Services
@@ -162,7 +204,7 @@ The Shared Services module contains reusable business logic services used across
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-09  
 **Status**: Production Ready
 

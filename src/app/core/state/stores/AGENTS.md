@@ -1,5 +1,45 @@
 # Core Stores Agent Guide
 
+## Title + Scope
+Scope: Signal-based stores under src/app/core/state/stores.
+
+## Purpose / Responsibility
+Describe shared state stores used across the application, ensuring stateful logic stays centralized and consistent.
+
+## Hard Rules / Constraints
+- NO UI components.
+- NO feature-specific logic outside shared state responsibilities.
+- NO direct Firebase access; stores consume services/repositories.
+
+## Allowed / Expected Content
+- Signal-based stores managing shared state and exposing readonly signals.
+- Store utilities, selectors, and supporting tests/docs.
+
+## Structure / Organization
+- Individual store files grouped by domain, plus index/barrel exports if needed.
+
+## Integration / Dependencies
+- Use inject() for dependencies; interact with services/repositories via public interfaces.
+- Avoid feature-to-feature coupling; stores should be reusable and stateless where possible aside from contained state.
+
+## Best Practices / Guidelines
+- Use private writable signals with public readonly exposures, computed selectors, and effects for side effects.
+- Apply Result pattern for async flows and keep teardown clean with takeUntilDestroyed() where observables are used.
+
+## Related Docs / References
+- ../../AGENTS.md (Core overview)
+- ../../services/AGENTS.md
+- ../../data-access/repositories/AGENTS.md
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
+# Core Stores Agent Guide
+
 The Core Stores directory contains centralized state management stores using Angular Signals.
 
 ## Module Purpose
@@ -285,6 +325,6 @@ export class TaskListComponent implements OnInit {
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-11  
 **Status**: Active

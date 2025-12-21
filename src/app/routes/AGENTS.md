@@ -1,3 +1,49 @@
+# Routes Module Agent Guide
+
+## Title + Scope
+Scope: Routing layer guidance for src/app/routes covering route definitions, guards, and cross-cutting navigation services.
+
+## Purpose / Responsibility
+Describe how to configure root/auth/exception routes, lazy-loaded feature modules, and shared guards while keeping routing consistent.
+
+## Hard Rules / Constraints
+- NO UI components.
+- NO feature-specific logic in routing layer.
+- NO direct Firebase access outside adapters/repositories.
+- Follow three-layer architecture, inject(), and Result pattern for async work.
+
+## Allowed / Expected Content
+- Route configuration files, lazy-load registrations, guards, and routing helpers.
+- Global interceptors or navigation services that remain cross-cutting.
+- Documentation and tests related to routing behavior.
+
+## Structure / Organization
+- routes.ts as primary router configuration
+- services/, guards/, interceptors/ folders for routing helpers
+- Feature subdirectories (e.g., blueprint) each with their own AGENTS
+
+## Integration / Dependencies
+- Angular DI only; guards/services may depend on core services via public interfaces.
+- No feature-to-feature imports; communicate via explicit interfaces or events.
+- No direct external AI calls from frontend.
+
+## Best Practices / Guidelines
+- Prefer composition over inheritance, keep services stateless, and order guards auth → permission → module enabled.
+- Use signals with standalone components where UI is present and cache permission checks to reduce Firestore usage.
+
+## Related Docs / References
+- ../AGENTS.md (App)
+- ./blueprint/AGENTS.md
+- ../../core/AGENTS.md
+- docs/architecture/
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
 # Routes 模組 Agent 指南
 
 Scope: 本文件位於 src/app/routes，針對 Routes（路由）模組的 Agent 使用者說明。此處定義 Agents 在路由層的職責與允許的內容範圍 —— 你現在位於路由層（Layer: Routes / Routing）。

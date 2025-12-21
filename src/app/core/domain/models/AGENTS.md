@@ -1,3 +1,44 @@
+# Core Domain Models Agent Guide
+
+## Title + Scope
+Scope: Domain model definitions under src/app/core/domain/models.
+
+## Purpose / Responsibility
+Ensure domain models are consistent, typed, and shared across features while avoiding business logic or UI concerns.
+
+## Hard Rules / Constraints
+- NO UI components.
+- NO feature-specific logic inside models.
+- NO direct Firebase access; models remain pure types/interfaces/classes.
+
+## Allowed / Expected Content
+- Domain model interfaces/types/classes used across modules.
+- Serialization helpers or mappers tied to these models.
+- Documentation/tests for model contracts.
+
+## Structure / Organization
+- Individual model files grouped by domain concept; barrel exports where appropriate.
+
+## Integration / Dependencies
+- Used by services, repositories, and stores; avoid circular deps and feature-specific imports.
+- Keep models framework-agnostic.
+
+## Best Practices / Guidelines
+- Maintain strict typing, prefer readonly properties where possible, and include JSDoc for clarity.
+- Keep models minimal and reuse shared types.
+
+## Related Docs / References
+- ../types/AGENTS.md
+- ../../AGENTS.md (Core overview)
+- ../../services/AGENTS.md
+
+## Metadata
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
 # Core Models Agent Guide
 
 The Core Models directory contains all data model definitions used across the GigHub application.
@@ -138,6 +179,6 @@ import { Blueprint } from './blueprint.model';
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-11  
 **Status**: Active
