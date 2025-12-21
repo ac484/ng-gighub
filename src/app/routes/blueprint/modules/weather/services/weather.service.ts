@@ -160,9 +160,11 @@ export class WeatherService {
       }
 
       // Transform to our format
-      const records = Array.isArray(response.records.record) ? response.records.record : [response.records.record];
+      const records: unknown[] = Array.isArray(response.records.record) 
+        ? response.records.record 
+        : [response.records.record];
 
-      const alerts = records.map(record => this.transformAlert(record));
+      const alerts = records.map((record: unknown) => this.transformAlert(record));
 
       // Cache the result
       if (useCache && alerts.length > 0) {
@@ -232,13 +234,14 @@ export class WeatherService {
   /**
    * Transform CWA alert record to our format
    */
-  private transformAlert(record: any): WeatherAlert {
+  private transformAlert(record: unknown): WeatherAlert {
+    const r = record as Record<string, any>;
     return {
-      type: record.datasetInfo?.datasetName || 'N/A',
-      title: record.hazardConditions?.hazards?.info?.phenomena || 'Weather Alert',
-      description: record.hazardConditions?.hazards?.info?.headline || 'N/A',
-      effectiveTime: new Date(record.hazardConditions?.hazards?.info?.effective || Date.now()),
-      severity: this.mapSeverity(record.hazardConditions?.hazards?.info?.severity)
+      type: r['datasetInfo']?.['datasetName'] || 'N/A',
+      title: r['hazardConditions']?.['hazards']?.['info']?.['phenomena'] || 'Weather Alert',
+      description: r['hazardConditions']?.['hazards']?.['info']?.['headline'] || 'N/A',
+      effectiveTime: new Date(r['hazardConditions']?.['hazards']?.['info']?.['effective'] || Date.now()),
+      severity: this.mapSeverity(r['hazardConditions']?.['hazards']?.['info']?.['severity'])
     };
   }
 

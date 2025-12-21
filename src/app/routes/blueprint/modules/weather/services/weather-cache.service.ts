@@ -23,14 +23,6 @@ interface CacheEntry<T> {
 }
 
 /**
- * Cache configuration
- */
-interface CacheConfig {
-  ttl: number; // Time-to-live in seconds
-  maxSize?: number; // Maximum cache size (optional)
-}
-
-/**
  * Default cache TTL values
  */
 const DEFAULT_TTL = {

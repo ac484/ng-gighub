@@ -69,7 +69,7 @@ export interface CwaObservationResponse {
 /**
  * Forecast request parameters
  */
-export interface ForecastParams {
+export interface ForecastParams extends Record<string, string | undefined> {
   locationName?: string;
   elementName?: string;
   sort?: string;
@@ -78,7 +78,7 @@ export interface ForecastParams {
 /**
  * Observation request parameters
  */
-export interface ObservationParams {
+export interface ObservationParams extends Record<string, string | undefined> {
   stationId?: string;
   stationName?: string;
   elementName?: string;
