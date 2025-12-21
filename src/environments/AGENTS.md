@@ -1,4 +1,72 @@
 ---
+Title + Scope
+
+Scope: Environment configuration guidance for the project.
+
+---
+
+Purpose / Responsibility
+
+Defines responsibilities and boundaries for files under src/environments/.
+
+---
+
+Hard Rules / Constraints
+
+Hard Rules:
+- NO UI components
+- NO feature-specific logic
+- NO direct Firebase access outside adapters
+
+---
+
+Allowed / Expected Content
+
+Allowed:
+- Build-time configuration
+- Environment flags
+- Provider selection
+
+---
+
+Structure / Organization
+
+Structure:
+- environment.ts
+- environment.prod.ts
+
+---
+
+Integration / Dependencies
+
+Integration:
+- Angular build replacements
+- No runtime secrets
+
+---
+
+Best Practices / Guidelines
+
+Guidelines:
+- Keep environments type-safe
+- Do not include secrets
+
+---
+
+Related Docs / References
+
+- ../AGENTS.md
+- ../app/AGENTS.md
+
+---
+
+Metadata
+
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
 
 # Environments – AGENTS.md
 
