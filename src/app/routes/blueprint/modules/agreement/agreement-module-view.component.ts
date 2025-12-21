@@ -170,7 +170,7 @@ interface ParsedDocument {
         } @else if (detailError()) {
           <nz-alert nzType="error" [nzMessage]="detailError()" nzShowIcon />
         } @else if (parsedDocument(); as parsed) {
-          <nz-descriptions nzColumn="2" nzBordered>
+          <nz-descriptions [nzColumn]="2" nzBordered>
             <nz-descriptions-item nzTitle="解析結果">{{ parsed.success ? '成功' : '失敗' }}</nz-descriptions-item>
             <nz-descriptions-item nzTitle="頁數">
               {{ parsed.result?.metadata?.pageCount ?? parsed.result?.pages?.length ?? 0 }}
