@@ -5,6 +5,7 @@
 
 import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
+
 import { ALL_COUNTIES } from '../../core/config/constants';
 
 @Component({
@@ -26,11 +27,13 @@ import { ALL_COUNTIES } from '../../core/config/constants';
       }
     </nz-select>
   `,
-  styles: [`
-    :host {
-      display: inline-block;
-    }
-  `]
+  styles: [
+    `
+      :host {
+        display: inline-block;
+      }
+    `
+  ]
 })
 export class LocationSelectorComponent {
   /** 當前選中的地點 */

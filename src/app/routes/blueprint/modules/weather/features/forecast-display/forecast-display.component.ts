@@ -5,6 +5,7 @@
 
 import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
+
 import type { WeatherForecast } from '../../core/models';
 import { formatTemperatureRange, formatRainProbability, formatDate } from '../../shared/utils/formatters';
 import { getWeatherIcon } from '../../shared/utils/icons';
@@ -38,62 +39,64 @@ import { getWeatherIcon } from '../../shared/utils/icons';
       }
     </div>
   `,
-  styles: [`
-    .forecast-container {
-      width: 100%;
-    }
-
-    .forecast-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 16px;
-    }
-
-    .forecast-item {
-      padding: 12px;
-      border: 1px solid #f0f0f0;
-      border-radius: 4px;
-      text-align: center;
-      transition: all 0.3s;
-
-      &:hover {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+  styles: [
+    `
+      .forecast-container {
+        width: 100%;
       }
-    }
 
-    .forecast-date {
-      font-size: 12px;
-      color: #8c8c8c;
-      margin-bottom: 8px;
-    }
+      .forecast-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 16px;
+      }
 
-    .forecast-icon {
-      font-size: 32px;
-      margin: 8px 0;
-    }
+      .forecast-item {
+        padding: 12px;
+        border: 1px solid #f0f0f0;
+        border-radius: 4px;
+        text-align: center;
+        transition: all 0.3s;
 
-    .forecast-desc {
-      font-size: 14px;
-      margin: 8px 0;
-      color: #595959;
-    }
+        &:hover {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+        }
+      }
 
-    .forecast-temp {
-      font-size: 16px;
-      font-weight: 500;
-      color: #262626;
-      margin: 8px 0;
-    }
+      .forecast-date {
+        font-size: 12px;
+        color: #8c8c8c;
+        margin-bottom: 8px;
+      }
 
-    .forecast-rain {
-      font-size: 12px;
-      color: #1890ff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-    }
-  `]
+      .forecast-icon {
+        font-size: 32px;
+        margin: 8px 0;
+      }
+
+      .forecast-desc {
+        font-size: 14px;
+        margin: 8px 0;
+        color: #595959;
+      }
+
+      .forecast-temp {
+        font-size: 16px;
+        font-weight: 500;
+        color: #262626;
+        margin: 8px 0;
+      }
+
+      .forecast-rain {
+        font-size: 12px;
+        color: #1890ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+      }
+    `
+  ]
 })
 export class ForecastDisplayComponent {
   /** 天氣預報資料 */

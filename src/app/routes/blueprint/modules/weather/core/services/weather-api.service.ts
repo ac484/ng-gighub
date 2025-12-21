@@ -3,8 +3,8 @@
  * 中央氣象署 API 服務
  */
 
-import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse, HttpContext } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 import { ALLOW_ANONYMOUS } from '@delon/auth';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, retry, timeout, tap } from 'rxjs/operators';
@@ -38,9 +38,7 @@ export class WeatherApiService {
     }
 
     // 呼叫 CWA API - Authorization 參數必須在 URL 中
-    const params = new HttpParams()
-      .set('Authorization', CWA_API_CONFIG.apiKey)
-      .set('locationName', locationName);
+    const params = new HttpParams().set('Authorization', CWA_API_CONFIG.apiKey).set('locationName', locationName);
 
     const url = `${CWA_API_CONFIG.baseUrl}/${CWA_API_CONFIG.datasets.cityForecast}`;
 
@@ -77,9 +75,7 @@ export class WeatherApiService {
     }
 
     // 呼叫 CWA API
-    const params = new HttpParams()
-      .set('Authorization', CWA_API_CONFIG.apiKey)
-      .set('limit', limit.toString());
+    const params = new HttpParams().set('Authorization', CWA_API_CONFIG.apiKey).set('limit', limit.toString());
 
     const url = `${CWA_API_CONFIG.baseUrl}/${CWA_API_CONFIG.datasets.earthquakeReport}`;
 

@@ -5,6 +5,7 @@
 
 import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
+
 import type { WeatherForecast } from '../../core/models';
 import { calculateConstructionSuitability } from '../../shared/utils/calculators';
 import { formatSuitabilityLevel, getSuitabilityColor } from '../../shared/utils/formatters';
@@ -37,7 +38,9 @@ import { getSuitabilityIcon } from '../../shared/utils/icons';
             </div>
             <div class="factor-item">
               <span class="factor-label">溫度:</span>
-              <span class="factor-value">{{ suit.factors.temperature.value.toFixed(1) }}°C ({{ suit.factors.temperature.description }})</span>
+              <span class="factor-value"
+                >{{ suit.factors.temperature.value.toFixed(1) }}°C ({{ suit.factors.temperature.description }})</span
+              >
             </div>
             @if (suit.factors.wind.value > 0) {
               <div class="factor-item">
@@ -82,66 +85,68 @@ import { getSuitabilityIcon } from '../../shared/utils/icons';
       <nz-empty nzNotFoundContent="無施工適宜度評估資料" />
     }
   `,
-  styles: [`
-    .suitability-content {
-      padding: 8px;
-    }
-
-    .score-display {
-      text-align: center;
-      padding: 24px 0;
-    }
-
-    .score-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-    }
-
-    .score-value {
-      font-size: 48px;
-      font-weight: bold;
-      line-height: 1;
-      margin-bottom: 8px;
-    }
-
-    .score-label {
-      font-size: 16px;
-      color: #8c8c8c;
-    }
-
-    .factors-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .factor-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 12px;
-      background: #fafafa;
-      border-radius: 4px;
-    }
-
-    .factor-label {
-      font-weight: 500;
-      color: #595959;
-    }
-
-    .factor-value {
-      color: #262626;
-    }
-
-    .suggestion-list {
-      margin: 0;
-      padding-left: 20px;
-
-      li {
-        margin: 4px 0;
+  styles: [
+    `
+      .suitability-content {
+        padding: 8px;
       }
-    }
-  `]
+
+      .score-display {
+        text-align: center;
+        padding: 24px 0;
+      }
+
+      .score-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+      }
+
+      .score-value {
+        font-size: 48px;
+        font-weight: bold;
+        line-height: 1;
+        margin-bottom: 8px;
+      }
+
+      .score-label {
+        font-size: 16px;
+        color: #8c8c8c;
+      }
+
+      .factors-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .factor-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: #fafafa;
+        border-radius: 4px;
+      }
+
+      .factor-label {
+        font-weight: 500;
+        color: #595959;
+      }
+
+      .factor-value {
+        color: #262626;
+      }
+
+      .suggestion-list {
+        margin: 0;
+        padding-left: 20px;
+
+        li {
+          margin: 4px 0;
+        }
+      }
+    `
+  ]
 })
 export class SuitabilityCardComponent {
   /** 天氣預報資料 */
