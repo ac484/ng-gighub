@@ -13,11 +13,14 @@ export class AgreementService {
   private readonly firebase = inject(FirebaseService);
   private readonly functions = inject(Functions);
 
-  // ✅ Create callable during injection context
+  // ✅ Create callable during injection context with reasonable timeout
+  // Document AI typically processes PDFs in 10-60 seconds for normal documents
+  // Set timeout to 120 seconds (2 minutes) which is sufficient for most cases
+  // If timeout occurs, check backend logs for actual error (likely configuration issue)
   private readonly processDocumentFromStorage = httpsCallable<
     { gcsUri: string; mimeType: string },
     { success: boolean; result: { [key: string]: unknown } }
-  >(this.functions, 'processDocumentFromStorage');
+  >(this.functions, 'processDocumentFromStorage', { timeout: 120000 });
 
   private readonly _agreements = signal<Agreement[]>([]);
   private readonly _loading = signal(false);
@@ -62,32 +65,72 @@ export class AgreementService {
   }
 
   async parseAttachment(agreement: Agreement): Promise<void> {
+    console.log('[AgreementService] Starting parseAttachment', {
+      agreementId: agreement.id,
+      hasAttachmentUrl: !!agreement.attachmentUrl,
+      hasAttachmentPath: !!agreement.attachmentPath
+    });
+
     if (!agreement.attachmentUrl || !agreement.attachmentPath) {
-      throw new Error('缺少附件，無法解析');
+      const error = new Error('缺少附件，無法解析');
+      console.error('[AgreementService] Validation failed', error);
+      throw error;
     }
 
-    const storageRef = this.firebase.storageRef(agreement.attachmentPath);
-    const bucket: string | undefined = (storageRef as any).bucket;
-    const gcsUri = bucket ? `gs://${bucket}/${agreement.attachmentPath}` : null;
+    try {
+      // 構建 GCS URI
+      const storageRef = this.firebase.storageRef(agreement.attachmentPath);
+      const bucket: string | undefined = (storageRef as any).bucket;
+      const gcsUri = bucket ? `gs://${bucket}/${agreement.attachmentPath}` : null;
 
-    if (!gcsUri) {
-      throw new Error('無法取得檔案路徑');
+      console.log('[AgreementService] GCS URI constructed', { gcsUri, bucket });
+
+      if (!gcsUri) {
+        throw new Error('無法取得檔案路徑');
+      }
+
+      // 呼叫 Cloud Function
+      console.log('[AgreementService] Calling processDocumentFromStorage', { gcsUri });
+      const result = await this.processDocumentFromStorage({
+        gcsUri,
+        mimeType: 'application/pdf'
+      });
+
+      console.log('[AgreementService] Document AI processing completed', {
+        success: result.data.success,
+        hasResult: !!result.data.result
+      });
+
+      // 儲存解析結果
+      const jsonString = JSON.stringify(result.data, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const parsedPath = `agreements/${agreement.id}/parsed.json`;
+
+      console.log('[AgreementService] Uploading parsed result', { parsedPath });
+      const parsedRef = this.firebase.storageRef(parsedPath);
+      await uploadBytes(parsedRef, blob);
+
+      const parsedUrl = await getDownloadURL(parsedRef);
+      console.log('[AgreementService] Parsed JSON uploaded', { parsedUrl });
+
+      await this.repository.saveParsedJsonUrl(agreement.id, parsedUrl);
+      console.log('[AgreementService] Repository updated');
+
+      // 更新本地狀態
+      this._agreements.update(items =>
+        items.map(item => (item.id === agreement.id ? { ...item, parsedJsonUrl: parsedUrl } : item))
+      );
+
+      console.log('[AgreementService] Parse completed successfully');
+    } catch (error) {
+      console.error('[AgreementService] Parse failed', {
+        error,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: (error as any)?.code,
+        errorDetails: (error as any)?.details
+      });
+      throw error; // 重新拋出以便 UI 層處理
     }
-
-    // ✅ Use pre-created callable (already in injection context)
-    const result = await this.processDocumentFromStorage({ gcsUri, mimeType: 'application/pdf' });
-    
-    const jsonString = JSON.stringify(result.data, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const parsedPath = `agreements/${agreement.id}/parsed.json`;
-    const parsedRef = this.firebase.storageRef(parsedPath);
-    await uploadBytes(parsedRef, blob);
-    const parsedUrl = await getDownloadURL(parsedRef);
-    await this.repository.saveParsedJsonUrl(agreement.id, parsedUrl);
-
-    this._agreements.update(items =>
-      items.map(item => (item.id === agreement.id ? { ...item, parsedJsonUrl: parsedUrl } : item))
-    );
   }
 
   async updateTitle(agreementId: string, title: string): Promise<void> {
