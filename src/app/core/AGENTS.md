@@ -1,36 +1,95 @@
 # Core Services Agent Guide
 
+Scope: Core module — application-wide singleton services, guards, interceptors and infrastructure for GigHub.
+
+1. Purpose / Responsibility
+
 The Core module contains essential services, guards, interceptors, and infrastructure that support the entire GigHub application.
 
-## Module Purpose
+Responsibilities:
+- Provide application-scoped singleton services used across the app
+- Provide HTTP interceptors for request/response handling
+- Provide route guards for navigation control
+- Provide error-handling infrastructure
+- Provide Repository pattern based data access (repositories are the only layer allowed to access Firestore)
+- Provide application startup logic
 
-**規則**:
-- Core 服務提供應用程式範圍內使用的單例服務
-- 提供 HTTP 攔截器處理請求/回應
-- 提供路由守衛進行導航控制
-- 提供錯誤處理基礎設施
-- 提供 Repository 模式進行資料存取
-- 提供應用程式啟動邏輯
+3. Hard Rules / Constraints
 
-## Module Structure
+Hard Rules:
+- NO UI components
+- NO feature-specific logic
+- NO direct Firebase access outside adapters (repositories/adapters only)
 
-**規則**:
+Additional core constraints from project guidelines:
+- Use Three-Layer Architecture: UI → Service → Repository
+- Repositories are the only layer allowed to access Firestore
+- Never create a FirebaseService wrapper
+- Inject dependencies via inject(), never constructor injection
+- Use Result Pattern for all async error handling
+- Do not introduce REST APIs, HTTP servers, or non-Firebase backends
+- Implement the minimum code necessary to satisfy requirements
+- Do not introduce abstractions unless they provide clear, current value
+
+4. Allowed / Expected Content
+
+Allowed:
+- Singleton services (providedIn: 'root')
+- Global interceptors
+- Cross-cutting concerns (logging, permissions, validation, startup)
+- Repository implementations and domain error classes
+- Guards and startup registration (APP_INITIALIZER)
+
+Not allowed here: feature components, feature-specific services that belong to feature modules.
+
+5. Structure / Organization
+
+Recommended folder layout (existing content relocated here):
 - `src/app/core/models/` - 核心資料模型（audit-log.model、blueprint.model、blueprint-config.model、blueprint-module.model）
 - `src/app/core/repositories/` - 統一資料存取層（account、audit-log、organization、organization-member、team、team-member、log、task、storage）
 - `src/app/core/stores/` - 集中狀態管理（log.store、task.store）
-- `src/app/core/services/` - 全域單例服務（firebase-auth、logger、supabase）
-- `src/app/core/blueprint/` - Blueprint 核心系統
-  - `blueprint/repositories/` - Blueprint 專屬 repositories（blueprint、blueprint-member、blueprint-module、audit-log）
-  - `blueprint/services/` - Blueprint 服務層（blueprint.service、validation.service、dependency-validator.service）
-  - `blueprint/modules/implementations/` - Blueprint 模組實作（logs、tasks）
-  - `blueprint/container/` - Blueprint 容器（lifecycle-manager、module-registry、resource-provider）
-  - `blueprint/events/` - 事件系統（event-bus）
-  - `blueprint/config/` - 配置管理
-  - `blueprint/context/` - 執行上下文
+- `src/app/core/services/` - 全域單例服務（firebase-auth、logger、supabase、validation、permission）
+- `src/app/core/blueprint/` - Blueprint 核心系統（repositories、services、modules、container、events、config、context）
 - `src/app/core/errors/` - 自訂錯誤類別（blueprint-error、permission-denied-error、validation-error、module-not-found-error）
 - `src/app/core/startup/` - 應用程式初始化（startup.service.ts）
 - `src/app/core/i18n/` - 國際化（i18n.service.ts）
+- `src/app/core/guards/` - Route guards (auth.guard.ts, permission.guard.ts, module-enabled.guard.ts)
 - `src/app/core/index.ts` - 公開 API 匯出
+
+6. Integration / Dependencies
+
+Integration rules:
+- Angular DI only; use inject() for dependencies
+- Use @angular/fire adapters for Firebase interactions in repositories
+- Frontend must never call Vertex AI directly — AI calls only via functions-ai and OCR via functions-ai-document
+- No feature-to-feature imports; modules communicate via public interfaces or events
+- No API keys or secrets in frontend code
+
+7. Best Practices / Guidelines
+
+Guidelines:
+- Prefer composition over inheritance where possible
+- Keep services single-responsibility and stateless when feasible
+- Use Signal-based state services with private writable signals and public readonly signals
+- Use Result Pattern for async error handling and convert Firestore errors to domain errors in repositories
+- Use batch writes for cost control when applicable
+- Avoid logging sensitive data; use different log levels for dev/prod
+
+8. Related Docs / References
+
+Related documentation and places to check:
+- Root AGENTS.md for project overview
+- Blueprint Module AGENTS.md for blueprint-specific info
+- Shared Components AGENTS.md for reusable components
+- docs/architecture/ and docs/functions/ for backend and functions design
+
+9. Metadata
+
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
 
 ## Key Services
 
@@ -273,6 +332,6 @@ The Core module contains essential services, guards, interceptors, and infrastru
 
 ---
 
-**Module Version**: 1.0.0  
+**Module Version**: 1.1.0  
 **Last Updated**: 2025-12-09  
-**Status**: Production Ready
+**Status**: Active
