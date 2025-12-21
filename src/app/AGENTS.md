@@ -1,3 +1,75 @@
+---
+Title + Scope
+
+Scope: App module documentation and agent guidance.
+
+---
+
+Purpose / Responsibility
+
+Defines responsibilities and boundaries for AI agents working in src/app/.
+
+---
+
+Hard Rules / Constraints
+
+Hard Rules:
+- NO UI components
+- NO feature-specific logic
+- NO direct Firebase access outside adapters
+
+---
+
+Allowed / Expected Content
+
+Allowed:
+- Singleton services
+- Global interceptors
+- Cross-cutting concerns
+
+---
+
+Structure / Organization
+
+Structure:
+- services/
+- guards/
+- interceptors/
+
+---
+
+Integration / Dependencies
+
+Integration:
+- Angular DI only
+- Uses @angular/fire adapters
+- No feature-to-feature imports
+
+---
+
+Best Practices / Guidelines
+
+Guidelines:
+- Prefer composition over inheritance
+- Keep services stateless where possible
+
+---
+
+Related Docs / References
+
+- ../AGENTS.md
+- ../core/AGENTS.md
+
+---
+
+Metadata
+
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
 # App Module Agent Guide
 
 The App module is the **entry point** of the GigHub application, responsible for bootstrapping and configuring the entire Angular application.

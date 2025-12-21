@@ -1,4 +1,72 @@
 ---
+Title + Scope
+
+Scope: Global styles and theming guidance for the application.
+
+---
+
+Purpose / Responsibility
+
+Defines responsibilities for managing global styles and themes.
+
+---
+
+Hard Rules / Constraints
+
+Hard Rules:
+- NO UI components
+- NO feature-specific logic
+- NO direct Firebase access outside adapters
+
+---
+
+Allowed / Expected Content
+
+Allowed:
+- Global style variables
+- Theming tokens
+- Utility style sheets
+
+---
+
+Structure / Organization
+
+Structure:
+- themes/
+- variables/
+- mixins/
+
+---
+
+Integration / Dependencies
+
+Integration:
+- Angular build tooling
+- No runtime dependencies
+
+---
+
+Best Practices / Guidelines
+
+Guidelines:
+- Keep styles global and generic
+- Avoid business-specific selectors
+
+---
+
+Related Docs / References
+
+- ../AGENTS.md
+
+---
+
+Metadata
+
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
 
 # Styles – AGENTS.md
 
