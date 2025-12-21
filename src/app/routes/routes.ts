@@ -47,11 +47,21 @@ export const routes: Routes = [
         loadChildren: () => import('./blueprint/routes').then(m => m.routes),
         data: { title: '組織藍圖' }
       },
-      // Monitoring module - lazy loaded
+      // Admin module - System administration center
       {
-        path: 'monitoring',
-        loadChildren: () => import('./monitoring/routes').then(m => m.routes),
-        data: { title: '系統監控' }
+        path: 'admin',
+        children: [
+          {
+            path: '',
+            redirectTo: 'monitoring',
+            pathMatch: 'full'
+          },
+          {
+            path: 'monitoring',
+            loadChildren: () => import('./monitoring/routes').then(m => m.routes),
+            data: { title: '系統監控' }
+          }
+        ]
       },
       // Explore search module - lazy loaded
       {
@@ -64,6 +74,12 @@ export const routes: Routes = [
         path: 'ai-assistant',
         loadComponent: () => import('./ai-assistant/ai-assistant.component').then(m => m.AIAssistantComponent),
         data: { title: 'AI 助理' }
+      },
+      // Backward compatibility redirects
+      {
+        path: 'monitoring',
+        redirectTo: 'admin/monitoring',
+        pathMatch: 'full'
       }
     ]
   },
