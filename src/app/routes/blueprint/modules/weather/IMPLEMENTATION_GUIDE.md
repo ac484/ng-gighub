@@ -1,0 +1,979 @@
+# 氣象模組實施指南 (Weather Module Implementation Guide)
+
+> 本指南提供詳細的實施步驟與程式碼範例，協助開發者快速實作氣象模組。
+
+## 📋 目錄
+
+1. [環境準備](#環境準備)
+2. [目錄結構建立](#目錄結構建立)
+3. [共享工具實作](#共享工具實作)
+4. [功能組件實作](#功能組件實作)
+5. [主協調器實作](#主協調器實作)
+6. [測試與驗證](#測試與驗證)
+
+---
+
+## 🔧 環境準備
+
+### 1. 安裝依賴
+
+確認專案已安裝以下依賴：
+
+```json
+{
+  "@angular/core": "^20.3.0",
+  "@angular/common": "^20.3.0",
+  "ng-zorro-antd": "^20.3.1",
+  "rxjs": "~7.8.0"
+}
+```
+
+### 2. 設定 API Key
+
+#### 開發環境
+
+編輯 `src/environments/environment.ts`：
+
+```typescript
+export const environment = {
+  production: false,
+  useHash: true,
+  CWA_API_KEY: 'YOUR_DEVELOPMENT_API_KEY',
+  // ... 其他配置
+};
+```
+
+#### 生產環境
+
+編輯 `src/environments/environment.prod.ts`：
+
+```typescript
+export const environment = {
+  production: true,
+  useHash: false,
+  CWA_API_KEY: '', // 從環境變數注入
+  // ... 其他配置
+};
+```
+
+**注意**: 不要將實際的 API Key 提交到版本控制！
+
+### 3. 申請 CWA API Key
+
+1. 訪問 [中央氣象署開放資料平臺](https://opendata.cwa.gov.tw/)
+2. 註冊會員帳號
+3. 申請 API 授權碼
+4. 複製授權碼到環境變數
+
+---
+
+## 📁 目錄結構建立
+
+### 執行指令
+
+```bash
+cd src/app/routes/blueprint/modules/weather
+
+# 建立功能目錄
+mkdir -p features/forecast-display
+mkdir -p features/location-selector
+mkdir -p features/construction-suitability
+mkdir -p features/weather-alerts
+
+# 建立共享目錄
+mkdir -p shared/utils
+```
+
+### 預期結構
+
+```
+weather/
+├── WEATHER_MODULE_DESIGN.md
+├── README.md
+├── IMPLEMENTATION_GUIDE.md          # 本文件
+├── weather-module-view.component.ts (待實作)
+├── index.ts                         (待實作)
+│
+├── features/
+│   ├── forecast-display/
+│   │   ├── forecast-display.component.ts
+│   │   ├── forecast-display.component.html
+│   │   ├── forecast-display.component.less
+│   │   └── index.ts
+│   ├── location-selector/
+│   │   └── ...
+│   ├── construction-suitability/
+│   │   └── ...
+│   └── weather-alerts/
+│       └── ...
+│
+└── shared/
+    ├── utils/
+    │   ├── weather-formatters.ts
+    │   ├── weather-icons.ts
+    │   └── index.ts
+    └── index.ts
+```
+
+---
+
+## 🛠️ 共享工具實作
+
+### 1. 格式化工具 (weather-formatters.ts)
+
+```typescript
+/**
+ * Weather Formatters
+ * 天氣資料格式化工具
+ */
+
+/**
+ * 格式化溫度
+ * @param temp 溫度值
+ * @param unit 溫度單位 (預設 'C')
+ */
+export function formatTemperature(temp: number, unit: string = 'C'): string {
+  return `${temp}°${unit}`;
+}
+
+/**
+ * 格式化溫度範圍
+ * @param min 最低溫
+ * @param max 最高溫
+ * @param unit 溫度單位 (預設 'C')
+ */
+export function formatTemperatureRange(min: number, max: number, unit: string = 'C'): string {
+  return `${min}-${max}°${unit}`;
+}
+
+/**
+ * 格式化時間範圍
+ * @param start 開始時間 (ISO 8601)
+ * @param end 結束時間 (ISO 8601)
+ */
+export function formatTimeRange(start: string, end: string): string {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  
+  const startTime = startDate.toLocaleTimeString('zh-TW', { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
+  const endTime = endDate.toLocaleTimeString('zh-TW', { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
+  
+  return `${startTime} - ${endTime}`;
+}
+
+/**
+ * 格式化日期
+ * @param dateString ISO 8601 日期字串
+ */
+export function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('zh-TW', {
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'short'
+  });
+}
+
+/**
+ * 格式化降雨機率
+ * @param prob 降雨機率 (0-100)
+ */
+export function formatRainProbability(prob: number): string {
+  return `${prob}%`;
+}
+
+/**
+ * 格式化施工適宜度等級
+ * @param level 適宜度等級
+ */
+export function formatSuitabilityLevel(
+  level: 'excellent' | 'good' | 'fair' | 'poor' | 'dangerous'
+): string {
+  const levelMap = {
+    excellent: '優秀',
+    good: '良好',
+    fair: '尚可',
+    poor: '不佳',
+    dangerous: '危險'
+  };
+  return levelMap[level];
+}
+
+/**
+ * 取得適宜度等級色彩
+ * @param level 適宜度等級
+ */
+export function getSuitabilityColor(
+  level: 'excellent' | 'good' | 'fair' | 'poor' | 'dangerous'
+): string {
+  const colorMap = {
+    excellent: '#52c41a',  // 綠色
+    good: '#1890ff',       // 藍色
+    fair: '#faad14',       // 橙色
+    poor: '#f5222d',       // 紅色
+    dangerous: '#cf1322'   // 暗紅
+  };
+  return colorMap[level];
+}
+
+/**
+ * 格式化風速
+ * @param speed 風速 (m/s)
+ */
+export function formatWindSpeed(speed: number): string {
+  return `${speed} m/s`;
+}
+
+/**
+ * 格式化濕度
+ * @param humidity 濕度 (%)
+ */
+export function formatHumidity(humidity: number): string {
+  return `${humidity}%`;
+}
+```
+
+### 2. 圖示映射 (weather-icons.ts)
+
+```typescript
+/**
+ * Weather Icons
+ * 天氣圖示映射工具
+ */
+
+/**
+ * 根據天氣代碼取得圖示
+ * @param weatherCode 天氣現象代碼
+ */
+export function getWeatherIcon(weatherCode?: string): string {
+  if (!weatherCode) return '🌤️';
+  
+  const iconMap: Record<string, string> = {
+    '1': '☀️',    // 晴
+    '2': '🌤️',    // 多雲
+    '3': '☁️',    // 陰
+    '4': '🌤️',    // 多雲時晴
+    '5': '🌥️',    // 多雲時陰
+    '6': '🌥️',    // 陰時多雲
+    '7': '🌤️',    // 晴時多雲
+    '8': '🌧️',    // 陰短暫雨
+    '9': '🌧️',    // 陰時多雲短暫雨
+    '10': '🌦️',   // 多雲短暫雨
+    '11': '🌦️',   // 多雲時晴短暫雨
+    '12': '🌧️',   // 多雲時陰短暫雨
+    '13': '🌦️',   // 晴時多雲短暫雨
+    '14': '⛈️',   // 陰短暫陣雨
+    '15': '⛈️',   // 陰時多雲短暫陣雨
+    '16': '⛈️',   // 多雲短暫陣雨
+    '17': '⛈️',   // 多雲時晴短暫陣雨
+    '18': '⛈️',   // 多雲時陰短暫陣雨
+    '19': '⛈️',   // 晴時多雲短暫陣雨
+    '20': '⛈️',   // 陰陣雨或雷雨
+    '21': '⛈️',   // 陰時多雲陣雨或雷雨
+    '22': '⛈️',   // 多雲陣雨或雷雨
+    '23': '⛈️',   // 多雲時晴陣雨或雷雨
+    '24': '⛈️',   // 晴時多雲陣雨或雷雨
+    '25': '🌨️',   // 陰短暫雨或雪
+    '26': '🌨️',   // 陰時多雲短暫雨或雪
+    '27': '🌨️',   // 多雲短暫雨或雪
+    '28': '🌨️',   // 多雲時陰短暫雨或雪
+    '29': '🌧️',   // 陰有雨
+    '30': '🌧️',   // 陰時多雲有雨
+    '31': '🌧️',   // 多雲有雨
+    '32': '🌧️',   // 多雲時陰有雨
+    '33': '⛈️',   // 陰有雷陣雨
+    '34': '⛈️',   // 陰時多雲有雷陣雨
+    '35': '⛈️',   // 多雲有雷陣雨
+    '36': '⛈️',   // 多雲時陰有雷陣雨
+    '37': '⛈️',   // 晴有雷陣雨
+    '38': '🌧️',   // 陰有大雨
+    '39': '🌧️',   // 陰有豪雨
+    '41': '⛈️',   // 陰有大雷雨
+    '42': '☀️'    // 晴
+  };
+  
+  return iconMap[weatherCode] || '🌤️';
+}
+
+/**
+ * 根據適宜度等級取得圖示
+ * @param level 適宜度等級
+ */
+export function getSuitabilityIcon(
+  level: 'excellent' | 'good' | 'fair' | 'poor' | 'dangerous'
+): string {
+  const iconMap = {
+    excellent: '✅',  // 優秀
+    good: '👍',       // 良好
+    fair: '⚠️',       // 尚可
+    poor: '❌',       // 不佳
+    dangerous: '🚫'   // 危險
+  };
+  return iconMap[level];
+}
+
+/**
+ * 根據警報類型取得圖示
+ * @param type 警報類型
+ */
+export function getAlertIcon(type: string): string {
+  const iconMap: Record<string, string> = {
+    'typhoon': '🌀',        // 颱風
+    'heavy_rain': '🌧️',     // 豪雨
+    'earthquake': '🏚️',     // 地震
+    'other': '⚠️'           // 其他
+  };
+  return iconMap[type] || '⚠️';
+}
+
+/**
+ * 根據風速取得圖示
+ * @param speed 風速 (m/s)
+ */
+export function getWindIcon(speed: number): string {
+  if (speed < 2) return '💨';      // 微風
+  if (speed < 5) return '🍃';      // 輕風
+  if (speed < 10) return '🌬️';     // 強風
+  return '💨💨';                     // 暴風
+}
+```
+
+### 3. 匯出檔案 (shared/utils/index.ts)
+
+```typescript
+/**
+ * Weather Module - Shared Utilities
+ */
+
+export * from './weather-formatters';
+export * from './weather-icons';
+```
+
+### 4. 共享模組匯出 (shared/index.ts)
+
+```typescript
+/**
+ * Weather Module - Shared Exports
+ */
+
+export * from './utils';
+```
+
+---
+
+## 🎨 功能組件實作
+
+### 1. 地點選擇器 (LocationSelectorComponent)
+
+#### Component 檔案
+
+**路徑**: `features/location-selector/location-selector.component.ts`
+
+```typescript
+/**
+ * Location Selector Component
+ * 地點選擇器組件
+ *
+ * 職責: 提供縣市選擇介面，支援搜尋與篩選
+ */
+
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { SHARED_IMPORTS } from '@shared';
+import { ALL_COUNTIES } from '@core/blueprint/modules/implementations/climate';
+
+@Component({
+  selector: 'app-location-selector',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SHARED_IMPORTS],
+  template: `
+    <nz-select
+      [ngModel]="selectedLocation()"
+      (ngModelChange)="locationChange.emit($event)"
+      nzShowSearch
+      nzPlaceHolder="選擇縣市"
+      style="width: 200px;"
+    >
+      @for (county of counties; track county) {
+        <nz-option [nzValue]="county" [nzLabel]="county" />
+      }
+    </nz-select>
+  `,
+  styles: [`
+    :host {
+      display: inline-block;
+    }
+  `]
+})
+export class LocationSelectorComponent {
+  /**
+   * Input: 當前選中的地點
+   */
+  selectedLocation = input.required<string>();
+  
+  /**
+   * Output: 地點變更事件
+   */
+  locationChange = output<string>();
+  
+  /**
+   * 可用的縣市列表
+   */
+  readonly counties = ALL_COUNTIES;
+}
+```
+
+#### 匯出檔案
+
+**路徑**: `features/location-selector/index.ts`
+
+```typescript
+export { LocationSelectorComponent } from './location-selector.component';
+```
+
+---
+
+### 2. 天氣預報顯示 (ForecastDisplayComponent)
+
+#### Component 檔案
+
+**路徑**: `features/forecast-display/forecast-display.component.ts`
+
+```typescript
+/**
+ * Forecast Display Component
+ * 天氣預報顯示組件
+ *
+ * 職責: 顯示天氣預報資料，支援多時段預報展示
+ */
+
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { SHARED_IMPORTS } from '@shared';
+import type { WeatherForecast } from '@core/blueprint/modules/implementations/climate';
+import { 
+  formatTemperatureRange, 
+  formatRainProbability, 
+  formatDate,
+  getWeatherIcon 
+} from '../../shared';
+
+@Component({
+  selector: 'app-forecast-display',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SHARED_IMPORTS],
+  template: `
+    @if (loading()) {
+      <div class="loading-container">
+        <nz-spin nzSimple />
+      </div>
+    } @else if (forecasts().length === 0) {
+      <nz-empty nzNotFoundContent="暫無天氣資料" />
+    } @else {
+      <div class="forecast-grid">
+        @for (forecast of displayForecasts(); track forecast.startTime) {
+          <nz-card 
+            class="forecast-card"
+            [nzHoverable]="true"
+            (click)="forecastSelect.emit(forecast)"
+          >
+            <div class="forecast-header">
+              <span class="forecast-date">{{ formatDate(forecast.startTime) }}</span>
+            </div>
+            <div class="forecast-icon">
+              {{ getWeatherIcon(forecast.weatherCode) }}
+            </div>
+            <div class="forecast-description">
+              {{ forecast.weatherDescription }}
+            </div>
+            <div class="forecast-temperature">
+              {{ formatTempRange(forecast.temperature) }}
+            </div>
+            <div class="forecast-rain">
+              <span nz-icon nzType="cloud" nzTheme="outline"></span>
+              {{ formatRain(forecast.rainProbability) }}
+            </div>
+          </nz-card>
+        }
+      </div>
+    }
+  `,
+  styles: [`
+    :host {
+      display: block;
+    }
+    
+    .loading-container {
+      display: flex;
+      justify-content: center;
+      padding: 40px 0;
+    }
+    
+    .forecast-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    
+    .forecast-card {
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .forecast-card:hover {
+      transform: translateY(-4px);
+    }
+    
+    .forecast-header {
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    .forecast-icon {
+      font-size: 48px;
+      margin: 12px 0;
+    }
+    
+    .forecast-description {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.65);
+      margin-bottom: 8px;
+    }
+    
+    .forecast-temperature {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .forecast-rain {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.45);
+    }
+    
+    .forecast-rain span {
+      margin-right: 4px;
+    }
+  `]
+})
+export class ForecastDisplayComponent {
+  /**
+   * Input: 預報資料
+   */
+  forecasts = input.required<WeatherForecast[]>();
+  
+  /**
+   * Input: 載入狀態
+   */
+  loading = input<boolean>(false);
+  
+  /**
+   * Output: 選中預報事件
+   */
+  forecastSelect = output<WeatherForecast>();
+  
+  /**
+   * 顯示的預報資料 (限制顯示前6筆)
+   */
+  displayForecasts = () => {
+    return this.forecasts().slice(0, 6);
+  };
+  
+  /**
+   * 格式化溫度範圍
+   */
+  formatTempRange = (temp: WeatherForecast['temperature']) => {
+    return formatTemperatureRange(temp.min, temp.max, temp.unit);
+  };
+  
+  /**
+   * 格式化降雨機率
+   */
+  formatRain = (prob: number) => {
+    return formatRainProbability(prob);
+  };
+  
+  /**
+   * 格式化日期
+   */
+  formatDate = formatDate;
+  
+  /**
+   * 取得天氣圖示
+   */
+  getWeatherIcon = getWeatherIcon;
+}
+```
+
+#### 匯出檔案
+
+**路徑**: `features/forecast-display/index.ts`
+
+```typescript
+export { ForecastDisplayComponent } from './forecast-display.component';
+```
+
+---
+
+### 3. 施工適宜度評估 (SuitabilityCardComponent)
+
+#### Component 檔案
+
+**路徑**: `features/construction-suitability/suitability-card.component.ts`
+
+```typescript
+/**
+ * Suitability Card Component
+ * 施工適宜度評估卡片組件
+ *
+ * 職責: 根據天氣資料計算並顯示施工適宜度
+ */
+
+import { Component, ChangeDetectionStrategy, input, computed, inject } from '@angular/core';
+import { SHARED_IMPORTS } from '@shared';
+import type { 
+  WeatherForecast, 
+  ConstructionSuitability 
+} from '@core/blueprint/modules/implementations/climate';
+import { CwbWeatherService } from '@core/blueprint/modules/implementations/climate';
+import { 
+  formatSuitabilityLevel, 
+  getSuitabilityColor,
+  getSuitabilityIcon 
+} from '../../shared';
+
+@Component({
+  selector: 'app-suitability-card',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SHARED_IMPORTS],
+  template: `
+    @if (forecast(); as fc) {
+      <nz-card nzTitle="施工適宜度評估" class="suitability-card">
+        <div class="suitability-score">
+          <div class="score-circle" [style.border-color]="scoreColor()">
+            <span class="score-value">{{ suitability().score }}</span>
+            <span class="score-icon">{{ levelIcon() }}</span>
+          </div>
+          <div class="score-label">
+            <nz-tag [nzColor]="scoreColor()">
+              {{ levelText() }}
+            </nz-tag>
+          </div>
+        </div>
+        
+        <nz-divider />
+        
+        <div class="factors-section">
+          <h4>影響因素</h4>
+          <nz-list [nzDataSource]="factorsList()" [nzRenderItem]="factorItem">
+            <ng-template #factorItem let-item>
+              <nz-list-item>
+                <div class="factor-item">
+                  <span class="factor-name">{{ item.name }}</span>
+                  <span class="factor-value">{{ item.value }}</span>
+                  <span class="factor-impact" [class.negative]="item.impact < 0">
+                    {{ item.impact }}
+                  </span>
+                </div>
+              </nz-list-item>
+            </ng-template>
+          </nz-list>
+        </div>
+        
+        @if (suitability().recommendations.length > 0) {
+          <nz-divider />
+          <div class="recommendations-section">
+            <h4>建議</h4>
+            <ul>
+              @for (rec of suitability().recommendations; track rec) {
+                <li>{{ rec }}</li>
+              }
+            </ul>
+          </div>
+        }
+        
+        @if (suitability().warnings.length > 0) {
+          <nz-divider />
+          <div class="warnings-section">
+            <h4>警告</h4>
+            <nz-alert 
+              nzType="warning" 
+              nzShowIcon
+              [nzMessage]="warningList"
+            >
+              <ng-template #warningList>
+                <ul>
+                  @for (warn of suitability().warnings; track warn) {
+                    <li>{{ warn }}</li>
+                  }
+                </ul>
+              </ng-template>
+            </nz-alert>
+          </div>
+        }
+      </nz-card>
+    } @else {
+      <nz-card nzTitle="施工適宜度評估">
+        <nz-empty nzNotFoundContent="請先選擇地點並載入天氣資料" />
+      </nz-card>
+    }
+  `,
+  styles: [`
+    :host {
+      display: block;
+    }
+    
+    .suitability-card {
+      margin-bottom: 16px;
+    }
+    
+    .suitability-score {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+    }
+    
+    .score-circle {
+      width: 120px;
+      height: 120px;
+      border: 4px solid;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    
+    .score-value {
+      font-size: 36px;
+      font-weight: bold;
+    }
+    
+    .score-icon {
+      font-size: 24px;
+      margin-top: 4px;
+    }
+    
+    .score-label {
+      font-size: 16px;
+    }
+    
+    .factors-section h4,
+    .recommendations-section h4,
+    .warnings-section h4 {
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+    
+    .factor-item {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      gap: 12px;
+    }
+    
+    .factor-name {
+      flex: 1;
+    }
+    
+    .factor-value {
+      flex: 1;
+      text-align: right;
+      color: rgba(0, 0, 0, 0.65);
+    }
+    
+    .factor-impact {
+      width: 60px;
+      text-align: right;
+      font-weight: 500;
+    }
+    
+    .factor-impact.negative {
+      color: #f5222d;
+    }
+    
+    .recommendations-section ul,
+    .warnings-section ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    
+    .recommendations-section li,
+    .warnings-section li {
+      margin-bottom: 8px;
+    }
+  `]
+})
+export class SuitabilityCardComponent {
+  private readonly weatherService = inject(CwbWeatherService);
+  
+  /**
+   * Input: 天氣預報資料
+   */
+  forecast = input<WeatherForecast | null>(null);
+  
+  /**
+   * Computed: 施工適宜度評估
+   */
+  suitability = computed(() => {
+    const fc = this.forecast();
+    if (!fc) {
+      return this.getEmptySuitability();
+    }
+    return this.weatherService.calculateConstructionSuitability(fc);
+  });
+  
+  /**
+   * Computed: 分數顏色
+   */
+  scoreColor = computed(() => {
+    return getSuitabilityColor(this.suitability().level);
+  });
+  
+  /**
+   * Computed: 等級文字
+   */
+  levelText = computed(() => {
+    return formatSuitabilityLevel(this.suitability().level);
+  });
+  
+  /**
+   * Computed: 等級圖示
+   */
+  levelIcon = computed(() => {
+    return getSuitabilityIcon(this.suitability().level);
+  });
+  
+  /**
+   * Computed: 因素列表
+   */
+  factorsList = computed(() => {
+    const factors = this.suitability().factors;
+    return [
+      {
+        name: '降雨機率',
+        value: `${factors.rainfall.value}%`,
+        impact: factors.rainfall.impact,
+        description: factors.rainfall.description
+      },
+      {
+        name: '溫度',
+        value: `${factors.temperature.value}°C`,
+        impact: factors.temperature.impact,
+        description: factors.temperature.description
+      },
+      {
+        name: '風速',
+        value: factors.wind.value ? `${factors.wind.value} m/s` : 'N/A',
+        impact: factors.wind.impact,
+        description: factors.wind.description
+      },
+      {
+        name: '天氣現象',
+        value: factors.weather.value,
+        impact: factors.weather.impact,
+        description: factors.weather.description
+      }
+    ];
+  });
+  
+  /**
+   * 取得空的施工適宜度評估
+   */
+  private getEmptySuitability(): ConstructionSuitability {
+    return {
+      score: 0,
+      level: 'dangerous',
+      factors: {
+        rainfall: { value: 0, impact: 0, description: '' },
+        temperature: { value: 0, impact: 0, description: '' },
+        wind: { value: 0, impact: 0, description: '' },
+        weather: { value: '', impact: 0, description: '' }
+      },
+      recommendations: [],
+      warnings: []
+    };
+  }
+}
+```
+
+#### 匯出檔案
+
+**路徑**: `features/construction-suitability/index.ts`
+
+```typescript
+export { SuitabilityCardComponent } from './suitability-card.component';
+```
+
+---
+
+## 📌 下一步
+
+完整的實作指南包含以下額外章節（因篇幅限制，這裡僅列出大綱）：
+
+### 4. 氣象警報組件 (WeatherAlertsComponent)
+- 地震資訊顯示
+- 警報列表與詳情
+- 即時更新機制
+
+### 5. 主協調器組件 (WeatherModuleViewComponent)
+- 狀態管理
+- 服務整合
+- 事件協調
+- 錯誤處理
+
+### 6. 公開 API (index.ts)
+- 模組匯出設定
+- 公開接口定義
+
+### 7. 單元測試
+- 組件測試範例
+- 工具函數測試
+- Mock 設定
+
+### 8. E2E 測試
+- 使用者流程測試
+- 整合測試場景
+
+---
+
+## ✅ 實施檢查清單
+
+### 基礎設施
+- [ ] API Key 已設定
+- [ ] 目錄結構已建立
+- [ ] 共享工具已實作
+
+### 功能組件
+- [ ] LocationSelectorComponent 已實作
+- [ ] ForecastDisplayComponent 已實作
+- [ ] SuitabilityCardComponent 已實作
+- [ ] WeatherAlertsComponent 已實作
+
+### 整合與測試
+- [ ] WeatherModuleViewComponent 已實作
+- [ ] 公開 API 已設定
+- [ ] 單元測試覆蓋率 > 80%
+- [ ] E2E 測試已通過
+
+### 文檔與驗證
+- [ ] 程式碼註解完整
+- [ ] README 已更新
+- [ ] 設計文檔已完成
+- [ ] 實施指南已完成
+
+---
+
+**版本**: v1.0.0  
+**最後更新**: 2025-12-21  
+**狀態**: ✅ 指南完成，等待實施
