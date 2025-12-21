@@ -26,6 +26,7 @@ import { DiaryModuleViewComponent } from './modules/diary';
 import { FinanceModuleViewComponent } from './modules/finance';
 import { IssuesModuleViewComponent } from './modules/issues';
 import { LogModuleViewComponent } from './modules/log-module-view.component';
+import { ModuleManagerComponent } from './modules/manager/module-manager.component';
 import { MembersModuleViewComponent } from './modules/members';
 import { QaModuleViewComponent } from './modules/qa';
 import { SafetyModuleViewComponent } from './modules/safety-module-view.component';
@@ -46,6 +47,7 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
  * - Integrated audit logs (審計記錄) in overview sidebar
  * - Cloud module (雲端模組) for storage and backup
  * - Container monitoring (容器監控) in separate dedicated tab
+ * - Module Manager (模組管理) for managing blueprint modules
  *
  * ✅ Modernized with AsyncState pattern
  * ✅ Updated: 2025-12-11 - Added Construction Log & Task modules
@@ -70,6 +72,7 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
     DatePipe,
     AuditLogsComponent,
     MembersModuleViewComponent,
+    ModuleManagerComponent,
     DiaryModuleViewComponent,
     ContainerDashboardComponent,
     TasksComponent,
@@ -291,6 +294,15 @@ import { WorkflowModuleViewComponent } from './modules/workflow-module-view.comp
             <ng-template nz-tab>
               @if (blueprint()?.id) {
                 <app-members-module-view [blueprintId]="blueprint()!.id" [blueprintOwnerType]="blueprint()!.ownerType" />
+              }
+            </ng-template>
+          </nz-tab>
+
+          <!-- Module Manager Tab -->
+          <nz-tab nzTitle="模組管理">
+            <ng-template nz-tab>
+              @if (blueprint()?.id) {
+                <app-module-manager [blueprintId]="blueprint()!.id" />
               }
             </ng-template>
           </nz-tab>

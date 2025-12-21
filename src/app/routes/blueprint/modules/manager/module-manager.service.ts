@@ -9,9 +9,17 @@
  */
 
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { AuditLogRepository, AuditEventType, AuditCategory } from '@core/blueprint/modules/implementations/audit-logs';
+import { 
+  AuditLogRepository, 
+  AuditEventType, 
+  AuditCategory, 
+  AuditSeverity, 
+  AuditStatus, 
+  ActorType 
+} from '@core/blueprint/modules/implementations/audit-logs';
 import { BlueprintModuleRepository } from '@core/blueprint/repositories/blueprint-module.repository';
-import { BlueprintModuleDocument, ModuleStatus, CreateModuleData, BatchResult } from '@core/models/blueprint-module.model';
+import { BlueprintModuleDocument, CreateModuleData, BatchModuleOperationResult } from '@core/domain/models/blueprint-module.model';
+import { ModuleStatus } from '@core/blueprint/modules/module-status.enum';
 import { FirebaseService } from '@core/services/firebase.service';
 import { firstValueFrom } from 'rxjs';
 
@@ -153,13 +161,18 @@ export class ModuleManagerService {
       this._modules.update(modules => [...modules, module]);
 
       // Log audit event
-      await this.auditRepo.create(blueprintId, {
+      await this.auditRepo.create({
+        blueprintId,
         eventType: AuditEventType.MODULE_REGISTERED,
         category: AuditCategory.MODULE,
-        actor: data.createdBy || 'system',
+        severity: AuditSeverity.INFO,
+        actorId: data.configuredBy || 'system',
+        actorType: ActorType.USER,
         resourceType: 'module',
         resourceId: module.id,
-        description: `Registered module: ${module.name}`,
+        action: 'register',
+        message: `Registered module: ${module.name}`,
+        status: AuditStatus.SUCCESS,
         metadata: {
           moduleName: module.name,
           moduleType: module.moduleType
@@ -199,13 +212,18 @@ export class ModuleManagerService {
       const module = this._modules().find(m => m.id === moduleId);
       if (module) {
         const currentUserId = this.firebaseService.getCurrentUserId() || 'system';
-        await this.auditRepo.create(blueprintId, {
+        await this.auditRepo.create({
+          blueprintId,
           eventType: AuditEventType.MODULE_ENABLED,
           category: AuditCategory.MODULE,
-          actor: currentUserId,
+          severity: AuditSeverity.INFO,
+          actorId: currentUserId,
+          actorType: ActorType.USER,
           resourceType: 'module',
           resourceId: moduleId,
-          description: `Enabled module: ${module.name}`
+          action: 'enable',
+          message: `Enabled module: ${module.name}`,
+          status: AuditStatus.SUCCESS
         });
       }
     } catch (err) {
@@ -240,13 +258,18 @@ export class ModuleManagerService {
       const module = this._modules().find(m => m.id === moduleId);
       if (module) {
         const currentUserId = this.firebaseService.getCurrentUserId() || 'system';
-        await this.auditRepo.create(blueprintId, {
+        await this.auditRepo.create({
+          blueprintId,
           eventType: AuditEventType.MODULE_DISABLED,
           category: AuditCategory.MODULE,
-          actor: currentUserId,
+          severity: AuditSeverity.INFO,
+          actorId: currentUserId,
+          actorType: ActorType.USER,
           resourceType: 'module',
           resourceId: moduleId,
-          description: `Disabled module: ${module.name}`
+          action: 'disable',
+          message: `Disabled module: ${module.name}`,
+          status: AuditStatus.SUCCESS
         });
       }
     } catch (err) {
@@ -310,13 +333,18 @@ export class ModuleManagerService {
       const module = this._modules().find(m => m.id === moduleId);
       if (module) {
         const currentUserId = this.firebaseService.getCurrentUserId() || 'system';
-        await this.auditRepo.create(blueprintId, {
+        await this.auditRepo.create({
+          blueprintId,
           eventType: AuditEventType.MODULE_CONFIGURED,
           category: AuditCategory.MODULE,
-          actor: currentUserId,
+          severity: AuditSeverity.INFO,
+          actorId: currentUserId,
+          actorType: ActorType.USER,
           resourceType: 'module',
           resourceId: moduleId,
-          description: `Updated configuration for module: ${module.name}`,
+          action: 'configure',
+          message: `Updated configuration for module: ${module.name}`,
+          status: AuditStatus.SUCCESS,
           metadata: { config }
         });
       }
@@ -350,13 +378,18 @@ export class ModuleManagerService {
 
       // Log audit event
       const currentUserId = this.firebaseService.getCurrentUserId() || 'system';
-      await this.auditRepo.create(blueprintId, {
+      await this.auditRepo.create({
+        blueprintId,
         eventType: AuditEventType.MODULE_UNREGISTERED,
         category: AuditCategory.MODULE,
-        actor: currentUserId,
+        severity: AuditSeverity.INFO,
+        actorId: currentUserId,
+        actorType: ActorType.USER,
         resourceType: 'module',
         resourceId: moduleId,
-        description: `Deleted module: ${moduleId}`
+        action: 'unregister',
+        message: `Deleted module: ${moduleId}`,
+        status: AuditStatus.SUCCESS
       });
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Failed to delete module';
@@ -375,7 +408,7 @@ export class ModuleManagerService {
    * @param enabled - Enable (true) or disable (false)
    * @returns Batch result
    */
-  async batchUpdateEnabled(moduleIds: string[], enabled: boolean): Promise<BatchResult> {
+  async batchUpdateEnabled(moduleIds: string[], enabled: boolean): Promise<BatchModuleOperationResult> {
     const blueprintId = this._currentBlueprintId();
     if (!blueprintId) {
       throw new Error('No blueprint loaded');
@@ -388,18 +421,23 @@ export class ModuleManagerService {
       const result = await this.moduleRepo.batchUpdateEnabled(blueprintId, moduleIds, enabled);
 
       // Update local state
-      this._modules.update(modules => modules.map(m => (result.successful.includes(m.id) ? { ...m, enabled } : m)));
+      this._modules.update(modules => modules.map(m => (result.success.includes(m.id!) ? { ...m, enabled } : m)));
 
       // Log audit event
       const currentUserId = this.firebaseService.getCurrentUserId() || 'system';
-      await this.auditRepo.create(blueprintId, {
+      await this.auditRepo.create({
+        blueprintId,
         eventType: enabled ? AuditEventType.MODULE_ENABLED : AuditEventType.MODULE_DISABLED,
         category: AuditCategory.MODULE,
-        actor: currentUserId,
+        severity: AuditSeverity.INFO,
+        actorId: currentUserId,
+        actorType: ActorType.USER,
         resourceType: 'module',
-        description: `Batch ${enabled ? 'enabled' : 'disabled'} ${result.successful.length} modules`,
+        action: enabled ? 'batch_enable' : 'batch_disable',
+        message: `Batch ${enabled ? 'enabled' : 'disabled'} ${result.success.length} modules`,
+        status: result.failed.length > 0 ? AuditStatus.PARTIAL : AuditStatus.SUCCESS,
         metadata: {
-          moduleIds: result.successful,
+          moduleIds: result.success,
           failed: result.failed
         }
       });
@@ -426,7 +464,7 @@ export class ModuleManagerService {
 
     if (options.search) {
       const search = options.search.toLowerCase();
-      filtered = filtered.filter(m => m.name.toLowerCase().includes(search) || m.description?.toLowerCase().includes(search));
+      filtered = filtered.filter(m => m.name.toLowerCase().includes(search) || m.moduleType.toLowerCase().includes(search));
     }
 
     if (options.status !== undefined) {
@@ -465,7 +503,7 @@ export class ModuleManagerService {
    * Select all modules
    */
   selectAll(): void {
-    const allIds = new Set(this._modules().map(m => m.id));
+    const allIds = new Set(this._modules().map(m => m.id).filter((id): id is string => id !== undefined));
     this._selectedModules.set(allIds);
   }
 

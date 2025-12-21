@@ -8,10 +8,11 @@
  * @date 2025-12-11
  */
 
-import { Component, OnInit, inject, signal, computed, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, input, effect } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BlueprintModuleDocument, ModuleStatus } from '@core/models/blueprint-module.model';
+import { BlueprintModuleDocument } from '@core/domain/models/blueprint-module.model';
+import { ModuleStatus } from '@core/blueprint/modules/module-status.enum';
 import { STColumn, STData } from '@delon/abc/st';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS } from '@shared';
@@ -26,9 +27,9 @@ import { ModuleManagerService } from './module-manager.service';
 @Component({
   selector: 'app-module-manager',
   standalone: true,
-  imports: [SHARED_IMPORTS, ModuleCardComponent, ModuleConfigFormComponent, ModuleDependencyGraphComponent, ModuleStatusBadgeComponent],
+  imports: [SHARED_IMPORTS, ModuleCardComponent],
   template: `
-    <page-header [title]="'模組管理'" [subtitle]="'Blueprint Modules'">
+    <page-header [title]="'模組管理'" >
       <ng-template #extra>
         <button nz-button nzType="primary" (click)="registerModule()">
           <span nz-icon nzType="plus" nzTheme="outline"></span>
@@ -135,17 +136,19 @@ import { ModuleManagerService } from './module-manager.service';
       } @else {
         <nz-row [nzGutter]="[16, 16]">
           @for (module of filteredModules(); track module.id) {
-            <nz-col [nzSpan]="8">
-              <app-module-card
-                [module]="module"
-                [selected]="isSelected(module.id)"
-                (selectionChange)="toggleSelection(module.id)"
-                (enableChange)="onEnableChange(module)"
-                (configClick)="openConfig(module)"
-                (deleteClick)="deleteModule(module)"
-              >
-              </app-module-card>
-            </nz-col>
+            @if (module.id) {
+              <nz-col [nzSpan]="8">
+                <app-module-card
+                  [module]="module"
+                  [selected]="isSelected(module.id)"
+                  (selectionChange)="toggleSelection(module.id)"
+                  (enableChange)="onEnableChange(module)"
+                  (configClick)="openConfig(module)"
+                  (deleteClick)="deleteModule(module)"
+                >
+                </app-module-card>
+              </nz-col>
+            }
           }
         </nz-row>
       }
@@ -211,11 +214,13 @@ export class ModuleManagerComponent implements OnInit {
   private message = inject(NzMessageService);
   private destroyRef = inject(DestroyRef);
 
+  // Inputs
+  blueprintId = input.required<string>();
+
   // Component state
   searchText = '';
   statusFilter: 'all' | 'enabled' | 'disabled' | 'failed' = 'all';
   viewMode: 'grid' | 'table' = 'grid';
-  blueprintId = signal<string>('');
   blueprintName = signal<string>('Blueprint');
 
   // Service state
@@ -234,7 +239,7 @@ export class ModuleManagerComponent implements OnInit {
     // Search filter
     if (this.searchText) {
       const search = this.searchText.toLowerCase();
-      filtered = filtered.filter(m => m.name.toLowerCase().includes(search) || m.description?.toLowerCase().includes(search));
+      filtered = filtered.filter(m => m.name.toLowerCase().includes(search) || m.moduleType.toLowerCase().includes(search));
     }
 
     // Status filter
@@ -348,14 +353,11 @@ export class ModuleManagerComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    // Get blueprint ID from route
-    this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
-      const id = params['id'];
-      if (id) {
-        this.blueprintId.set(id);
-        this.loadModules();
-      }
-    });
+    // Load modules when component initializes
+    // blueprintId is provided as input from parent component
+    if (this.blueprintId()) {
+      this.loadModules();
+    }
   }
 
   async loadModules(): Promise<void> {
@@ -419,7 +421,7 @@ export class ModuleManagerComponent implements OnInit {
 
     try {
       const result = await this.service.batchUpdateEnabled(ids, true);
-      this.message.success(`成功啟用 ${result.successful.length} 個模組`);
+      this.message.success(`成功啟用 ${result.success.length} 個模組`);
       if (result.failed.length > 0) {
         this.message.warning(`${result.failed.length} 個模組啟用失敗`);
       }
@@ -438,7 +440,7 @@ export class ModuleManagerComponent implements OnInit {
 
     try {
       const result = await this.service.batchUpdateEnabled(ids, false);
-      this.message.success(`成功停用 ${result.successful.length} 個模組`);
+      this.message.success(`成功停用 ${result.success.length} 個模組`);
       if (result.failed.length > 0) {
         this.message.warning(`${result.failed.length} 個模組停用失敗`);
       }
@@ -457,6 +459,7 @@ export class ModuleManagerComponent implements OnInit {
   }
 
   async enableModule(module: BlueprintModuleDocument): Promise<void> {
+    if (!module.id) return;
     try {
       await this.service.enableModule(module.id);
       this.message.success(`已啟用模組: ${module.name}`);
@@ -466,6 +469,7 @@ export class ModuleManagerComponent implements OnInit {
   }
 
   async disableModule(module: BlueprintModuleDocument): Promise<void> {
+    if (!module.id) return;
     try {
       await this.service.disableModule(module.id);
       this.message.success(`已停用模組: ${module.name}`);
@@ -485,6 +489,7 @@ export class ModuleManagerComponent implements OnInit {
   }
 
   async updateConfig(module: BlueprintModuleDocument, config: any): Promise<void> {
+    if (!module.id) return;
     try {
       await this.service.updateModuleConfig(module.id, config);
       this.message.success('配置已更新');
@@ -494,6 +499,7 @@ export class ModuleManagerComponent implements OnInit {
   }
 
   async deleteModule(module: BlueprintModuleDocument): Promise<void> {
+    if (!module.id) return;
     try {
       await this.service.deleteModule(module.id);
       this.message.success(`已刪除模組: ${module.name}`);

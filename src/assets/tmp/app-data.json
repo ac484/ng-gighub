@@ -93,6 +93,21 @@
             "link": "/ai-assistant"
           }
         ]
+      },
+      {
+        "text": "系統管理",
+        "i18n": "menu.admin",
+        "group": true,
+        "hideInBreadcrumb": true,
+        "children": [
+          {
+            "text": "系統監控",
+            "i18n": "menu.admin.monitoring",
+            "icon": "anticon-monitor",
+            "link": "/admin/monitoring",
+            "badge": 0
+          }
+        ]
       }
     ],
     "organization": [
@@ -160,6 +175,21 @@
             "link": "/ai-assistant"
           }
         ]
+      },
+      {
+        "text": "系統管理",
+        "i18n": "menu.admin",
+        "group": true,
+        "hideInBreadcrumb": true,
+        "children": [
+          {
+            "text": "系統監控",
+            "i18n": "menu.admin.monitoring",
+            "icon": "anticon-monitor",
+            "link": "/admin/monitoring",
+            "badge": 0
+          }
+        ]
       }
     ],
     "team": [
@@ -201,6 +231,21 @@
             "link": "/ai-assistant"
           }
         ]
+      },
+      {
+        "text": "系統管理",
+        "i18n": "menu.admin",
+        "group": true,
+        "hideInBreadcrumb": true,
+        "children": [
+          {
+            "text": "系統監控",
+            "i18n": "menu.admin.monitoring",
+            "icon": "anticon-monitor",
+            "link": "/admin/monitoring",
+            "badge": 0
+          }
+        ]
       }
     ],
     "partner": [
@@ -240,6 +285,21 @@
             "i18n": "menu.ai_assistant",
             "icon": "anticon-robot",
             "link": "/ai-assistant"
+          }
+        ]
+      },
+      {
+        "text": "系統管理",
+        "i18n": "menu.admin",
+        "group": true,
+        "hideInBreadcrumb": true,
+        "children": [
+          {
+            "text": "系統監控",
+            "i18n": "menu.admin.monitoring",
+            "icon": "anticon-monitor",
+            "link": "/admin/monitoring",
+            "badge": 0
           }
         ]
       }

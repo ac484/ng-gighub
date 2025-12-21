@@ -96,6 +96,8 @@ export enum AuditEventType {
   MODULE_ENABLED = 'module.enabled',
   MODULE_DISABLED = 'module.disabled',
   MODULE_CONFIGURED = 'module.configured',
+  MODULE_REGISTERED = 'module.registered',
+  MODULE_UNREGISTERED = 'module.unregistered',
   MODULE_STARTED = 'module.started',
   MODULE_STOPPED = 'module.stopped',
   MODULE_ERROR = 'module.error',
