@@ -408,7 +408,7 @@ export class AgreementModuleViewComponent {
     this.detailError.set(null);
     this.parsedDocument.set(null);
     try {
-      const normalizedUrl = url.replace('firebasestorage.app', 'appspot.com');
+      const normalizedUrl = this.normalizeStorageUrl(url);
       const response = await fetch(normalizedUrl, { method: 'GET', headers: {} });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -430,5 +430,14 @@ export class AgreementModuleViewComponent {
     const value = entities.find(item => item.type === type)?.mentionText ?? '';
     const trimmed = value.trim();
     return trimmed.length > 0 ? trimmed : null;
+  }
+
+  private normalizeStorageUrl(url: string): string {
+    let normalized = url.replace('firebasestorage.app', 'appspot.com');
+    normalized = normalized.replace(/b\/([^/]+)\.firebasestorage\.app\//, 'b/$1.appspot.com/');
+    if (!normalized.includes('alt=media')) {
+      normalized += (normalized.includes('?') ? '&' : '?') + 'alt=media';
+    }
+    return normalized;
   }
 }
