@@ -26,6 +26,9 @@ Allowed:
 - Build-time configuration
 - Environment flags
 - Provider selection
+- Singleton services
+- Global interceptors
+- Cross-cutting concerns
 
 ---
 
@@ -34,12 +37,18 @@ Structure / Organization
 Structure:
 - environment.ts
 - environment.prod.ts
+- services/
+- guards/
+- interceptors/
 
 ---
 
 Integration / Dependencies
 
 Integration:
+- Angular DI only
+- Uses @angular/fire adapters
+- No feature-to-feature imports
 - Angular build replacements
 - No runtime secrets
 
@@ -50,13 +59,19 @@ Best Practices / Guidelines
 Guidelines:
 - Keep environments type-safe
 - Do not include secrets
+- Prefer composition over inheritance
+- Keep services stateless where possible
+- Validate all environment-provided values at build or runtime
 
 ---
 
 Related Docs / References
 
-- ../AGENTS.md
+Related:
+- ../shared/AGENTS.md
+- ../environments/AGENTS.md
 - ../app/AGENTS.md
+- docs/architecture/
 
 ---
 
@@ -70,129 +85,19 @@ Audience: AI Coding Agents
 
 # Environments – AGENTS.md
 
-This document defines **rules and boundaries** for environment configuration in GigHub.
+This document defines rules and boundaries for environment configuration in GigHub. It governs what may exist in `src/environments/` and how it is used at build time.
 
-It governs **what may exist in `src/environments/` and how it is used at build time**.
 
----
+## Details
 
-## 1. Purpose
-
-The `environments/` directory contains **build-time configuration only**.
-
-It defines:
-- Deployment-specific settings
-- API endpoints
-- Feature flags
-- Providers and interceptors selection
-
-It must **not** contain runtime logic or secrets.
+- The `environments/` directory contains build-time configuration only. It must not contain runtime logic or secrets.
+- environment.ts (Development): MUST set `production: false`; may enable verbose logging, mock providers/interceptors; must use non-production endpoints.
+- environment.prod.ts (Production): MUST set `production: true`; must use production endpoints; must disable mock providers/interceptors and debug logging.
+- Environment files MUST conform to a stable Environment interface and remain structurally consistent across environments.
+- Security: forbidden to include secrets, credentials, or environment-specific business logic. Sensitive values MUST be injected at build or runtime.
+- Build Integration: `angular.json` MUST define `fileReplacements` so production builds replace `environment.ts`.
 
 ---
 
-## 2. Directory Structure
-
-src/environments/ ├── AGENTS.md ├── environment.ts        # Development └── environment.prod.ts   # Production
-
----
-
-## 3. Environment Files
-
-### environment.ts (Development)
-
-**Rules**
-- MUST set `production: false`
-- MAY enable:
-  - verbose logging
-  - mock providers
-  - mock interceptors
-- MUST use non-production API endpoints
-- MAY include development-only feature flags
-
----
-
-### environment.prod.ts (Production)
-
-**Rules**
-- MUST set `production: true`
-- MUST use production API endpoints
-- MUST disable:
-  - mock providers
-  - mock interceptors
-  - debug logging
-- MUST include production-optimized settings
-
----
-
-## 4. Environment Interface
-
-**Rules**
-- MUST conform to the `Environment` interface (`@delon/theme`)
-- MUST include:
-  - `production: boolean`
-  - `api` configuration
-  - `useHash` routing flag
-  - `providers` array
-  - `interceptorFns` array
-- MUST remain structurally consistent across environments
-
----
-
-## 5. Configuration Rules
-
-### API
-
-- `baseUrl` defines the API root
-- Token refresh behavior MUST be explicit
-- API shape MUST be identical in all environments
-
----
-
-### Providers & Interceptors
-
-**Rules**
-- Mock providers/interceptors:
-  - allowed in development
-  - forbidden in production
-- Interceptor order MUST be deterministic
-- No environment may introduce hidden side effects
-
----
-
-## 6. Security Constraints
-
-**Forbidden**
-- Secrets (API keys, private tokens)
-- Credentials or passwords
-- Environment-specific business logic
-
-**Required**
-- Sensitive values MUST be injected at build or runtime
-- Configuration MUST be type-safe
-
----
-
-## 7. Build Integration
-
-**Rules**
-- `angular.json` MUST define `fileReplacements`
-- Production builds MUST replace `environment.ts`
-- Environment files MUST be complete and self-contained
-
----
-
-## 8. Related Documentation
-
-- **Application Root**: `src/app/AGENTS.md`
-- **Core Services**: `src/app/core/AGENTS.md`
-
----
-
-**Version**: 1.1.0  
-**Last Updated**: 2025-12-21  
-**Scope**: `src/environments/`  
-**Audience**: GitHub Copilot Agent / AI Coding Agents
-
-
----
+**Last Updated**: 2025-12-21
 

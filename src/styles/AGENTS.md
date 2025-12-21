@@ -7,7 +7,7 @@ Scope: Global styles and theming guidance for the application.
 
 Purpose / Responsibility
 
-Defines responsibilities for managing global styles and themes.
+Defines responsibilities for managing global styles and themes. 這裡位於 UI 層之外，屬於全域樣式與主題管理層（styles 層）。
 
 ---
 
@@ -23,40 +23,47 @@ Hard Rules:
 Allowed / Expected Content
 
 Allowed:
-- Global style variables
-- Theming tokens
-- Utility style sheets
+- Singleton services
+- Global interceptors
+- Cross-cutting concerns
+
+（註：此處只列出允許放於 src/styles/ 相關的跨切關注項範圍，實際檔案仍應遵守「NO UI components」等硬性限制。）
 
 ---
 
 Structure / Organization
 
 Structure:
-- themes/
-- variables/
-- mixins/
+- services/
+- guards/
+- interceptors/
+
+（說明：以業務能力劃分結構，避免在 styles 目錄中散置非全域資源。）
 
 ---
 
 Integration / Dependencies
 
 Integration:
-- Angular build tooling
-- No runtime dependencies
+- Angular DI only
+- Uses @angular/fire adapters
+- No feature-to-feature imports
 
 ---
 
 Best Practices / Guidelines
 
 Guidelines:
-- Keep styles global and generic
-- Avoid business-specific selectors
+- Prefer composition over inheritance
+- Keep services stateless where possible
 
 ---
 
 Related Docs / References
 
-- ../AGENTS.md
+Related:
+- ../shared/AGENTS.md
+- ../environments/AGENTS.md
 
 ---
 
@@ -70,134 +77,29 @@ Audience: AI Coding Agents
 
 # Styles – AGENTS.md
 
-This document defines **rules and boundaries** for global styles in GigHub.  
-It governs **what may and may not live in `src/styles/`**.
+This document defines rules and boundaries for global styles in GigHub and governs what may and may not live in `src/styles/`.
 
 ---
 
-## 1. Purpose
+Notes and additional guidance
 
-The `styles/` directory contains **global, cross-feature styles only**.
-
-It provides:
-- Theme variables (Azure Dragon)
-- Global UI adjustments
-- Reusable utility classes
-- Global animations
-
-It must **not** contain business or feature-specific styling.
+- index.less MUST be the single global style entry and MUST import `theme.less`.
+- theme.less MUST define theme variables using Less variables and integrate with ng-zorro-antd tokens.
+- Utilities MUST be generic and reusable; avoid business- or feature-specific selectors.
+- Animations MUST be lightweight and performance-friendly.
+- Follow accessibility best practices for any global style changes.
 
 ---
 
-## 2. Directory Structure
+Changelog
 
-src/styles/ ├── AGENTS.md        # This file ├── index.less       # Global style entry └── theme.less       # Theme variables
-
----
-
-## 3. File Responsibilities
-
-### index.less
-
-**Rules**
-- MUST be the single global style entry
-- MUST import `theme.less`
-- MAY include:
-  - ng-zorro global overrides
-  - shared utility classes
-  - global animations
-  - accessibility improvements
-- MUST NOT include feature- or page-specific styles
+- 1.1.0 — Reordered document to strict 9-section format and clarified allowed content and integrations (2025-12-21).
 
 ---
 
-### theme.less
+**Last Updated**: 2025-12-21
 
-**Rules**
-- MUST define Azure Dragon theme variables
-- MUST use Less variables (no hard-coded values)
-- MUST integrate with ng-zorro-antd theme tokens
-- SHOULD remain stable and backward-compatible
+**Scope**: `src/styles/`
 
----
-
-## 4. Style Rules
-
-### Utility Classes
-
-**Rules**
-- Utilities MUST be generic and reusable
-- Utilities MAY include:
-  - colors
-  - spacing
-  - layout helpers
-- `!important` is allowed **only when unavoidable**
-
----
-
-### Component Enhancements
-
-**Rules**
-- Only global enhancements to ng-zorro components are allowed
-- Must follow Ant Design guidelines
-- Must remain responsive and accessible
-
----
-
-### Animations
-
-**Rules**
-- Animations MUST be lightweight
-- Animations MUST respect performance constraints
-- Utility animation classes are allowed
-
----
-
-## 5. Theme Integration
-
-**Rules**
-- Must rely on Less variable system
-- Must remain consistent across components
-- Theme switching is optional but supported
-
----
-
-## 6. Global Constraints
-
-**Forbidden**
-- Business or domain styling
-- Feature- or page-specific selectors
-- Inline styles
-- Excessive use of `!important`
-
-**Required**
-- Modular structure
-- Reusability
-- Accessibility compliance
-- Performance awareness
-
----
-
-## 7. Style Placement Rules
-
-- Global styles → `src/styles/`
-- Component styles → component-scoped styles
-- Shared UI helpers → `src/app/shared/`
-
----
-
-## 8. Related Documentation
-
-- **Application Root**: `src/app/AGENTS.md`
-- **Layout Styles**: `src/app/layout/AGENTS.md`
-
----
-
-**Version**: 1.1.0  
-**Last Updated**: 2025-12-21  
-**Scope**: `src/styles/`  
 **Audience**: GitHub Copilot Agent / AI Coding Agents
-
-
----
 

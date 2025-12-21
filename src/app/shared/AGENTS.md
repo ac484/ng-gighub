@@ -1,3 +1,75 @@
+---
+Title + Scope
+
+Scope: Shared module guidance for reusable UI and cross-cutting concerns.
+
+---
+
+Purpose / Responsibility
+
+Defines responsibilities for the Shared module: what belongs here and what must not.
+
+---
+
+Hard Rules / Constraints
+
+Hard Rules:
+- NO UI components that are feature-specific
+- NO feature-specific logic
+- NO direct Firebase access outside adapters
+
+---
+
+Allowed / Expected Content
+
+Allowed:
+- Singleton services
+- Global interceptors
+- Cross-cutting concerns
+
+---
+
+Structure / Organization
+
+Structure:
+- services/
+- guards/
+- interceptors/
+
+---
+
+Integration / Dependencies
+
+Integration:
+- Angular DI only
+- Uses @angular/fire adapters
+- No feature-to-feature imports
+
+---
+
+Best Practices / Guidelines
+
+Guidelines:
+- Prefer composition over inheritance
+- Keep services stateless where possible
+
+---
+
+Related Docs / References
+
+- ../shared/AGENTS.md
+- ../environments/AGENTS.md
+
+---
+
+Metadata
+
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
+
+---
+
 # Shared Components Agent Guide
 
 The Shared module contains reusable components, services, pipes, directives, and utilities used across the GigHub application.

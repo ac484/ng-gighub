@@ -57,8 +57,8 @@ Guidelines:
 
 Related Docs / References
 
-- ../AGENTS.md
-- ../core/AGENTS.md
+- ../shared/AGENTS.md
+- ../environments/AGENTS.md
 
 ---
 
