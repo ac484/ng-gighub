@@ -1,8 +1,5 @@
-export interface TaskModel {
-  id: string;
-  blueprintId: string;
-  title: string;
-  status?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+import { TaskWithWBS, TaskDependency } from '@core/domain/types/task/task-wbs.types';
+
+export type TaskModel = TaskWithWBS;
+
+export type { TaskWithWBS, TaskDependency };

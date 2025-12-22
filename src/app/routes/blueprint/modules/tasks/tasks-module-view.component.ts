@@ -11,5 +11,5 @@ import { TasksListComponent } from './components/tasks-list.component';
   `
 })
 export class TasksModuleViewComponent {
-  readonly blueprintId = input.required<string>();
+  readonly blueprintId = input<string | null>(null);
 }

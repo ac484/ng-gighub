@@ -1,36 +1,43 @@
-import { effect, inject, Injectable, Signal, signal } from '@angular/core';
-import { TasksRepository } from '../data-access/repositories/task.repository';
-import { TaskModel } from '../data-access/models/task.model';
+import { effect, inject, Injectable, Signal } from '@angular/core';
+import { TaskStore } from '../state/task.store';
+import { TaskViewId, TaskViewStore } from '../state/task-view.store';
+import { TaskWithWBS } from '../data-access/models/task.model';
 
 @Injectable({ providedIn: 'root' })
 export class TasksFacade {
-  private readonly repository = inject(TasksRepository);
+  private readonly taskStore = inject(TaskStore);
+  private readonly viewStore = inject(TaskViewStore);
 
-  private readonly tasks = signal<TaskModel[]>([]);
-  private readonly loading = signal(false);
+  readonly tasks = this.taskStore.tasks;
+  readonly loading = this.taskStore.loading;
+  readonly currentView = this.viewStore.currentView;
+  readonly expandedNodes = this.viewStore.expandedNodes;
 
-  readonly tasksState = {
-    data: this.tasks.asReadonly(),
-    loading: this.loading.asReadonly()
-  };
-
-  ensureLoaded(blueprintId: Signal<string>): void {
+  ensureLoaded(blueprintId: Signal<string | null>): void {
     effect(
       () => {
         const id = blueprintId();
-        void this.loadByBlueprint(id);
+        if (id) {
+          this.taskStore.loadTasks(id);
+        }
       },
       { allowSignalWrites: true }
     );
   }
 
-  async loadByBlueprint(blueprintId: string): Promise<void> {
-    this.loading.set(true);
-    try {
-      const result = await this.repository.findByBlueprintId(blueprintId);
-      this.tasks.set(result);
-    } finally {
-      this.loading.set(false);
-    }
+  switchView(view: TaskViewId): void {
+    this.viewStore.switchView(view);
+  }
+
+  toggleNode(nodeId: string): void {
+    this.viewStore.toggleNode(nodeId);
+  }
+
+  selectTask(taskId: string | null): void {
+    this.taskStore.selectTask(taskId);
+  }
+
+  addTask(blueprintId: string, task: Omit<TaskWithWBS, 'id' | 'createdAt' | 'updatedAt'>): Promise<TaskWithWBS> {
+    return this.taskStore.createTask(blueprintId, task);
   }
 }

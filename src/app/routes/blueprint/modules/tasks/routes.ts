@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { TasksShellComponent } from './tasks-shell.component';
-import { TasksListComponent } from './components/tasks-list.component';
+import { TasksModuleViewComponent } from './tasks-module-view.component';
 
 export const TASKS_ROUTES: Routes = [
   {
@@ -9,7 +9,7 @@ export const TASKS_ROUTES: Routes = [
     children: [
       {
         path: '',
-        component: TasksListComponent
+        component: TasksModuleViewComponent
       }
     ]
   }

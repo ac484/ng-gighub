@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { collection, query, where, orderBy, limit as firestoreLimit, Timestamp, DocumentData } from '@angular/fire/firestore';
-import { Task, TaskStatus, CreateTaskRequest, UpdateTaskRequest, TaskQueryOptions, AssigneeType } from '@core/types/task/task.types';
+import { query, where, orderBy, limit as firestoreLimit, Timestamp, DocumentData } from '@angular/fire/firestore';
+import { TaskStatus, CreateTaskRequest, UpdateTaskRequest, TaskQueryOptions } from '@core/domain/types/task/task.types';
+import { TaskWithWBS, TaskDependency } from '@core/domain/types/task/task-wbs.types';
 
 import { FirestoreBaseRepository } from './base/firestore-base.repository';
 
@@ -21,13 +22,14 @@ import { FirestoreBaseRepository } from './base/firestore-base.repository';
 @Injectable({
   providedIn: 'root'
 })
-export class TaskFirestoreRepository extends FirestoreBaseRepository<Task> {
-  protected collectionName = 'tasks';
-
+export class TaskFirestoreRepository extends FirestoreBaseRepository<TaskWithWBS> {
+  protected override collectionName = 'tasks';
   /**
    * Convert Firestore document to Task entity
    */
-  protected toEntity(data: DocumentData, id: string): Task {
+  protected override toEntity(data: DocumentData, id: string): TaskWithWBS {
+    const dependencies = this.mapDependencies(data['dependencies']);
+
     return {
       id,
       blueprintId: data['blueprint_id'] || data['blueprintId'],
@@ -49,14 +51,29 @@ export class TaskFirestoreRepository extends FirestoreBaseRepository<Task> {
       priority: data['priority'],
       tags: data['tags'] || [],
       attachments: data['attachments'] || [],
-      metadata: data['metadata'] || {}
+      metadata: data['metadata'] || {},
+      parentId: data['parent_id'] ?? data['parentId'] ?? null,
+      level: data['level'],
+      orderIndex: data['order_index'] ?? data['orderIndex'],
+      wbsCode: data['wbs_code'] ?? data['wbsCode'],
+      path: data['path'] ?? data['ancestor_path'],
+      progress: data['progress'] ?? data['completion'] ?? 0,
+      plannedStartDate: this.optionalDate(data['planned_start_date']),
+      plannedEndDate: this.optionalDate(data['planned_end_date']),
+      actualStartDate: this.optionalDate(data['actual_start_date']),
+      actualEndDate: this.optionalDate(data['actual_end_date']),
+      estimatedHours: data['estimated_hours'] ?? data['estimatedHours'],
+      actualHours: data['actual_hours'] ?? data['actualHours'],
+      dependencies: dependencies.dependencyIds,
+      dependencyDetails: dependencies.details,
+      blockedBy: data['blocked_by'] ?? data['blockedBy']
     };
   }
 
   /**
    * Convert Task entity to Firestore document
    */
-  protected override toDocument(task: Partial<Task>): DocumentData {
+  protected override toDocument(task: Partial<TaskWithWBS>): DocumentData {
     const doc: DocumentData = {};
 
     if (task.blueprintId) doc['blueprint_id'] = task.blueprintId;
@@ -78,6 +95,29 @@ export class TaskFirestoreRepository extends FirestoreBaseRepository<Task> {
     if (task.tags) doc['tags'] = task.tags;
     if (task.attachments) doc['attachments'] = task.attachments;
     if (task.metadata) doc['metadata'] = task.metadata;
+    if (task.parentId !== undefined) doc['parent_id'] = task.parentId ?? null;
+    if (task.level !== undefined) doc['level'] = task.level;
+    if (task.orderIndex !== undefined) doc['order_index'] = task.orderIndex;
+    if (task.wbsCode !== undefined) doc['wbs_code'] = task.wbsCode;
+    if (task.path !== undefined) doc['path'] = task.path;
+    if (task.progress !== undefined) doc['progress'] = task.progress;
+    if (task.plannedStartDate !== undefined) {
+      doc['planned_start_date'] = task.plannedStartDate ? Timestamp.fromDate(task.plannedStartDate) : null;
+    }
+    if (task.plannedEndDate !== undefined) {
+      doc['planned_end_date'] = task.plannedEndDate ? Timestamp.fromDate(task.plannedEndDate) : null;
+    }
+    if (task.actualStartDate !== undefined) {
+      doc['actual_start_date'] = task.actualStartDate ? Timestamp.fromDate(task.actualStartDate) : null;
+    }
+    if (task.actualEndDate !== undefined) {
+      doc['actual_end_date'] = task.actualEndDate ? Timestamp.fromDate(task.actualEndDate) : null;
+    }
+    if (task.estimatedHours !== undefined) doc['estimated_hours'] = task.estimatedHours;
+    if (task.actualHours !== undefined) doc['actual_hours'] = task.actualHours;
+    if (task.dependencies !== undefined) doc['dependencies'] = task.dependencies;
+    if (task.dependencyDetails !== undefined) doc['dependency_details'] = task.dependencyDetails;
+    if (task.blockedBy !== undefined) doc['blocked_by'] = task.blockedBy;
 
     return doc;
   }
@@ -93,6 +133,37 @@ export class TaskFirestoreRepository extends FirestoreBaseRepository<Task> {
       return timestamp.toDate();
     }
     return new Date(timestamp);
+  }
+
+  private optionalDate(value: any): Date | undefined {
+    if (!value) return undefined;
+    return this.toDate(value);
+  }
+
+  private mapDependencies(
+    value: any
+  ): {
+    dependencyIds: string[];
+    details?: TaskDependency[];
+  } {
+    if (!value) {
+      return { dependencyIds: [] };
+    }
+
+    if (Array.isArray(value)) {
+      if (value.length === 0) {
+        return { dependencyIds: [] };
+      }
+
+      if (typeof value[0] === 'string') {
+        return { dependencyIds: value as string[] };
+      }
+
+      const details = (value as TaskDependency[]).filter(dep => !!dep?.taskId);
+      return { dependencyIds: details.map(dep => dep.taskId), details };
+    }
+
+    return { dependencyIds: [] };
   }
 
   /**
@@ -117,7 +188,7 @@ export class TaskFirestoreRepository extends FirestoreBaseRepository<Task> {
    * Find task by ID
    * 根據 ID 查找任務
    */
-  async findById(id: string): Promise<Task | null> {
+  async findById(id: string): Promise<TaskWithWBS | null> {
     return this.executeWithRetry(async () => {
       return this.getDocument(id);
     });
@@ -127,7 +198,7 @@ export class TaskFirestoreRepository extends FirestoreBaseRepository<Task> {
    * Find tasks by blueprint
    * 根據藍圖查找任務
    */
-  async findByBlueprint(blueprintId: string, options?: TaskQueryOptions): Promise<Task[]> {
+  async findByBlueprint(blueprintId: string, options?: TaskQueryOptions): Promise<TaskWithWBS[]> {
     return this.executeWithRetry(async () => {
       const constraints: any[] = [where('blueprint_id', '==', blueprintId)];
 
@@ -166,7 +237,7 @@ export class TaskFirestoreRepository extends FirestoreBaseRepository<Task> {
    * Find tasks with options
    * 使用選項查找任務
    */
-  async findWithOptions(options: TaskQueryOptions): Promise<Task[]> {
+  async findWithOptions(options: TaskQueryOptions): Promise<TaskWithWBS[]> {
     return this.executeWithRetry(async () => {
       const constraints: any[] = [];
 
@@ -209,7 +280,7 @@ export class TaskFirestoreRepository extends FirestoreBaseRepository<Task> {
    * Create a new task
    * 創建新任務
    */
-  async create(blueprintId: string, payload: CreateTaskRequest): Promise<Task> {
+  async create(blueprintId: string, payload: CreateTaskRequest & Partial<TaskWithWBS>): Promise<TaskWithWBS> {
     return this.executeWithRetry(async () => {
       const doc: DocumentData = {
         // Note: blueprintId removed from CreateTaskRequest, passed as parameter
@@ -223,10 +294,24 @@ export class TaskFirestoreRepository extends FirestoreBaseRepository<Task> {
         priority: payload.priority?.toUpperCase() || 'MEDIUM',
         tags: payload.tags || [],
         attachments: [],
-        metadata: {}
+        metadata: {},
+        parent_id: payload.parentId ?? null,
+        level: payload.level ?? null,
+        order_index: payload.orderIndex ?? null,
+        wbs_code: payload.wbsCode ?? null,
+        path: payload.path ?? null,
+        progress: payload.progress ?? null,
+        planned_start_date: payload.plannedStartDate ? Timestamp.fromDate(payload.plannedStartDate) : null,
+        planned_end_date: payload.plannedEndDate ? Timestamp.fromDate(payload.plannedEndDate) : null,
+        actual_start_date: payload.actualStartDate ? Timestamp.fromDate(payload.actualStartDate) : null,
+        actual_end_date: payload.actualEndDate ? Timestamp.fromDate(payload.actualEndDate) : null,
+        estimated_hours: payload.estimatedHours ?? null,
+        actual_hours: payload.actualHours ?? null,
+        dependencies: payload.dependencies ?? [],
+        blocked_by: payload.blockedBy ?? []
       };
 
-      const task = await this.createDocument(doc as Partial<Task>);
+      const task = await this.createDocument(doc as Partial<TaskWithWBS>);
 
       this.logger.info('[TaskFirestoreRepository]', `Task created with ID: ${task.id}`);
 
@@ -238,11 +323,11 @@ export class TaskFirestoreRepository extends FirestoreBaseRepository<Task> {
    * Update task
    * 更新任務
    */
-  async update(id: string, payload: UpdateTaskRequest): Promise<void> {
+  async update(id: string, payload: UpdateTaskRequest & Partial<TaskWithWBS>): Promise<void> {
     return this.executeWithRetry(async () => {
       const doc = this.toDocument(payload);
 
-      await this.updateDocument(id, doc as Partial<Task>);
+      await this.updateDocument(id, doc as Partial<TaskWithWBS>);
 
       this.logger.info('[TaskFirestoreRepository]', `Task updated: ${id}`);
     });
@@ -308,7 +393,7 @@ export class TaskFirestoreRepository extends FirestoreBaseRepository<Task> {
     return this.executeWithRetry(async () => {
       const q = query(this.collectionRef, where('blueprint_id', '==', blueprintId), where('deleted_at', '==', null));
 
-      const tasks = await this.queryDocuments(q);
+       const tasks = await this.queryDocuments(q);
 
       // Initialize counts
       const counts: Record<TaskStatus, number> = {
