@@ -23,8 +23,17 @@ export * from './tasks';
 // Members Module
 export * from './members';
 
+// Diary Module
+export * from './diary';
+
+// Weather Module
+export * from './weather';
+
 // Issues Module (Refactored)
 export * from './issues';
 
 // QA Module (Refactored)
 export * from './qa';
+
+// Log Module
+export * from './log';

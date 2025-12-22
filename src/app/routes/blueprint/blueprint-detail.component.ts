@@ -24,7 +24,7 @@ import { ContractModuleViewComponent } from './modules/contract';
 import { DiaryModuleViewComponent } from './modules/diary';
 import { FinanceModuleViewComponent } from './modules/finance';
 import { IssuesModuleViewComponent } from './modules/issues';
-import { LogModuleViewComponent } from './modules/log-module-view.component';
+import { LogModuleViewComponent } from './modules/log';
 import { ModuleManagerComponent } from './modules/manager/module-manager.component';
 import { MembersModuleViewComponent } from './modules/members';
 import { QaModuleViewComponent } from './modules/qa';
