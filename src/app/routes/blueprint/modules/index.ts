@@ -43,3 +43,6 @@ export * from './safety';
 
 // Workflow Module
 export * from './workflow';
+
+// Warranty Module
+export * from './warranty';
