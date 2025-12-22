@@ -182,7 +182,7 @@ export class TasksModuleViewComponent implements OnInit {
       this.newStatus.set('in-progress');
     } catch (error) {
       this.message.error('新增任務失敗');
-      this.logger.error('[TasksModuleViewComponent] createTask failed', error as Error);
+      this.logger.error('[TasksModuleViewComponent]', 'createTask failed', error as Error);
     } finally {
       this.submitting.set(false);
     }
@@ -195,7 +195,7 @@ export class TasksModuleViewComponent implements OnInit {
       this.message.success('已刪除任務');
     } catch (error) {
       this.message.error('刪除任務失敗');
-      this.logger.error('[TasksModuleViewComponent] deleteTask failed', error as Error);
+      this.logger.error('[TasksModuleViewComponent]', 'deleteTask failed', error as Error);
     }
   }
 

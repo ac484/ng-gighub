@@ -20,7 +20,7 @@ import { ModuleStatusBadgeComponent } from './module-status-badge.component';
       <div class="module-info mt-3">
         <p><strong>Version:</strong> {{ module().version }}</p>
         <p><strong>Type:</strong> {{ module().moduleType }}</p>
-        <p><strong>Dependencies:</strong> {{ module().dependencies?.length || 0 }}</p>
+    <p><strong>Dependencies:</strong> {{ module().dependencies.length || 0 }}</p>
         @if (module().updatedAt) {
           <p><strong>Updated:</strong> {{ toDate(module().updatedAt) | date: 'short' }}</p>
         }
