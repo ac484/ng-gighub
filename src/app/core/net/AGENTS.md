@@ -1,120 +1,19 @@
-# Core Networking Agent Guide
+# Core Networking Agent Guide (Self-Owned Modules)
 
-## Title + Scope
-Scope: Networking utilities and HTTP concerns under src/app/core/net.
+Scope: HTTP utilities/interceptors under `src/app/core/net`. Supports self-owned modules without centralizing module behavior.
 
-## Purpose / Responsibility
-Document networking helpers, interceptors, and configurations that support application-wide HTTP behaviors.
+## Key Rules
+- Keep interceptors/helpers generic and feature-agnostic; no UI. Use `inject()` DI and Result-pattern error handling.
+- Do not embed module metadata or lifecycle here; modules manage themselves.
+- Firestore stays in repositories; networking code avoids new backends or secrets.
+- Keep docs brief.
 
-## Hard Rules / Constraints
-- NO UI components.
-- NO feature-specific logic; keep networking concerns generic.
-- NO direct Firebase access outside repositories/adapters.
+## Allowed
+- HTTP interceptors, token refresh helpers, and small utilities/tests that respect module boundaries.
 
-## Allowed / Expected Content
-- HTTP helpers, interceptors, and networking utilities shared across the app.
-- Documentation/tests for these cross-cutting concerns.
+## Forbidden
+- Module-specific coupling, global module registries, or long-form docs.
 
-## Structure / Organization
-- net-related services and interceptors housed under this directory with an index/barrel as needed.
+References: `../AGENTS.md`, `../services/AGENTS.md`.
 
-## Integration / Dependencies
-- Use Angular HttpClient and DI with inject(); avoid feature-to-feature imports.
-- Interact with auth/permission services via public interfaces only.
-
-## Best Practices / Guidelines
-- Apply Result pattern for async operations, log via LoggerService without sensitive data, and keep interceptors composable.
-
-## Related Docs / References
-- ../AGENTS.md (Core overview)
-- ../services/AGENTS.md
-- ../../routes/AGENTS.md
-
-## Metadata
-Version: 1.1.0
-Status: Active
-Audience: AI Coding Agents
-
----
-
-# Core Network Agent Guide
-
-The Core Network module provides HTTP interceptors and network-related utilities for the GigHub application.
-
-## Module Purpose
-
-The Core Network module provides:
-- **HTTP Interceptors** - Request/response interceptors
-- **Token Refresh** - Authentication token refresh mechanism
-- **Network Helpers** - Network utility functions
-- **Default Interceptor** - Default HTTP interceptor configuration
-
-## Module Structure
-
-```
-src/app/core/net/
-├── AGENTS.md                    # This file
-├── index.ts                     # Public API exports
-├── default.interceptor.ts       # Default HTTP interceptor
-├── refresh-token.ts             # Token refresh mechanism
-└── helper.ts                    # Network helper functions
-```
-
-## HTTP Interceptors
-
-### Default Interceptor
-
-**規則**:
-- 必須實作 `HttpInterceptorFn` 介面
-- 必須處理請求標頭設定
-- 必須處理回應轉換
-- 必須實作錯誤處理
-- 必須使用 `inject()` 注入依賴
-
-### Token Refresh
-
-**規則**:
-- 必須提供 `provideBindAuthRefresh` 函數
-- 必須處理 token 過期情況
-- 必須自動刷新過期的 token
-- 必須重試失敗的請求
-- 必須避免無限刷新循環
-
-## Network Helpers
-
-**規則**:
-- 必須提供網路請求輔助函數
-- 必須處理常見的網路操作
-- 必須提供錯誤處理工具
-- 必須支援請求取消功能
-
-## Best Practices
-
-**規則**:
-1. 必須在攔截器中處理認證 token
-2. 必須實作 token 自動刷新機制
-3. 必須處理網路錯誤和超時
-4. 必須記錄網路請求日誌（開發環境）
-5. 必須避免在攔截器中執行長時間操作
-6. 必須使用 RxJS 運算子處理請求/回應
-7. 必須提供清晰的錯誤訊息
-
-## Integration
-
-**規則**:
-- 必須在 `app.config.ts` 中註冊攔截器
-- 必須使用 `withInterceptors()` 提供攔截器
-- 必須確保攔截器執行順序正確
-- 必須與 Firebase Auth 整合
-
-## Related Documentation
-
-- **[Core Services](../AGENTS.md)** - Core infrastructure
-- **[App Module](../../AGENTS.md)** - Application configuration
-
----
-
-**Module Version**: 1.1.0  
-**Last Updated**: 2025-12-09  
-**Status**: Production Ready
-
+Metadata: version 1.2.0 (self-owned), Status Active.
