@@ -22,13 +22,9 @@ contract/
 
 ## Core Components
 
-- **ContractModuleViewComponent**: Thin coordinator; loads data, routes events between features, and opens modals/drawers.
+- **ContractModuleViewComponent**: Minimal coordinator; loads data and shows stats + table.
 - **Features**:
   - `list`: displays contracts with statistics and actions.
-  - `create`: multi-step wizard for new contracts.
-  - `detail`: drawer with tabs (basic info, parties, attachments, history).
-  - `edit`: modal-based editing.
-  - `preview`: upload/parse helpers for AI extraction and file preview.
 
 ## Services & State
 
@@ -57,7 +53,7 @@ import { ContractModuleViewComponent } from './contract';
 - Keep orchestration thin; delegate UI concerns to feature components and business rules to services.
 - Validate inputs early (title length, parties present, positive amounts, start < end).
 - Prefer signal-based state from `ContractStore` over local copies to avoid drift.
-- File uploads are handled by `ContractUploadService`, which calls Cloud Functions for parsing.
+- File uploads/parsing flows have been removed from the minimalist view.
 
 ## Testing
 

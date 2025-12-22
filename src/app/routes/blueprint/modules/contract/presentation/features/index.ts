@@ -7,10 +7,5 @@
 // Main Orchestrator
 export { ContractModuleViewComponent } from '../../contract-module-view-refactored.component';
 
-// Feature Exports
-export * from './list';
-export * from './create';
-export * from './detail';
-export * from './edit';
-export * from './preview';
-export * from './upload';
+// Minimal feature export: view component only
+export { ContractModuleViewComponent } from '../../contract-module-view-refactored.component';

@@ -10,6 +10,3 @@
 // Core business logic services
 export * from './contract.service';
 export * from './work-item.service';
-
-// File upload service
-export * from './contract-upload.service';

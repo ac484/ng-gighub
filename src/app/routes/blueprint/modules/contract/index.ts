@@ -30,8 +30,8 @@ export * from './infrastructure';
 // Public Application Layer
 export * from './application';
 
-// Public Presentation Layer
-export * from './presentation';
+// Public Presentation Layer (minimal)
+export * from './presentation/features';
 
 // Module Configuration
 export * from './config';
