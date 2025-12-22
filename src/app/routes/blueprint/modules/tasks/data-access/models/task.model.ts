@@ -1,11 +1,5 @@
 import { AssigneeType, Task, TaskPriority, TaskStatus } from '@core/types/task/task.types';
 
-export interface TaskDependency {
-  taskId: string;
-  type: 'finish-to-start' | 'start-to-start' | 'finish-to-finish' | 'start-to-finish';
-  lag?: number;
-}
-
 /**
  * WBS 專用任務模型
  * 使用現有 Task 定義並擴充視圖/結構欄位
@@ -27,7 +21,10 @@ export interface TaskWithWBS extends Task {
   actualBudget?: number;
   progress?: number;
 
-  dependencies?: TaskDependency[];
+  /**
+   * 保持與核心 Task 一致，使用依賴任務 ID 陣列
+   */
+  dependencies?: string[];
   blockedBy?: string[];
 }
 

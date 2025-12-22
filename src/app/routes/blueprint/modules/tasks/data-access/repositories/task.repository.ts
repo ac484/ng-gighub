@@ -3,8 +3,7 @@ import { DocumentData, Timestamp, orderBy, query, where } from '@angular/fire/fi
 
 import { FirestoreBaseRepository } from '@core/data-access/repositories/base/firestore-base.repository';
 import { TaskPriority, TaskStatus } from '@core/types/task/task.types';
-
-import { TaskDependency, TaskWithWBS } from '../models/task.model';
+import { TaskWithWBS } from '../models/task.model';
 
 @Injectable({ providedIn: 'root' })
 export class TasksRepository extends FirestoreBaseRepository<TaskWithWBS> {
@@ -55,7 +54,7 @@ export class TasksRepository extends FirestoreBaseRepository<TaskWithWBS> {
       actualBudget: data['actual_budget'],
       progress: data['progress'],
       parentId: data['parent_id'] ?? data['parentId'] ?? null,
-      dependencies: this.toDependencyIds(data['dependencies']),
+      dependencies: (data['dependencies'] as string[]) ?? [],
       tags: data['tags'] ?? [],
       attachments: data['attachments'] ?? [],
       metadata: data['metadata'] ?? {},
@@ -100,7 +99,7 @@ export class TasksRepository extends FirestoreBaseRepository<TaskWithWBS> {
     if (entity.actualBudget !== undefined) doc['actual_budget'] = entity.actualBudget;
     if (entity.progress !== undefined) doc['progress'] = entity.progress;
     if (entity.parentId !== undefined) doc['parent_id'] = entity.parentId;
-    if (entity.dependencies !== undefined) doc['dependencies'] = this.fromDependencies(entity.dependencies);
+    if (entity.dependencies !== undefined) doc['dependencies'] = entity.dependencies;
     if (entity.tags !== undefined) doc['tags'] = entity.tags;
     if (entity.attachments !== undefined) doc['attachments'] = entity.attachments;
     if (entity.metadata !== undefined) doc['metadata'] = entity.metadata;
@@ -162,16 +161,4 @@ export class TasksRepository extends FirestoreBaseRepository<TaskWithWBS> {
     return map[priority] || TaskPriority.MEDIUM;
   }
 
-  private toDependencyIds(dependencies: unknown): string[] {
-    if (!dependencies) return [];
-    if (Array.isArray(dependencies)) {
-      return dependencies.map(dep => (typeof dep === 'string' ? dep : (dep as TaskDependency).taskId)).filter(Boolean);
-    }
-    return [];
-  }
-
-  private fromDependencies(dependencies: TaskDependency[] | string[]): Array<TaskDependency | string> {
-    if (!dependencies) return [];
-    return dependencies;
-  }
 }
