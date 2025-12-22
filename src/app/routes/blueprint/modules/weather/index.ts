@@ -5,6 +5,8 @@
 
 // Main component
 export * from './weather-module-view.component';
+export * from './weather.repository';
+export * from './weather.service';
 
 // Core
 export * from './core/config';

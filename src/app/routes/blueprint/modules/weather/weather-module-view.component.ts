@@ -7,11 +7,11 @@ import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/cor
 import { SHARED_IMPORTS } from '@shared';
 
 import type { WeatherForecast } from './core/models';
-import { WeatherApiService } from './core/services';
 import { SuitabilityCardComponent } from './features/construction-suitability';
 import { ForecastDisplayComponent } from './features/forecast-display';
 import { LocationSelectorComponent } from './features/location-selector';
 import { WeatherAlertsComponent } from './features/weather-alerts';
+import { WeatherService } from './weather.service';
 
 @Component({
   selector: 'app-weather-module-view',
@@ -119,22 +119,16 @@ import { WeatherAlertsComponent } from './features/weather-alerts';
   ]
 })
 export class WeatherModuleViewComponent {
-  private readonly weatherApi = inject(WeatherApiService);
+  private readonly weatherService = inject(WeatherService);
 
   /** 選中的地點 */
   selectedLocation = signal<string>('臺北市');
 
   /** 天氣預報資料 */
-  weatherData = signal<WeatherForecast[]>([]);
-
-  /** 載入狀態 */
-  loading = signal(false);
-
-  /** 錯誤訊息 */
-  error = signal<string | null>(null);
-
-  /** 第一筆預報 (用於適宜度評估) */
-  firstForecast = signal<WeatherForecast | null>(null);
+  weatherData = this.weatherService.forecasts;
+  loading = this.weatherService.loading;
+  error = this.weatherService.error;
+  firstForecast = this.weatherService.firstForecast;
 
   /**
    * 處理地點變更
@@ -148,19 +142,6 @@ export class WeatherModuleViewComponent {
    * 載入天氣資料
    */
   loadWeather(): void {
-    this.loading.set(true);
-    this.error.set(null);
-
-    this.weatherApi.getCityForecast(this.selectedLocation()).subscribe({
-      next: forecasts => {
-        this.weatherData.set(forecasts);
-        this.firstForecast.set(forecasts.length > 0 ? forecasts[0] : null);
-        this.loading.set(false);
-      },
-      error: err => {
-        this.error.set(err.message || '載入天氣資料失敗');
-        this.loading.set(false);
-      }
-    });
+    this.weatherService.loadForecast(this.selectedLocation());
   }
 }
