@@ -24,8 +24,8 @@
  */
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal, effect } from '@angular/core';
-import { AcceptanceRecord, AcceptanceStatus } from '@core/blueprint/modules/implementations/acceptance/models';
-import { AcceptanceRepository } from '@core/blueprint/modules/implementations/acceptance/repositories/acceptance.repository';
+import { AcceptanceRecord, AcceptanceStatus } from './acceptance.model';
+import { AcceptanceRepository } from './acceptance.repository';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { lastValueFrom } from 'rxjs';

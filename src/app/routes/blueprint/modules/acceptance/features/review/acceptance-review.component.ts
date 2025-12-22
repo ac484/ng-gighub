@@ -7,7 +7,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { AcceptanceRecord } from '@core/blueprint/modules/implementations/acceptance/models';
+import { AcceptanceRecord } from '../../acceptance.model';
 import { SHARED_IMPORTS } from '@shared';
 
 @Component({

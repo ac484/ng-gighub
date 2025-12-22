@@ -8,6 +8,9 @@
 // Contract Module
 export * from './contract';
 
+// Finance Module
+export * from './finance';
+
 // Acceptance Module
 export * from './acceptance';
 
@@ -43,3 +46,5 @@ export * from './workflow';
 
 // Warranty Module
 export * from './warranty';
+// Cloud Module
+export * from './cloud';

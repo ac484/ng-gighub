@@ -1,3 +1,76 @@
+Title + Scope
+
+Scope: Directory for Blueprint module view components located at src/app/routes/blueprint/modules.
+
+This file is an agent guide describing what belongs in this directory and the rules agents must follow. Each module view component in this directory is self-contained: it must receive data and dependencies via explicit inputs and injected services, and must not rely on or import feature implementations from other modules directly.
+
+## Purpose / Responsibility
+
+Define the responsibilities and boundaries for UI view components that render Blueprint modules inside the Blueprint container. Keep presentation in this directory and move business logic, data access, and shared models to the core or shared layers.
+
+## Hard Rules / Constraints
+
+These are strict, early-checked rules. Breakage is not allowed.
+
+- NO UI components outside module view scope: only module view components, their templates, and module-local modals are allowed here.
+- NO feature-specific logic: do not implement business rules, domain services, or repositories in this directory.
+- NO direct Firebase access outside adapters: components must never access Firestore or Firebase SDKs directly; use repositories/adapters in @core.
+
+All modules must be self-contained: they should operate solely from inputs and injected services (facades/repositories) and must not import or depend on other module view implementations.
+
+## Allowed / Expected Content
+
+What agents are allowed to create here (high-level):
+
+- Singleton services that are presentation-only helpers (e.g., local UI helpers); prefer placing domain services in `@core`.
+- Global/interceptor-style cross-cutting concerns relevant to UI presentation only (e.g., presentation error formatter) when justified.
+- Module view components, templates, module-local modal/drawer components, and barrel exports (`index.ts`).
+- Submodule directories for complex views (each with README and local index.ts).
+
+Note: When in doubt about adding a service, prefer `@core` placement and consult `@core/blueprint` guidelines.
+
+## Structure / Organization
+
+Follow this directory layout to reduce sprawl and confusion:
+
+- `services/` — presentation helpers only (avoid domain logic)
+- `guards/` — route guards specific to the Blueprint route surface
+- `interceptors/` — presentation-layer interceptors (e.g., error-to-toast mapper)
+- Module view files at the root, named `[module-name]-module-view.component.ts` and companion template/styles
+- `index.ts` — barrel export for all view components
+
+Each module view must be a Standalone Component, use signals for local UI state, and apply `ChangeDetectionStrategy.OnPush`.
+
+## Integration / Dependencies
+
+Permitted integration patterns and dependency rules:
+
+- Use Angular DI only (prefer `inject()` for new code).
+- Consume domain services, facades, and repositories via well-defined public APIs from `@core/blueprint` or `@core/repositories`.
+- Use the repository/adapters provided by `@angular/fire` only inside approved repository/adapters in `@core` — frontend components must not call Firebase directly.
+- No feature-to-feature imports: module view components must not import other module view components or their internals. Communication between features must happen via `EventBus` or shared domain services.
+
+## Best Practices / Guidelines
+
+Quality guidance (advisory):
+
+- Prefer composition over inheritance for component and service composition.
+- Keep presentation services stateless where possible; store state in signals within the component or in domain stores located in `@core`.
+- Validate inputs early and surface clear error UI for invalid input.
+- Keep the component public API minimal: require `blueprintId` and any small configuration objects; avoid exposing internal implementation details.
+- Ensure keyboard and screen-reader accessibility for interactive elements.
+
+## Related Docs / References
+
+- [../shared/AGENTS.md](../shared/AGENTS.md)
+- [../environments/AGENTS.md](../environments/AGENTS.md)
+- [@core/blueprint/AGENTS.md](../../../core/blueprint/AGENTS.md)
+
+## Metadata
+
+Version: 1.1.0
+Status: Active
+Audience: AI Coding Agents
 # Blueprint Modules Directory Agent Guide
 
 ## Title + Scope

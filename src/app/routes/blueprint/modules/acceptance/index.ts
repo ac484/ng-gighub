@@ -7,6 +7,8 @@
 
 // Main Orchestrator
 export * from './acceptance-module-view.component';
+export * from './acceptance.model';
+export * from './acceptance.repository';
 
 // Features (if needed for standalone use)
 export * from './features/request';

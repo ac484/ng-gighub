@@ -8,7 +8,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import type { CloudStorageStats } from '@core/blueprint/modules/implementations/cloud';
+import type { CloudStorageStats } from '../../cloud.model';
 import { SHARED_IMPORTS } from '@shared';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 
