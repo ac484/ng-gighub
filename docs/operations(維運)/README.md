@@ -12,11 +12,13 @@ operations/
 ├── 03-error-handling.md        # 錯誤處理
 ├── 04-backup-recovery.md       # 備份與恢復
 ├── 05-release-process.md       # 發佈流程
-└── 06-monitoring-executive-summary.md # 監控/模組管理摘要（docs-old 提取）
+├── 06-monitoring-executive-summary.md # 監控/模組管理摘要（docs-old 提取）
+├── 07-contract-module-fixes-summary.md # 合約模組修復摘要（docs-old 提取）
 └── runbooks/                   # 運維手冊
     ├── incident-response.md
     ├── rollback-procedure.md
-    └── security-incident.md
+    ├── security-incident.md
+    └── contract-verification-checklist.md # 合約模組驗證清單（docs-old 提取）
 ```
 
 ## 📊 監控系統
