@@ -1,12 +1,13 @@
 import { effect, inject, Injectable, Signal, signal } from '@angular/core';
+
+import { TaskWithWBS } from '../data-access/models/task.model';
 import { TasksRepository } from '../data-access/repositories/task.repository';
-import { TaskModel } from '../data-access/models/task.model';
 
 @Injectable({ providedIn: 'root' })
 export class TasksFacade {
   private readonly repository = inject(TasksRepository);
 
-  private readonly tasks = signal<TaskModel[]>([]);
+  private readonly tasks = signal<TaskWithWBS[]>([]);
   private readonly loading = signal(false);
 
   readonly tasksState = {

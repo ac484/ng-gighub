@@ -5,3 +5,6 @@ export * from './components/tasks-list.component';
 export * from './services/tasks.facade';
 export * from './data-access/models/task.model';
 export * from './data-access/repositories/task.repository';
+export * from './state/task.store';
+export * from './state/task-view.store';
+export * from './views/tree-list/task-tree-list-view.component';
