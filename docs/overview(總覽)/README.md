@@ -12,7 +12,8 @@ overview/
 ├── 03-business-objectives.md    # 業務目標
 ├── 04-scope-boundaries.md       # 範圍與邊界
 ├── 05-key-constraints.md        # 關鍵限制
-└── 06-stakeholders.md           # 利害關係人
+├── 06-stakeholders.md           # 利害關係人
+└── 07-implementation-progress.md # 實作進度/Phase 計畫（docs-old 提取）
 ```
 
 ## 🎯 專案簡介

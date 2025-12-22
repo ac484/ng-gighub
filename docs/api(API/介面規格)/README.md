@@ -12,6 +12,8 @@ api/interface-spec/
 ├── 03-firebase-api.md          # Firebase API 使用指南
 ├── 04-data-contracts.md        # 資料契約定義
 ├── 05-contract-module-docs-index.md # 合約模組文檔索引（角色導向導覽）
+├── 06-contract-implementation-quickstart.md # 合約模組實作快速開始（docs-old 提取）
+├── 07-contract-module-architecture.md # 合約模組架構摘要（docs-old 提取）
 ├── contracts/                  # API 契約檔案目錄
 │   ├── task.contract.md
 │   ├── blueprint.contract.md
