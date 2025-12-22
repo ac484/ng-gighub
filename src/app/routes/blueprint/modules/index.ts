@@ -40,3 +40,6 @@ export * from './qa';
 
 // Log Module
 export * from './log';
+
+// Cloud Module
+export * from './cloud';

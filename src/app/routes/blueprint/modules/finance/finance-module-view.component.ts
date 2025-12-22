@@ -119,6 +119,21 @@ export class FinanceModuleViewComponent implements OnInit {
   private readonly message = inject(NzMessageService);
   private readonly modal = inject(NzModalService);
 
+  readonly invoiceService = {
+    loading: () => this.loading(),
+    data: () => this.filteredReceivableInvoices()
+  };
+
+  readonly paymentService = {
+    loading: () => this.loading(),
+    data: () => this.filteredPayableInvoices()
+  };
+
+  readonly costService = {
+    loading: () => this.loading(),
+    data: () => this.payableItems()
+  };
+
   // 狀態
   loading = signal(false);
   activeTabIndex = 0;
