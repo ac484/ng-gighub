@@ -119,11 +119,12 @@ export class ContractService {
   /**
    * Get contract statistics for a blueprint
    */
-  async getContractStatistics(blueprintId: string): Promise<ContractStatistics> {
+  async getContractStatistics(blueprintId: string, existingContracts?: Contract[]): Promise<ContractStatistics> {
     this.logger.debug('[ContractService]', 'getContractStatistics', { blueprintId });
 
     try {
-      return this.buildStatistics(await this.getContractsByBlueprint(blueprintId));
+      const contracts = existingContracts ?? (await this.getContractsByBlueprint(blueprintId));
+      return this.buildStatistics(contracts);
     } catch (error) {
       this.logger.error('[ContractService]', 'Failed to get statistics', error as Error, { blueprintId });
       throw error;
@@ -480,13 +481,10 @@ export class ContractService {
    * Aggregate statistics without extra Firestore reads.
    */
   private buildStatistics(contracts: Contract[]): ContractStatistics {
-    const counts: Record<ContractStatus, number> = {
-      draft: 0,
-      pending_activation: 0,
-      active: 0,
-      completed: 0,
-      terminated: 0
-    };
+    const counts = {} as Record<ContractStatus, number>;
+    for (const status of Object.keys(STATUS_TRANSITIONS) as ContractStatus[]) {
+      counts[status] = 0;
+    }
 
     let totalValue = 0;
     let activeValue = 0;
