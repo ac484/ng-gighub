@@ -15,17 +15,14 @@
  * @date 2025-12-19
  */
 
-import { Component, ChangeDetectionStrategy, input, signal, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, signal, OnInit, inject, effect } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 
-interface QaStandard {
-  id: string;
-  name: string;
-  description: string;
-}
+import { QaStandard } from '../../qa.model';
+import { QaService } from '../../qa.service';
 
 @Component({
   selector: 'app-qa-standards',
@@ -62,20 +59,23 @@ interface QaStandard {
 })
 export class QaStandardsComponent implements OnInit {
   blueprintId = input.required<string>();
+  private readonly qaService = inject(QaService);
 
   // State
   standards = signal<QaStandard[]>([]);
 
   ngOnInit(): void {
-    this.loadStandards();
+    effect(() => {
+      const id = this.blueprintId();
+      if (id) {
+        this.loadStandards(id);
+      }
+    });
   }
 
   /** Load standards data */
-  private loadStandards(): void {
-    // TODO: Integrate with QA services from core module
-    this.standards.set([
-      { id: '1', name: 'CNS 3090 混凝土標準', description: '混凝土強度與配比規範' },
-      { id: '2', name: 'CNS 560 鋼筋標準', description: '鋼筋規格與品質要求' }
-    ]);
+  private async loadStandards(blueprintId: string): Promise<void> {
+    const data = await this.qaService.listStandards(blueprintId);
+    this.standards.set(data);
   }
 }

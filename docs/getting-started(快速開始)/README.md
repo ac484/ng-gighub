@@ -7,11 +7,12 @@
 ```
 getting-started/
 ├── README.md                    # 本檔案
-├── 01-prerequisites.md          # 前置需求
-├── 02-environment-setup.md      # 環境設定
-├── 03-local-development.md      # 本地開發
-├── 04-testing-guide.md          # 測試指南
-└── 05-troubleshooting.md        # 問題排解
+├── 01-dev-quickstart.md         # 開發環境快速開始（docs-old 提取）
+├── 02-prerequisites.md          # 前置需求
+├── 03-environment-setup.md      # 環境設定
+├── 04-local-development.md      # 本地開發
+├── 05-testing-guide.md          # 測試指南
+└── 06-troubleshooting.md        # 問題排解
 ```
 
 ## 🎯 前置需求

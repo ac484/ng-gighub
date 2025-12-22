@@ -7,7 +7,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import type { CloudFile } from '@core/blueprint/modules/implementations/cloud';
+import type { CloudFile } from '../../cloud.model';
 import { SHARED_IMPORTS } from '@shared';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';

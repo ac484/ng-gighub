@@ -12,7 +12,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import type { IssueStatistics } from '@core/blueprint/modules/implementations/issue/models';
+import type { IssueStatistics } from '../../issues.model';
 import { SHARED_IMPORTS } from '@shared';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 

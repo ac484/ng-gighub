@@ -16,19 +16,14 @@
  * @date 2025-12-19
  */
 
-import { Component, ChangeDetectionStrategy, input, signal, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, signal, inject, OnInit, effect } from '@angular/core';
 import { STColumn } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
-interface QaInspection {
-  id: string;
-  item: string;
-  inspector: string;
-  result: 'pass' | 'fail' | 'pending';
-  inspectedAt: Date;
-}
+import { QaInspection } from '../../qa.model';
+import { QaService } from '../../qa.service';
 
 @Component({
   selector: 'app-qa-inspections',
@@ -64,6 +59,7 @@ interface QaInspection {
 })
 export class QaInspectionsComponent implements OnInit {
   private readonly message = inject(NzMessageService);
+  private readonly qaService = inject(QaService);
 
   blueprintId = input.required<string>();
 
@@ -100,17 +96,25 @@ export class QaInspectionsComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.loadInspections();
+    effect(() => {
+      const id = this.blueprintId();
+      if (id) {
+        this.loadInspections(id);
+      }
+    });
   }
 
   /** Load inspections data */
-  private loadInspections(): void {
-    // TODO: Integrate with QA services from core module
-    this.inspections.set([
-      { id: '1', item: '混凝土強度測試', inspector: '品管員A', result: 'pass', inspectedAt: new Date() },
-      { id: '2', item: '鋼筋保護層檢查', inspector: '品管員B', result: 'pass', inspectedAt: new Date() },
-      { id: '3', item: '防水層檢驗', inspector: '品管員A', result: 'pending', inspectedAt: new Date() }
-    ]);
+  private async loadInspections(blueprintId: string): Promise<void> {
+    this.loading.set(true);
+    try {
+      const data = await this.qaService.listInspections(blueprintId);
+      this.inspections.set(data);
+    } catch (error) {
+      this.message.error('載入品質檢驗失敗');
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   /** Add new inspection */

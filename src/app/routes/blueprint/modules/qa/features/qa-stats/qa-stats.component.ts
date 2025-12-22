@@ -16,15 +16,12 @@
  * @date 2025-12-19
  */
 
-import { Component, ChangeDetectionStrategy, input, signal, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, signal, inject, OnInit, effect } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 
-interface QaStatistics {
-  inspections: number;
-  passRate: number;
-  openIssues: number;
-}
+import { QaStatistics } from '../../qa.model';
+import { QaService } from '../../qa.service';
 
 @Component({
   selector: 'app-qa-stats',
@@ -89,6 +86,7 @@ interface QaStatistics {
 })
 export class QaStatsComponent implements OnInit {
   blueprintId = input.required<string>();
+  private readonly qaService = inject(QaService);
 
   // State
   stats = signal<QaStatistics>({
@@ -98,21 +96,22 @@ export class QaStatsComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.loadStatistics();
+    effect(() => {
+      const id = this.blueprintId();
+      if (id) {
+        this.loadStatistics(id);
+      }
+    });
   }
 
   /** Load statistics data */
-  private loadStatistics(): void {
-    // TODO: Integrate with QA services from core module
-    this.stats.set({
-      inspections: 25,
-      passRate: 96.5,
-      openIssues: 2
-    });
+  private async loadStatistics(blueprintId: string): Promise<void> {
+    const result = await this.qaService.getStatistics(blueprintId);
+    this.stats.set(result);
   }
 
   /** Refresh statistics */
   refresh(): void {
-    this.loadStatistics();
+    this.loadStatistics(this.blueprintId());
   }
 }

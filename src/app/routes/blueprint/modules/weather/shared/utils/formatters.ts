@@ -6,14 +6,14 @@
 /**
  * 格式化溫度
  */
-export function formatTemperature(temp: number, unit: string = 'C'): string {
+export function formatTemperature(temp: number, unit = 'C'): string {
   return `${temp}°${unit}`;
 }
 
 /**
  * 格式化溫度範圍
  */
-export function formatTemperatureRange(min: number, max: number, unit: string = 'C'): string {
+export function formatTemperatureRange(min: number, max: number, unit = 'C'): string {
   return `${min}-${max}°${unit}`;
 }
 
@@ -39,9 +39,7 @@ export function formatRainProbability(prob: number): string {
 /**
  * 格式化施工適宜度等級
  */
-export function formatSuitabilityLevel(
-  level: 'excellent' | 'good' | 'fair' | 'poor' | 'dangerous'
-): string {
+export function formatSuitabilityLevel(level: 'excellent' | 'good' | 'fair' | 'poor' | 'dangerous'): string {
   const levelMap = {
     excellent: '優秀',
     good: '良好',
@@ -55,15 +53,13 @@ export function formatSuitabilityLevel(
 /**
  * 取得適宜度等級色彩
  */
-export function getSuitabilityColor(
-  level: 'excellent' | 'good' | 'fair' | 'poor' | 'dangerous'
-): string {
+export function getSuitabilityColor(level: 'excellent' | 'good' | 'fair' | 'poor' | 'dangerous'): string {
   const colorMap = {
-    excellent: '#52c41a',  // 綠色
-    good: '#1890ff',       // 藍色
-    fair: '#faad14',       // 橙色
-    poor: '#f5222d',       // 紅色
-    dangerous: '#cf1322'   // 暗紅
+    excellent: '#52c41a', // 綠色
+    good: '#1890ff', // 藍色
+    fair: '#faad14', // 橙色
+    poor: '#f5222d', // 紅色
+    dangerous: '#cf1322' // 暗紅
   };
   return colorMap[level];
 }

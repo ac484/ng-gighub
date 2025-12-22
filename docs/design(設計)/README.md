@@ -12,6 +12,7 @@ design/
 ├── 03-component-design.md      # 元件設計原則
 ├── 04-accessibility.md         # 可存取性指南
 ├── 05-responsive-design.md     # 響應式設計
+└── 06-blueprint-ownership-membership.md # Blueprint 所有權/成員設計（docs-old 提取）
 ├── mockups/                    # UI 設計稿
 │   ├── dashboard.png
 │   ├── blueprint-list.png

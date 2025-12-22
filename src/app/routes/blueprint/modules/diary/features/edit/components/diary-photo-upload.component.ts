@@ -9,7 +9,7 @@
  */
 
 import { Component, OnDestroy, input, output, signal } from '@angular/core';
-import { Log } from '@core/types/log/log.types';
+import { Diary } from '../../../diary.model';
 import { SHARED_IMPORTS } from '@shared';
 import { NzUploadFile } from 'ng-zorro-antd/upload';
 
@@ -85,7 +85,7 @@ import { NzUploadFile } from 'ng-zorro-antd/upload';
 })
 export class DiaryPhotoUploadComponent implements OnDestroy {
   // Inputs
-  diary = input<Log | null>(null);
+  diary = input<Diary | null>(null);
   isView = input<boolean>(false);
 
   // Outputs

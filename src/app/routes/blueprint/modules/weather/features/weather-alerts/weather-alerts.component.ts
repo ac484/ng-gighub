@@ -5,6 +5,7 @@
 
 import { Component, signal, inject, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
+
 import type { EarthquakeInfo } from '../../core/models';
 import { WeatherApiService } from '../../core/services';
 
@@ -39,41 +40,43 @@ import { WeatherApiService } from '../../core/services';
       }
     </nz-card>
   `,
-  styles: [`
-    .earthquake-item {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+  styles: [
+    `
+      .earthquake-item {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
 
-    .earthquake-time {
-      font-size: 12px;
-      color: #8c8c8c;
-    }
+      .earthquake-time {
+        font-size: 12px;
+        color: #8c8c8c;
+      }
 
-    .earthquake-info {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-    }
+      .earthquake-info {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+      }
 
-    .magnitude {
-      font-weight: 600;
-      color: #f5222d;
-      font-size: 16px;
-    }
+      .magnitude {
+        font-weight: 600;
+        color: #f5222d;
+        font-size: 16px;
+      }
 
-    .location {
-      flex: 1;
-      color: #262626;
-    }
+      .location {
+        flex: 1;
+        color: #262626;
+      }
 
-    .depth {
-      font-size: 12px;
-      color: #8c8c8c;
-    }
-  `]
+      .depth {
+        font-size: 12px;
+        color: #8c8c8c;
+      }
+    `
+  ]
 })
 export class WeatherAlertsComponent implements OnInit {
   private readonly weatherApi = inject(WeatherApiService);
@@ -99,11 +102,11 @@ export class WeatherAlertsComponent implements OnInit {
     this.error.set(null);
 
     this.weatherApi.getEarthquakeReport(10).subscribe({
-      next: (data) => {
+      next: data => {
         this.earthquakes.set(data);
         this.loading.set(false);
       },
-      error: (err) => {
+      error: err => {
         this.error.set(err.message || '載入地震資訊失敗');
         this.loading.set(false);
       }

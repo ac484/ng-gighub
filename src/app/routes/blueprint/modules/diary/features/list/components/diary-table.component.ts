@@ -9,7 +9,7 @@
  */
 
 import { Component, input, output } from '@angular/core';
-import { Log } from '@core/types/log/log.types';
+import { Diary } from '../../../diary.model';
 import { STColumn, STChange } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 
@@ -28,12 +28,12 @@ import { SHARED_IMPORTS } from '@shared';
   `
 })
 export class DiaryTableComponent {
-  diaries = input.required<Log[]>();
+  diaries = input.required<Diary[]>();
   loading = input<boolean>(false);
 
-  viewDiary = output<Log>();
-  editDiary = output<Log>();
-  deleteDiary = output<Log>();
+  viewDiary = output<Diary>();
+  editDiary = output<Diary>();
+  deleteDiary = output<Diary>();
   tableChange = output<STChange>();
 
   columns: STColumn[] = [

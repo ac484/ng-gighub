@@ -7,12 +7,13 @@
 ```
 security/
 ├── README.md                       # 本檔案
-├── 01-security-overview.md        # 安全總覽
-├── 02-authentication.md           # 認證機制
-├── 03-authorization.md            # 授權機制
-├── 04-security-rules.md           # Firestore Security Rules
-├── 05-secret-management.md        # 機密管理
-├── 06-frontend-security.md        # 前端安全限制
+├── 01-security-baseline.md        # 安全基線摘要（docs-old 提取）
+├── 02-security-overview.md        # 安全總覽
+├── 03-authentication.md           # 認證機制
+├── 04-authorization.md            # 授權機制
+├── 05-security-rules.md           # Firestore Security Rules
+├── 06-secret-management.md        # 機密管理
+├── 07-frontend-security.md        # 前端安全限制
 └── rules/                         # Security Rules 範例
     ├── firestore.rules.template
     └── storage.rules.template

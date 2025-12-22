@@ -11,6 +11,10 @@ api/interface-spec/
 ├── 02-rest-api-spec.md         # RESTful API 規格
 ├── 03-firebase-api.md          # Firebase API 使用指南
 ├── 04-data-contracts.md        # 資料契約定義
+├── 05-contract-module-docs-index.md # 合約模組文檔索引（角色導向導覽）
+├── 06-contract-implementation-quickstart.md # 合約模組實作快速開始（docs-old 提取）
+├── 07-contract-module-architecture.md # 合約模組架構摘要（docs-old 提取）
+├── 08-contract-upload-and-parsing.md # 合約上傳與解析指南（docs-old 提取）
 ├── contracts/                  # API 契約檔案目錄
 │   ├── task.contract.md
 │   ├── blueprint.contract.md
@@ -55,6 +59,10 @@ api/interface-spec/
 2. **版本管理**: 使用語意化版本控制 API 變更
 3. **向後相容**: 新版本保持與舊版本的相容性
 4. **文件同步**: 保持程式碼與文件的一致性
+
+### 模組專用索引
+
+- `05-contract-module-docs-index.md`：統整合約模組技術債修復與實施文檔的角色導向導航，對應 `docs-old/` 的完整內容。
 
 ### API 設計準則
 

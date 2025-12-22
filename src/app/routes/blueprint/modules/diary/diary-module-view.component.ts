@@ -14,14 +14,14 @@
  */
 
 import { Component, OnInit, inject, input, computed } from '@angular/core';
-import { ConstructionLogStore } from '@core/stores';
-import { Log } from '@core/types/log/log.types';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 
 import { DiaryEditModalComponent } from './features/edit';
 import { DiaryListComponent } from './features/list';
+import { Diary } from './diary.model';
+import { DiaryService } from './diary.service';
 
 @Component({
   selector: 'app-diary-module-view',
@@ -53,21 +53,21 @@ export class DiaryModuleViewComponent implements OnInit {
   blueprintId = input.required<string>();
 
   // Injected services
-  private logStore = inject(ConstructionLogStore);
+  private diaryService = inject(DiaryService);
   private modal = inject(NzModalService);
   private message = inject(NzMessageService);
 
   // State from store
-  diaries = this.logStore.logs;
-  loading = this.logStore.loading;
-  error = this.logStore.error;
+  diaries = this.diaryService.diaries;
+  loading = this.diaryService.loading;
+  error = this.diaryService.error;
 
   // Computed statistics
   statistics = computed(() => ({
-    total: this.logStore.totalCount(),
-    thisMonth: this.logStore.thisMonthCount(),
-    today: this.logStore.todayCount(),
-    totalPhotos: this.logStore.totalPhotos()
+    total: this.diaryService.totalCount(),
+    thisMonth: this.diaryService.thisMonthCount(),
+    today: this.diaryService.todayCount(),
+    totalPhotos: this.diaryService.totalPhotos()
   }));
 
   ngOnInit(): void {
@@ -78,7 +78,7 @@ export class DiaryModuleViewComponent implements OnInit {
   }
 
   private loadDiaries(blueprintId: string): void {
-    this.logStore.loadLogs(blueprintId);
+    this.diaryService.loadDiaries(blueprintId);
   }
 
   handleRefresh(): void {
@@ -109,7 +109,7 @@ export class DiaryModuleViewComponent implements OnInit {
     });
   }
 
-  handleView(diary: Log): void {
+  handleView(diary: Diary): void {
     this.modal.create({
       nzTitle: '查看工地施工日誌',
       nzContent: DiaryEditModalComponent,
@@ -123,7 +123,7 @@ export class DiaryModuleViewComponent implements OnInit {
     });
   }
 
-  handleEdit(diary: Log): void {
+  handleEdit(diary: Diary): void {
     const modalRef = this.modal.create({
       nzTitle: '編輯工地施工日誌',
       nzContent: DiaryEditModalComponent,
@@ -144,12 +144,12 @@ export class DiaryModuleViewComponent implements OnInit {
     });
   }
 
-  async handleDelete(diary: Log): Promise<void> {
+  async handleDelete(diary: Diary): Promise<void> {
     const blueprintId = this.blueprintId();
     if (!blueprintId || !diary.id) return;
 
     try {
-      await this.logStore.deleteLog(blueprintId, diary.id);
+      await this.diaryService.delete(blueprintId, diary.id);
       this.message.success('日誌刪除成功');
     } catch (error) {
       this.message.error('日誌刪除失敗');

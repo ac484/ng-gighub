@@ -6,7 +6,7 @@
  * Features: Type-safe formatters for consistent display across components
  */
 
-import type { IssueStatus, IssueSeverity, IssueSource } from '@core/blueprint/modules/implementations/issue/models';
+import type { IssueStatus, IssueSeverity, IssueSource } from '../../issues.model';
 
 /**
  * Status display configuration

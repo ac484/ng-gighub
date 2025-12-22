@@ -10,7 +10,7 @@
  */
 
 import { Component, input, output } from '@angular/core';
-import { Log } from '@core/types/log/log.types';
+import { Diary } from '../../diary.model';
 import { STChange } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 
@@ -58,7 +58,7 @@ import { DiaryTableComponent } from './components/diary-table.component';
 })
 export class DiaryListComponent {
   // Inputs
-  diaries = input.required<Log[]>();
+  diaries = input.required<Diary[]>();
   statistics = input.required<DiaryStatistics>();
   loading = input<boolean>(false);
   error = input<string | null>(null);
@@ -66,8 +66,8 @@ export class DiaryListComponent {
   // Outputs
   create = output<void>();
   refresh = output<void>();
-  viewDiary = output<Log>();
-  editDiary = output<Log>();
-  deleteDiary = output<Log>();
+  viewDiary = output<Diary>();
+  editDiary = output<Diary>();
+  deleteDiary = output<Diary>();
   tableChange = output<STChange>();
 }

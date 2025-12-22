@@ -1,11 +1,13 @@
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { BlueprintMember, BlueprintMemberType, BlueprintRole, BusinessRole, OwnerType, LoggerService, FirebaseAuthService } from '@core';
-import { BlueprintMemberRepository } from '@core/blueprint/repositories';
+import { BlueprintMemberType, BlueprintRole, BusinessRole, OwnerType, LoggerService } from '@core';
 import { getAllowedMemberTypes } from '@core/domain/utils';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
+
+import { Member } from '../../members.model';
+import { MembersService } from '../../members.service';
 
 /**
  * Member Form Modal Component
@@ -97,9 +99,8 @@ export class MemberFormModalComponent implements OnInit {
   private readonly modal = inject(NzModalRef);
   private readonly message = inject(NzMessageService);
   private readonly logger = inject(LoggerService);
-  private readonly authService = inject(FirebaseAuthService);
-  private readonly memberRepository: BlueprintMemberRepository = inject(BlueprintMemberRepository);
-  private readonly data: { blueprintId: string; blueprintOwnerType: string; member?: BlueprintMember } = inject(NZ_MODAL_DATA);
+  private readonly membersService = inject(MembersService);
+  private readonly data: { blueprintId: string; blueprintOwnerType: string; member?: Member } = inject(NZ_MODAL_DATA);
 
   // Expose enums for template
   BlueprintRole = BlueprintRole;
@@ -211,7 +212,7 @@ export class MemberFormModalComponent implements OnInit {
 
       if (this.isEdit) {
         // Update existing member
-        await this.memberRepository.updateMember(this.data.blueprintId, this.data.member!.id, {
+        await this.membersService.updateMember(this.data.blueprintId, this.data.member!.id, {
           role: formValue.role,
           businessRole: formValue.businessRole,
           isExternal: formValue.isExternal
@@ -219,17 +220,16 @@ export class MemberFormModalComponent implements OnInit {
         this.message.success('成員已更新');
       } else {
         // Add new member
-        const currentUser = this.authService.currentUser;
-        await this.memberRepository.addMember(this.data.blueprintId, ownerType, {
+        await this.membersService.addMember({
+          blueprintId: this.data.blueprintId,
+          blueprintOwnerType: ownerType,
           accountId: formValue.accountId,
           memberType: formValue.memberType,
           accountName: undefined, // Will be populated later if needed
           role: formValue.role,
           businessRole: formValue.businessRole,
           isExternal: formValue.isExternal,
-          blueprintId: this.data.blueprintId,
-          grantedBy: currentUser?.uid || 'system',
-          permissions: this.getDefaultPermissions(formValue.role)
+          permissions: this.membersService.getDefaultPermissions(formValue.role)
         });
         this.message.success('成員已新增');
       }
@@ -240,36 +240,6 @@ export class MemberFormModalComponent implements OnInit {
       this.logger.error('[MemberFormModalComponent]', 'Failed to save member', error as Error);
     } finally {
       this.submitting.set(false);
-    }
-  }
-
-  /**
-   * Get default permissions based on role
-   */
-  private getDefaultPermissions(role: BlueprintRole) {
-    switch (role) {
-      case BlueprintRole.MAINTAINER:
-        return {
-          canManageMembers: true,
-          canManageSettings: true,
-          canExportData: true,
-          canDeleteBlueprint: false // Only owner can delete
-        };
-      case BlueprintRole.CONTRIBUTOR:
-        return {
-          canManageMembers: false,
-          canManageSettings: false,
-          canExportData: true,
-          canDeleteBlueprint: false
-        };
-      case BlueprintRole.VIEWER:
-      default:
-        return {
-          canManageMembers: false,
-          canManageSettings: false,
-          canExportData: false,
-          canDeleteBlueprint: false
-        };
     }
   }
 

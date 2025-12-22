@@ -20,3 +20,8 @@ export * from './features/upload';
 
 // Shared Utilities
 export * from './shared';
+
+// Domain
+export * from './cloud.model';
+export * from './cloud.repository';
+export * from './cloud.service';
