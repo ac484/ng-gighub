@@ -7,7 +7,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import { AcceptanceRecord, AcceptanceStatus } from '@core/blueprint/modules/implementations/acceptance/models';
+import { AcceptanceRecord, AcceptanceStatus } from '../../../acceptance.model';
 import { SHARED_IMPORTS } from '@shared';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 
