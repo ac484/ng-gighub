@@ -19,13 +19,14 @@
  */
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal, computed, effect } from '@angular/core';
-import type { Issue, IssueStatistics } from '@core/blueprint/modules/implementations/issue/models';
-import { IssueManagementService } from '@core/blueprint/modules/implementations/issue/services/issue-management.service';
+import { LoggerService } from '@core/services/logger';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 
+import { IssueManagementService } from './issue-management.service';
+import type { Issue, IssueStatistics } from './issues.model';
 // Feature Components
 import { IssueDetailsComponent } from './features/issue-details';
 import { IssueFormComponent } from './features/issue-form';
@@ -88,6 +89,7 @@ import { escapeHtml, formatStatusText, formatSeverityText, formatSourceText } fr
 })
 export class IssuesModuleViewComponent implements OnInit {
   private readonly managementService = inject(IssueManagementService);
+  private readonly logger = inject(LoggerService);
   private readonly message = inject(NzMessageService);
   private readonly modal = inject(NzModalService);
   private readonly modalHelper = inject(ModalHelper);
@@ -157,7 +159,7 @@ export class IssuesModuleViewComponent implements OnInit {
       this.issues.set(issueList);
     } catch (error) {
       this.message.error('載入問題列表失敗');
-      console.error('[IssuesModuleView]', 'loadIssues failed', error);
+      this.logger.error('[IssuesModuleView]', 'loadIssues failed', error as Error);
     } finally {
       this.loading.set(false);
     }
@@ -222,7 +224,7 @@ export class IssuesModuleViewComponent implements OnInit {
       await this.loadIssues();
     } catch (error) {
       this.message.error('刪除問題失敗');
-      console.error('[IssuesModuleView]', 'deleteIssue failed', error);
+      this.logger.error('[IssuesModuleView]', 'deleteIssue failed', error as Error);
     }
   }
 }

@@ -12,8 +12,8 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, output, inject } from '@angular/core';
-import type { Issue } from '@core/blueprint/modules/implementations/issue/models';
-import { IssueLifecycleService } from '@core/blueprint/modules/implementations/issue/services/issue-lifecycle.service';
+import type { Issue } from '../../issues.model';
+import { IssueLifecycleService } from '../../issue-lifecycle.service';
 import { STColumn, STChange } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';

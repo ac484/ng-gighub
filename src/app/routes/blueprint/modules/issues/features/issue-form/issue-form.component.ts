@@ -14,14 +14,8 @@
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FirebaseAuthService, LoggerService } from '@core';
-import type {
-  Issue,
-  CreateIssueData,
-  UpdateIssueData,
-  IssueSeverity,
-  IssueCategory
-} from '@core/blueprint/modules/implementations/issue/models';
-import { IssueManagementService } from '@core/blueprint/modules/implementations/issue/services/issue-management.service';
+import type { Issue, CreateIssueData, UpdateIssueData, IssueSeverity, IssueCategory } from '../../issues.model';
+import { IssueManagementService } from '../../issue-management.service';
 import { SHARED_IMPORTS } from '@shared';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzMessageService } from 'ng-zorro-antd/message';
