@@ -8,7 +8,8 @@
 principles/
 ├── README.md                           # 本檔案
 ├── 01-principles-core-principles.md    # 核心設計原則
-└── 02-principles-rules.md              # 開發規範與規則
+├── 02-principles-rules.md              # 開發規範與規則
+└── 03-principles-technical-debt.md     # 技術債治理原則（docs-old 提取）
 ```
 
 ## 🎯 核心原則概述

@@ -12,6 +12,7 @@ data-model/
 ├── 03-indexes.md                  # 索引設計
 ├── 04-relationships.md            # 資料關聯
 ├── 05-schema-evolution.md         # Schema 演進策略
+├── 06-contract-data-model.md      # 合約資料模型摘要（docs-old 提取）
 ├── schemas/                       # Collection Schema
 │   ├── blueprint.schema.md
 │   ├── blueprint-member.schema.md
