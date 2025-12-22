@@ -18,6 +18,14 @@ export class TasksService {
   readonly completedCount = computed(() => this._tasks().filter(task => task.status === 'completed').length);
   readonly inProgressCount = computed(() => this._tasks().filter(task => task.status === 'in-progress').length);
   readonly pendingCount = computed(() => this._tasks().filter(task => task.status === 'pending').length);
+  readonly tasksByStatus = computed(() => {
+    const tasks = this._tasks();
+    return {
+      pending: tasks.filter(task => task.status === 'pending'),
+      inProgress: tasks.filter(task => task.status === 'in-progress'),
+      completed: tasks.filter(task => task.status === 'completed')
+    };
+  });
 
   async loadTasks(blueprintId: string): Promise<void> {
     if (!blueprintId) return;
@@ -35,9 +43,40 @@ export class TasksService {
   }
 
   async createTask(blueprintId: string, title: string, status: TaskStatus): Promise<Task> {
-    const created = await this.repository.createTask({ blueprintId, title, status });
+    const created = await this.repository.createTask({
+      blueprintId,
+      title,
+      status,
+      startAt: new Date(),
+      dueAt: null,
+      parentId: null,
+      progress: status === 'completed' ? 100 : 0
+    });
     this._tasks.update(tasks => [created, ...tasks]);
     return created;
+  }
+
+  async updateTask(taskId: string, updates: Partial<Task>): Promise<void> {
+    await this.repository.updateTask(taskId, updates);
+    this._tasks.update(tasks =>
+      tasks.map(task => {
+        if (task.id !== taskId) return task;
+        const next: Task = { ...task, updatedAt: new Date() };
+        if (updates.title !== undefined) next.title = updates.title;
+        if (updates.status !== undefined) next.status = updates.status;
+        if (updates.description !== undefined) next.description = updates.description;
+        if (updates.progress !== undefined) next.progress = updates.progress;
+        if (updates.startAt !== undefined) next.startAt = updates.startAt;
+        if (updates.dueAt !== undefined) next.dueAt = updates.dueAt;
+        if (updates.parentId !== undefined) next.parentId = updates.parentId;
+        return next;
+      })
+    );
+  }
+
+  async updateStatus(taskId: string, status: TaskStatus): Promise<void> {
+    const progress = status === 'completed' ? 100 : status === 'in-progress' ? 50 : 0;
+    await this.updateTask(taskId, { status, progress });
   }
 
   async deleteTask(taskId: string): Promise<void> {

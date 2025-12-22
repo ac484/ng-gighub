@@ -3,16 +3,22 @@ import { LoggerService } from '@core/services/logger';
 import { FormsModule } from '@angular/forms';
 import { SHARED_IMPORTS } from '@shared';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
 
 import { TaskStatus } from './tasks.model';
+import { TasksGanttViewComponent } from './tasks-gantt-view.component';
+import { TasksKanbanViewComponent } from './tasks-kanban-view.component';
+import { TasksListViewComponent } from './tasks-list-view.component';
+import { TasksTimelineViewComponent } from './tasks-timeline-view.component';
+import { TasksTreeViewComponent } from './tasks-tree-view.component';
 import { TasksService } from './tasks.service';
 
 @Component({
@@ -22,88 +28,111 @@ import { TasksService } from './tasks.service';
   imports: [
     SHARED_IMPORTS,
     FormsModule,
-    NzTableModule,
-    NzTagModule,
+    NzGridModule,
     NzEmptyModule,
     NzSpinModule,
     NzInputModule,
     NzSelectModule,
     NzButtonModule,
-    NzStatisticModule
+    NzStatisticModule,
+    NzTabsModule,
+    NzCardModule,
+    TasksListViewComponent,
+    TasksTreeViewComponent,
+    TasksKanbanViewComponent,
+    TasksTimelineViewComponent,
+    TasksGanttViewComponent
   ],
   template: `
-    <nz-card nzTitle="任務統計" class="mb-md">
-      <nz-row [nzGutter]="16">
-        <nz-col [nzSpan]="6">
-          <nz-statistic [nzValue]="totalCount()" nzTitle="總數"></nz-statistic>
-        </nz-col>
-        <nz-col [nzSpan]="6">
-          <nz-statistic [nzValue]="inProgressCount()" nzTitle="進行中" [nzValueStyle]="{ color: '#1890ff' }"></nz-statistic>
-        </nz-col>
-        <nz-col [nzSpan]="6">
-          <nz-statistic [nzValue]="completedCount()" nzTitle="已完成" [nzValueStyle]="{ color: '#52c41a' }"></nz-statistic>
-        </nz-col>
-        <nz-col [nzSpan]="6">
-          <nz-statistic [nzValue]="pendingCount()" nzTitle="待處理" [nzValueStyle]="{ color: '#faad14' }"></nz-statistic>
-        </nz-col>
-      </nz-row>
-    </nz-card>
+    <nz-row [nzGutter]="16" class="mb-md">
+      <nz-col [nzSpan]="24">
+        <nz-card nzTitle="任務統計">
+          <nz-row [nzGutter]="16">
+            <nz-col [nzSpan]="6">
+              <nz-statistic [nzValue]="totalCount()" nzTitle="總數"></nz-statistic>
+            </nz-col>
+            <nz-col [nzSpan]="6">
+              <nz-statistic [nzValue]="inProgressCount()" nzTitle="進行中" [nzValueStyle]="{ color: '#1890ff' }"></nz-statistic>
+            </nz-col>
+            <nz-col [nzSpan]="6">
+              <nz-statistic [nzValue]="completedCount()" nzTitle="已完成" [nzValueStyle]="{ color: '#52c41a' }"></nz-statistic>
+            </nz-col>
+            <nz-col [nzSpan]="6">
+              <nz-statistic [nzValue]="pendingCount()" nzTitle="待處理" [nzValueStyle]="{ color: '#faad14' }"></nz-statistic>
+            </nz-col>
+          </nz-row>
+        </nz-card>
+      </nz-col>
+    </nz-row>
 
-    <nz-card nzTitle="任務列表">
-      <div class="task-form" role="form" aria-label="新增任務表單">
-        <label class="sr-only" for="taskTitle">任務標題</label>
-        <input
-          id="taskTitle"
-          nz-input
-          placeholder="輸入任務標題"
-          [ngModel]="newTitle()"
-          (ngModelChange)="newTitle.set($event)"
-          (keyup.enter)="createTask()"
-        />
-        <label class="sr-only" for="taskStatus">任務狀態</label>
-        <nz-select id="taskStatus" nzSize="large" [ngModel]="newStatus()" (ngModelChange)="newStatus.set($event)" class="task-form__select">
-          <nz-option nzLabel="待處理" nzValue="pending"></nz-option>
-          <nz-option nzLabel="進行中" nzValue="in-progress"></nz-option>
-          <nz-option nzLabel="已完成" nzValue="completed"></nz-option>
-        </nz-select>
-        <button nz-button nzType="primary" nzSize="large" [nzLoading]="submitting()" (click)="createTask()">新增任務</button>
-      </div>
+    <nz-row [nzGutter]="16" class="mb-md">
+      <nz-col [nzSpan]="24">
+        <nz-card nzTitle="新增任務">
+          <div class="task-form" role="form" aria-label="新增任務表單">
+            <label class="sr-only" for="taskTitle">任務標題</label>
+            <input
+              id="taskTitle"
+              nz-input
+              placeholder="輸入任務標題"
+              [ngModel]="newTitle()"
+              (ngModelChange)="newTitle.set($event)"
+              (keyup.enter)="createTask()"
+            />
+            <label class="sr-only" for="taskStatus">任務狀態</label>
+            <nz-select
+              id="taskStatus"
+              nzSize="large"
+              [ngModel]="newStatus()"
+              (ngModelChange)="newStatus.set($event)"
+              class="task-form__select"
+            >
+              <nz-option nzLabel="待處理" nzValue="pending"></nz-option>
+              <nz-option nzLabel="進行中" nzValue="in-progress"></nz-option>
+              <nz-option nzLabel="已完成" nzValue="completed"></nz-option>
+            </nz-select>
+            <button nz-button nzType="primary" nzSize="large" [nzLoading]="submitting()" (click)="createTask()">新增任務</button>
+          </div>
+          @if (error()) {
+            <div class="mt-sm" role="alert" style="color: #d4380d;">{{ error() }}</div>
+          }
+        </nz-card>
+      </nz-col>
+    </nz-row>
 
-      @if (error()) {
-        <div class="mt-sm" role="alert" style="color: #d4380d;">{{ error() }}</div>
-      }
-
+    <nz-card>
+      <nz-tabset nzTabBarStyle="margin-bottom: 16px;">
+        <nz-tab nzTitle="列表">
+          <ng-template nz-tab>
+            <app-tasks-list-view [blueprintId]="blueprintId()" />
+          </ng-template>
+        </nz-tab>
+        <nz-tab nzTitle="樹狀">
+          <ng-template nz-tab>
+            <app-tasks-tree-view [blueprintId]="blueprintId()" />
+          </ng-template>
+        </nz-tab>
+        <nz-tab nzTitle="看板">
+          <ng-template nz-tab>
+            <app-tasks-kanban-view [blueprintId]="blueprintId()" />
+          </ng-template>
+        </nz-tab>
+        <nz-tab nzTitle="時間線">
+          <ng-template nz-tab>
+            <app-tasks-timeline-view [blueprintId]="blueprintId()" />
+          </ng-template>
+        </nz-tab>
+        <nz-tab nzTitle="甘特圖">
+          <ng-template nz-tab>
+            <app-tasks-gantt-view [blueprintId]="blueprintId()" />
+          </ng-template>
+        </nz-tab>
+      </nz-tabset>
       @if (loading()) {
         <div class="mt-md text-center">
           <nz-spin nzSimple />
         </div>
       } @else if (tasks().length === 0) {
         <nz-empty nzNotFoundContent="尚未建立任務" />
-      } @else {
-        <nz-table [nzData]="tasks()" [nzShowPagination]="false" nzSize="middle">
-          <thead>
-            <tr>
-              <th scope="col">標題</th>
-              <th scope="col">狀態</th>
-              <th scope="col">建立時間</th>
-              <th scope="col" class="text-right">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (task of tasks(); track task.id) {
-              <tr>
-                <td>{{ task.title }}</td>
-                <td>
-                  <nz-tag [nzColor]="getStatusColor(task.status)">{{ getStatusLabel(task.status) }}</nz-tag>
-                </td>
-                <td>{{ task.createdAt | date: 'yyyy-MM-dd HH:mm' }}</td>
-                <td class="text-right">
-                  <button nz-button nzType="link" nzDanger nzSize="small" (click)="remove(task.id)">刪除</button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </nz-table>
       }
     </nz-card>
   `,
@@ -118,10 +147,6 @@ import { TasksService } from './tasks.service';
 
       .task-form__select {
         min-width: 160px;
-      }
-
-      .text-right {
-        text-align: right;
       }
 
       .sr-only {
@@ -188,32 +213,4 @@ export class TasksModuleViewComponent implements OnInit {
     }
   }
 
-  async remove(taskId: string): Promise<void> {
-    if (!taskId) return;
-    try {
-      await this.tasksService.deleteTask(taskId);
-      this.message.success('已刪除任務');
-    } catch (error) {
-      this.message.error('刪除任務失敗');
-      this.logger.error('[TasksModuleViewComponent]', 'deleteTask failed', error as Error);
-    }
-  }
-
-  getStatusColor(status: TaskStatus): string {
-    const map: Record<TaskStatus, string> = {
-      pending: 'gold',
-      'in-progress': 'blue',
-      completed: 'green'
-    };
-    return map[status] ?? 'default';
-  }
-
-  getStatusLabel(status: TaskStatus): string {
-    const map: Record<TaskStatus, string> = {
-      pending: '待處理',
-      'in-progress': '進行中',
-      completed: '已完成'
-    };
-    return map[status] ?? status;
-  }
 }

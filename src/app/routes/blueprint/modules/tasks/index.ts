@@ -2,3 +2,8 @@ export * from './tasks.model';
 export * from './tasks.repository';
 export * from './tasks.service';
 export * from './tasks-module-view.component';
+export * from './tasks-list-view.component';
+export * from './tasks-tree-view.component';
+export * from './tasks-kanban-view.component';
+export * from './tasks-timeline-view.component';
+export * from './tasks-gantt-view.component';
