@@ -1,8 +1,8 @@
 Title + Scope
 
-Scope: Directory for Blueprint module view components located at src/app/routes/blueprint/modules.
+Scope: Directory for Blueprint module view components located at src/app/routes/blueprint/modules. All modules **must fully follow** `src/app/routes/blueprint/modules/README.md` and stay self-owned/self-contained; each module owns its compliance.
 
-This file is an agent guide describing what belongs in this directory and the rules agents must follow. Each module view component in this directory is self-contained: it must receive data and dependencies via explicit inputs and injected services, and must not rely on or import feature implementations from other modules directly.
+This file is an agent guide describing what belongs in this directory and the rules agents must follow. Each module view component in this directory is self-contained: it must receive data and dependencies via explicit inputs and injected services, and must not rely on or import feature implementations from other modules directly. Pending self-ownership/hardening (align to modules/README): diary.service.ts; finance/features/approval-dialog/approval-dialog.component.ts; finance/features/invoice-list.component.ts; manager/*.ts (including module-manager.component.ts, module-manager.service.ts, module-status-badge.component.ts); safety-module-view.component.ts; warranty module view and defects/detail/list components (including warranty-module-view.component.ts, warranty-defects.component.ts, defect-filters/statistics/table components, warranty-detail-drawer.component.ts, basic-info-tab.component.ts, defects-tab.component.ts, warranty-list.component.ts, warranty-filters/table components, warranty-status-badge.component.ts); workflow-module-view.component.ts.
 
 ## Purpose / Responsibility
 

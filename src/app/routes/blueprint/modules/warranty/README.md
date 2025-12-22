@@ -1,6 +1,6 @@
 # Warranty Module (Refactored)
 
-保固管理模組 - 採用功能導向架構設計
+保固管理模組 - 採用功能導向架構設計。所有內容必須遵循 `modules/README.md` 並維持本模組自有化（self-owned）。
 
 ## 🎯 架構原則
 

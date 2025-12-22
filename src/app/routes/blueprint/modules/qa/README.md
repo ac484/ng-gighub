@@ -2,7 +2,7 @@
 
 ## 概述 (Overview)
 
-品質控管模組提供工地品質管理功能，包括品質檢驗、標準管理等。本模組採用特徵導向架構 (Feature-based Architecture)，具有高內聚性 (High Cohesion)、低耦合性 (Low Coupling) 和良好的可擴展性 (Extensibility)。
+品質控管模組提供工地品質管理功能，包括品質檢驗、標準管理等。本模組採用特徵導向架構 (Feature-based Architecture)，具有高內聚性 (High Cohesion)、低耦合性 (Low Coupling) 和良好的可擴展性 (Extensibility)。所有內容必須符合 `modules/README.md` 並保持本模組自有化（self-owned）。
 
 ## 設計原則 (Design Principles)
 
