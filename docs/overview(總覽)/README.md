@@ -7,11 +7,15 @@
 ```
 overview/
 ├── README.md                    # 本檔案
-├── 01-project-summary.md       # 專案摘要
-├── 02-business-objectives.md   # 業務目標
-├── 03-scope-boundaries.md      # 範圍與邊界
-├── 04-key-constraints.md       # 關鍵限制
-└── 05-stakeholders.md          # 利害關係人
+├── 01-project-summary.md        # 專案摘要
+├── 02-project-analysis-summary.md # 專案分析/風險摘要（docs-old 提取）
+├── 03-business-objectives.md    # 業務目標
+├── 04-scope-boundaries.md       # 範圍與邊界
+├── 05-key-constraints.md        # 關鍵限制
+├── 06-stakeholders.md           # 利害關係人
+├── 07-implementation-progress.md # 實作進度/Phase 計畫（docs-old 提取）
+├── 08-analysis-index.md         # 分析文件索引（docs-old/analysis 提取）
+└── 09-archived-modules-index.md # 歷史模組索引（docs-old/Archived 提取）
 ```
 
 ## 🎯 專案簡介

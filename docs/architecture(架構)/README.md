@@ -8,11 +8,12 @@
 architecture/
 ├── README.md                           # 本檔案
 ├── 01-architecture-overview.md         # 架構總覽
-├── 02-three-layer-architecture.md      # 三層架構設計
-├── 03-blueprint-system.md              # Blueprint 系統架構
-├── 04-module-structure.md              # 模組結構與邊界
-├── 05-design-patterns.md               # 設計模式
-├── 06-technology-stack.md              # 技術堆疊
+├── 02-three-layer-architecture.md      # 三層架構實作重點
+├── 03-monitoring-module-manager.md     # 監控/模組管理摘要
+├── 04-angular-fire-integration.md      # Angular + Firebase 整合
+├── 05-contract-ai-integration.md       # 合約 AI / 文件解析架構
+├── 06-angular-fire-analysis.md         # Angular-Fire 整合分析索引（docs-old 提取）
+└── 07-monitoring-module-manager-index.md # 監控/模組管理索引（docs-old 提取）
 ├── diagrams/                           # 架構圖表目錄
 │   ├── system-architecture.mermaid
 │   ├── three-layer.mermaid
