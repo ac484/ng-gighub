@@ -1,106 +1,94 @@
 ---
 
-# Blueprint Module Template (Angular v20 + @angular/fire)
+# Blueprint Module Template (Angular v20 Standalone)
 
-## 1️⃣ Standard Module Structure
+> Angular 20 官方指引（standalone components + Route 配置）建議優先使用無 NgModule 的設計。以下範本符合 GigHub 的 UI → Service → Repository 分層與 signals 狀態管理。
+
+## 1️⃣ 推薦目錄結構（Standalone + Feature-Based）
 
 ```
 src/app/routes/blueprint/modules/feature/
 │
-├─ feature.module.ts                  # Angular Module
-├─ feature-routing.module.ts          # Lazy load Routing
+├─ README.md
+├─ routes.ts                        # export const FEATURE_ROUTES: Routes = [...]
+├─ feature-shell.component.ts       # Thin orchestrator (standalone, OnPush)
 │
-├─ components/                        # All UI Components
-│   ├─ list/                           # List page components
-│   │   ├─ feature-list.component.ts
-│   │   ├─ feature-list.component.html
-│   │   └─ feature-list.component.scss
-│   ├─ edit/                           # Edit / Create page components
-│   │   ├─ feature-edit.component.ts
-│   │   ├─ feature-edit.component.html
-│   │   └─ feature-edit.component.scss
-│   └─ detail/                         # Detail / Drawer page components
-│       ├─ feature-detail.component.ts
-│       ├─ feature-detail.component.html
-│       └─ feature-detail.component.scss
+├─ components/                      # Page-level standalone components
+│   ├─ feature-list.component.ts
+│   ├─ feature-detail.component.ts
+│   └─ feature-edit.component.ts
 │
-├─ services/                          # Business logic and data access
-│   ├─ feature.service.ts             # Core Firestore / API wrapper
-│   └─ feature.facade.ts              # Unified interface for external use
+├─ ui/                              # Presentational pieces (cards, badges, forms)
+│   └─ ...
 │
-├─ models/                            # Value Objects / DTO
-│   └─ feature.model.ts
+├─ services/                        # Business coordination (no Firestore here)
+│   ├─ feature.service.ts
+│   └─ feature.facade.ts            # Optional signals-based facade/store API
 │
-├─ state/                             # State management (Signal / RxJS / NgRx)
-│   ├─ feature.store.ts
-│   └─ feature.query.ts
+├─ data-access/
+│   ├─ repositories/
+│   │   └─ feature.repository.ts    # Extends FirestoreBaseRepository<T>
+│   └─ models/                      # DTO / domain contracts
 │
-└─ utils/                             # Utility functions
-    └─ feature.helpers.ts
+├─ state/                           # Signals state containers
+│   └─ feature.store.ts
+│
+├─ shared/                          # Reusable UI for this feature
+│   └─ components/
+│
+└─ index.ts                         # Public exports
 ```
 
----
+## 2️⃣ Routing（Angular 20 standalone lazy loading）
 
-## 2️⃣ Core Principles
+* 以 `Route[]` 匯出，供 Blueprint route 使用 `loadChildren` 或直接匯入。
+* 頁面元件使用 `standalone: true`，並以 `SHARED_IMPORTS` / 特定 imports 取代 NgModule。
 
-1. **Single Responsibility (SRP)**
-   Each module focuses on a single responsibility (e.g., Contracts, Tasks, User Settings).
+範例：
+```typescript
+import { Routes } from '@angular/router';
+import { FeatureShellComponent } from './feature-shell.component';
+import { FeatureListComponent } from './components/feature-list.component';
+import { FeatureDetailComponent } from './components/feature-detail.component';
 
-2. **Clear Boundaries and Interfaces**
+export const FEATURE_ROUTES: Routes = [
+  {
+    path: '',
+    component: FeatureShellComponent,
+    children: [
+      { path: '', component: FeatureListComponent },
+      { path: ':id', component: FeatureDetailComponent },
+    ],
+  },
+];
+```
 
-   * Use services or facades for external access.
-   * Do not allow direct manipulation of internal state or Firestore collections.
+## 3️⃣ 核心原則
 
-3. **Plug-and-Play / Extensible Design**
+1. **Standalone First**  
+   無 NgModule / `forRoot` / `forFeature`。Routing、DI、imports 皆由元件與 route 配置完成。
 
-   * Support `forRoot()` / `forFeature()` static methods for dependency injection.
-   * Lazy loading reduces tight coupling between modules.
+2. **UI → Service → Repository**  
+   * UI：signals 管理本地狀態，使用 `input()/output()`、`@if/@for` 控制流。  
+   * Service/Facade：協調權限、校驗與流程；不得直接存取 Firestore。  
+   * Repository：唯一的 Firestore 入口，繼承 `FirestoreBaseRepository`，實作資料轉換與重試。
 
-4. **Centralized Data Access Layer**
+3. **Feature Isolation**  
+   子功能（list/detail/edit...）自包含，透過 facade/store 共享狀態與事件，避免跨 feature 耦合。
 
-   * Firestore or API operations go through service/repository.
-   * Swapping data sources does not affect module logic.
+4. **Lazy + Permission Aware**  
+   Route 層決定載入與守衛；權限判斷集中於 service/facade（UI 只負責呈現禁用/隱藏狀態）。
 
----
+## 4️⃣ Extensibility & Shared Assets
 
-## 3️⃣ Extensibility Considerations
+* 新增子功能時，以 `components/` 或 `features/` 子資料夾自包含實作，並更新 `routes.ts`。  
+* 共用的 ST 表格、表單 schema、timeline 等放在 `shared/`，或提升到 `src/app/shared/components`。  
+* 資料模型、Repository 查詢條件保持通用型態以利重用與測試。
 
-1. **Adding Sub-Modules**
+## 5️⃣ 最佳實踐
 
-   * Example: `installments-module`, `audit-log-module`.
-   * Use lazy loading and `forFeature()` pattern.
-
-2. **State Management**
-
-   * Use Signals, RxJS, or NgRx for shared module state.
-   * Avoid repeated Firestore reads.
-
-3. **Permissions and Roles**
-
-   * Abstract permission logic via `PermissionsService` or `NgxPermissions` + Firebase Claims.
-   * Standard checks like `canEditContract(user, contract)`.
-
-4. **Shared UI Components**
-
-   * Tables, PDF viewers, attachments, timelines should live in `shared/components` for reuse.
-
----
-
-## 4️⃣ Sub-Modules Guidelines
-
-* Each sub-module should be self-contained with its own services, state, and components.
-* Lazy load whenever possible to optimize performance.
-* Expose a facade to wrap service layer, preventing direct dependency on internal implementations.
-* Maintain consistent naming for folders, components, services, and models.
-
----
-
-## 5️⃣ Notes / Best Practices
-
-* Keep all modules consistent in structure to make onboarding and expansion easier.
-* Optional folders (`state`, `utils`) can be left empty but preserve the folder for consistency.
-* Service → Facade → Component flow should always be maintained.
-* Firestore or API changes should only affect the service layer; components should remain unchanged.
-* Document each module’s purpose, permissions, and main routes in a README.md inside the module folder.
-
----
+* 使用 `inject()` 取代 constructor DI；狀態以 `signal/computed/effect` 組合。  
+* Firestore 查詢一律走 Repository，並以 Security Rules 做第二道防線。  
+* 控制流使用 `@if / @for / @switch`，事件使用 `output()`。  
+* 拆分 orchestrator（Shell）與純 UI 元件，Shell 僅負責調度與管控 loading/error。  
+* 每個子目錄保留 README 或 index barrel，描述公開 API 與權限需求。
