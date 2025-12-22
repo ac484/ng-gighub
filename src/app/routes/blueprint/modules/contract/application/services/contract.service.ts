@@ -483,10 +483,13 @@ export class ContractService {
    * Aggregate statistics without extra Firestore reads.
    */
   private buildStatistics(contracts: Contract[]): ContractStatistics {
-    const counts = {} as Record<ContractStatus, number>;
-    for (const status of CONTRACT_STATUSES) {
-      counts[status] = 0;
-    }
+    const counts: Record<ContractStatus, number> = {
+      draft: 0,
+      pending_activation: 0,
+      active: 0,
+      completed: 0,
+      terminated: 0
+    };
 
     let totalValue = 0;
     let activeValue = 0;
