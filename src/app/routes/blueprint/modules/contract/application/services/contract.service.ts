@@ -137,7 +137,7 @@ export class ContractService {
       let activeValue = 0;
 
       for (const contract of contracts) {
-        counts[contract.status] = (counts[contract.status] ?? 0) + 1;
+        counts[contract.status] += 1;
         totalValue += contract.totalAmount;
         if (contract.status === 'active') {
           activeValue += contract.totalAmount;
