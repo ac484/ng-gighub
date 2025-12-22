@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { effect, inject, Injectable, Signal, signal } from '@angular/core';
 import { TasksRepository } from '../data-access/repositories/task.repository';
 import { TaskModel } from '../data-access/models/task.model';
 
@@ -13,6 +13,16 @@ export class TasksFacade {
     data: this.tasks.asReadonly(),
     loading: this.loading.asReadonly()
   };
+
+  ensureLoaded(blueprintId: Signal<string>): void {
+    effect(
+      () => {
+        const id = blueprintId();
+        void this.loadByBlueprint(id);
+      },
+      { allowSignalWrites: true }
+    );
+  }
 
   async loadByBlueprint(blueprintId: string): Promise<void> {
     this.loading.set(true);

@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { effect, inject, Injectable, Signal, signal } from '@angular/core';
 import { ContractRepository } from '../data-access/repositories/contract.repository';
 import { ContractModel } from '../data-access/models/contract.model';
 
@@ -13,6 +13,16 @@ export class ContractFacade {
     data: this.contracts.asReadonly(),
     loading: this.loading.asReadonly()
   };
+
+  ensureLoaded(blueprintId: Signal<string>): void {
+    effect(
+      () => {
+        const id = blueprintId();
+        void this.loadByBlueprint(id);
+      },
+      { allowSignalWrites: true }
+    );
+  }
 
   async loadByBlueprint(blueprintId: string): Promise<void> {
     this.loading.set(true);

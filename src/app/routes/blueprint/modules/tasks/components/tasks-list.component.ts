@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
 import { TasksFacade } from '../services/tasks.facade';
 
@@ -10,20 +10,34 @@ import { TasksFacade } from '../services/tasks.facade';
   template: `
     <page-header [title]="'任務 (Tasks)'" />
     <nz-card>
-      <p class="text-muted">Tasks 模組雛形，待接資料與權限流程。</p>
+      <p class="text-muted">Tasks 模組雛形，使用 @angular/fire 透過 Repository 讀取資料。</p>
       @if (loading()) {
         <nz-spin nzSimple />
-      }
-      @if (!loading()) {
-        <nz-alert nzType="info" nzMessage="尚未串接資料" />
+      } @else if (tasks().length === 0) {
+        <nz-alert nzType="info" nzMessage="尚未有任務資料" />
+      } @else {
+        <nz-list [nzDataSource]="tasks()" [nzRenderItem]="item">
+          <ng-template #item let-task>
+            <nz-list-item>
+              <nz-list-item-meta
+                [nzTitle]="task.title || '未命名任務'"
+                [nzDescription]="task.status || '未設定狀態'"
+              />
+            </nz-list-item>
+          </ng-template>
+        </nz-list>
       }
     </nz-card>
   `
 })
 export class TasksListComponent {
   private readonly facade = inject(TasksFacade);
-  loading = signal(false);
 
-  // 保留日後串接 blueprintId → facade.load(blueprintId)
-  // constructor() { this.facade.loading changes can be wired here }
+  readonly blueprintId = input.required<string>();
+  readonly tasks = computed(() => this.facade.tasksState.data());
+  readonly loading = computed(() => this.facade.tasksState.loading());
+
+  constructor() {
+    this.facade.ensureLoaded(this.blueprintId);
+  }
 }
