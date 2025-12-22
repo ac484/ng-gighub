@@ -30,3 +30,8 @@ export * from './features/member-form';
 
 // Shared Utilities
 export * from './shared';
+
+// Domain
+export * from './members.model';
+export * from './members.repository';
+export * from './members.service';

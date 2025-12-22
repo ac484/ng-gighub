@@ -1,11 +1,12 @@
 import { Component, ChangeDetectionStrategy, OnInit, inject, input } from '@angular/core';
-import { BlueprintMember, BlueprintRole, LoggerService } from '@core';
-import { BlueprintMemberRepository } from '@core/blueprint/repositories';
+import { LoggerService } from '@core';
 import { STColumn } from '@delon/abc/st';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS, createAsyncArrayState } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { firstValueFrom } from 'rxjs';
+
+import { Member } from '../../members.model';
+import { MembersService } from '../../members.service';
 
 /**
  * Member List Component
@@ -62,14 +63,14 @@ export class MemberListComponent implements OnInit {
   private readonly message = inject(NzMessageService);
   private readonly modal = inject(ModalHelper);
   private readonly logger = inject(LoggerService);
-  private readonly memberRepository: BlueprintMemberRepository = inject(BlueprintMemberRepository);
+  private readonly membersService = inject(MembersService);
 
   // Input: blueprint ID and owner type (required for member validation)
   blueprintId = input.required<string>();
   blueprintOwnerType = input.required<string>(); // 'user' or 'organization'
 
   // ✅ Modern Pattern: Use AsyncState for unified state management
-  readonly membersState = createAsyncArrayState<BlueprintMember>([]);
+  readonly membersState = createAsyncArrayState<Member>([]);
 
   // Table columns
   columns: STColumn[] = [
@@ -82,7 +83,7 @@ export class MemberListComponent implements OnInit {
       title: '成員類型',
       index: 'memberType',
       width: '100px',
-      format: (item: BlueprintMember) => {
+      format: (item: Member) => {
         const type = item.memberType;
         return type === 'user' ? '用戶' : type === 'team' ? '團隊' : type === 'partner' ? '夥伴' : type;
       }
@@ -102,7 +103,7 @@ export class MemberListComponent implements OnInit {
       title: '業務角色',
       index: 'businessRole',
       width: '150px',
-      format: (item: BlueprintMember) => this.getBusinessRoleName(item.businessRole),
+      format: (item: Member) => this.getBusinessRoleName(item.businessRole),
       default: '-'
     },
     {
@@ -150,7 +151,8 @@ export class MemberListComponent implements OnInit {
    */
   private async loadMembers(): Promise<void> {
     try {
-      await this.membersState.load(firstValueFrom(this.memberRepository.findByBlueprint(this.blueprintId())));
+      const members = await this.membersService.list(this.blueprintId());
+      await this.membersState.load(Promise.resolve(members));
       this.logger.info('[MemberListComponent]', `Loaded ${this.membersState.length()} members`);
     } catch (error) {
       this.message.error('載入成員失敗');
@@ -205,7 +207,7 @@ export class MemberListComponent implements OnInit {
    * 編輯成員角色/權限
    */
   async editMember(record: any): Promise<void> {
-    const member = record as BlueprintMember;
+    const member = record as Member;
     const { MemberFormModalComponent } = await import('../member-form/member-form-modal.component');
     this.modal
       .createStatic(
@@ -229,10 +231,10 @@ export class MemberListComponent implements OnInit {
    * 移除成員
    */
   async removeMember(record: any): Promise<void> {
-    const member = record as BlueprintMember;
+    const member = record as Member;
 
     try {
-      await this.memberRepository.removeMember(this.blueprintId(), member.id);
+      await this.membersService.removeMember(this.blueprintId(), member.id);
       this.message.success('成員已移除');
       this.loadMembers();
     } catch (error) {
