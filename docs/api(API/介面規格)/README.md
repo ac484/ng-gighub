@@ -14,6 +14,7 @@ api/interface-spec/
 ├── 05-contract-module-docs-index.md # 合約模組文檔索引（角色導向導覽）
 ├── 06-contract-implementation-quickstart.md # 合約模組實作快速開始（docs-old 提取）
 ├── 07-contract-module-architecture.md # 合約模組架構摘要（docs-old 提取）
+├── 08-contract-upload-and-parsing.md # 合約上傳與解析指南（docs-old 提取）
 ├── contracts/                  # API 契約檔案目錄
 │   ├── task.contract.md
 │   ├── blueprint.contract.md
