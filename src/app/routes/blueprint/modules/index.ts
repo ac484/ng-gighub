@@ -6,10 +6,7 @@
  */
 
 // Contract Module
-export * from './contract/contract-creation-wizard.component';
-export * from './contract/contract-detail-drawer.component';
-export * from './contract/contract-modal.component';
-export * from './contract/contract-module-view.component';
+export * from './contract';
 
 // Finance Module
 export * from './finance';
@@ -41,5 +38,13 @@ export * from './qa';
 // Log Module
 export * from './log';
 
+// Safety Module
+export * from './safety';
+
+// Workflow Module
+export * from './workflow';
+
+// Warranty Module
+export * from './warranty';
 // Cloud Module
 export * from './cloud';
