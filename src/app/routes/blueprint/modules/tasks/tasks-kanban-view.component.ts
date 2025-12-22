@@ -97,7 +97,7 @@ import { TasksService } from './tasks.service';
 })
 export class TasksKanbanViewComponent {
   blueprintId = input.required<string>();
-  private readonly tasksService = inject(TasksService);
+  readonly tasksService = inject(TasksService);
 
   async move(taskId: string, status: TaskStatus): Promise<void> {
     await this.tasksService.updateStatus(taskId, status);

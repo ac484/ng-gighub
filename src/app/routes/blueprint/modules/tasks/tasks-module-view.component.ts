@@ -100,7 +100,7 @@ import { TasksService } from './tasks.service';
     </nz-row>
 
     <nz-card>
-      <nz-tabset nzTabBarStyle="margin-bottom: 16px;">
+      <nz-tabset [nzTabBarStyle]="{ 'margin-bottom': '16px' }">
         <nz-tab nzTitle="列表">
           <ng-template nz-tab>
             <app-tasks-list-view [blueprintId]="blueprintId()" />
