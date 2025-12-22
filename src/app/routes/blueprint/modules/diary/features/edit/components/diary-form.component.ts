@@ -10,7 +10,7 @@
 
 import { Component, OnInit, input, output, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Log } from '@core/types/log/log.types';
+import { Diary } from '../../../diary.model';
 import { SHARED_IMPORTS } from '@shared';
 
 @Component({
@@ -102,7 +102,7 @@ export class DiaryFormComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   // Inputs
-  diary = input<Log | null>(null);
+  diary = input<Diary | null>(null);
   isView = input<boolean>(false);
 
   // Outputs

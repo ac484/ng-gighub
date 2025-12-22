@@ -11,8 +11,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FirebaseService } from '@core/services/firebase.service';
-import { ConstructionLogStore } from '@core/stores';
-import { Log, CreateLogRequest, UpdateLogRequest } from '@core/types/log/log.types';
+import { Diary, CreateDiaryRequest, UpdateDiaryRequest } from '../../diary.model';
+import { DiaryService } from '../../diary.service';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
@@ -22,7 +22,7 @@ import { DiaryPhotoUploadComponent } from './components/diary-photo-upload.compo
 
 interface ModalData {
   blueprintId: string;
-  diary?: Log;
+  diary?: Diary;
   mode: 'create' | 'edit' | 'view';
 }
 
@@ -56,7 +56,7 @@ interface ModalData {
 export class DiaryEditModalComponent implements OnInit {
   private modalRef = inject(NzModalRef);
   private message = inject(NzMessageService);
-  private logStore = inject(ConstructionLogStore);
+  private diaryService = inject(DiaryService);
   private firebaseService = inject(FirebaseService);
 
   // Modal data injected
@@ -88,7 +88,7 @@ export class DiaryEditModalComponent implements OnInit {
     if (!diaryId) return;
 
     try {
-      await this.logStore.deletePhoto(this.modalData.blueprintId, diaryId, photoId);
+      await this.diaryService.deletePhoto(this.modalData.blueprintId, diaryId, photoId);
       this.message.success('照片刪除成功');
 
       if (this.modalData.diary) {
@@ -135,7 +135,7 @@ export class DiaryEditModalComponent implements OnInit {
     }
   }
 
-  private async createDiary(formValue: any): Promise<Log> {
+  private async createDiary(formValue: any): Promise<Diary> {
     if (!formValue.date) {
       throw new Error('請選擇日期');
     }
@@ -145,7 +145,7 @@ export class DiaryEditModalComponent implements OnInit {
       throw new Error('無法取得使用者資訊，請重新登入');
     }
 
-    const request: CreateLogRequest = {
+    const request: CreateDiaryRequest = {
       blueprintId: this.modalData.blueprintId,
       date: formValue.date,
       title: formValue.title,
@@ -158,10 +158,10 @@ export class DiaryEditModalComponent implements OnInit {
       creatorId: currentUserId
     };
 
-    return this.logStore.createLog(request);
+    return this.diaryService.create(request);
   }
 
-  private async updateDiary(formValue: any): Promise<Log> {
+  private async updateDiary(formValue: any): Promise<Diary> {
     const diaryId = this.modalData.diary?.id;
     if (!diaryId) {
       throw new Error('無法取得日誌 ID');
@@ -171,7 +171,7 @@ export class DiaryEditModalComponent implements OnInit {
       throw new Error('請選擇日期');
     }
 
-    const request: UpdateLogRequest = {
+    const request: UpdateDiaryRequest = {
       date: formValue.date,
       title: formValue.title,
       description: formValue.description,
@@ -182,11 +182,11 @@ export class DiaryEditModalComponent implements OnInit {
       temperature: formValue.temperature
     };
 
-    return this.logStore.updateLog(this.modalData.blueprintId, diaryId, request);
+    return this.diaryService.update(this.modalData.blueprintId, diaryId, request);
   }
 
   private async uploadPhotos(diaryId: string): Promise<void> {
-    await Promise.all(this.fileList.map(file => this.logStore.uploadPhoto(this.modalData.blueprintId, diaryId, file)));
+    await Promise.all(this.fileList.map(file => this.diaryService.uploadPhoto(this.modalData.blueprintId, diaryId, file)));
   }
 
   cancel(): void {
