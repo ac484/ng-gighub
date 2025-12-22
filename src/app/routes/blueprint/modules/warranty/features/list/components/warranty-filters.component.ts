@@ -24,8 +24,7 @@ import { SHARED_IMPORTS } from '@shared';
   template: `
     <div class="filter-bar" style="margin-bottom: 16px; display: flex; gap: 16px; flex-wrap: wrap;">
       <nz-select
-        [(ngModel)]="selectedStatus"
-        (ngModelChange)="statusChange.emit($event)"
+        [(ngModel)]="selectedStatusModel"
         nzPlaceHolder="選擇狀態"
         nzAllowClear
         style="width: 150px;"
@@ -35,7 +34,7 @@ import { SHARED_IMPORTS } from '@shared';
         }
       </nz-select>
       <nz-input-group nzPrefixIcon="search" style="width: 240px;">
-        <input nz-input [(ngModel)]="searchText" (ngModelChange)="searchChange.emit($event)" placeholder="搜尋保固編號..." />
+        <input nz-input [(ngModel)]="searchTextModel" placeholder="搜尋保固編號..." />
       </nz-input-group>
       <button nz-button (click)="refresh.emit()">
         <span nz-icon nzType="reload"></span>
@@ -48,12 +47,12 @@ export class WarrantyFiltersComponent {
   /**
    * 選中的狀態
    */
-  selectedStatus: WarrantyStatus | null = null;
+  private readonly selectedStatus = signal<WarrantyStatus | null>(null);
 
   /**
    * 搜尋文字
    */
-  searchText = signal('');
+  private readonly searchText = signal('');
 
   /**
    * 狀態選項
@@ -81,4 +80,23 @@ export class WarrantyFiltersComponent {
    * 重新整理事件
    */
   refresh = output<void>();
+
+  get selectedStatusModel(): WarrantyStatus | null {
+    return this.selectedStatus();
+  }
+
+  set selectedStatusModel(value: WarrantyStatus | null) {
+    this.selectedStatus.set(value);
+    this.statusChange.emit(value);
+  }
+
+  get searchTextModel(): string {
+    return this.searchText();
+  }
+
+  set searchTextModel(value: string) {
+    const next = value ?? '';
+    this.searchText.set(next);
+    this.searchChange.emit(next);
+  }
 }

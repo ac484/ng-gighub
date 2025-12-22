@@ -9,7 +9,7 @@
  * @date 2025-12-19
  */
 
-import { Component, ChangeDetectionStrategy, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, output, signal } from '@angular/core';
 import type { WarrantyDefectStatus } from '@core/blueprint/modules/implementations/warranty';
 import { SHARED_IMPORTS } from '@shared';
 
@@ -24,8 +24,7 @@ import { SHARED_IMPORTS } from '@shared';
   template: `
     <div class="filter-bar" style="margin-bottom: 16px; display: flex; gap: 16px; flex-wrap: wrap;">
       <nz-select
-        [(ngModel)]="selectedStatus"
-        (ngModelChange)="statusChange.emit($event)"
+        [(ngModel)]="selectedStatusModel"
         nzPlaceHolder="選擇狀態"
         nzAllowClear
         style="width: 150px;"
@@ -35,8 +34,7 @@ import { SHARED_IMPORTS } from '@shared';
         }
       </nz-select>
       <nz-select
-        [(ngModel)]="selectedSeverity"
-        (ngModelChange)="severityChange.emit($event)"
+        [(ngModel)]="selectedSeverityModel"
         nzPlaceHolder="選擇嚴重程度"
         nzAllowClear
         style="width: 150px;"
@@ -56,12 +54,12 @@ export class DefectFiltersComponent {
   /**
    * 選中的狀態
    */
-  selectedStatus: WarrantyDefectStatus | null = null;
+  private readonly selectedStatus = signal<WarrantyDefectStatus | null>(null);
 
   /**
    * 選中的嚴重程度
    */
-  selectedSeverity: string | null = null;
+  private readonly selectedSeverity = signal<string | null>(null);
 
   /**
    * 狀態選項
@@ -90,4 +88,22 @@ export class DefectFiltersComponent {
    * 重新整理事件
    */
   refresh = output<void>();
+
+  get selectedStatusModel(): WarrantyDefectStatus | null {
+    return this.selectedStatus();
+  }
+
+  set selectedStatusModel(value: WarrantyDefectStatus | null) {
+    this.selectedStatus.set(value);
+    this.statusChange.emit(value);
+  }
+
+  get selectedSeverityModel(): string | null {
+    return this.selectedSeverity();
+  }
+
+  set selectedSeverityModel(value: string | null) {
+    this.selectedSeverity.set(value);
+    this.severityChange.emit(value);
+  }
 }

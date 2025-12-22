@@ -108,7 +108,7 @@ interface WorkflowTemplate {
       } @else {
         <nz-row [nzGutter]="[16, 16]">
           <nz-col [nzXs]="12" [nzSm]="6">
-            <nz-card nzSize="small" [nzHoverable]="true" (click)="activeTabIndex = 0">
+            <nz-card nzSize="small" [nzHoverable]="true" (click)="setActiveTab(0)">
               <nz-statistic [nzValue]="workflows().length" nzTitle="自訂流程" [nzPrefix]="workflowIcon" />
               <ng-template #workflowIcon>
                 <span nz-icon nzType="apartment" style="color: #1890ff;"></span>
@@ -119,7 +119,7 @@ interface WorkflowTemplate {
             </nz-card>
           </nz-col>
           <nz-col [nzXs]="12" [nzSm]="6">
-            <nz-card nzSize="small" [nzHoverable]="true" (click)="activeTabIndex = 1">
+            <nz-card nzSize="small" [nzHoverable]="true" (click)="setActiveTab(1)">
               <nz-statistic [nzValue]="stateMachines().length" nzTitle="狀態機" [nzPrefix]="stateIcon" />
               <ng-template #stateIcon>
                 <span nz-icon nzType="cluster" style="color: #52c41a;"></span>
@@ -130,7 +130,7 @@ interface WorkflowTemplate {
             </nz-card>
           </nz-col>
           <nz-col [nzXs]="12" [nzSm]="6">
-            <nz-card nzSize="small" [nzHoverable]="true" (click)="activeTabIndex = 2">
+            <nz-card nzSize="small" [nzHoverable]="true" (click)="setActiveTab(2)">
               <nz-statistic [nzValue]="automations().length" nzTitle="自動化觸發" [nzPrefix]="autoIcon" />
               <ng-template #autoIcon>
                 <span nz-icon nzType="robot" style="color: #faad14;"></span>
@@ -141,7 +141,7 @@ interface WorkflowTemplate {
             </nz-card>
           </nz-col>
           <nz-col [nzXs]="12" [nzSm]="6">
-            <nz-card nzSize="small" [nzHoverable]="true" (click)="activeTabIndex = 3">
+            <nz-card nzSize="small" [nzHoverable]="true" (click)="setActiveTab(3)">
               <nz-statistic [nzValue]="approvals().length" nzTitle="審批流程" [nzPrefix]="approvalIcon" />
               <ng-template #approvalIcon>
                 <span nz-icon nzType="audit" style="color: #eb2f96;"></span>
@@ -157,7 +157,7 @@ interface WorkflowTemplate {
 
     <!-- Workflow Tabs -->
     <nz-card>
-      <nz-tabset [(nzSelectedIndex)]="activeTabIndex">
+      <nz-tabset [(nzSelectedIndex)]="activeTabIndexModel">
         <!-- 自訂流程 Tab -->
         <nz-tab nzTitle="自訂流程">
           <ng-template nz-tab>
@@ -447,7 +447,7 @@ export class WorkflowModuleViewComponent implements OnInit {
 
   // 狀態
   loading = signal(false);
-  activeTabIndex = 0;
+  activeTabIndex = signal(0);
 
   // 資料
   workflows = signal<CustomWorkflow[]>([]);
@@ -462,6 +462,14 @@ export class WorkflowModuleViewComponent implements OnInit {
   enabledAutomationCount = computed(() => this.automations().filter(a => a.enabled).length);
 
   pendingApprovalCount = computed(() => this.approvals().filter(a => a.status === 'pending' || a.status === 'in_progress').length);
+
+  get activeTabIndexModel(): number {
+    return this.activeTabIndex();
+  }
+
+  set activeTabIndexModel(value: number) {
+    this.activeTabIndex.set(value ?? 0);
+  }
 
   // 自訂流程欄位
   workflowColumns: STColumn[] = [
@@ -621,6 +629,10 @@ export class WorkflowModuleViewComponent implements OnInit {
 
     // 載入模擬資料
     this.loadMockData();
+  }
+
+  setActiveTab(index: number): void {
+    this.activeTabIndex.set(index);
   }
 
   /** 載入模擬資料 */

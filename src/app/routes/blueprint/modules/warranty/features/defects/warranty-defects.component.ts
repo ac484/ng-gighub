@@ -10,9 +10,8 @@
  * @date 2025-12-19
  */
 
-import { Component, ChangeDetectionStrategy, OnInit, inject, signal, computed, DestroyRef, output, input } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { WarrantyDefectRepository, WarrantyDefectService, DefectStatistics } from '@core/blueprint/modules/implementations/warranty';
+import { Component, ChangeDetectionStrategy, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { DefectStatistics, WarrantyDefectService } from '@core/blueprint/modules/implementations/warranty';
 import type { WarrantyDefect, WarrantyDefectStatus } from '@core/blueprint/modules/implementations/warranty';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -66,11 +65,9 @@ import { DefectTableComponent } from './components/defect-table.component';
   `
 })
 export class WarrantyDefectsComponent implements OnInit {
-  private readonly defectRepository = inject(WarrantyDefectRepository);
   private readonly defectService = inject(WarrantyDefectService);
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
-  private readonly destroyRef = inject(DestroyRef);
 
   /**
    * 藍圖 ID (從父元件傳入)
@@ -149,7 +146,7 @@ export class WarrantyDefectsComponent implements OnInit {
     this.loading.set(true);
 
     try {
-      const defects = await this.defectRepository.getByWarrantyId(bpId, wId);
+      const defects = await this.defectService.getAllDefects(bpId, wId);
       this.defects.set(defects);
 
       const stats = await this.defectService.getDefectStatistics(bpId, wId);

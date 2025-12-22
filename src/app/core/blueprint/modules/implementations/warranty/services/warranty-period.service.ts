@@ -16,7 +16,7 @@ import { LoggerService } from '@core';
 import { WarrantyConfig } from '../config/warranty.config';
 import type { Warranty, WarrantyStatus, WarrantorInfo, CreateWarrantyOptions } from '../models/warranty.model';
 import { WarrantyDefectRepository } from '../repositories/warranty-defect.repository';
-import { WarrantyRepository } from '../repositories/warranty.repository';
+import { WarrantyRepository, type WarrantyQueryOptions } from '../repositories/warranty.repository';
 
 /**
  * 保固證明
@@ -172,6 +172,13 @@ export class WarrantyPeriodService {
    */
   async getExpiredWarranties(blueprintId: string): Promise<Warranty[]> {
     return this.warrantyRepository.getExpiredWarranties(blueprintId);
+  }
+
+  /**
+   * 取得保固列表
+   */
+  getWarranties(blueprintId: string, options?: WarrantyQueryOptions) {
+    return this.warrantyRepository.findByBlueprintId(blueprintId, options);
   }
 
   /**

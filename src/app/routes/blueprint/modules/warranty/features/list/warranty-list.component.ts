@@ -10,10 +10,9 @@
  * @date 2025-12-19
  */
 
-import { Component, ChangeDetectionStrategy, OnInit, inject, signal, computed, DestroyRef, output, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, DestroyRef, computed, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute } from '@angular/router';
-import { WarrantyRepository, WarrantyQueryOptions } from '@core/blueprint/modules/implementations/warranty';
+import { WarrantyPeriodService, WarrantyQueryOptions } from '@core/blueprint/modules/implementations/warranty';
 import type { Warranty, WarrantyStatus } from '@core/blueprint/modules/implementations/warranty';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -63,8 +62,7 @@ import { WarrantyTableComponent } from './components/warranty-table.component';
   `
 })
 export class WarrantyListComponent implements OnInit {
-  private readonly warrantyRepository = inject(WarrantyRepository);
-  private readonly route = inject(ActivatedRoute);
+  private readonly warrantyService = inject(WarrantyPeriodService);
   private readonly message = inject(NzMessageService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -139,8 +137,8 @@ export class WarrantyListComponent implements OnInit {
       options.status = status;
     }
 
-    this.warrantyRepository
-      .findByBlueprintId(bpId, options)
+    this.warrantyService
+      .getWarranties(bpId, options)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: warranties => {

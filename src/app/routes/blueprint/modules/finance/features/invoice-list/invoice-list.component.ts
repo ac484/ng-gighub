@@ -45,18 +45,18 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 
       <!-- 篩選區域 -->
       <div class="filter-bar" style="margin-bottom: 16px; display: flex; gap: 16px; flex-wrap: wrap;">
-        <nz-select [(ngModel)]="statusFilter" (ngModelChange)="reload()" style="width: 160px;" nzPlaceHolder="篩選狀態" nzAllowClear>
+        <nz-select [(ngModel)]="statusFilterModel" (ngModelChange)="reload()" style="width: 160px;" nzPlaceHolder="篩選狀態" nzAllowClear>
           @for (status of statusOptions; track status.value) {
             <nz-option [nzValue]="status.value" [nzLabel]="status.label"></nz-option>
           }
         </nz-select>
 
-        <nz-date-picker [(ngModel)]="startDate" (ngModelChange)="reload()" nzPlaceHolder="開始日期"> </nz-date-picker>
+        <nz-date-picker [(ngModel)]="startDateModel" (ngModelChange)="reload()" nzPlaceHolder="開始日期"> </nz-date-picker>
 
-        <nz-date-picker [(ngModel)]="endDate" (ngModelChange)="reload()" nzPlaceHolder="結束日期"> </nz-date-picker>
+        <nz-date-picker [(ngModel)]="endDateModel" (ngModelChange)="reload()" nzPlaceHolder="結束日期"> </nz-date-picker>
 
         <nz-input-group nzSearch [nzAddOnAfter]="searchBtn" style="width: 240px;">
-          <input type="text" nz-input [(ngModel)]="searchKeyword" placeholder="搜尋編號或名稱" (keyup.enter)="reload()" />
+          <input type="text" nz-input [(ngModel)]="searchKeywordModel" placeholder="搜尋編號或名稱" (keyup.enter)="reload()" />
         </nz-input-group>
         <ng-template #searchBtn>
           <button nz-button nzType="primary" nzSearch (click)="reload()">
@@ -96,10 +96,10 @@ export class InvoiceListComponent implements OnInit {
   loading = signal(false);
 
   /** 篩選條件 */
-  statusFilter = '';
-  startDate: Date | null = null;
-  endDate: Date | null = null;
-  searchKeyword = '';
+  statusFilter = signal('');
+  startDate = signal<Date | null>(null);
+  endDate = signal<Date | null>(null);
+  searchKeyword = signal('');
 
   /** 頁面標題 */
   pageTitle = computed(() => (this.invoiceType() === 'receivable' ? '請款單管理' : '付款單管理'));
@@ -109,21 +109,25 @@ export class InvoiceListComponent implements OnInit {
     let result = this.invoices().filter(inv => inv.invoiceType === this.invoiceType());
 
     // 狀態篩選
-    if (this.statusFilter) {
-      result = result.filter(inv => inv.status === this.statusFilter);
+    const statusFilter = this.statusFilter();
+    if (statusFilter) {
+      result = result.filter(inv => inv.status === statusFilter);
     }
 
     // 日期範圍篩選
-    if (this.startDate && this.endDate) {
+    const startDate = this.startDate();
+    const endDate = this.endDate();
+    if (startDate && endDate) {
       result = result.filter(inv => {
         const date = inv.createdAt instanceof Date ? inv.createdAt : new Date(inv.createdAt);
-        return date >= this.startDate! && date <= this.endDate!;
+        return date >= startDate && date <= endDate;
       });
     }
 
     // 關鍵字搜尋
-    if (this.searchKeyword) {
-      const keyword = this.searchKeyword.toLowerCase();
+    const keywordRaw = this.searchKeyword();
+    if (keywordRaw) {
+      const keyword = keywordRaw.toLowerCase();
       result = result.filter(
         inv =>
           inv.invoiceNumber.toLowerCase().includes(keyword) ||
@@ -134,6 +138,38 @@ export class InvoiceListComponent implements OnInit {
 
     return result;
   });
+
+  get statusFilterModel(): string {
+    return this.statusFilter();
+  }
+
+  set statusFilterModel(value: string) {
+    this.statusFilter.set(value ?? '');
+  }
+
+  get startDateModel(): Date | null {
+    return this.startDate();
+  }
+
+  set startDateModel(value: Date | null) {
+    this.startDate.set(value);
+  }
+
+  get endDateModel(): Date | null {
+    return this.endDate();
+  }
+
+  set endDateModel(value: Date | null) {
+    this.endDate.set(value);
+  }
+
+  get searchKeywordModel(): string {
+    return this.searchKeyword();
+  }
+
+  set searchKeywordModel(value: string) {
+    this.searchKeyword.set(value ?? '');
+  }
 
   /** 狀態選項 */
   statusOptions = [

@@ -13,7 +13,7 @@
 import { Component, ChangeDetectionStrategy, inject, input, signal } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import type { Warranty, WarrantyDefect } from '@core/blueprint/modules/implementations/warranty';
-import { WarrantyDefectRepository } from '@core/blueprint/modules/implementations/warranty';
+import { WarrantyDefectService } from '@core/blueprint/modules/implementations/warranty';
 import { SHARED_IMPORTS } from '@shared';
 
 import { WarrantyDetailDrawerComponent } from './features/detail';
@@ -56,7 +56,7 @@ import { WarrantyListComponent } from './features/list';
 export class WarrantyModuleViewComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly defectRepository = inject(WarrantyDefectRepository);
+  private readonly defectService = inject(WarrantyDefectService);
 
   /**
    * 藍圖 ID (從父元件傳入)
@@ -79,7 +79,7 @@ export class WarrantyModuleViewComponent {
 
     // 載入缺失列表
     try {
-      const defects = await this.defectRepository.getByWarrantyId(this.blueprintId(), warranty.id);
+      const defects = await this.defectService.getAllDefects(this.blueprintId(), warranty.id);
       this.selectedDefects.set(defects);
     } catch {
       this.selectedDefects.set([]);

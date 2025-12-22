@@ -8,7 +8,7 @@
  * @date 2025-12-10
  */
 
-import { Component, input, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { ModuleStatus } from '@core/blueprint/modules/module-status.enum';
 import { SHARED_IMPORTS } from '@shared';
 
@@ -33,6 +33,7 @@ const STATUS_CONFIG: Record<ModuleStatus, { text: string; status: string; color:
   selector: 'app-module-status-badge',
   standalone: true,
   imports: [SHARED_IMPORTS],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: ` <nz-badge [nzStatus]="badgeStatus()" [nzText]="statusText()" [ngStyle]="{ color: badgeColor() }"> </nz-badge> `,
   styles: [
     `

@@ -8,12 +8,10 @@
  * @date 2025-12-11
  */
 
-import { Component, OnInit, inject, signal, computed, DestroyRef, input, effect } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { ModuleStatus } from '@core/blueprint/modules/module-status.enum';
 import { BlueprintModuleDocument } from '@core/domain/models/blueprint-module.model';
-import { STColumn, STData } from '@delon/abc/st';
+import { STColumn } from '@delon/abc/st';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -28,6 +26,7 @@ import { ModuleManagerService } from './module-manager.service';
   selector: 'app-module-manager',
   standalone: true,
   imports: [SHARED_IMPORTS, ModuleCardComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <page-header [title]="'模組管理'">
       <ng-template #extra>
@@ -75,11 +74,11 @@ import { ModuleManagerService } from './module-manager.service';
       <nz-row [nzGutter]="16">
         <nz-col [nzSpan]="8">
           <nz-input-group [nzPrefix]="searchIcon">
-            <input nz-input placeholder="搜尋模組名稱或描述" [(ngModel)]="searchText" (ngModelChange)="onSearchChange()" />
+            <input nz-input placeholder="搜尋模組名稱或描述" [(ngModel)]="searchTextModel" (ngModelChange)="onSearchChange()" />
           </nz-input-group>
         </nz-col>
         <nz-col [nzSpan]="4">
-          <nz-select nzPlaceHolder="狀態篩選" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()" style="width: 100%">
+          <nz-select nzPlaceHolder="狀態篩選" [(ngModel)]="statusFilterModel" (ngModelChange)="onFilterChange()" style="width: 100%">
             <nz-option nzValue="all" nzLabel="全部"></nz-option>
             <nz-option nzValue="enabled" nzLabel="已啟用"></nz-option>
             <nz-option nzValue="disabled" nzLabel="已停用"></nz-option>
@@ -87,7 +86,7 @@ import { ModuleManagerService } from './module-manager.service';
           </nz-select>
         </nz-col>
         <nz-col [nzSpan]="4">
-          <nz-radio-group [(ngModel)]="viewMode" (ngModelChange)="onViewModeChange()">
+          <nz-radio-group [(ngModel)]="viewModeModel" (ngModelChange)="onViewModeChange()">
             <label nz-radio-button nzValue="grid">
               <span nz-icon nzType="appstore" nzTheme="outline"></span>
               網格
@@ -127,7 +126,7 @@ import { ModuleManagerService } from './module-manager.service';
     }
 
     <!-- Grid View -->
-    @else if (viewMode === 'grid') {
+    @else if (viewMode() === 'grid') {
       @if (filteredModules().length === 0) {
         <nz-empty [nzNotFoundContent]="'沒有找到模組'" [nzNotFoundFooter]="emptyFooter"> </nz-empty>
         <ng-template #emptyFooter>
@@ -207,21 +206,17 @@ import { ModuleManagerService } from './module-manager.service';
   ]
 })
 export class ModuleManagerComponent implements OnInit {
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
   private service = inject(ModuleManagerService);
   private modal = inject(ModalHelper);
   private message = inject(NzMessageService);
-  private destroyRef = inject(DestroyRef);
 
   // Inputs
   blueprintId = input.required<string>();
 
   // Component state
-  searchText = '';
-  statusFilter: 'all' | 'enabled' | 'disabled' | 'failed' = 'all';
-  viewMode: 'grid' | 'table' = 'grid';
-  blueprintName = signal<string>('Blueprint');
+  searchText = signal('');
+  statusFilter = signal<'all' | 'enabled' | 'disabled' | 'failed'>('all');
+  viewMode = signal<'grid' | 'table'>('grid');
 
   // Service state
   loading = this.service.loading;
@@ -237,14 +232,16 @@ export class ModuleManagerComponent implements OnInit {
     let filtered = this.modules();
 
     // Search filter
-    if (this.searchText) {
-      const search = this.searchText.toLowerCase();
-      filtered = filtered.filter(m => m.name.toLowerCase().includes(search) || m.moduleType.toLowerCase().includes(search));
+    const search = this.searchText();
+    if (search) {
+      const lower = search.toLowerCase();
+      filtered = filtered.filter(m => m.name.toLowerCase().includes(lower) || m.moduleType.toLowerCase().includes(lower));
     }
 
     // Status filter
-    if (this.statusFilter !== 'all') {
-      switch (this.statusFilter) {
+    const statusFilter = this.statusFilter();
+    if (statusFilter !== 'all') {
+      switch (statusFilter) {
         case 'enabled':
           filtered = filtered.filter(m => m.enabled);
           break;
@@ -259,6 +256,30 @@ export class ModuleManagerComponent implements OnInit {
 
     return filtered;
   });
+
+  get searchTextModel(): string {
+    return this.searchText();
+  }
+
+  set searchTextModel(value: string) {
+    this.searchText.set(value ?? '');
+  }
+
+  get statusFilterModel(): 'all' | 'enabled' | 'disabled' | 'failed' {
+    return this.statusFilter();
+  }
+
+  set statusFilterModel(value: 'all' | 'enabled' | 'disabled' | 'failed') {
+    this.statusFilter.set(value ?? 'all');
+  }
+
+  get viewModeModel(): 'grid' | 'table' {
+    return this.viewMode();
+  }
+
+  set viewModeModel(value: 'grid' | 'table') {
+    this.viewMode.set(value ?? 'grid');
+  }
 
   // Table columns
   columns: STColumn[] = [
