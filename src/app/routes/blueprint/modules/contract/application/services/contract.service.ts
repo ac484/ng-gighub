@@ -69,7 +69,7 @@ const STATUS_TRANSITIONS: Record<ContractStatus, ContractStatus[]> = {
   terminated: []
 };
 
-const CONTRACT_STATUSES = Object.keys(STATUS_TRANSITIONS) as ContractStatus[];
+const CONTRACT_STATUSES: readonly ContractStatus[] = ['draft', 'pending_activation', 'active', 'completed', 'terminated'];
 
 /**
  * Contract Service
@@ -478,13 +478,6 @@ export class ContractService {
   // ============================================================================
   // Helper Methods
   // ============================================================================
-
-  /**
-   * Calculate statistics for an already loaded contract list.
-   */
-  public getContractStatisticsFromContracts(contracts: Contract[]): ContractStatistics {
-    return this.buildStatistics(contracts);
-  }
 
   /**
    * Aggregate statistics without extra Firestore reads.
