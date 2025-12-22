@@ -8,7 +8,7 @@
  * - File type utilities
  */
 
-import type { CloudFile } from '@core/blueprint/modules/implementations/cloud';
+import type { CloudFile } from '../../cloud.model';
 
 /**
  * Format file size from bytes to human-readable format

@@ -7,7 +7,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
-import type { CloudFile } from '@core/blueprint/modules/implementations/cloud';
+import type { CloudFile } from '../../cloud.model';
 import { SHARED_IMPORTS } from '@shared';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';

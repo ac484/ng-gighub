@@ -15,8 +15,8 @@
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-import { CloudStorageService } from '@core/blueprint/modules/implementations/cloud';
-import type { CloudFile } from '@core/blueprint/modules/implementations/cloud';
+import { CloudService } from './cloud.service';
+import type { CloudFile } from './cloud.model';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
@@ -78,7 +78,7 @@ import { buildFolderSet, isValidFolderName, getFolderFromPath } from './shared/u
   `
 })
 export class CloudModuleViewComponent implements OnInit {
-  private readonly cloudService = inject(CloudStorageService);
+  private readonly cloudService = inject(CloudService);
   private readonly message = inject(NzMessageService);
   private readonly modal = inject(NzModalService);
 
