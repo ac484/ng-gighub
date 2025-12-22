@@ -28,11 +28,11 @@ import { LogModuleViewComponent } from './modules/log';
 import { ModuleManagerComponent } from './modules/manager/module-manager.component';
 import { MembersModuleViewComponent } from './modules/members';
 import { QaModuleViewComponent } from './modules/qa';
-import { SafetyModuleViewComponent } from './modules/safety-module-view.component';
+import { SafetyModuleViewComponent } from './modules/safety';
 import { TasksModuleViewComponent } from './modules/tasks';
 import { WarrantyModuleViewComponent } from './modules/warranty';
 import { WeatherModuleViewComponent } from './modules/weather';
-import { WorkflowModuleViewComponent } from './modules/workflow-module-view.component';
+import { WorkflowModuleViewComponent } from './modules/workflow';
 
 /**
  * Blueprint Detail Component
