@@ -69,6 +69,8 @@ const STATUS_TRANSITIONS: Record<ContractStatus, ContractStatus[]> = {
   terminated: []
 };
 
+const CONTRACT_STATUSES = Object.keys(STATUS_TRANSITIONS) as ContractStatus[];
+
 /**
  * Contract Service
  *
@@ -119,11 +121,11 @@ export class ContractService {
   /**
    * Get contract statistics for a blueprint
    */
-  async getContractStatistics(blueprintId: string, existingContracts?: Contract[]): Promise<ContractStatistics> {
+  async getContractStatistics(blueprintId: string): Promise<ContractStatistics> {
     this.logger.debug('[ContractService]', 'getContractStatistics', { blueprintId });
 
     try {
-      const contracts = existingContracts ?? (await this.getContractsByBlueprint(blueprintId));
+      const contracts = await this.getContractsByBlueprint(blueprintId);
       return this.buildStatistics(contracts);
     } catch (error) {
       this.logger.error('[ContractService]', 'Failed to get statistics', error as Error, { blueprintId });
@@ -474,15 +476,22 @@ export class ContractService {
   }
 
   // ============================================================================
-  // Private Helper Methods
+  // Helper Methods
   // ============================================================================
+
+  /**
+   * Calculate statistics for an already loaded contract list.
+   */
+  public getContractStatisticsFromContracts(contracts: Contract[]): ContractStatistics {
+    return this.buildStatistics(contracts);
+  }
 
   /**
    * Aggregate statistics without extra Firestore reads.
    */
   private buildStatistics(contracts: Contract[]): ContractStatistics {
     const counts = {} as Record<ContractStatus, number>;
-    for (const status of Object.keys(STATUS_TRANSITIONS) as ContractStatus[]) {
+    for (const status of CONTRACT_STATUSES) {
       counts[status] = 0;
     }
 
