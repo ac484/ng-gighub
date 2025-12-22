@@ -1,13 +1,24 @@
 # 任務模組設計文件 (Tasks Module Design)
 
 ## 文件資訊
-- **版本**: v1.0
+- **版本**: v1.1
 - **最後更新**: 2025-12-22
 - **適用範圍**: `/src/app/routes/blueprint/modules/tasks`
+- **審核狀態**: ✅ 已檢查並修正潛在實作問題
 - **相關文件**: 
   - [Blueprint Module Template](../README.md)
   - [Component Design](../../../../../docs/design(設計)/03-component-design.md)
   - [Design Overview](../../../../../docs/design(設計)/01-design-overview.md)
+
+## ⚠️ 實作前必讀
+
+### 重要提醒
+
+1. **Task 模型定義位置**: 專案已有現存的 Task 類型定義於 `/src/app/core/domain/types/task/task.types.ts`，請使用該定義，不要重複定義
+2. **Repository 基類**: 必須使用 `/src/app/core/data-access/repositories/base/firestore-base.repository.ts`
+3. **EventBus**: 使用現有的 `/src/app/core/blueprint/events/enhanced-event-bus.service.ts`
+4. **依賴注入**: 統一使用 `inject()` 函式，禁止使用建構函式注入
+5. **日期工具函式**: 需自行實作或使用 `date-fns` 庫的 `isSameDay`, `isSameMonth` 函式
 
 ---
 
@@ -337,79 +348,87 @@ export class TaskViewStore {
 
 ### 📦 核心任務模型 (Task Core Model)
 
+⚠️ **重要提醒**: 專案已有現存 Task 模型定義於 `/src/app/core/domain/types/task/task.types.ts`
+
+#### 現有 Task 模型 (必須使用)
+
+```typescript
+// 從 @core/domain/types/task/task.types.ts 匯入
+import { Task, TaskStatus, TaskPriority, AssigneeType } from '@core/domain/types/task/task.types';
+
+// 現有模型包含欄位:
+// - id, blueprintId, title, description
+// - status: TaskStatus (PENDING, IN_PROGRESS, ON_HOLD, COMPLETED, CANCELLED)
+// - priority: TaskPriority (LOW, MEDIUM, HIGH, CRITICAL)
+// - assigneeType, assigneeId, assigneeName
+// - assigneeTeamId, assigneeTeamName
+// - assigneePartnerId, assigneePartnerName
+// - creatorId, dueDate
+// - createdAt, updatedAt, deletedAt
+// - tags, metadata
+```
+
+#### 需要擴展的欄位 (用於 WBS 與多視圖)
+
+以下欄位需要透過 **擴展類型** 或 **單獨的 WBS 模型** 實作，不要直接修改核心 Task 模型：
+
 ```typescript
 /**
- * 任務核心實體
- * 作為唯一的資料來源 (Single Source of Truth)
+ * 任務擴展模型 (用於 WBS 與視圖功能)
+ * 繼承現有 Task 模型並添加 WBS 相關欄位
  */
-export interface Task {
-  // 基本資訊
-  id: string;
-  blueprintId: string;
-  title: string;
-  description?: string;
+export interface TaskWithWBS extends Task {
+  // WBS 階層結構 (新增欄位)
+  parentId?: string | null;                   // 父任務 ID (null 表示根任務)
+  level?: number;                             // 階層深度 (0 = 根, 1 = 第一層子任務...)
+  orderIndex?: number;                        // 同層排序索引
+  wbsCode?: string;                           // WBS 編碼 (如: 1.2.3)
+  path?: string[];                            // 祖先路徑 [rootId, parentId, ...]
   
-  // WBS 階層結構
-  parentId: string | null;                    // 父任務 ID (null 表示根任務)
-  level: number;                              // 階層深度 (0 = 根, 1 = 第一層子任務...)
-  orderIndex: number;                         // 同層排序索引
-  wbsCode: string;                            // WBS 編碼 (如: 1.2.3)
-  path: string[];                             // 祖先路徑 [rootId, parentId, ...]
-  
-  // 狀態與進度
-  status: TaskStatus;                         // 待辦/進行中/完成/封存
-  progress: number;                           // 進度百分比 (0-100)
-  priority: TaskPriority;                     // 優先級 (低/中/高/緊急)
-  
-  // 指派與責任
-  assigneeId?: string;                        // 指派人 ID
-  assigneeType?: 'user' | 'team' | 'partner'; // 指派人類型
-  accountableUserId?: string;                 // 最終責任人 (User ID)
-  
-  // 時間規劃
+  // 進度與時間 (新增欄位)
+  progress?: number;                          // 進度百分比 (0-100)
   plannedStartDate?: Date;                    // 計劃開始日期
   plannedEndDate?: Date;                      // 計劃結束日期
   actualStartDate?: Date;                     // 實際開始日期
   actualEndDate?: Date;                       // 實際完成日期
-  dueDate?: Date;                             // 截止日期
   estimatedHours?: number;                    // 預估工時
   actualHours?: number;                       // 實際工時
   
-  // 依賴關係
-  dependencies: TaskDependency[];             // 依賴的其他任務
-  blockedBy: string[];                        // 被哪些任務阻擋
-  
-  // 元資料
-  tags?: string[];                            // 標籤
-  attachments?: TaskAttachment[];             // 附件
-  customFields?: Record<string, any>;         // 自訂欄位
-  
-  // 審計資訊
-  createdAt: Date;
-  createdBy: string;
-  updatedAt: Date;
-  updatedBy: string;
-  deletedAt: Date | null;
+  // 依賴關係 (新增欄位)
+  dependencies?: TaskDependency[];            // 依賴的其他任務
+  blockedBy?: string[];                       // 被哪些任務阻擋
 }
 
-export type TaskStatus = 'pending' | 'in-progress' | 'completed' | 'archived';
-export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
-
+/**
+ * 任務依賴關係
+ */
 export interface TaskDependency {
   taskId: string;                             // 依賴的任務 ID
   type: 'finish-to-start' | 'start-to-start' | 'finish-to-finish' | 'start-to-finish';
   lag?: number;                               // 延遲天數 (正數=延後, 負數=提前)
 }
 
-export interface TaskAttachment {
-  id: string;
-  name: string;
-  url: string;
-  type: string;
-  size: number;
-  uploadedAt: Date;
-  uploadedBy: string;
-}
+/**
+ * 任務狀態對應 (現有與視圖使用的對應關係)
+ */
+export const TASK_STATUS_MAP = {
+  // 現有 TaskStatus enum 值
+  PENDING: 'pending' as const,
+  IN_PROGRESS: 'in-progress' as const,
+  ON_HOLD: 'on-hold' as const,
+  COMPLETED: 'completed' as const,
+  CANCELLED: 'archived' as const,  // 將 CANCELLED 對應到視圖的 archived
+} as const;
+
+/**
+ * 任務優先級對應
+ */
+export const TASK_PRIORITY_MAP = {
+  LOW: 'low' as const,
+  MEDIUM: 'medium' as const,
+  HIGH: 'high' as const,
+  CRITICAL: 'urgent' as const,  // 將 CRITICAL 對應到視圖的 urgent
+} as const;
 ```
 
 ### 🎭 視圖特定模型
@@ -419,7 +438,7 @@ export interface TaskAttachment {
  * 樹狀視圖節點
  */
 export interface TaskTreeNode {
-  task: Task;
+  task: TaskWithWBS;                          // 使用擴展的任務模型
   children: TaskTreeNode[];
   expanded: boolean;
   level: number;
@@ -429,7 +448,7 @@ export interface TaskTreeNode {
  * 甘特圖任務項
  */
 export interface GanttTaskItem {
-  task: Task;
+  task: TaskWithWBS;                          // 使用擴展的任務模型
   startDate: Date;
   endDate: Date;
   duration: number;                           // 天數
@@ -451,7 +470,7 @@ export interface GanttDependency {
  * 日曆事件項
  */
 export interface CalendarTaskEvent {
-  task: Task;
+  task: TaskWithWBS;                          // 使用擴展的任務模型
   date: Date;
   type: 'start' | 'end' | 'due' | 'milestone';
   badge?: {
@@ -464,7 +483,7 @@ export interface CalendarTaskEvent {
  * 時間線事件項
  */
 export interface TimelineTaskEvent {
-  task: Task;
+  task: TaskWithWBS;                          // 使用擴展的任務模型
   timestamp: Date;
   eventType: 'created' | 'started' | 'completed' | 'updated' | 'milestone';
   description: string;
@@ -486,7 +505,7 @@ export interface WBSNode {
   level: number;
   parentId: string | null;
   children: WBSNode[];
-  task?: Task;                                // 關聯的任務實體
+  task?: TaskWithWBS;                         // 關聯的任務實體 (使用擴展模型)
 }
 
 /**
@@ -510,10 +529,11 @@ export interface WBSStructure {
 ```typescript
 @Injectable({ providedIn: 'root' })
 export class TaskStore {
-  private taskRepository = inject(TaskRepository);
+  // ⚠️ 實作提醒: 使用現有的 TaskFirestoreRepository
+  private taskRepository = inject(TaskFirestoreRepository);  // 從 @core/data-access/repositories/task-firestore.repository
   
   // ===== Private State =====
-  private _tasks = signal<Task[]>([]);
+  private _tasks = signal<TaskWithWBS[]>([]);  // 使用擴展模型
   private _loading = signal(false);
   private _error = signal<string | null>(null);
   private _selectedTaskId = signal<string | null>(null);
@@ -597,18 +617,19 @@ export class TaskStore {
     this._selectedTaskId.set(taskId);
   }
   
-  async createTask(task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>): Promise<Task> {
+  async createTask(task: Omit<TaskWithWBS, 'id' | 'createdAt' | 'updatedAt'>): Promise<TaskWithWBS> {
     try {
-      const created = await this.taskRepository.create(task);
-      this._tasks.update(tasks => [...tasks, created]);
-      return created;
+      // ⚠️ 實作提醒: TaskFirestoreRepository.create() 需要調整以支援 WBS 欄位
+      const created = await this.taskRepository.create(task as any);
+      this._tasks.update(tasks => [...tasks, created as TaskWithWBS]);
+      return created as TaskWithWBS;
     } catch (err) {
       this._error.set(err instanceof Error ? err.message : 'Unknown error');
       throw err;
     }
   }
   
-  async updateTask(id: string, updates: Partial<Task>): Promise<void> {
+  async updateTask(id: string, updates: Partial<TaskWithWBS>): Promise<void> {
     try {
       await this.taskRepository.update(id, updates);
       this._tasks.update(tasks => 
@@ -691,12 +712,25 @@ export class TaskViewStore {
 
 ### 🚀 實作階段規劃
 
+⚠️ **實作前必須完成的準備工作**:
+
+#### 準備階段 0: 環境檢查與依賴確認 (1 天)
+- [ ] 確認專案使用 Angular 20.3.x, ng-zorro-antd 20.3.x
+- [ ] 確認已安裝 `date-fns` 套件 (用於日期比較函式)
+  ```bash
+  yarn add date-fns
+  ```
+- [ ] 檢查 `/src/app/core/domain/types/task/task.types.ts` 中的 Task 定義
+- [ ] 檢查 `/src/app/core/data-access/repositories/task-firestore.repository.ts` 現有實作
+- [ ] 檢查 `/src/app/core/blueprint/events/enhanced-event-bus.service.ts` 現有實作
+- [ ] 確認 FirestoreBaseRepository 的使用方式
+
 #### Phase 1: 基礎設施 (1-2 週)
-- [ ] 完善 Task 資料模型與 TypeScript interfaces
-- [ ] 實作 TaskRepository (CRUD + 查詢)
-- [ ] 實作 TaskStore (狀態管理)
-- [ ] 實作 TaskFacade (業務協調)
-- [ ] 單元測試 Repository 和 Store
+- [ ] 定義 TaskWithWBS 擴展模型 (基於現有 Task)
+- [ ] 定義視圖相關模型 (TaskTreeNode, GanttTaskItem, etc.)
+- [ ] 定義 WBS 相關模型
+- [ ] 擴展 TaskFirestoreRepository 以支援 WBS 欄位查詢
+- [ ] 確認 Firestore Security Rules 涵蓋新欄位
 
 #### Phase 2: 核心視圖實作 (2-3 週)
 - [ ] 實作樹狀列表視圖 (Tree List - 預設視圖)
@@ -729,15 +763,16 @@ export class TaskViewStore {
 
 ### 🔧 技術選型
 
-| 功能 | 技術方案 | 替代方案 |
-|------|---------|---------|
-| 樹狀圖 | ng-zorro-antd `nz-tree` | 自訂 D3.js |
-| 樹狀列表 | ng-zorro-antd `nz-table` + 階層邏輯 | @delon/abc ST |
-| 甘特圖 | @delon/chart + 自訂邏輯 | dhtmlx-gantt, frappe-gantt |
-| 日曆 | ng-zorro-antd `nz-calendar` | fullcalendar |
-| 時間線 | ng-zorro-antd `nz-timeline` | vis-timeline |
-| 狀態管理 | Angular Signals | RxJS BehaviorSubject |
-| 即時更新 | Firestore onSnapshot | Firebase Realtime Database |
+| 功能 | 技術方案 | 必要性 | 注意事項 |
+|------|---------|--------|----------|
+| 樹狀圖 | ng-zorro-antd `nz-tree` | 必須 | 需匯入 `NzTreeModule` 或使用 standalone 元件 |
+| 樹狀列表 | ng-zorro-antd `nz-table` + 階層邏輯 | 必須 | 預設視圖，優先實作 |
+| 甘特圖 | @delon/chart + 自訂邏輯 | 可選 | 或使用第三方如 dhtmlx-gantt (需付費授權) |
+| 日曆 | ng-zorro-antd `nz-calendar` | 可選 | 需搭配 `nz-badge` 顯示事件 |
+| 時間線 | ng-zorro-antd `nz-timeline` | 可選 | 適合歷史記錄展示 |
+| 狀態管理 | Angular Signals | 必須 | Angular 20 內建 |
+| 即時更新 | Firestore onSnapshot | 可選 | 使用 TaskRealtimeRepository |
+| 日期工具 | `date-fns` | 必須 | 用於 `isSameDay`, `isSameMonth` 等函式 |
 
 ### ✅ 實作檢查清單
 
@@ -777,6 +812,12 @@ export class TaskViewStore {
 #### 元件結構
 
 ```typescript
+import { Component, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { SHARED_IMPORTS } from '@shared';
+import { TaskStore } from '../../state/task.store';
+import { TaskViewStore } from '../../state/task-view.store';
+import { TaskWithWBS } from '@core/domain/types/task/task.types';  // ⚠️ 使用現有類型
+
 @Component({
   selector: 'app-task-tree-list-view',
   standalone: true,
@@ -880,19 +921,19 @@ export class TaskTreeListViewComponent {
   }
   
   private flattenTaskTree(
-    tasks: Task[], 
+    tasks: TaskWithWBS[],  // ⚠️ 使用擴展模型
     expanded: Set<string>
-  ): { task: Task; level: number; hasChildren: boolean }[] {
+  ): { task: TaskWithWBS; level: number; hasChildren: boolean }[] {
     // 建立任務樹結構並扁平化
-    const result: { task: Task; level: number; hasChildren: boolean }[] = [];
+    const result: { task: TaskWithWBS; level: number; hasChildren: boolean }[] = [];
     const taskMap = new Map(tasks.map(t => [t.id, t]));
-    const rootTasks = tasks.filter(t => t.parentId === null);
+    const rootTasks = tasks.filter(t => !t.parentId);  // ⚠️ 使用 parentId 欄位
     
-    const flatten = (task: Task, level: number) => {
+    const flatten = (task: TaskWithWBS, level: number) => {
       const children = tasks.filter(t => t.parentId === task.id);
       result.push({ task, level, hasChildren: children.length > 0 });
       
-      if (expanded.has(task.id) && children.length > 0) {
+      if (expanded.has(task.id!) && children.length > 0) {  // ⚠️ task.id 可能是 optional
         children.forEach(child => flatten(child, level + 1));
       }
     };
@@ -906,6 +947,13 @@ export class TaskTreeListViewComponent {
 ### 2️⃣ 樹狀圖視圖 (Tree View)
 
 ```typescript
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { SHARED_IMPORTS } from '@shared';
+import { NzTreeNodeOptions } from 'ng-zorro-antd/tree';  // ⚠️ 正確的型別匯入
+import { TaskStore } from '../../state/task.store';
+import { TaskViewStore } from '../../state/task-view.store';
+import { TaskWithWBS, TaskStatus } from '@core/domain/types/task/task.types';
+
 @Component({
   selector: 'app-task-tree-view',
   standalone: true,
@@ -928,8 +976,8 @@ export class TaskTreeListViewComponent {
           <span class="node-meta">
             <app-task-priority-icon [priority]="node.origin.task.priority" />
             <app-task-assignee-avatar [task]="node.origin.task" />
-            <nz-tag [nzColor]="getProgressColor(node.origin.task.progress)">
-              {{ node.origin.task.progress }}%
+            <nz-tag [nzColor]="getProgressColor(node.origin.task.progress || 0)">
+              {{ node.origin.task.progress || 0 }}%
             </nz-tag>
           </span>
         </div>
@@ -952,20 +1000,20 @@ export class TaskTreeViewComponent {
   expandedKeys = computed(() => Array.from(this.expandedNodes()));
   
   canEdit = computed(() => {
-    // 權限檢查邏輯
+    // ⚠️ 實作提醒: 需整合 PermissionService 檢查權限
     return true;
   });
   
-  private buildTreeNodes(tasks: Task[]): NzTreeNode[] {
+  private buildTreeNodes(tasks: TaskWithWBS[]): NzTreeNodeOptions[] {  // ⚠️ 使用正確的型別
     const taskMap = new Map(tasks.map(t => [t.id, t]));
-    const rootTasks = tasks.filter(t => t.parentId === null);
+    const rootTasks = tasks.filter(t => !t.parentId);
     
-    const buildNode = (task: Task): NzTreeNode => {
+    const buildNode = (task: TaskWithWBS): NzTreeNodeOptions => {
       const children = tasks.filter(t => t.parentId === task.id);
       return {
-        key: task.id,
+        key: task.id!,  // ⚠️ 處理 optional id
         title: task.title,
-        expanded: this.expandedNodes().has(task.id),
+        expanded: this.expandedNodes().has(task.id!),
         children: children.map(child => buildNode(child)),
         origin: { task }
       };
@@ -975,13 +1023,15 @@ export class TaskTreeViewComponent {
   }
   
   getStatusIcon(status: TaskStatus): string {
-    const icons: Record<TaskStatus, string> = {
+    // ⚠️ 使用現有的 TaskStatus enum 值
+    const icons: Record<string, string> = {
       'pending': 'clock-circle',
-      'in-progress': 'loading',
+      'in_progress': 'loading',
+      'on_hold': 'pause-circle',
       'completed': 'check-circle',
-      'archived': 'folder'
+      'cancelled': 'folder'
     };
-    return icons[status];
+    return icons[status] || 'question-circle';
   }
   
   getProgressColor(progress: number): string {
@@ -989,6 +1039,14 @@ export class TaskTreeViewComponent {
     if (progress < 50) return 'orange';
     if (progress < 100) return 'blue';
     return 'green';
+  }
+  
+  onNodeClick(event: any): void {
+    // ⚠️ 實作提醒: 處理節點點擊事件
+  }
+  
+  onNodeDrop(event: any): void {
+    // ⚠️ 實作提醒: 處理節點拖放事件，需更新 WBS 結構
   }
 }
 ```
@@ -1112,6 +1170,12 @@ export class TaskGanttViewComponent {
 ### 4️⃣ 日曆視圖 (Calendar View)
 
 ```typescript
+import { Component, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { SHARED_IMPORTS } from '@shared';
+import { isSameDay, isSameMonth } from 'date-fns';  // ⚠️ 需安裝 date-fns
+import { TaskStore } from '../../state/task.store';
+import { TaskWithWBS } from '@core/domain/types/task/task.types';
+
 @Component({
   selector: 'app-task-calendar-view',
   standalone: true,
@@ -1124,11 +1188,11 @@ export class TaskGanttViewComponent {
       (nzSelectChange)="onDateSelect($event)"
     >
       <ul *nzDateCell="let date" class="events">
-        @for (event of getTasksForDate(date); track event.task.id) {
+        @for (event of getTasksForDate(date); track event.id) {
           <li>
             <nz-badge 
-              [nzStatus]="event.badge.status"
-              [nzText]="event.task.title"
+              [nzStatus]="getBadgeStatus(event)"
+              [nzText]="event.title"
             />
           </li>
         }
@@ -1168,9 +1232,9 @@ export class TaskCalendarViewComponent {
     return this.getTasksForDate(date);
   });
   
-  getTasksForDate(date: Date): Task[] {
+  getTasksForDate(date: Date): TaskWithWBS[] {
     return this.tasks().filter(task => {
-      // 檢查任務的開始日期、結束日期或截止日期是否在該日期
+      // ⚠️ 使用 date-fns 的 isSameDay 函式
       const taskDate = task.plannedStartDate || task.plannedEndDate || task.dueDate;
       return taskDate && isSameDay(new Date(taskDate), date);
     });
@@ -1178,13 +1242,30 @@ export class TaskCalendarViewComponent {
   
   getMonthTaskCount(month: Date): number {
     return this.tasks().filter(task => {
+      // ⚠️ 使用 date-fns 的 isSameMonth 函式
       const taskDate = task.plannedStartDate || task.plannedEndDate || task.dueDate;
       return taskDate && isSameMonth(new Date(taskDate), month);
     });
   }
   
+  getBadgeStatus(task: TaskWithWBS): string {
+    // ⚠️ 根據 TaskStatus enum 映射徽章狀態
+    const statusMap: Record<string, string> = {
+      'pending': 'default',
+      'in_progress': 'processing',
+      'on_hold': 'warning',
+      'completed': 'success',
+      'cancelled': 'error'
+    };
+    return statusMap[task.status] || 'default';
+  }
+  
   onDateSelect(date: Date): void {
     this.selectedDate.set(date);
+  }
+  
+  viewTaskDetail(task: TaskWithWBS): void {
+    // ⚠️ 實作提醒: 導航到任務詳情頁
   }
 }
 ```
@@ -1329,6 +1410,132 @@ export class TaskTimelineViewComponent {
 | 版本 | 日期 | 變更內容 | 作者 |
 |------|------|---------|------|
 | v1.0 | 2025-12-22 | 初始版本 | AI Assistant |
+| v1.1 | 2025-12-22 | 修正實作問題：<br>- 明確指出使用現有 Task 模型<br>- 新增 TaskWithWBS 擴展模型<br>- 修正元件範例的匯入與型別<br>- 新增 date-fns 依賴說明<br>- 補充實作前檢查清單 | AI Assistant |
+
+---
+
+## 🔍 實作風險評估與緩解措施
+
+### 高風險項目
+
+#### 1️⃣ 資料模型不一致 (已解決)
+**風險**: 設計文件定義的 Task 模型與現有模型不一致
+**緩解**: 
+- ✅ 明確使用現有 `/src/app/core/domain/types/task/task.types.ts` 定義
+- ✅ 透過 `TaskWithWBS` 擴展模型增加 WBS 欄位
+- ✅ 避免修改核心 Task 介面
+
+#### 2️⃣ Repository 方法不支援 WBS 欄位
+**風險**: TaskFirestoreRepository 不支援 WBS 相關欄位的查詢與儲存
+**緩解**:
+- 需擴展 `toEntity()` 和 `toDocument()` 方法以處理 WBS 欄位
+- 需新增 WBS 特定的查詢方法 (如 `findByParentId()`, `findRootTasks()`)
+- 需更新 Firestore Security Rules 以涵蓋新欄位
+
+#### 3️⃣ 第三方套件依賴
+**風險**: 缺少必要的第三方套件 (date-fns, gantt library)
+**緩解**:
+- ✅ 明確標註 `date-fns` 為必須依賴
+- ⚠️ 甘特圖視圖標註為可選功能
+- 提供替代方案 (先實作樹狀列表等核心視圖)
+
+### 中風險項目
+
+#### 4️⃣ ng-zorro-antd 型別定義
+**風險**: 元件範例使用的型別可能不存在或已變更
+**緩解**:
+- ✅ 修正為使用正確的 `NzTreeNodeOptions` 型別
+- ✅ 元件範例包含必要的 import 語句
+- 建議實作時參考 ng-zorro-antd 最新文檔
+
+#### 5️⃣ 效能問題
+**風險**: 大量任務的樹狀展開與甘特圖渲染可能造成效能問題
+**緩解**:
+- 實作虛擬滾動 (ng-zorro-antd `nz-table` 支援)
+- 實作分頁載入
+- 使用 OnPush 變更檢測策略
+- 合理設定預設展開層級
+
+### 低風險項目
+
+#### 6️⃣ 視圖切換狀態遺失
+**風險**: 視圖切換時可能遺失使用者的操作狀態
+**緩解**:
+- ✅ 設計文件已包含 TaskViewStore 管理視圖狀態
+- 使用 Signals 持久化展開節點、篩選條件等狀態
+
+---
+
+## ✅ 實作前終極檢查清單
+
+### Phase 0: 開始實作前 (強制完成)
+
+- [ ] **已閱讀完整設計文件** 包含所有章節與實作細節
+- [ ] **已檢查現有 Task 模型定義** (`/src/app/core/domain/types/task/task.types.ts`)
+- [ ] **已檢查 TaskFirestoreRepository** (`/src/app/core/data-access/repositories/task-firestore.repository.ts`)
+- [ ] **已檢查 FirestoreBaseRepository** (`/src/app/core/data-access/repositories/base/firestore-base.repository.ts`)
+- [ ] **已確認 EventBus 實作** (`/src/app/core/blueprint/events/enhanced-event-bus.service.ts`)
+- [ ] **已安裝 date-fns 套件** (`yarn add date-fns`)
+- [ ] **已確認 ng-zorro-antd 版本** (需 20.3.x)
+- [ ] **已確認 Angular 版本** (需 20.3.x)
+- [ ] **已規劃實作順序** (建議: 資料模型 → Repository 擴展 → Store → 樹狀列表視圖 → 其他視圖)
+
+### Phase 1: 資料模型擴展
+
+- [ ] 定義 `TaskWithWBS` 介面 (繼承 Task)
+- [ ] 定義 `TaskTreeNode` 介面
+- [ ] 定義 `GanttTaskItem` 介面 (可選)
+- [ ] 定義 `CalendarTaskEvent` 介面 (可選)
+- [ ] 定義 `TimelineTaskEvent` 介面 (可選)
+- [ ] 定義 `WBSNode` 和 `WBSStructure` 介面
+- [ ] 撰寫型別轉換輔助函式 (Task → TaskWithWBS)
+
+### Phase 2: Repository 擴展
+
+- [ ] 擴展 `TaskFirestoreRepository.toEntity()` 以處理 WBS 欄位
+- [ ] 擴展 `TaskFirestoreRepository.toDocument()` 以處理 WBS 欄位
+- [ ] 新增 `findRootTasks()` 方法
+- [ ] 新增 `findByParentId()` 方法
+- [ ] 新增 `findDescendants()` 方法
+- [ ] 新增 `updateWBSStructure()` 方法
+- [ ] 撰寫 Repository 單元測試
+- [ ] 更新 Firestore Security Rules
+
+### Phase 3: 狀態管理
+
+- [ ] 實作 `TaskStore` (使用 Signals)
+- [ ] 實作 `TaskViewStore` (視圖狀態)
+- [ ] 實作 computed signals (rootTasks, tasksByStatus, etc.)
+- [ ] 實作 CRUD actions
+- [ ] 撰寫 Store 單元測試
+
+### Phase 4: 樹狀列表視圖 (優先)
+
+- [ ] 實作 `TaskTreeListViewComponent`
+- [ ] 實作展開/摺疊功能
+- [ ] 實作排序功能
+- [ ] 實作篩選功能
+- [ ] 實作分頁
+- [ ] 實作 CRUD 操作整合
+- [ ] 撰寫元件測試
+
+### Phase 5: 其他視圖 (可選)
+
+- [ ] 實作樹狀圖視圖 (可選)
+- [ ] 實作甘特圖視圖 (可選)
+- [ ] 實作日曆視圖 (可選)
+- [ ] 實作時間線視圖 (可選)
+- [ ] 實作視圖切換器
+- [ ] 測試視圖間切換的狀態保持
+
+### Phase 6: 整合與測試
+
+- [ ] 整合 EventBus 發送任務事件
+- [ ] 實作權限檢查 (PermissionService)
+- [ ] 實作即時更新 (可選)
+- [ ] E2E 測試關鍵流程
+- [ ] 效能測試與優化
+- [ ] 撰寫使用者文檔
 
 ---
 
