@@ -12,6 +12,8 @@ architecture/
 ├── 03-monitoring-module-manager.md     # 監控/模組管理摘要
 ├── 04-angular-fire-integration.md      # Angular + Firebase 整合
 ├── 05-contract-ai-integration.md       # 合約 AI / 文件解析架構
+├── 06-angular-fire-analysis.md         # Angular-Fire 整合分析索引（docs-old 提取）
+└── 07-monitoring-module-manager-index.md # 監控/模組管理索引（docs-old 提取）
 ├── diagrams/                           # 架構圖表目錄
 │   ├── system-architecture.mermaid
 │   ├── three-layer.mermaid

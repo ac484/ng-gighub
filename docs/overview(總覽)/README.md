@@ -13,7 +13,9 @@ overview/
 ├── 04-scope-boundaries.md       # 範圍與邊界
 ├── 05-key-constraints.md        # 關鍵限制
 ├── 06-stakeholders.md           # 利害關係人
-└── 07-implementation-progress.md # 實作進度/Phase 計畫（docs-old 提取）
+├── 07-implementation-progress.md # 實作進度/Phase 計畫（docs-old 提取）
+├── 08-analysis-index.md         # 分析文件索引（docs-old/analysis 提取）
+└── 09-archived-modules-index.md # 歷史模組索引（docs-old/Archived 提取）
 ```
 
 ## 🎯 專案簡介
