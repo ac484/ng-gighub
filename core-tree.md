@@ -57,26 +57,6 @@
 │  │  └─implementations
 │  │      │  index.ts
 │  │      │
-│  │      ├─acceptance
-│  │      │  │  acceptance.module.ts
-│  │      │  │  index.ts
-│  │      │  │  module.metadata.ts
-│  │      │  │  README.md
-│  │      │  │
-│  │      │  ├─models
-│  │      │  │      acceptance.model.ts
-│  │      │  │      index.ts
-│  │      │  │
-│  │      │  ├─repositories
-│  │      │  │      acceptance.repository.ts
-│  │      │  │
-│  │      │  └─services
-│  │      │          conclusion.service.ts
-│  │      │          preliminary.service.ts
-│  │      │          re-inspection.service.ts
-│  │      │          request.service.ts
-│  │      │          review.service.ts
-│  │      │
 │  │      ├─audit-logs
 │  │      │  │  audit-logs.module.ts
 │  │      │  │  index.ts
@@ -101,25 +81,6 @@
 │  │      │  │
 │  │      │  └─services
 │  │      │          audit-logs.service.ts
-│  │      │
-│  │      ├─communication
-│  │      │  │  communication.module.ts
-│  │      │  │  index.ts
-│  │      │  │  module.metadata.ts
-│  │      │  │  README.md
-│  │      │  │
-│  │      │  ├─models
-│  │      │  │      communication.model.ts
-│  │      │  │      index.ts
-│  │      │  │
-│  │      │  ├─repositories
-│  │      │  │      communication.repository.ts
-│  │      │  │
-│  │      │  └─services
-│  │      │          group-message.service.ts
-│  │      │          push-notification.service.ts
-│  │      │          system-notification.service.ts
-│  │      │          task-reminder.service.ts
 │  │      │
 │  │      ├─finance
 │  │      │  │  finance.module.ts
@@ -160,88 +121,6 @@
 │  │      │          payment-generation.service.ts
 │  │      │          payment-status-tracking.service.ts
 │  │      │          payment.service.ts
-│  │      │
-│  │      ├─issue
-│  │      │  │  index.ts
-│  │      │  │  issue.module.ts
-│  │      │  │  module.metadata.ts
-│  │      │  │  README.md
-│  │      │  │
-│  │      │  ├─config
-│  │      │  │      index.ts
-│  │      │  │      issue.config.ts
-│  │      │  │
-│  │      │  ├─exports
-│  │      │  │      index.ts
-│  │      │  │      issue-api.exports.ts
-│  │      │  │
-│  │      │  ├─models
-│  │      │  │      index.ts
-│  │      │  │      issue.model.ts
-│  │      │  │
-│  │      │  ├─repositories
-│  │      │  │      index.ts
-│  │      │  │      issue.repository.ts
-│  │      │  │
-│  │      │  └─services
-│  │      │          index.ts
-│  │      │          issue-creation.service.ts
-│  │      │          issue-event.service.ts
-│  │      │          issue-lifecycle.service.ts
-│  │      │          issue-management.service.ts
-│  │      │          issue-resolution.service.ts
-│  │      │          issue-verification.service.ts
-│  │      │
-│  │      ├─log
-│  │      │  │  index.ts
-│  │      │  │  log.module.ts
-│  │      │  │  module.metadata.ts
-│  │      │  │  README.md
-│  │      │  │
-│  │      │  ├─models
-│  │      │  │      activity-log.model.ts
-│  │      │  │
-│  │      │  ├─repositories
-│  │      │  │      log.repository.ts
-│  │      │  │
-│  │      │  └─services
-│  │      │          activity-log.service.ts
-│  │      │          attachment.service.ts
-│  │      │          change-history.service.ts
-│  │      │          comment.service.ts
-│  │      │          system-event.service.ts
-│  │      │
-│  │      ├─qa
-│  │      │  │  index.ts
-│  │      │  │  module.metadata.ts
-│  │      │  │  qa.module.ts
-│  │      │  │  README.md
-│  │      │  │
-│  │      │  ├─config
-│  │      │  │      index.ts
-│  │      │  │      qa.config.ts
-│  │      │  │
-│  │      │  ├─exports
-│  │      │  │      index.ts
-│  │      │  │      qa-api.exports.ts
-│  │      │  │
-│  │      │  ├─models
-│  │      │  │      index.ts
-│  │      │  │      qa.model.ts
-│  │      │  │
-│  │      │  ├─repositories
-│  │      │  │      qa.repository.ts
-│  │      │  │
-│  │      │  └─services
-│  │      │          checklist.service.ts
-│  │      │          defect-issue-integration.service.ts
-│  │      │          defect-lifecycle.service.ts
-│  │      │          defect-reinspection.service.ts
-│  │      │          defect-resolution.service.ts
-│  │      │          defect.service.ts
-│  │      │          index.ts
-│  │      │          inspection.service.ts
-│  │      │          report.service.ts
 │  │      │
 │  │      ├─safety
 │  │      │  │  index.ts
@@ -498,6 +377,4 @@
 │          notification.store.ts
 │          partner.store.ts
 │          team.store.ts
-│
-└─utils
-        task-hierarchy.util.ts
+
