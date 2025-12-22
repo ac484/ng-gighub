@@ -19,6 +19,7 @@ import { Functions, httpsCallable } from '@angular/fire/functions';
 import { LoggerService } from '@core';
 import { EnhancedEventBusService } from '@core/blueprint/events/enhanced-event-bus.service';
 import { SystemEventType } from '@core/blueprint/events/types/system-event-type.enum';
+import { firstValueFrom } from 'rxjs';
 
 import type {
   Contract,
@@ -93,7 +94,7 @@ export class ContractService {
     this.logger.debug('[ContractService]', 'getContractsByBlueprint', { blueprintId, filters });
 
     try {
-      const contracts = await this.contractRepo.findByBlueprint(blueprintId, filters).toPromise();
+      const contracts = await firstValueFrom(this.contractRepo.findByBlueprint(blueprintId, filters));
       return contracts || [];
     } catch (error) {
       this.logger.error('[ContractService]', 'Failed to get contracts', error as Error, { blueprintId });
@@ -122,15 +123,29 @@ export class ContractService {
     this.logger.debug('[ContractService]', 'getContractStatistics', { blueprintId });
 
     try {
-      const counts = await this.contractRepo.countByStatus(blueprintId);
       const contracts = await this.getContractsByBlueprint(blueprintId);
 
-      const activeContracts = contracts.filter(c => c.status === 'active');
-      const totalValue = contracts.reduce((sum, c) => sum + c.totalAmount, 0);
-      const activeValue = activeContracts.reduce((sum, c) => sum + c.totalAmount, 0);
+      const counts: Record<ContractStatus, number> = {
+        draft: 0,
+        pending_activation: 0,
+        active: 0,
+        completed: 0,
+        terminated: 0
+      };
+
+      let totalValue = 0;
+      let activeValue = 0;
+
+      for (const contract of contracts) {
+        counts[contract.status] = (counts[contract.status] ?? 0) + 1;
+        totalValue += contract.totalAmount;
+        if (contract.status === 'active') {
+          activeValue += contract.totalAmount;
+        }
+      }
 
       return {
-        total: counts.draft + counts.pending_activation + counts.active + counts.completed + counts.terminated,
+        total: contracts.length,
         draft: counts.draft,
         pendingActivation: counts.pending_activation,
         active: counts.active,

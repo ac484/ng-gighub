@@ -18,6 +18,7 @@ import { Injectable, inject } from '@angular/core';
 import { LoggerService } from '@core';
 import { EnhancedEventBusService } from '@core/blueprint/events/enhanced-event-bus.service';
 import { SystemEventType } from '@core/blueprint/events/types/system-event-type.enum';
+import { firstValueFrom } from 'rxjs';
 
 import type { ContractWorkItem, CreateWorkItemDto, UpdateWorkItemDto, WorkItemProgress } from '../../data/models';
 import { ContractWorkItemRepository } from '../../infrastructure/repositories';
@@ -65,7 +66,7 @@ export class WorkItemService {
     this.logger.debug('[WorkItemService]', 'getWorkItemsByContract', { blueprintId, contractId });
 
     try {
-      const workItems = await this.workItemRepo.findByContract(blueprintId, contractId).toPromise();
+      const workItems = await firstValueFrom(this.workItemRepo.findByContract(blueprintId, contractId));
       return workItems || [];
     } catch (error) {
       this.logger.error('[WorkItemService]', 'Failed to get work items', error as Error, { contractId });
