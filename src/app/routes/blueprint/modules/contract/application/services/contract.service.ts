@@ -123,37 +123,7 @@ export class ContractService {
     this.logger.debug('[ContractService]', 'getContractStatistics', { blueprintId });
 
     try {
-      const contracts = await this.getContractsByBlueprint(blueprintId);
-
-      const counts: Record<ContractStatus, number> = {
-        draft: 0,
-        pending_activation: 0,
-        active: 0,
-        completed: 0,
-        terminated: 0
-      };
-
-      let totalValue = 0;
-      let activeValue = 0;
-
-      for (const contract of contracts) {
-        counts[contract.status] += 1;
-        totalValue += contract.totalAmount;
-        if (contract.status === 'active') {
-          activeValue += contract.totalAmount;
-        }
-      }
-
-      return {
-        total: contracts.length,
-        draft: counts.draft,
-        pendingActivation: counts.pending_activation,
-        active: counts.active,
-        completed: counts.completed,
-        terminated: counts.terminated,
-        totalValue,
-        activeValue
-      };
+      return this.buildStatistics(await this.getContractsByBlueprint(blueprintId));
     } catch (error) {
       this.logger.error('[ContractService]', 'Failed to get statistics', error as Error, { blueprintId });
       throw error;
@@ -505,6 +475,41 @@ export class ContractService {
   // ============================================================================
   // Private Helper Methods
   // ============================================================================
+
+  /**
+   * Aggregate statistics without extra Firestore reads.
+   */
+  private buildStatistics(contracts: Contract[]): ContractStatistics {
+    const counts: Record<ContractStatus, number> = {
+      draft: 0,
+      pending_activation: 0,
+      active: 0,
+      completed: 0,
+      terminated: 0
+    };
+
+    let totalValue = 0;
+    let activeValue = 0;
+
+    for (const contract of contracts) {
+      counts[contract.status] += 1;
+      totalValue += contract.totalAmount;
+      if (contract.status === 'active') {
+        activeValue += contract.totalAmount;
+      }
+    }
+
+    return {
+      total: contracts.length,
+      draft: counts.draft,
+      pendingActivation: counts.pending_activation,
+      active: counts.active,
+      completed: counts.completed,
+      terminated: counts.terminated,
+      totalValue,
+      activeValue
+    };
+  }
 
   private validateContractForActivation(contract: Contract): void {
     this.validateContractData(contract);
