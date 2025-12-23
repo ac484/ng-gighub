@@ -6,8 +6,8 @@
  */
 
 import { Injectable, signal, computed, inject, DestroyRef } from '@angular/core';
-import { AIChatMessage, AIGenerateTextResponse, AIGenerateChatResponse } from '@core/data-access/ai/ai.types';
-import { AIService } from '@core/services/ai/ai.service';
+import { AIChatMessage, AIGenerateTextResponse, AIGenerateChatResponse } from '@routes/ai-assistant/data-access/ai/ai.types';
+import { AIService } from '@routes/ai-assistant/services/ai/ai.service';
 
 /**
  * AI 狀態介面

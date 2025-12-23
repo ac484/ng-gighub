@@ -8,14 +8,14 @@
  */
 
 import { inject, Injectable } from '@angular/core';
-import { AIRepository } from '@core/data-access/ai/ai.repository';
+import { AIRepository } from '@routes/ai-assistant/data-access/ai/ai.repository';
 import {
   AIGenerateTextRequest,
   AIGenerateTextResponse,
   AIChatMessage,
   AIGenerateChatRequest,
   AIGenerateChatResponse
-} from '@core/data-access/ai/ai.types';
+} from '@routes/ai-assistant/data-access/ai/ai.types';
 
 /**
  * AI Service
