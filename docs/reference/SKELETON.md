@@ -81,29 +81,29 @@
 │  │  └─ README.md
 │  │
 │  ├─ acceptance/                             # 驗收模組 - 品質驗收管理
-│  │  ├─ models/
+│  │  ├─ models/                              # 驗收實體與檢驗清單
 │  │  │  ├─ acceptance.entity.ts              # 驗收聚合根
 │  │  │  ├─ qc-checklist.vo.ts                # QC 檢查清單值物件
-│  │  │  └─ index.ts
+│  │  │  └─ index.ts                          # barrel 匯出
 │  │  ├─ states/                              # 驗收狀態機
-│  │  │  └─ acceptance.states.ts
-│  │  ├─ services/
-│  │  │  ├─ acceptance.service.ts
-│  │  │  └─ qc.service.ts                     # 品質檢驗服務
-│  │  ├─ repositories/
-│  │  │  ├─ acceptance.repository.ts
-│  │  │  └─ acceptance.repository.impl.ts
-│  │  ├─ events/
+│  │  │  └─ acceptance.states.ts              # 驗收狀態列舉與轉換
+│  │  ├─ services/                            # 驗收相關服務
+│  │  │  ├─ acceptance.service.ts             # 驗收流程邏輯
+│  │  │  └─ qc.service.ts                     # 品質檢驗邏輯
+│  │  ├─ repositories/                        # 驗收資料存取
+│  │  │  ├─ acceptance.repository.ts          # repository 介面
+│  │  │  └─ acceptance.repository.impl.ts     # repository 實作（查詢/索引優化）
+│  │  ├─ events/                              # 驗收事件（驗收完成 / 失敗）
 │  │  │  └─ acceptance.events.ts
-│  │  ├─ policies/
+│  │  ├─ policies/                            # 驗收策略（誰可驗收、驗收條件）
 │  │  │  └─ acceptance.policies.ts
-│  │  ├─ facade/
+│  │  ├─ facade/                              # 驗收門面（組合式操作）
 │  │  │  └─ acceptance.facade.ts
-│  │  ├─ config/
+│  │  ├─ config/                              # 模組設定
 │  │  │  └─ acceptance.config.ts
-│  │  ├─ module.metadata.ts
-│  │  ├─ acceptance.module.ts
-│  │  └─ README.md
+│  │  ├─ module.metadata.ts                   # 模組元資料
+│  │  ├─ acceptance.module.ts                 # 模組註冊檔
+│  │  └─ README.md                            # 模組說明
 │  │
 │  ├─ finance/                                # 財務模組 - 請款付款管理
 │  │  ├─ models/
@@ -159,30 +159,30 @@
 │     └─ README.md
 │
 ├─ asset/                                     # 資產檔案模組 - 檔案生命週期管理
-│  ├─ models/
+│  ├─ models/                                 # 資產實體與元資料
 │  │  ├─ asset.entity.ts                      # 資產聚合根
 │  │  ├─ file-metadata.vo.ts                  # 檔案元資料值物件
-│  │  └─ index.ts
+│  │  └─ index.ts                              # barrel 匯出
 │  ├─ states/                                 # 資產狀態機
-│  │  └─ asset.states.ts
-│  ├─ services/
-│  │  ├─ asset.service.ts                     # 資產核心服務
-│  ├─ events/                                   # 問題單事件定義（事件名稱與 payload schema）
-│  │  │  └─ issue.events.ts                      # issue.created / issue.resolved 等事件
-│  ├─ policies/                                 # 問題單專屬策略（狀態/驗收/關閉規則）
-│  │  │  └─ issue.policies.ts                    # 函式式判斷：是否可關閉/退回等
-│  ├─ facade/                                   # 對外門面（複合操作入口）
-│  │  │  └─ issue.facade.ts                      # 提供整合多步驟操作方法
-│  ├─ config/                                   # 模組設定（可覆寫的常數）
-│  │  │  └─ issue.config.ts                      # module specific settings
-│  │  └─ asset.policies.ts                    # 檔案存取權限規則
-│  ├─ facade/
-│  │  └─ asset.facade.ts
-│  ├─ config/
-│  │  └─ asset.config.ts
-│  ├─ module.metadata.ts
-│  ├─ asset.module.ts
-│  └─ README.md
+│  │  └─ asset.states.ts                       # asset 狀態定義
+│  ├─ services/                               # 資產相關服務
+│  │  ├─ asset.service.ts                      # 資產核心服務
+│  │  ├─ asset-upload.service.ts               # 上傳流程（暫存 / 抽象 cloud facade）
+│  │  └─ asset-validation.service.ts           # 上傳驗證（類型/大小/安全）
+│  ├─ repositories/                            # 資產資料存取
+│  │  ├─ asset.repository.ts                   # repository 介面
+│  │  └─ asset.repository.impl.ts              # repository 實作（CloudFacade 調用）
+│  ├─ events/                                 # 資產相關事件
+│  │  └─ asset.events.ts                       # asset.uploaded / asset.deleted 等
+│  ├─ policies/                               # 檔案存取與保留政策
+│  │  └─ asset.policies.ts                     # 存取權限 / 保留期規則
+│  ├─ facade/                                 # 對外門面（高階檔案操作）
+│  │  └─ asset.facade.ts                       # 上傳/下載/刪除等高階操作
+│  ├─ config/                                 # 模組設定
+│  │  └─ asset.config.ts                       # 存儲設定與限制
+│  ├─ module.metadata.ts                       # 模組元資料
+│  ├─ asset.module.ts                          # 模組註冊檔
+│  └─ README.md                                # 模組說明
 │
 ├─ ai/                                        # AI 服務模組 - AI 能力統一入口
 │  ├─ providers/                              # AI 供應商適配器集合
