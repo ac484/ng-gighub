@@ -295,6 +295,63 @@
 │  ├─ module.metadata.ts
 │  └─ README.md
 │
+├─ blueprint-capabilities/                    # 藍圖能力映射 - 模組功能與授權配置
+│  ├─ models/
+│  │  ├─ blueprint-capability.entity.ts       # 能力/feature 聚合根
+│  │  ├─ capability-scope.vo.ts               # 能力範圍與授權值物件
+│  │  └─ index.ts
+│  ├─ services/
+│  │  ├─ blueprint-capabilities.service.ts    # 能力開關/授權載入
+│  │  └─ capability-mapper.service.ts         # 模組-能力對應表
+│  ├─ config/
+│  │  └─ blueprint-capabilities.config.ts     # 能力與角色預設映射
+│  └─ README.md
+│
+├─ blueprint-runtime/                         # 藍圖執行態 - 執行上下文與資源管理
+│  ├─ context/
+│  │  ├─ runtime-context.ts                   # 執行上下文定義
+│  │  └─ context-factory.ts                   # Context 建立/回收
+│  ├─ services/
+│  │  ├─ runtime.service.ts                   # 執行態生命週期管理
+│  │  └─ resource-allocator.service.ts        # 資源配置與隔離
+│  ├─ config/
+│  │  └─ runtime.config.ts                    # 執行態限制/隔離設定
+│  └─ README.md
+│
+├─ blueprint-errors/                          # 藍圖錯誤 - 錯誤分類與補償策略
+│  ├─ models/
+│  │  ├─ blueprint-error.entity.ts            # 錯誤/異常聚合根
+│  │  └─ index.ts
+│  ├─ services/
+│  │  ├─ blueprint-error.service.ts           # 錯誤登錄/對應處置
+│  │  └─ error-mapping.service.ts             # 來源模組錯誤映射
+│  ├─ config/
+│  │  └─ blueprint-errors.config.ts           # 錯誤分類/告警/補償設定
+│  └─ README.md
+│
+├─ blueprint-observability/                   # 藍圖可觀測性 - 日誌/指標/追蹤
+│  ├─ telemetry/
+│  │  ├─ telemetry.service.ts                 # 指標與追蹤上報
+│  │  └─ telemetry-config.ts                  # 指標/追蹤設定
+│  ├─ logging/
+│  │  ├─ blueprint-logger.ts                  # 藍圖範疇日誌器
+│  │  └─ log-pipeline.ts                      # 日誌管線/匯流排對接
+│  ├─ tracing/
+│  │  ├─ tracing-adapter.ts                   # 追蹤適配器
+│  │  └─ tracing-context.ts                   # 追蹤上下文封裝
+│  ├─ README.md
+│
+├─ blueprint-saga/                            # 藍圖 Saga - 跨模組補償流程
+│  ├─ definitions/
+│  │  ├─ saga-definition.ts                   # Saga 定義介面
+│  │  └─ saga-mappings.ts                     # 模組事件對應 Saga
+│  ├─ orchestrator/
+│  │  ├─ saga-orchestrator.service.ts         # Saga 執行/補償協調
+│  │  └─ saga-state.store.ts                  # Saga 狀態儲存
+│  ├─ config/
+│  │  └─ saga.config.ts                       # 超時/重試/補償策略設定
+│  ├─ README.md
+│
 ├─ asset/                                     # 資產檔案模組 - 檔案生命週期管理
 │  ├─ models/                                 # 資產實體與元資料
 │  │  ├─ asset.entity.ts                      # 資產聚合根
