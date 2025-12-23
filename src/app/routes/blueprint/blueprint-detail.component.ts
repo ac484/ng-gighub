@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, ChangeDetectionStrategy, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Blueprint, LoggerService } from '@core';
-import { AuditLogsComponent } from '@core/blueprint/modules/implementations/audit-logs';
+import { AuditLogsComponent } from './modules/audit-logs';
 import { BlueprintService } from '@core/blueprint/services';
 import { SHARED_IMPORTS, createAsyncState } from '@shared';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';

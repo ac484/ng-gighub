@@ -16,7 +16,7 @@ import {
   AuditSeverity,
   AuditStatus,
   ActorType
-} from '@core/blueprint/modules/implementations/audit-logs';
+} from '../audit-logs';
 import { ModuleStatus } from '@core/blueprint/modules/module-status.enum';
 import { BlueprintModuleRepository } from '@core/blueprint/repositories/blueprint-module.repository';
 import { BlueprintModuleDocument, CreateModuleData, BatchModuleOperationResult } from '@core/domain/models/blueprint-module.model';

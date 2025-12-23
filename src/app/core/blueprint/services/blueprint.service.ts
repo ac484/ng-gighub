@@ -16,7 +16,7 @@ import {
   AuditSeverity,
   ActorType,
   AuditStatus
-} from '@core/blueprint/modules/implementations/audit-logs';
+} from '@routes/blueprint/modules/audit-logs';
 import { BlueprintMemberRepository, BlueprintRepository } from '@core/blueprint/repositories';
 import { Observable } from 'rxjs';
 

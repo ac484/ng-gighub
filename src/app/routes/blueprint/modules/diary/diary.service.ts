@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { AuditLogsService, AuditEventType, AuditCategory, AuditSeverity, ActorType, AuditStatus } from '@core/blueprint/modules/implementations/audit-logs';
+import { AuditLogsService, AuditEventType, AuditCategory, AuditSeverity, ActorType, AuditStatus } from '../audit-logs';
 import { LoggerService } from '@core/services/logger';
 
 import { CreateDiaryRequest, Diary, UpdateDiaryRequest } from './diary.model';

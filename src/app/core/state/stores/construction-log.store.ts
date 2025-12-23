@@ -17,7 +17,7 @@ import {
   AuditSeverity,
   ActorType,
   AuditStatus
-} from '@core/blueprint/modules/implementations/audit-logs';
+} from '@routes/blueprint/modules/audit-logs';
 import { LogFirestoreRepository } from '@core/data-access/repositories/log-firestore.repository';
 import { Log, CreateLogRequest, UpdateLogRequest, LogPhoto } from '@core/types/log/log.types';
 
