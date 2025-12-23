@@ -1,7 +1,7 @@
-// Errors
+// Errors (shared infrastructure)
 export * from './errors/index';
 
-// Services
+// Services (shared infrastructure)
 export * from './i18n/i18n.service';
 export * from './net/index';
 export * from './services/firebase.service';
@@ -16,16 +16,14 @@ export * from './start-page.guard';
 // Domain layer (pure business logic - includes models and types)
 export * from './domain/index';
 
-// Data access layer
+// Data access layer (shared repositories)
 export * from './data-access/index';
 
-// Infrastructure layer
+// Infrastructure (shared)
 export * from './infrastructure/index';
 
-// State management
+// State management (shared stores)
 export * from './state/index';
 
-// Blueprint system
-// 注意：blueprint 系統有自己的 types、errors、repositories，這些會與 core 層的導出衝突
-// 因此不從這裡導出 blueprint，使用者應該直接從 '@core/blueprint' 導入
-// export * from './blueprint/index';
+// Note: blueprint directory has been removed as part of module self-containment (模組自有化).
+// Blueprint-specific functionality should now be imported from src/app/routes/blueprint/.
