@@ -260,7 +260,7 @@ features/list/components/warranty-export.component.ts
 
 ## 📚 資料模型
 
-保固相關的資料模型定義在 `@core/blueprint/modules/implementations/warranty`:
+保固相關的資料模型定義在模組內部 `./core/models/`:
 
 ```typescript
 interface Warranty {
@@ -292,6 +292,31 @@ interface WarrantyDefect {
 }
 ```
 
+## 🔥 Firebase 整合
+
+本模組**完全自包含**，直接使用 `@angular/fire` 進行 Firestore 操作，不依賴 `@core` 層。
+
+### Repository 實作範例
+
+```typescript
+import { Injectable, inject } from '@angular/core';
+import { Firestore, collection, query, where, getDocs, addDoc } from '@angular/fire/firestore';
+
+@Injectable({ providedIn: 'root' })
+export class WarrantyRepository {
+  private firestore = inject(Firestore); // ✅ 直接注入 @angular/fire
+  
+  async findByBlueprintId(blueprintId: string): Promise<Warranty[]> {
+    const q = query(
+      collection(this.firestore, 'warranties'),
+      where('blueprint_id', '==', blueprintId)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Warranty));
+  }
+}
+```
+
 ## 🚀 未來擴展方向
 
 - 保固報表功能
@@ -306,9 +331,18 @@ interface WarrantyDefect {
 - Angular 20.x
 - ng-alain 20.x
 - ng-zorro-antd 20.x
+- **@angular/fire 20.x** - 直接 Firebase 整合
 - Signals for state management
 - Standalone Components
 - TypeScript 5.x
+
+## 自包含原則
+
+本模組遵循**完全自包含**設計原則：
+- ✅ 不依賴 `@core/blueprint` 或其他 core 層
+- ✅ 直接使用 `@angular/fire` 服務
+- ✅ 模組內部實作所有業務邏輯
+- ✅ 高度可移植和獨立演進
 
 ## 維護者
 

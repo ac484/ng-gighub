@@ -2,7 +2,7 @@
 
 ## 概述 (Overview)
 
-品質控管模組提供工地品質管理功能，包括品質檢驗、標準管理等。本模組採用特徵導向架構 (Feature-based Architecture)，具有高內聚性 (High Cohesion)、低耦合性 (Low Coupling) 和良好的可擴展性 (Extensibility)。
+品質控管模組提供工地品質管理功能，包括品質檢驗、標準管理等。本模組採用特徵導向架構 (Feature-based Architecture) 與完全自包含設計，具有高內聚性 (High Cohesion)、低耦合性 (Low Coupling) 和良好的可擴展性 (Extensibility)。
 
 ## 設計原則 (Design Principles)
 
@@ -11,6 +11,7 @@
 - **高內聚性**：所有 QA 功能集中在一個模組中
 - **低耦合性**：透過清晰的介面與其他模組溝通
 - **易擴展**：未來可輕鬆添加缺陷管理、報告生成等功能
+- **完全自包含**：直接使用 `@angular/fire`，不依賴 `@core` 層
 
 ## 架構 (Architecture)
 
@@ -19,17 +20,47 @@
 ```
 qa/
 ├── qa-module-view.component.ts     # 主協調器 (Main Orchestrator)
-├── features/                        # 功能元件 (Feature Components)
-│   ├── qa-stats/                   # 統計儀表板
+├── core/                           # 🔥 模組核心層 (自包含)
+│   ├── models/                     # 資料模型
+│   │   └── inspection.model.ts
+│   ├── repositories/               # 資料存取 (使用 @angular/fire)
+│   │   └── inspection.repository.ts
+│   └── services/                   # 業務邏輯
+│       └── qa.service.ts
+├── features/                       # 功能元件 (Feature Components)
+│   ├── qa-stats/                  # 統計儀表板
 │   │   ├── qa-stats.component.ts
 │   │   └── index.ts
-│   ├── qa-inspections/             # 檢驗列表
+│   ├── qa-inspections/            # 檢驗列表
 │   │   ├── qa-inspections.component.ts
 │   │   └── index.ts
-│   └── qa-standards/               # 標準列表
+│   └── qa-standards/              # 標準列表
 │       ├── qa-standards.component.ts
 │       └── index.ts
-└── index.ts                        # 桶式匯出 (Barrel Export)
+└── index.ts                       # 桶式匯出 (Barrel Export)
+```
+
+## 🔥 Firebase 整合
+
+本模組**完全自包含**，在 `core/repositories/` 目錄下實作自己的 Repository：
+
+```typescript
+import { Injectable, inject } from '@angular/core';
+import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
+
+@Injectable({ providedIn: 'root' })
+export class InspectionRepository {
+  private firestore = inject(Firestore); // ✅ 直接注入 @angular/fire
+  
+  async findByBlueprintId(blueprintId: string): Promise<Inspection[]> {
+    const q = query(
+      collection(this.firestore, 'inspections'),
+      where('blueprint_id', '==', blueprintId)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Inspection));
+  }
+}
 ```
 
 ### 元件職責 (Component Responsibilities)
@@ -90,14 +121,45 @@ export class CustomComponent {
 
 ## 整合服務 (Service Integration)
 
-本模組可以整合來自 `@core/blueprint/modules/implementations/qa` 的服務：
+本模組採用**完全自包含設計**，在 `core/` 目錄下實作自己的服務和資料存取：
 
 ```typescript
-import { 
-  DefectService,
-  InspectionService,
-  ChecklistService 
-} from '@core/blueprint/modules/implementations/qa';
+// 模組內部服務 (使用 @angular/fire)
+import { InspectionService } from './core/services/inspection.service';
+import { QualityCheckService } from './core/services/quality-check.service';
+import { InspectionRepository } from './core/repositories/inspection.repository';
+```
+
+### Repository 範例
+
+```typescript
+import { Injectable, inject } from '@angular/core';
+import { Firestore, collection, query, where, orderBy, getDocs, addDoc } from '@angular/fire/firestore';
+
+@Injectable({ providedIn: 'root' })
+export class InspectionRepository {
+  private firestore = inject(Firestore); // ✅ 直接注入 @angular/fire
+  
+  async findByBlueprintId(blueprintId: string): Promise<Inspection[]> {
+    const q = query(
+      collection(this.firestore, 'inspections'),
+      where('blueprint_id', '==', blueprintId),
+      orderBy('inspection_date', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Inspection));
+  }
+  
+  async create(inspection: Omit<Inspection, 'id'>): Promise<string> {
+    const docRef = await addDoc(collection(this.firestore, 'inspections'), {
+      ...inspection,
+      created_at: new Date(),
+      updated_at: new Date()
+    });
+    return docRef.id;
+  }
+}
+```
 ```
 
 ### 可用服務 API (Available Service APIs)

@@ -53,9 +53,9 @@ audit-logs/
 ### 1. 註冊模組
 
 ```typescript
-import { AuditLogsModule } from '@core/blueprint/modules/implementations/audit-logs';
+import { AuditLogsModule } from './modules/audit-logs';
 
-// 在 Blueprint Container 中註冊
+// 在 Blueprint Container 中註冊（如果使用模組系統）
 await container.registerModule(AuditLogsModule);
 ```
 
@@ -63,7 +63,8 @@ await container.registerModule(AuditLogsModule);
 
 ```typescript
 import { inject } from '@angular/core';
-import { AuditLogsService, CreateAuditLogData, AuditEventType, AuditCategory, AuditSeverity, AuditStatus, ActorType } from '@core/blueprint/modules/implementations/audit-logs';
+import { AuditLogsService } from './modules/audit-logs/core/services/audit-logs.service';
+import { CreateAuditLogData, AuditEventType, AuditCategory, AuditSeverity, AuditStatus, ActorType } from './modules/audit-logs/core/models';
 
 class MyComponent {
   private auditService = inject(AuditLogsService);
@@ -101,7 +102,7 @@ class MyComponent {
 
 ```typescript
 import { Component } from '@angular/core';
-import { AuditLogsComponent } from '@core/blueprint/modules/implementations/audit-logs';
+import { AuditLogsComponent } from './modules/audit-logs';
 
 @Component({
   selector: 'app-my-page',
@@ -113,6 +114,43 @@ import { AuditLogsComponent } from '@core/blueprint/modules/implementations/audi
 })
 export class MyPageComponent {
   blueprintId = 'blueprint-123';
+}
+```
+
+## 🔥 Firebase 整合
+
+本模組**完全自包含**，直接使用 `@angular/fire` 進行 Firestore 操作，不依賴 `@core` 層。
+
+### Repository 實作
+
+Audit-logs 模組在 `core/repositories/` 目錄下實作自己的 Repository：
+
+```typescript
+import { Injectable, inject } from '@angular/core';
+import { Firestore, collection, query, where, orderBy, limit as firestoreLimit, getDocs, addDoc } from '@angular/fire/firestore';
+
+@Injectable({ providedIn: 'root' })
+export class AuditLogRepository {
+  private firestore = inject(Firestore); // ✅ 直接注入 @angular/fire
+  
+  async create(data: CreateAuditLogData): Promise<AuditLogDocument> {
+    const docRef = await addDoc(collection(this.firestore, 'audit_logs'), {
+      ...data,
+      timestamp: new Date()
+    });
+    return { id: docRef.id, ...data } as AuditLogDocument;
+  }
+  
+  async findByBlueprintId(blueprintId: string, pageSize = 50): Promise<AuditLogDocument[]> {
+    const q = query(
+      collection(this.firestore, 'audit_logs'),
+      where('blueprint_id', '==', blueprintId),
+      orderBy('timestamp', 'desc'),
+      firestoreLimit(pageSize)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AuditLogDocument));
+  }
 }
 ```
 

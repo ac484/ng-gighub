@@ -14,9 +14,9 @@ These are strict, early-checked rules. Breakage is not allowed.
 
 - NO UI components outside module view scope: only module view components, their templates, and module-local modals are allowed here.
 - NO feature-specific logic: do not implement business rules, domain services, or repositories in this directory.
-- NO direct Firebase access outside adapters: components must never access Firestore or Firebase SDKs directly; use repositories/adapters in @core.
+- **Modules must be self-contained**: Each module should use `@angular/fire` directly for Firebase interactions, not depend on `@core` layers.
 
-All modules must be self-contained: they should operate solely from inputs and injected services (facades/repositories) and must not import or depend on other module view implementations.
+All modules must be self-contained: they should operate solely from inputs and injected `@angular/fire` services and must not import or depend on `@core/blueprint` implementations or other module view implementations.
 
 ## Allowed / Expected Content
 
@@ -46,9 +46,9 @@ Each module view must be a Standalone Component, use signals for local UI state,
 Permitted integration patterns and dependency rules:
 
 - Use Angular DI only (prefer `inject()` for new code).
-- Consume domain services, facades, and repositories via well-defined public APIs from `@core/blueprint` or `@core/repositories`.
-- Use the repository/adapters provided by `@angular/fire` only inside approved repository/adapters in `@core` — frontend components must not call Firebase directly.
-- No feature-to-feature imports: module view components must not import other module view components or their internals. Communication between features must happen via `EventBus` or shared domain services.
+- **Use `@angular/fire` services directly** (Firestore, Auth, Storage) for Firebase operations within each module's own repositories.
+- Each module should be self-contained with its own repositories, services, and models.
+- No feature-to-feature imports: module view components must not import other module view components or their internals. Communication between features must happen via `EventBus` or shared domain services if absolutely necessary.
 
 ## Best Practices / Guidelines
 
@@ -140,38 +140,40 @@ This directory contains **UI view components** for Blueprint modules. These are 
 3. **Module View HTML Templates** - 視圖元件的模板
    - 例如: `finance-module-view.component.html`
 
-4. **Barrel Export File** - 統一匯出檔案
+4. **Module Core Layer** - 模組內部的核心層（自包含架構）
+   - `core/models/` - 模組專用資料模型
+   - `core/repositories/` - 模組專用 Repository（直接使用 `@angular/fire`）
+   - `core/services/` - 模組專用業務邏輯服務
+   - 例如: `modules/warranty/core/`, `modules/cloud/core/`
+
+5. **Barrel Export File** - 統一匯出檔案
    - `index.ts` - 匯出所有模組視圖元件
 
-5. **Submodule Directories** - 複雜模組的子目錄
+6. **Submodule Directories** - 複雜模組的子目錄
    - 例如: `contract/` - 合約模組的相關元件
    - 每個子目錄必須包含 `README.md` 說明用途
 
 ### ❌ What DOES NOT belong here:
 
-1. **業務邏輯** - 移至 `@core/blueprint/modules/implementations/`
-   - ❌ Module Services
-   - ❌ Module Stores
-   - ❌ Module Facades
+1. **跨模組共享的業務邏輯** - 如需共享，移至 `@core/blueprint/` 或 `shared/`
+   - ❌ 跨模組 Services（僅限模組內部使用的 Services 才放在 module/core/）
+   - ❌ 跨模組 Stores
+   - ❌ 跨模組 Facades
 
-2. **資料存取邏輯** - 移至 `@core/repositories/` 或 `@core/blueprint/repositories/`
-   - ❌ Repositories
-   - ❌ Data Access Services
+2. **跨模組共享的資料模型** - 移至 `@core/models/` 或 `shared/`
+   - ❌ 跨模組使用的 TypeScript Interfaces
+   - ❌ 跨模組使用的 Type Definitions
+   - ❌ 跨模組使用的 Enums
 
-3. **資料模型** - 移至 `@core/models/`
-   - ❌ TypeScript Interfaces
-   - ❌ Type Definitions
-   - ❌ Enums
-
-4. **共享元件** - 移至 `@shared/components/`
+3. **共享元件** - 移至 `@shared/components/`
    - ❌ 跨模組使用的元件
    - ❌ 可重用的 UI 元件
 
-5. **路由配置** - 保留在上層目錄
+4. **路由配置** - 保留在上層目錄
    - ❌ routes.ts 檔案不屬於此目錄
    - ✅ 路由配置應在 `src/app/routes/blueprint/routes.ts`
 
-6. **Configuration** - 移至 `@core/blueprint/config/`
+5. **Configuration** - 移至 `@core/blueprint/config/`
    - ❌ Module Registry
    - ❌ Module Configuration
 
@@ -189,7 +191,8 @@ This directory contains **UI view components** for Blueprint modules. These are 
 ```typescript
 import { Component, ChangeDetectionStrategy, signal, inject, input } from '@angular/core';
 import { SHARED_IMPORTS } from '@shared';
-import { LogService } from '@core/blueprint/modules/implementations/logs';
+import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
+import { LogRepository } from './core/repositories/log.repository'; // ✅ 模組內部 repository
 
 @Component({
   selector: 'app-log-module-view',
@@ -210,8 +213,8 @@ export class LogModuleViewComponent {
   // Input from parent Blueprint Detail Component
   blueprintId = input.required<string>();
   
-  // Inject services (business logic layer)
-  private logService = inject(LogService);
+  // Inject repository (module's own repository using @angular/fire)
+  private logRepository = inject(LogRepository);
   
   // Local UI state (Signals)
   loading = signal(false);
@@ -224,11 +227,32 @@ export class LogModuleViewComponent {
   async loadLogs(): Promise<void> {
     this.loading.set(true);
     try {
-      const logs = await this.logService.getLogsByBlueprintId(this.blueprintId());
+      const logs = await this.logRepository.findByBlueprintId(this.blueprintId());
       this.logs.set(logs);
     } finally {
       this.loading.set(false);
     }
+  }
+}
+```
+
+### 模組內部 Repository 範例
+
+```typescript
+import { Injectable, inject } from '@angular/core';
+import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
+
+@Injectable({ providedIn: 'root' })
+export class LogRepository {
+  private firestore = inject(Firestore); // ✅ 直接注入 @angular/fire
+  
+  async findByBlueprintId(blueprintId: string): Promise<Log[]> {
+    const q = query(
+      collection(this.firestore, 'logs'),
+      where('blueprint_id', '==', blueprintId)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Log));
   }
 }
 ```
@@ -239,16 +263,17 @@ export class LogModuleViewComponent {
 
 ### ✅ Module View Components SHOULD:
 1. 接收 `blueprintId` 作為 input
-2. 從業務層服務注入並使用（`@core/blueprint/modules/implementations/`）
+2. 使用模組內部的 Repository (直接使用 `@angular/fire`)
 3. 使用 Signals 管理本地 UI 狀態（loading、error、data）
-4. 處理使用者互動並委派給服務層
+4. 處理使用者互動並委派給模組內部的服務層
 5. 顯示錯誤訊息和 loading 狀態
 6. 使用 ng-zorro-antd 元件進行 UI 顯示
+7. **完全自包含**: 所有業務邏輯和資料存取都在模組內部實作
 
 ### ❌ Module View Components SHOULD NOT:
-1. 直接操作 Firestore（必須透過 Repository）
-2. 包含複雜的業務邏輯（委派給 Service）
-3. 直接管理權限（使用 PermissionService）
+1. 依賴 `@core/blueprint` 或其他 core 層（除了共享的 EventBus 或 Logger 等基礎設施）
+2. 包含複雜的業務邏輯（委派給模組內部的 Service）
+3. 直接在元件中操作 Firestore（必須透過模組內部的 Repository）
 4. 跨模組通訊（使用 EventBus）
 
 ## Integration with Blueprint Detail
@@ -395,13 +420,29 @@ modules/
 ## Migration Notes
 
 **規則**:
-如果發現以下內容在此目錄中，請移至正確位置：
+如果發現以下內容在此目錄中，請按照自包含原則處理：
 
-1. **Services** → `@core/blueprint/modules/implementations/[module-name]/`
-2. **Repositories** → `@core/repositories/` 或 `@core/blueprint/repositories/`
-3. **Models** → `@core/models/`
+1. **Module-Specific Services** → 保留在 `modules/[module-name]/core/services/`
+2. **Module-Specific Repositories** → 保留在 `modules/[module-name]/core/repositories/`（使用 `@angular/fire`）
+3. **Module-Specific Models** → 保留在 `modules/[module-name]/core/models/`
 4. **Shared Components** → `@shared/components/`
 5. **Routes** → `src/app/routes/blueprint/routes.ts`
+
+**自包含架構範例**:
+```
+modules/warranty/
+├── warranty-module-view.component.ts
+├── core/
+│   ├── models/
+│   │   └── warranty.model.ts
+│   ├── repositories/
+│   │   └── warranty.repository.ts (使用 @angular/fire)
+│   └── services/
+│       └── warranty.service.ts
+└── features/
+    └── list/
+        └── warranty-list.component.ts
+```
 
 ---
 
