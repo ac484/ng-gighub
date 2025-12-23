@@ -56,7 +56,7 @@
 │  │  ├─ contract.module.ts                   # 模組定義檔
 │  │  └─ README.md                            # 模組說明文件
 │  │
-│  ├─ task/                                   # 任務模組 - 施工任務管理
+│  ├─ task/                                   # 任務模組 - 施工任務管理（核心映射多視圖：樹狀列表 / 樹狀圖 / 甘特圖 / 時間線 / 日曆）
 │  │  ├─ models/                              # 任務聚合根與值物件
 │  │  │  ├─ task.entity.ts                    # 任務聚合根
 │  │  │  ├─ task-assignment.vo.ts             # 任務指派值物件
@@ -159,30 +159,198 @@
 │  │  ├─ finance.module.ts
 │  │  └─ README.md
 │  │
-│  └─ warranty/                               # 保固模組 - 保固期管理
+│  ├─ warranty/                               # 保固模組 - 保固期管理
+│  │  ├─ models/
+│  │  │  ├─ warranty.entity.ts                # 保固聚合根
+│  │  │  ├─ warranty-period.vo.ts             # 保固期間值物件
+│  │  │  └─ index.ts
+│  │  ├─ states/                              # 保固狀態機
+│  │  │  └─ warranty.states.ts
+│  │  ├─ services/
+│  │  │  ├─ warranty.service.ts
+│  │  │  └─ warranty-monitor.service.ts       # 保固監控服務
+│  │  ├─ repositories/
+│  │  │  ├─ warranty.repository.ts
+│  │  │  └─ warranty.repository.impl.ts
+│  │  ├─ events/
+│  │  │  └─ warranty.events.ts
+│  │  ├─ policies/
+│  │  │  └─ warranty.policies.ts
+│  │  ├─ facade/
+│  │  │  └─ warranty.facade.ts
+│  │  ├─ config/
+│  │  │  └─ warranty.config.ts
+│  │  ├─ module.metadata.ts
+│  │  ├─ warranty.module.ts
+│  │  └─ README.md
+│  │
+│  ├─ document/                               # 文件模組 - 工程文件與圖面版本生命週期管理
+│  │  ├─ models/
+│  │  │  ├─ document.entity.ts                # 文件聚合根
+│  │  │  ├─ document-version.vo.ts            # 文件版本值物件
+│  │  │  └─ index.ts
+│  │  ├─ states/                              # 文件狀態機
+│  │  │  └─ document.states.ts
+│  │  ├─ services/
+│  │  │  ├─ document.service.ts               # 文件核心服務（簽核/發佈/作廢）
+│  │  │  └─ document-render.service.ts        # 圖面/文件渲染與預覽
+│  │  ├─ repositories/
+│  │  │  ├─ document.repository.ts
+│  │  │  └─ document.repository.impl.ts
+│  │  ├─ events/
+│  │  │  └─ document.events.ts                # 文件建立/修訂/發佈事件
+│  │  ├─ policies/
+│  │  │  └─ document.policies.ts              # 文件權限與保留規則
+│  │  ├─ facade/
+│  │  │  └─ document.facade.ts                # 文件高階用例門面
+│  │  ├─ config/
+│  │  │  └─ document.config.ts                # 存儲/預覽/審核設定
+│  │  ├─ module.metadata.ts
+│  │  ├─ document.module.ts
+│  │  └─ README.md
+│  │
+│  ├─ quality/                                # 品質模組 - 品質計畫與巡檢管控
+│  │  ├─ models/
+│  │  │  ├─ quality-plan.entity.ts            # 品質計畫聚合根
+│  │  │  ├─ quality-issue.vo.ts               # 品質缺失/缺陷值物件
+│  │  │  └─ index.ts
+│  │  ├─ states/                              # 品質狀態機
+│  │  │  └─ quality.states.ts                 # 缺失/整改/驗收狀態
+│  │  ├─ services/
+│  │  │  ├─ quality.service.ts                # 品質計畫與巡檢流程
+│  │  │  └─ quality-rectification.service.ts  # 整改追蹤與閉環
+│  │  ├─ repositories/
+│  │  │  ├─ quality.repository.ts
+│  │  │  └─ quality.repository.impl.ts
+│  │  ├─ events/
+│  │  │  └─ quality.events.ts                 # 巡檢、整改、驗證事件
+│  │  ├─ policies/
+│  │  │  └─ quality.policies.ts               # 品質控制與權限策略
+│  │  ├─ facade/
+│  │  │  └─ quality.facade.ts                 # 對外門面（巡檢/整改用例）
+│  │  ├─ config/
+│  │  │  └─ quality.config.ts                 # 品質標準/閾值設定
+│  │  ├─ module.metadata.ts
+│  │  ├─ quality.module.ts
+│  │  └─ README.md
+│  │
+│  └─ weather/                                # 氣象模組 - 氣象資料採集與預警
 │     ├─ models/
-│     │  ├─ warranty.entity.ts                # 保固聚合根
-│     │  ├─ warranty-period.vo.ts             # 保固期間值物件
+│     │  ├─ weather-data.entity.ts            # 即時氣象資料實體
+│     │  ├─ weather-forecast.vo.ts            # 天氣預報值物件
 │     │  └─ index.ts
-│     ├─ states/                              # 保固狀態機
-│     │  └─ warranty.states.ts
+│     ├─ states/                              # 氣象狀態定義
+│     │  └─ weather.states.ts                 # 觀測/預警/解除狀態
 │     ├─ services/
-│     │  ├─ warranty.service.ts
-│     │  └─ warranty-monitor.service.ts       # 保固監控服務
+│     │  ├─ weather.service.ts                # 氣象查詢與預警推送
+│     │  └─ weather-ingest.service.ts         # 氣象資料整合與清洗
 │     ├─ repositories/
-│     │  ├─ warranty.repository.ts
-│     │  └─ warranty.repository.impl.ts
+│     │  ├─ weather.repository.ts
+│     │  └─ weather.repository.impl.ts
 │     ├─ events/
-│     │  └─ warranty.events.ts
+│     │  └─ weather.events.ts                 # 氣象更新/預警事件
 │     ├─ policies/
-│     │  └─ warranty.policies.ts
+│     │  └─ weather.policies.ts               # 天氣預警與風險策略
 │     ├─ facade/
-│     │  └─ warranty.facade.ts
+│     │  └─ weather.facade.ts                 # 氣象服務對外門面
 │     ├─ config/
-│     │  └─ warranty.config.ts
+│     │  └─ weather.config.ts                 # 供應商/位置/閾值設定
 │     ├─ module.metadata.ts
-│     ├─ warranty.module.ts
+│     ├─ weather.module.ts
 │     └─ README.md
+│
+├─ blueprint-members/                         # 藍圖成員模型 - 成員/角色/權限維護
+│  ├─ models/
+│  │  ├─ blueprint-member.entity.ts           # 藍圖成員聚合根（user/team/partner）
+│  │  ├─ blueprint-role.vo.ts                 # 角色與權限集合
+│  │  └─ index.ts
+│  ├─ services/
+│  │  ├─ blueprint-member.service.ts          # 成員加入/退出/權限同步
+│  │  └─ membership-sync.service.ts           # 與組織/團隊/合作夥伴同步
+│  ├─ repositories/
+│  │  ├─ blueprint-member.repository.ts
+│  │  └─ blueprint-member.repository.impl.ts
+│  ├─ events/
+│  │  └─ blueprint-member.events.ts           # 成員調整/權限變更事件
+│  ├─ policies/
+│  │  └─ blueprint-member.policies.ts         # 成員資格與狀態規則
+│  ├─ config/
+│  │  └─ blueprint-member.config.ts           # 權限模板與預設設定
+│  └─ README.md
+│
+├─ blueprint-settings/                        # 藍圖設定 - 全域參數/模板/功能開關
+│  ├─ models/
+│  │  ├─ blueprint-setting.entity.ts          # 藍圖設定聚合根
+│  │  └─ index.ts
+│  ├─ services/
+│  │  ├─ blueprint-settings.service.ts        # 設定載入/覆寫/驗證
+│  │  └─ feature-toggle.service.ts            # 藍圖層級功能開關
+│  ├─ repositories/
+│  │  ├─ blueprint-settings.repository.ts
+│  │  └─ blueprint-settings.repository.impl.ts
+│  ├─ policies/
+│  │  └─ blueprint-settings.policies.ts       # 設定修改權限與審核規則
+│  ├─ config/
+│  │  └─ blueprint-settings.config.ts         # 預設設定/驗證規範
+│  ├─ module.metadata.ts
+│  └─ README.md
+│
+├─ blueprint-capabilities/                    # 藍圖能力映射 - 模組功能與授權配置
+│  ├─ models/
+│  │  ├─ blueprint-capability.entity.ts       # 能力/feature 聚合根
+│  │  ├─ capability-scope.vo.ts               # 能力範圍與授權值物件
+│  │  └─ index.ts
+│  ├─ services/
+│  │  ├─ blueprint-capabilities.service.ts    # 能力開關/授權載入
+│  │  └─ capability-mapper.service.ts         # 模組-能力對應表
+│  ├─ config/
+│  │  └─ blueprint-capabilities.config.ts     # 能力與角色預設映射
+│  └─ README.md
+│
+├─ blueprint-runtime/                         # 藍圖執行態 - 執行上下文與資源管理
+│  ├─ context/
+│  │  ├─ runtime-context.ts                   # 執行上下文定義
+│  │  └─ context-factory.ts                   # Context 建立/回收
+│  ├─ services/
+│  │  ├─ runtime.service.ts                   # 執行態生命週期管理
+│  │  └─ resource-allocator.service.ts        # 資源配置與隔離
+│  ├─ config/
+│  │  └─ runtime.config.ts                    # 執行態限制/隔離設定
+│  └─ README.md
+│
+├─ blueprint-errors/                          # 藍圖錯誤 - 錯誤分類與補償策略
+│  ├─ models/
+│  │  ├─ blueprint-error.entity.ts            # 錯誤/異常聚合根
+│  │  └─ index.ts
+│  ├─ services/
+│  │  ├─ blueprint-error.service.ts           # 錯誤登錄/對應處置
+│  │  └─ error-mapping.service.ts             # 來源模組錯誤映射
+│  ├─ config/
+│  │  └─ blueprint-errors.config.ts           # 錯誤分類/告警/補償設定
+│  └─ README.md
+│
+├─ blueprint-observability/                   # 藍圖可觀測性 - 日誌/指標/追蹤
+│  ├─ telemetry/
+│  │  ├─ telemetry.service.ts                 # 指標與追蹤上報
+│  │  └─ telemetry-config.ts                  # 指標/追蹤設定
+│  ├─ logging/
+│  │  ├─ blueprint-logger.ts                  # 藍圖範疇日誌器
+│  │  └─ log-pipeline.ts                      # 日誌管線/匯流排對接
+│  ├─ tracing/
+│  │  ├─ tracing-adapter.ts                   # 追蹤適配器
+│  │  └─ tracing-context.ts                   # 追蹤上下文封裝
+│  ├─ README.md
+│
+├─ blueprint-saga/                            # 藍圖 Saga - 跨模組補償流程
+│  ├─ definitions/
+│  │  ├─ saga-definition.ts                   # Saga 定義介面
+│  │  └─ saga-mappings.ts                     # 模組事件對應 Saga
+│  ├─ orchestrator/
+│  │  ├─ saga-orchestrator.service.ts         # Saga 執行/補償協調
+│  │  └─ saga-state.store.ts                  # Saga 狀態儲存
+│  ├─ config/
+│  │  └─ saga.config.ts                       # 超時/重試/補償策略設定
+│  ├─ README.md
 │
 ├─ asset/                                     # 資產檔案模組 - 檔案生命週期管理
 │  ├─ models/                                 # 資產實體與元資料
