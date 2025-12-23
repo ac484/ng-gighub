@@ -1,19 +1,6 @@
-/**
- * Issue Form Component
- * 問題表單元件
- *
- * Purpose: Create/edit issue form in modal
- * Features: Reactive form with validation, modal integration
- *
- * Architecture: Feature Component (High Cohesion)
- * - Standalone form component
- * - Modal integration via NZ_MODAL_DATA
- * - Form validation and submission
- */
-
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
+import { Auth } from '@angular/fire/auth';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { FirebaseAuthService, LoggerService } from '@core';
 import type { Issue, CreateIssueData, UpdateIssueData, IssueSeverity, IssueCategory } from '../../issues.model';
 import { IssueManagementService } from '../../issue-management.service';
 import { SHARED_IMPORTS } from '@shared';
@@ -119,9 +106,8 @@ export class IssueFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly modal = inject(NzModalRef);
   private readonly message = inject(NzMessageService);
-  private readonly logger = inject(LoggerService);
   private readonly managementService = inject(IssueManagementService);
-  private readonly authService = inject(FirebaseAuthService);
+  private readonly auth = inject(Auth);
   private readonly data: IssueFormData = inject(NZ_MODAL_DATA, { optional: true }) || { blueprintId: '' };
 
   // State
@@ -181,7 +167,7 @@ export class IssueFormComponent implements OnInit {
       return;
     }
 
-    const user = this.authService.currentUser;
+    const user = this.auth.currentUser;
     if (!isValidUser(user)) {
       this.message.error('請先登入');
       return;
@@ -231,9 +217,7 @@ export class IssueFormComponent implements OnInit {
         this.modal.close(newIssue);
       }
     } catch (error) {
-      this.message.error(this.isEdit ? '更新問題失敗' : '建立問題失敗');
-      this.logger.error('[IssueFormComponent]', 'Failed to save issue', error as Error);
-    } finally {
+      this.message.error(this.isEdit ? '更新問題失敗' : '建立問題失敗');    } finally {
       this.submitting.set(false);
     }
   }

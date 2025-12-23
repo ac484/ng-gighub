@@ -9,7 +9,6 @@
  */
 
 import { Injectable, signal, inject, WritableSignal } from '@angular/core';
-import { LoggerService } from '@core';
 import type { IExecutionContext } from '../../shared/interfaces/execution-context.interface';
 import { ModuleStatus } from '../../shared/enums/module-status.enum';
 import { IBlueprintModule } from '../../shared/interfaces/module.interface';
@@ -26,7 +25,6 @@ import { AuditLogsService } from './services/audit-logs.service';
  */
 @Injectable()
 export class AuditLogsModule implements IBlueprintModule {
-  private readonly logger = inject(LoggerService);
   private readonly auditService = inject(AuditLogsService);
   private readonly auditRepository = inject(AuditLogRepository);
 
@@ -69,9 +67,7 @@ export class AuditLogsModule implements IBlueprintModule {
   /**
    * Initialize the module
    */
-  async init(context: IExecutionContext): Promise<void> {
-    this.logger.info('[AuditLogsModule]', 'Initializing...');
-    this.status.set(ModuleStatus.INITIALIZING);
+  async init(context: IExecutionContext): Promise<void> {    this.status.set(ModuleStatus.INITIALIZING);
 
     try {
       // Store context
@@ -93,21 +89,15 @@ export class AuditLogsModule implements IBlueprintModule {
       // Register module exports
       this.registerExports(context);
 
-      this.status.set(ModuleStatus.INITIALIZED);
-      this.logger.info('[AuditLogsModule]', 'Initialized successfully');
-    } catch (error) {
-      this.status.set(ModuleStatus.ERROR);
-      this.logger.error('[AuditLogsModule]', 'Initialization failed', error as Error);
-      throw error;
+      this.status.set(ModuleStatus.INITIALIZED);    } catch (error) {
+      this.status.set(ModuleStatus.ERROR);      throw error;
     }
   }
 
   /**
    * Start the module
    */
-  async start(): Promise<void> {
-    this.logger.info('[AuditLogsModule]', 'Starting...');
-    this.status.set(ModuleStatus.STARTING);
+  async start(): Promise<void> {    this.status.set(ModuleStatus.STARTING);
 
     try {
       if (!this.blueprintId) {
@@ -117,21 +107,15 @@ export class AuditLogsModule implements IBlueprintModule {
       // Load initial audit logs (optional - can be lazy loaded)
       // await this.auditService.loadLogs(this.blueprintId, { limit: 50 });
 
-      this.status.set(ModuleStatus.STARTED);
-      this.logger.info('[AuditLogsModule]', 'Started successfully');
-    } catch (error) {
-      this.status.set(ModuleStatus.ERROR);
-      this.logger.error('[AuditLogsModule]', 'Start failed', error as Error);
-      throw error;
+      this.status.set(ModuleStatus.STARTED);    } catch (error) {
+      this.status.set(ModuleStatus.ERROR);      throw error;
     }
   }
 
   /**
    * Signal module is ready
    */
-  async ready(): Promise<void> {
-    this.logger.info('[AuditLogsModule]', 'Ready');
-    this.status.set(ModuleStatus.READY);
+  async ready(): Promise<void> {    this.status.set(ModuleStatus.READY);
 
     try {
       // Emit module ready event
@@ -139,32 +123,22 @@ export class AuditLogsModule implements IBlueprintModule {
         this.context['eventBus'].emit(AUDIT_LOGS_MODULE_EVENTS.LOGS_LOADED, { status: 'ready' }, this.id);
       }
 
-      this.status.set(ModuleStatus.RUNNING);
-      this.logger.info('[AuditLogsModule]', 'Running');
-    } catch (error) {
-      this.status.set(ModuleStatus.ERROR);
-      this.logger.error('[AuditLogsModule]', 'Ready transition failed', error as Error);
-      throw error;
+      this.status.set(ModuleStatus.RUNNING);    } catch (error) {
+      this.status.set(ModuleStatus.ERROR);      throw error;
     }
   }
 
   /**
    * Stop the module
    */
-  async stop(): Promise<void> {
-    this.logger.info('[AuditLogsModule]', 'Stopping...');
-    this.status.set(ModuleStatus.STOPPING);
+  async stop(): Promise<void> {    this.status.set(ModuleStatus.STOPPING);
 
     try {
       // Clear service state
       this.auditService.clearState();
 
-      this.status.set(ModuleStatus.STOPPED);
-      this.logger.info('[AuditLogsModule]', 'Stopped successfully');
-    } catch (error) {
-      this.status.set(ModuleStatus.ERROR);
-      this.logger.error('[AuditLogsModule]', 'Stop failed', error as Error);
-      throw error;
+      this.status.set(ModuleStatus.STOPPED);    } catch (error) {
+      this.status.set(ModuleStatus.ERROR);      throw error;
     }
   }
 
@@ -172,8 +146,6 @@ export class AuditLogsModule implements IBlueprintModule {
    * Dispose of the module
    */
   async dispose(): Promise<void> {
-    this.logger.info('[AuditLogsModule]', 'Disposing...');
-
     try {
       // Unsubscribe from events
       this.unsubscribeFromEvents();
@@ -183,12 +155,8 @@ export class AuditLogsModule implements IBlueprintModule {
       this.context = undefined;
       this.blueprintId = undefined;
 
-      this.status.set(ModuleStatus.DISPOSED);
-      this.logger.info('[AuditLogsModule]', 'Disposed successfully');
-    } catch (error) {
-      this.status.set(ModuleStatus.ERROR);
-      this.logger.error('[AuditLogsModule]', 'Dispose failed', error as Error);
-      throw error;
+      this.status.set(ModuleStatus.DISPOSED);    } catch (error) {
+      this.status.set(ModuleStatus.ERROR);      throw error;
     }
   }
 
@@ -199,7 +167,6 @@ export class AuditLogsModule implements IBlueprintModule {
    */
   private validateDependencies(_context: IExecutionContext): void {
     // Currently no dependencies to validate
-    this.logger.debug('[AuditLogsModule]', 'Dependencies validated');
   }
 
   /**
@@ -207,7 +174,6 @@ export class AuditLogsModule implements IBlueprintModule {
    */
   private subscribeToEvents(context: IExecutionContext): void {
     if (!context['eventBus']) {
-      this.logger.warn('[AuditLogsModule]', 'EventBus not available in context');
       return;
     }
 
@@ -216,23 +182,21 @@ export class AuditLogsModule implements IBlueprintModule {
     // Subscribe to audit log events
     this.eventUnsubscribers.push(
       eventBus.on(AUDIT_LOGS_MODULE_EVENTS.LOG_CREATED, (event: any) => {
-        this.logger.info('[AuditLogsModule]', 'Audit log created event received', event.payload);
+        // Handle log created event
       })
     );
 
     this.eventUnsubscribers.push(
       eventBus.on(AUDIT_LOGS_MODULE_EVENTS.LOGS_LOADED, (event: any) => {
-        this.logger.info('[AuditLogsModule]', 'Audit logs loaded event received', event.payload);
+        // Handle logs loaded event
       })
     );
 
     this.eventUnsubscribers.push(
       eventBus.on(AUDIT_LOGS_MODULE_EVENTS.ERROR_OCCURRED, (event: any) => {
-        this.logger.error('[AuditLogsModule]', 'Audit error event received', new Error(JSON.stringify(event.payload)));
+        console.error('[AuditLogsModule]', 'Audit error event received', event.payload);
       })
     );
-
-    this.logger.debug('[AuditLogsModule]', `Subscribed to ${this.eventUnsubscribers.length} events`);
   }
 
   /**
@@ -242,7 +206,6 @@ export class AuditLogsModule implements IBlueprintModule {
     // Clean up event subscriptions
     this.eventUnsubscribers.forEach(unsubscribe => unsubscribe());
     this.eventUnsubscribers = [];
-    this.logger.debug('[AuditLogsModule]', 'Unsubscribed from all events');
   }
 
   /**
@@ -252,6 +215,5 @@ export class AuditLogsModule implements IBlueprintModule {
    */
   private registerExports(_context: IExecutionContext): void {
     // Exports are available via the exports property
-    this.logger.debug('[AuditLogsModule]', 'Module exports registered');
   }
 }

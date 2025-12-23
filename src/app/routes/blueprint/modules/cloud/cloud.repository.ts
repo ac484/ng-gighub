@@ -1,17 +1,15 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { collection, addDoc, doc, getDocs, deleteDoc, updateDoc, query, where, orderBy, Timestamp } from '@angular/fire/firestore';
-import { LoggerService } from '@core';
+import { Auth } from '@angular/fire/auth';
+import { Firestore, collection, addDoc, doc, getDocs, deleteDoc, updateDoc, query, where, orderBy, Timestamp } from '@angular/fire/firestore';
 import { CloudStorageRepository } from './core/cloud-storage.repository';
-import { FirebaseService } from '@core/services/firebase.service';
 
 import type { CloudFile, CloudBackup, CloudUploadRequest, CloudBackupRequest } from './cloud.model';
 
 @Injectable({ providedIn: 'root' })
 export class CloudRepository {
-  private readonly firebaseService = inject(FirebaseService);
+  private readonly firestore = inject(Firestore);
+  private readonly auth = inject(Auth);
   private readonly storageRepo = inject(CloudStorageRepository);
-  private readonly logger = inject(LoggerService);
-
   readonly files = signal<CloudFile[]>([]);
   readonly backups = signal<CloudBackup[]>([]);
   readonly loading = signal(false);
@@ -41,7 +39,7 @@ export class CloudRepository {
           : {}
       });
 
-      const currentUserId = this.firebaseService.getCurrentUserId() || 'anonymous';
+      const currentUserId = this.auth.currentUser?.uid || 'anonymous';
 
       const file: CloudFile = {
         id: '',
@@ -64,7 +62,7 @@ export class CloudRepository {
         versionHistory: []
       };
 
-      const filesCollection = collection(this.firebaseService.db, 'cloud_files');
+      const filesCollection = collection(this.firestore, 'cloud_files');
       const docData: Record<string, unknown> = {
         blueprint_id: file.blueprintId,
         name: file.name,
@@ -91,15 +89,10 @@ export class CloudRepository {
       const docRef = await addDoc(filesCollection, docData);
 
       file.id = docRef.id;
-      this.files.update(files => [...files, file]);
-
-      this.logger.info('[CloudRepository]', `File uploaded: ${file.name}`);
-      return file;
+      this.files.update(files => [...files, file]);      return file;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Upload failed';
-      this.error.set(errorMessage);
-      this.logger.error('[CloudRepository]', 'Upload failed', error as Error);
-      throw error;
+      this.error.set(errorMessage);      throw error;
     } finally {
       this.loading.set(false);
     }
@@ -122,14 +115,10 @@ export class CloudRepository {
         throw new Error(`Failed to download file: ${response.statusText}`);
       }
 
-      const blob = await response.blob();
-      this.logger.info('[CloudRepository]', `File downloaded: ${file.name}`);
-      return blob;
+      const blob = await response.blob();      return blob;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Download failed';
-      this.error.set(errorMessage);
-      this.logger.error('[CloudRepository]', 'Download failed', error as Error);
-      throw error;
+      this.error.set(errorMessage);      throw error;
     } finally {
       this.loading.set(false);
     }
@@ -148,16 +137,12 @@ export class CloudRepository {
       const bucket = this.getBucketName(blueprintId);
       await this.storageRepo.deleteFile(bucket, file.path);
 
-      const fileDoc = doc(this.firebaseService.db, 'cloud_files', fileId);
+      const fileDoc = doc(this.firestore, 'cloud_files', fileId);
       await deleteDoc(fileDoc);
 
-      this.files.update(files => files.filter(f => f.id !== fileId));
-      this.logger.info('[CloudRepository]', `File deleted: ${file.name}`);
-    } catch (error) {
+      this.files.update(files => files.filter(f => f.id !== fileId));    } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Delete failed';
-      this.error.set(errorMessage);
-      this.logger.error('[CloudRepository]', 'Delete failed', error as Error);
-      throw error;
+      this.error.set(errorMessage);      throw error;
     } finally {
       this.loading.set(false);
     }
@@ -168,19 +153,15 @@ export class CloudRepository {
     this.error.set(null);
 
     try {
-      const fileDoc = doc(this.firebaseService.db, 'cloud_files', fileId);
+      const fileDoc = doc(this.firestore, 'cloud_files', fileId);
       await updateDoc(fileDoc, {
         path: newPath,
         updated_at: new Date()
       });
 
-      this.files.update(files => files.map(f => (f.id === fileId ? { ...f, path: newPath, updatedAt: new Date() } : f)));
-      this.logger.info('[CloudRepository]', `File path updated: ${fileId} -> ${newPath}`);
-    } catch (error) {
+      this.files.update(files => files.map(f => (f.id === fileId ? { ...f, path: newPath, updatedAt: new Date() } : f)));    } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Update path failed';
-      this.error.set(errorMessage);
-      this.logger.error('[CloudRepository]', 'Update path failed', error as Error);
-      throw error;
+      this.error.set(errorMessage);      throw error;
     } finally {
       this.loading.set(false);
     }
@@ -191,7 +172,7 @@ export class CloudRepository {
     this.error.set(null);
 
     try {
-      const filesCollection = collection(this.firebaseService.db, 'cloud_files');
+      const filesCollection = collection(this.firestore, 'cloud_files');
       const q = query(filesCollection, where('blueprint_id', '==', blueprintId));
       const querySnapshot = await getDocs(q);
 
@@ -220,15 +201,10 @@ export class CloudRepository {
       });
 
       files.sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime());
-      this.files.set(files);
-
-      this.logger.info('[CloudRepository]', `Loaded ${files.length} files`);
-      return files;
+      this.files.set(files);      return files;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'List files failed';
-      this.error.set(errorMessage);
-      this.logger.error('[CloudRepository]', 'List files failed', error as Error);
-      throw error;
+      this.error.set(errorMessage);      throw error;
     } finally {
       this.loading.set(false);
     }
@@ -239,7 +215,7 @@ export class CloudRepository {
     this.error.set(null);
 
     try {
-      const currentUserId = this.firebaseService.getCurrentUserId() || 'anonymous';
+      const currentUserId = this.auth.currentUser?.uid || 'anonymous';
 
       const backup: CloudBackup = {
         id: '',
@@ -261,7 +237,7 @@ export class CloudRepository {
         }
       };
 
-      const backupsCollection = collection(this.firebaseService.db, 'cloud_backups');
+      const backupsCollection = collection(this.firestore, 'cloud_backups');
       const docRef = await addDoc(backupsCollection, {
         blueprint_id: backup.blueprintId,
         name: backup.name,
@@ -278,15 +254,10 @@ export class CloudRepository {
       });
 
       backup.id = docRef.id;
-      this.backups.update(backups => [...backups, backup]);
-
-      this.logger.info('[CloudRepository]', `Backup created: ${backup.name}`);
-      return backup;
+      this.backups.update(backups => [...backups, backup]);      return backup;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Create backup failed';
-      this.error.set(errorMessage);
-      this.logger.error('[CloudRepository]', 'Create backup failed', error as Error);
-      throw error;
+      this.error.set(errorMessage);      throw error;
     } finally {
       this.loading.set(false);
     }
@@ -297,7 +268,7 @@ export class CloudRepository {
     this.error.set(null);
 
     try {
-      const backupsCollection = collection(this.firebaseService.db, 'cloud_backups');
+      const backupsCollection = collection(this.firestore, 'cloud_backups');
       const q = query(backupsCollection, where('blueprint_id', '==', blueprintId));
       const querySnapshot = await getDocs(q);
 
@@ -321,14 +292,10 @@ export class CloudRepository {
       });
 
       backups.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-      this.backups.set(backups);
-      this.logger.info('[CloudRepository]', `Loaded ${backups.length} backups`);
-      return backups;
+      this.backups.set(backups);      return backups;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'List backups failed';
-      this.error.set(errorMessage);
-      this.logger.error('[CloudRepository]', 'List backups failed', error as Error);
-      throw error;
+      this.error.set(errorMessage);      throw error;
     } finally {
       this.loading.set(false);
     }

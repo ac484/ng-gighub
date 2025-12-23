@@ -26,7 +26,6 @@ import {
   QueryConstraint,
   QueryDocumentSnapshot
 } from '@angular/fire/firestore';
-import { LoggerService } from '@core';
 import { Observable, from, map, catchError, of } from 'rxjs';
 
 import {
@@ -63,9 +62,7 @@ export interface AuditLogPage {
   providedIn: 'root'
 })
 export class AuditLogRepository {
-  private readonly firestore = inject(Firestore);
-  private readonly logger = inject(LoggerService);
-  private readonly parentCollection = 'blueprints';
+  private readonly firestore = inject(Firestore);  private readonly parentCollection = 'blueprints';
   private readonly subcollectionName = 'audit-logs';
 
   /**
@@ -120,9 +117,7 @@ export class AuditLogRepository {
 
       // For audit logs, we don't read back - it's write-heavy
       return this.toAuditLogDocument(docData, docRef.id, data.blueprintId);
-    } catch (error: unknown) {
-      this.logger.error('[AuditLogRepository]', 'create failed', error as Error);
-      throw error;
+    } catch (error: unknown) {      throw error;
     }
   }
 
@@ -132,12 +127,7 @@ export class AuditLogRepository {
   async createBatch(logs: CreateAuditLogData[]): Promise<void> {
     try {
       const promises = logs.map(log => this.create(log));
-      await Promise.all(promises);
-
-      this.logger.info('[AuditLogRepository]', `Batch created ${logs.length} audit logs`);
-    } catch (error: unknown) {
-      this.logger.error('[AuditLogRepository]', 'createBatch failed', error as Error);
-      throw error;
+      await Promise.all(promises);    } catch (error: unknown) {      throw error;
     }
   }
 
@@ -165,9 +155,7 @@ export class AuditLogRepository {
         hasMore: snapshot.docs.length > pageSize,
         lastDoc: snapshot.docs.length > 0 ? snapshot.docs[pageSize - 1] : undefined
       };
-    } catch (error: unknown) {
-      this.logger.error('[AuditLogRepository]', 'findByBlueprintId failed', error as Error);
-      throw error;
+    } catch (error: unknown) {      throw error;
     }
   }
 
@@ -233,9 +221,7 @@ export class AuditLogRepository {
     try {
       const snapshot = await getDocs(q);
       return snapshot.docs.map(doc => this.toAuditLogDocument(doc.data(), doc.id, blueprintId));
-    } catch (error: unknown) {
-      this.logger.error('[AuditLogRepository]', 'queryLogs failed', error as Error);
-      throw error;
+    } catch (error: unknown) {      throw error;
     }
   }
 
@@ -252,9 +238,7 @@ export class AuditLogRepository {
 
     return from(getDocs(q)).pipe(
       map(snapshot => snapshot.docs.map(doc => this.toAuditLogDocument(doc.data(), doc.id, blueprintId))),
-      catchError(error => {
-        this.logger.error('[AuditLogRepository]', 'findByEventType failed', error as Error);
-        return of([]);
+      catchError(error => {        return of([]);
       })
     );
   }
@@ -272,9 +256,7 @@ export class AuditLogRepository {
 
     return from(getDocs(q)).pipe(
       map(snapshot => snapshot.docs.map(doc => this.toAuditLogDocument(doc.data(), doc.id, blueprintId))),
-      catchError(error => {
-        this.logger.error('[AuditLogRepository]', 'findByCategory failed', error as Error);
-        return of([]);
+      catchError(error => {        return of([]);
       })
     );
   }
@@ -292,9 +274,7 @@ export class AuditLogRepository {
 
     return from(getDocs(q)).pipe(
       map(snapshot => snapshot.docs.map(doc => this.toAuditLogDocument(doc.data(), doc.id, blueprintId))),
-      catchError(error => {
-        this.logger.error('[AuditLogRepository]', 'findRecentErrors failed', error as Error);
-        return of([]);
+      catchError(error => {        return of([]);
       })
     );
   }
@@ -370,9 +350,7 @@ export class AuditLogRepository {
       });
 
       return summary;
-    } catch (error: unknown) {
-      this.logger.error('[AuditLogRepository]', 'getSummary failed', error as Error);
-      throw error;
+    } catch (error: unknown) {      throw error;
     }
   }
 
@@ -382,9 +360,7 @@ export class AuditLogRepository {
   findById(blueprintId: string, logId: string): Observable<AuditLogDocument | null> {
     return from(getDoc(doc(this.firestore, this.parentCollection, blueprintId, this.subcollectionName, logId))).pipe(
       map(snapshot => (snapshot.exists() ? this.toAuditLogDocument(snapshot.data(), snapshot.id, blueprintId) : null)),
-      catchError(error => {
-        this.logger.error('[AuditLogRepository]', 'findById failed', error as Error);
-        return of(null);
+      catchError(error => {        return of(null);
       })
     );
   }

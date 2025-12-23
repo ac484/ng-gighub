@@ -1,16 +1,6 @@
-/**
- * Diary Edit Modal Component
- * 日誌編輯模態框元件
- *
- * Modal for creating, editing, and viewing diary entries
- *
- * @author GigHub Development Team
- * @date 2025-12-19
- */
-
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { Auth } from '@angular/fire/auth';
 import { FormGroup } from '@angular/forms';
-import { FirebaseService } from '@core/services/firebase.service';
 import { Diary, CreateDiaryRequest, UpdateDiaryRequest } from '../../diary.model';
 import { DiaryService } from '../../diary.service';
 import { SHARED_IMPORTS } from '@shared';
@@ -57,8 +47,7 @@ export class DiaryEditModalComponent implements OnInit {
   private modalRef = inject(NzModalRef);
   private message = inject(NzMessageService);
   private diaryService = inject(DiaryService);
-  private firebaseService = inject(FirebaseService);
-
+  private auth = inject(Auth);
   // Modal data injected
   modalData: ModalData = inject(NZ_MODAL_DATA);
 
@@ -140,7 +129,7 @@ export class DiaryEditModalComponent implements OnInit {
       throw new Error('請選擇日期');
     }
 
-    const currentUserId = this.firebaseService.getCurrentUserId();
+    const currentUserId = this.auth.currentUser?.uid;
     if (!currentUserId) {
       throw new Error('無法取得使用者資訊，請重新登入');
     }

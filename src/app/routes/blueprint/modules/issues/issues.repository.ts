@@ -14,26 +14,17 @@ import {
   DocumentData,
   Timestamp
 } from '@angular/fire/firestore';
-import { LoggerService } from '@core/services/logger';
 
 import { CreateIssueData, Issue, IssueDocument, IssueStatus, UpdateIssueData } from './issues.model';
 
 @Injectable({ providedIn: 'root' })
 export class IssuesRepository {
-  private readonly firestore = inject(Firestore);
-  private readonly logger = inject(LoggerService);
-  private readonly collectionName = 'issues';
+  private readonly firestore = inject(Firestore);  private readonly collectionName = 'issues';
   private readonly collectionRef = collection(this.firestore, this.collectionName);
 
-  async listIssues(blueprintId: string): Promise<Issue[]> {
-    try {
-      const q = query(this.collectionRef, where('blueprintId', '==', blueprintId), orderBy('createdAt', 'desc'));
+  async listIssues(blueprintId: string): Promise<Issue[]> {    const q = query(this.collectionRef, where('blueprintId', '==', blueprintId), orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
       return snapshot.docs.map(snap => this.toEntity(snap.data(), snap.id));
-    } catch (error) {
-      this.logger.error('[IssuesRepository]', 'Failed to load issues', error as Error, { blueprintId });
-      throw error;
-    }
   }
 
   async createIssue(payload: CreateIssueData): Promise<Issue> {

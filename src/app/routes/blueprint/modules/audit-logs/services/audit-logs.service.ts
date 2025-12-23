@@ -9,7 +9,6 @@
  */
 
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { LoggerService } from '@core';
 
 import {
   AuditLogDocument,
@@ -32,9 +31,7 @@ import { AuditLogRepository } from '../repositories/audit-log.repository';
 @Injectable({
   providedIn: 'root'
 })
-export class AuditLogsService {
-  private readonly logger = inject(LoggerService);
-  private readonly repository = inject(AuditLogRepository);
+export class AuditLogsService {  private readonly repository = inject(AuditLogRepository);
 
   // Private state signals
   private readonly _logs = signal<AuditLogDocument[]>([]);
@@ -58,17 +55,13 @@ export class AuditLogsService {
    */
   async recordLog(data: CreateAuditLogData): Promise<AuditLogDocument> {
     try {
-      this.logger.info('[AuditLogsService]', 'Recording audit log', { eventType: data.eventType });
-
       const log = await this.repository.create(data);
 
       // Add to local state
       this._logs.update(logs => [log, ...logs]);
 
       return log;
-    } catch (error) {
-      this.logger.error('[AuditLogsService]', 'Failed to record audit log', error as Error);
-      throw error;
+    } catch (error) {      throw error;
     }
   }
 
@@ -76,12 +69,8 @@ export class AuditLogsService {
    * Record a batch of audit log entries
    */
   async recordBatch(logs: CreateAuditLogData[]): Promise<void> {
-    try {
-      this.logger.info('[AuditLogsService]', `Recording ${logs.length} audit logs`);
-      await this.repository.createBatch(logs);
-    } catch (error) {
-      this.logger.error('[AuditLogsService]', 'Failed to record batch audit logs', error as Error);
-      throw error;
+    try {      await this.repository.createBatch(logs);
+    } catch (error) {      throw error;
     }
   }
 
@@ -93,19 +82,13 @@ export class AuditLogsService {
     this._error.set(null);
 
     try {
-      this.logger.info('[AuditLogsService]', 'Loading audit logs', { blueprintId, options });
-
       const logs = await this.repository.queryLogs(blueprintId, {
         ...options,
         limit: options.limit || 100
       });
 
-      this._logs.set(logs);
-      this.logger.info('[AuditLogsService]', `Loaded ${logs.length} audit logs`);
-    } catch (error) {
-      this._error.set(error as Error);
-      this.logger.error('[AuditLogsService]', 'Failed to load audit logs', error as Error);
-      throw error;
+      this._logs.set(logs);    } catch (error) {
+      this._error.set(error as Error);      throw error;
     } finally {
       this._loading.set(false);
     }
@@ -116,15 +99,8 @@ export class AuditLogsService {
    */
   async loadSummary(blueprintId: string, startDate?: Date, endDate?: Date): Promise<void> {
     try {
-      this.logger.info('[AuditLogsService]', 'Loading audit summary', { blueprintId });
-
       const summary = await this.repository.getSummary(blueprintId, startDate, endDate);
-      this._summary.set(summary);
-
-      this.logger.info('[AuditLogsService]', 'Summary loaded', { total: summary.total });
-    } catch (error) {
-      this.logger.error('[AuditLogsService]', 'Failed to load summary', error as Error);
-      throw error;
+      this._summary.set(summary);    } catch (error) {      throw error;
     }
   }
 
@@ -156,9 +132,7 @@ export class AuditLogsService {
     this._logs.set([]);
     this._error.set(null);
     this._summary.set(null);
-    this._loading.set(false);
-    this.logger.debug('[AuditLogsService]', 'State cleared');
-  }
+    this._loading.set(false);  }
 
   /**
    * Helper: Create a success audit log

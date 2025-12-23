@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { BlueprintMemberType, BlueprintRole, BusinessRole, OwnerType, LoggerService } from '@core';
+import { BlueprintMemberType, BlueprintRole, BusinessRole, OwnerType } from '@core';
 import { getAllowedMemberTypes } from '@core';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -97,9 +97,7 @@ import { MembersService } from '../../members.service';
 export class MemberFormModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly modal = inject(NzModalRef);
-  private readonly message = inject(NzMessageService);
-  private readonly logger = inject(LoggerService);
-  private readonly membersService = inject(MembersService);
+  private readonly message = inject(NzMessageService);  private readonly membersService = inject(MembersService);
   private readonly data: { blueprintId: string; blueprintOwnerType: string; member?: Member } = inject(NZ_MODAL_DATA);
 
   // Expose enums for template
@@ -236,9 +234,7 @@ export class MemberFormModalComponent implements OnInit {
 
       this.modal.close(true);
     } catch (error) {
-      this.message.error(this.isEdit ? '更新成員失敗' : '新增成員失敗');
-      this.logger.error('[MemberFormModalComponent]', 'Failed to save member', error as Error);
-    } finally {
+      this.message.error(this.isEdit ? '更新成員失敗' : '新增成員失敗');    } finally {
       this.submitting.set(false);
     }
   }

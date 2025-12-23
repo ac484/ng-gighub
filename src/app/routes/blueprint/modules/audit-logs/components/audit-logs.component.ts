@@ -9,7 +9,6 @@
  */
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input } from '@angular/core';
-import { LoggerService } from '@core';
 import { STColumn } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
@@ -98,8 +97,6 @@ import { AuditLogsService } from '../services/audit-logs.service';
 })
 export class AuditLogsComponent implements OnInit {
   private readonly message = inject(NzMessageService);
-  private readonly logger = inject(LoggerService);
-
   // Inject the audit logs service
   readonly auditService = inject(AuditLogsService);
 
@@ -172,12 +169,8 @@ export class AuditLogsComponent implements OnInit {
     };
 
     try {
-      await this.auditService.loadLogs(this.blueprintId(), options);
-      this.logger.info('[AuditLogsComponent]', `Loaded ${this.auditService.logs().length} audit logs`);
-    } catch (error) {
-      this.message.error('載入審計記錄失敗');
-      this.logger.error('[AuditLogsComponent]', 'Failed to load audit logs', error as Error);
-    }
+      await this.auditService.loadLogs(this.blueprintId(), options);    } catch (error) {
+      this.message.error('載入審計記錄失敗');    }
   }
 
   /**

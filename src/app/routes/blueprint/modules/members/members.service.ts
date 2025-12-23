@@ -54,9 +54,4 @@ export class MembersService {
           canDeleteBlueprint: false
         };
     }
-  }
-
-  logError(action: string, error: unknown, context?: Record<string, unknown>): void {
-    this.repository.logError(action, error, context);
-  }
-}
+  }}

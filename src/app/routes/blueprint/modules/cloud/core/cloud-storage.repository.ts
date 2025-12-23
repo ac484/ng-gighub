@@ -9,7 +9,6 @@ import {
   getMetadata,
   UploadMetadata
 } from '@angular/fire/storage';
-import { LoggerService } from '@core';
 import { Observable } from 'rxjs';
 
 export interface UploadResult {
@@ -27,8 +26,6 @@ export interface UploadResult {
 @Injectable({ providedIn: 'root' })
 export class CloudStorageRepository {
   private readonly storage = inject(Storage);
-  private readonly logger = inject(LoggerService);
-
   /**
    * Upload file with progress tracking
    */
@@ -50,25 +47,17 @@ export class CloudStorageRepository {
               onProgress(progress);
             }
           },
-          error => {
-            this.logger.error('[CloudStorageRepository]', `Upload failed: ${path}`, error as Error);
-            observer.error(error);
+          error => {            observer.error(error);
           },
           async () => {
             try {
-              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-              this.logger.debug('[CloudStorageRepository]', `Upload successful: ${path}`);
-              observer.next(downloadURL);
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);              observer.next(downloadURL);
               observer.complete();
-            } catch (err) {
-              this.logger.error('[CloudStorageRepository]', `Failed to get download URL: ${path}`, err as Error);
-              observer.error(err);
+            } catch (err) {              observer.error(err);
             }
           }
         );
-      } catch (err) {
-        this.logger.error('[CloudStorageRepository]', `Upload initialization failed: ${path}`, err as Error);
-        observer.error(err);
+      } catch (err) {        observer.error(err);
       }
     });
   }
@@ -106,18 +95,13 @@ export class CloudStorageRepository {
       const uploadTask = uploadBytesResumable(storageRef, file, uploadMetadata);
       
       await uploadTask;
-      const downloadURL = await getDownloadURL(storageRef);
-      
-      this.logger.debug('[CloudStorageRepository]', `Upload successful: ${fullPath}`);
-      
+      const downloadURL = await getDownloadURL(storageRef);      
       return {
         path: fullPath,
         url: downloadURL,
         publicUrl: downloadURL  // Firebase Storage URLs are public by default
       };
-    } catch (err) {
-      this.logger.error('[CloudStorageRepository]', `Upload failed: ${path}`, err as Error);
-      throw err;
+    } catch (err) {      throw err;
     }
   }
 
@@ -130,9 +114,7 @@ export class CloudStorageRepository {
       const storageRef = ref(this.storage, fullPath);
       const url = await getDownloadURL(storageRef);
       return url;
-    } catch (err) {
-      this.logger.error('[CloudStorageRepository]', `Download failed: ${path}`, err as Error);
-      throw err;
+    } catch (err) {      throw err;
     }
   }
 
@@ -144,9 +126,7 @@ export class CloudStorageRepository {
       const storageRef = ref(this.storage, path);
       const url = await getDownloadURL(storageRef);
       return url;
-    } catch (err) {
-      this.logger.error('[CloudStorageRepository]', `Failed to get download URL: ${path}`, err as Error);
-      throw err;
+    } catch (err) {      throw err;
     }
   }
 
@@ -156,11 +136,7 @@ export class CloudStorageRepository {
   async delete(path: string): Promise<void> {
     try {
       const storageRef = ref(this.storage, path);
-      await deleteObject(storageRef);
-      this.logger.debug('[CloudStorageRepository]', `Delete successful: ${path}`);
-    } catch (err) {
-      this.logger.error('[CloudStorageRepository]', `Delete failed: ${path}`, err as Error);
-      throw err;
+      await deleteObject(storageRef);    } catch (err) {      throw err;
     }
   }
 
@@ -171,11 +147,7 @@ export class CloudStorageRepository {
     try {
       const fullPath = path.startsWith(bucket) ? path : `${bucket}/${path}`;
       const storageRef = ref(this.storage, fullPath);
-      await deleteObject(storageRef);
-      this.logger.debug('[CloudStorageRepository]', `Delete successful: ${fullPath}`);
-    } catch (err) {
-      this.logger.error('[CloudStorageRepository]', `Delete failed: ${path}`, err as Error);
-      throw err;
+      await deleteObject(storageRef);    } catch (err) {      throw err;
     }
   }
 
@@ -203,9 +175,7 @@ export class CloudStorageRepository {
               contentType: metadata.contentType,
               timeCreated: metadata.timeCreated
             };
-          } catch (err) {
-            this.logger.warn('[CloudStorageRepository]', `Failed to get metadata for: ${itemRef.fullPath}`);
-            // Return basic info if metadata fetch fails
+          } catch (err) {            // Return basic info if metadata fetch fails
             const url = await getDownloadURL(itemRef);
             return {
               name: itemRef.name,
@@ -214,13 +184,8 @@ export class CloudStorageRepository {
             };
           }
         })
-      );
-
-      this.logger.debug('[CloudStorageRepository]', `Listed ${files.length} files in: ${path}`);
-      return files;
-    } catch (err) {
-      this.logger.error('[CloudStorageRepository]', `List files failed: ${path}`, err as Error);
-      throw err;
+      );      return files;
+    } catch (err) {      throw err;
     }
   }
 
@@ -235,9 +200,7 @@ export class CloudStorageRepository {
     } catch (err: any) {
       if (err?.code === 'storage/object-not-found') {
         return false;
-      }
-      this.logger.error('[CloudStorageRepository]', `Exists check failed: ${path}`, err as Error);
-      throw err;
+      }      throw err;
     }
   }
 
@@ -260,9 +223,7 @@ export class CloudStorageRepository {
         timeCreated: metadata.timeCreated,
         updated: metadata.updated
       };
-    } catch (err) {
-      this.logger.error('[CloudStorageRepository]', `Get metadata failed: ${path}`, err as Error);
-      throw err;
+    } catch (err) {      throw err;
     }
   }
 }
