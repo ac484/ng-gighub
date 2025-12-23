@@ -4,3 +4,4 @@ export * from './team.model';
 export * from './partner.model';
 export * from './bot.model';
 export * from './notification.model';
+export * from './friend.model';

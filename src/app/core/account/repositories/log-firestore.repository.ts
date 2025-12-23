@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CreateLogRequest, Log, UpdateLogRequest } from '../../domain/types/log/log.types';
+import { CreateLogRequest, Log, UpdateLogRequest } from '../../blueprint/domain/types/log/log.types';
 
 @Injectable({
   providedIn: 'root'

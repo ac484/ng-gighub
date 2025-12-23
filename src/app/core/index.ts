@@ -4,9 +4,6 @@ export * from './startup/startup.service';
 export * from './start-page.guard';
 export * from './services';
 export * from './account';
-export * from './domain/models';
-export * from './domain/types';
-export * from './data-access/repositories';
 
 // Blueprint system (consolidated)
 // Export specific blueprint types that may be needed by other modules

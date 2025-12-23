@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { LogFirestoreRepository } from '@core/data-access/repositories/log-firestore.repository';
-import { Log, CreateLogRequest, UpdateLogRequest } from '@core/domain/types/log/log.types';
+import { LogFirestoreRepository } from '@core/account/repositories/log-firestore.repository';
+import { Log, CreateLogRequest, UpdateLogRequest } from '@core/blueprint/domain/types/log/log.types';
 
 import { CreateDiaryRequest, Diary, DiaryPhoto, UpdateDiaryRequest } from './diary.model';
 

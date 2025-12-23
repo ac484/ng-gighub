@@ -59,4 +59,3 @@ export class NotificationStore {
     };
   }
 }
-export * from '../../account/stores/notification.store';
