@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { collection, addDoc, doc, getDocs, deleteDoc, updateDoc, query, where, orderBy, Timestamp } from '@angular/fire/firestore';
 import { LoggerService } from '@core';
-import { FirebaseStorageRepository } from '@core/infrastructure/storage';
+import { CloudStorageRepository } from './core/cloud-storage.repository';
 import { FirebaseService } from '@core/services/firebase.service';
 
 import type { CloudFile, CloudBackup, CloudUploadRequest, CloudBackupRequest } from './cloud.model';
@@ -9,7 +9,7 @@ import type { CloudFile, CloudBackup, CloudUploadRequest, CloudBackupRequest } f
 @Injectable({ providedIn: 'root' })
 export class CloudRepository {
   private readonly firebaseService = inject(FirebaseService);
-  private readonly storageRepo = inject(FirebaseStorageRepository);
+  private readonly storageRepo = inject(CloudStorageRepository);
   private readonly logger = inject(LoggerService);
 
   readonly files = signal<CloudFile[]>([]);

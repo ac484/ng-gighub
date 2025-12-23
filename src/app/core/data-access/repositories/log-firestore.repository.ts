@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { query, where, orderBy, limit as firestoreLimit, Timestamp, DocumentData, updateDoc, doc, getDoc } from '@angular/fire/firestore';
-import { FirebaseStorageRepository } from '@core/infrastructure/storage';
+import { LogStorageRepository } from './storage/log-storage.repository';
 import { Log, LogPhoto, CreateLogRequest, UpdateLogRequest, LogQueryOptions } from '@core/types/log/log.types';
 
 import { FirestoreBaseRepository } from './base/firestore-base.repository';
@@ -32,7 +32,7 @@ type LogPhotoDocumentInput = LogPhoto & {
 export class LogFirestoreRepository extends FirestoreBaseRepository<Log> {
   protected collectionName = 'logs';
   private readonly photosBucket = 'log-photos';
-  private readonly storageRepo = inject(FirebaseStorageRepository);
+  private readonly storageRepo = inject(LogStorageRepository);
 
   /**
    * Convert Firestore document to Log entity

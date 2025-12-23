@@ -18,9 +18,6 @@ export * from './domain/index';
 // Data access layer (shared repositories)
 export * from './data-access/index';
 
-// Infrastructure (shared)
-export * from './infrastructure/index';
-
 // State management (shared stores)
 export * from './state/index';
 
