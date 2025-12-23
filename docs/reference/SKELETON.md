@@ -1,6 +1,28 @@
 ```
 /
 /app/
+/src                                       # 前端程式碼結構
+├─ app/
+│  ├─ core/                         # 基礎設施 + Domain 層
+│  │  ├─ blueprint/                 # Blueprint Layer（事件/流程/模組實作）
+│  │  │  ├─ modules/implementations/<module>/   # 模組骨架（與 MODULE_LAYER 一致）
+│  │  │  ├─ workflow/ | event-bus/ | policies/ | audit/ | context/ | container/
+│  │  │  └─ integration/ | repositories/ | services/
+│  │  ├─ data-access/               # Repository + Firebase 存取封裝
+│  │  ├─ services/ | facades/       # 跨模組協作服務（不直接觸碰 Firestore）
+│  │  └─ auth / guards / interceptors / models
+│  │
+│  ├─ layout/                       # 全局 layout、navbar、workspace 切換器
+│  ├─ routes/                       # UI/Presentation（每個業務模組的頁面）
+│  │  ├─ blueprint/                 # Blueprint UI（與 core/blueprint 對應）
+│  │  ├─ organization/ | team/ | partner/ | user/
+│  │  └─ ai-assistant/              # AI UX（前端入口）
+│  ├─ shared/                       # 公用組件、指令、Pipe、utils
+│  └─ main.ts / app.config.ts
+│
+├─ environments/                    # environment.{dev,prod,staging}.ts
+├─ assets/
+
 /src/blueprint                                # Blueprint Layer - 跨模組流程與系統規則
 │
 ├─ modules/                                   # 業務領域模組集合 - 具體業務聚合根
