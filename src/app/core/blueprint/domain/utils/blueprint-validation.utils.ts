@@ -8,7 +8,7 @@
  * @module core/domain/utils
  */
 
-import { OwnerType, BlueprintMemberType } from '@core/types';
+import { OwnerType, BlueprintMemberType } from '../types/blueprint';
 
 // AssigneeType mirrors BlueprintMemberType for task assignment
 type AssigneeType = BlueprintMemberType;
