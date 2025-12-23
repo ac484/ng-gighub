@@ -28,14 +28,14 @@ import {
   writeBatch
 } from '@angular/fire/firestore';
 import { LoggerService } from '@core';
-import { ModuleStatus } from '@core/blueprint/modules/module-status.enum';
+import { ModuleStatus } from '../enums/module-status.enum';
 import {
   BlueprintModuleDocument,
   CreateModuleData,
   UpdateModuleData,
   ModuleStatusSummary,
   BatchModuleOperationResult
-} from '@core/models/blueprint-module.model';
+} from '@core/domain/models/blueprint-module.model';
 import { Observable, from, map, catchError, of } from 'rxjs';
 
 /**

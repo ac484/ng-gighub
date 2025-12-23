@@ -10,7 +10,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import type { WarrantyDefect } from '../../core';
+import type { WarrantyDefect } from '../../../core';
 import { SHARED_IMPORTS } from '@shared';
 
 /**

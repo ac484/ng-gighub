@@ -10,7 +10,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import type { Warranty } from '../../core';
+import type { Warranty } from '../../../core';
 import { STColumn, STChange } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 

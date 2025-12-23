@@ -17,8 +17,8 @@ import {
   AuditStatus,
   ActorType
 } from '../audit-logs';
-import { ModuleStatus } from '../../../shared/enums/module-status.enum';
-import { BlueprintModuleRepository } from '../../../shared/repositories/blueprint-module.repository';
+import { ModuleStatus } from '../../shared/enums/module-status.enum';
+import { BlueprintModuleRepository } from '../../shared/repositories/blueprint-module.repository';
 import { BlueprintModuleDocument, CreateModuleData, BatchModuleOperationResult } from '@core/domain/models/blueprint-module.model';
 import { FirebaseService } from '@core/services/firebase.service';
 import { firstValueFrom } from 'rxjs';
@@ -118,7 +118,7 @@ export class ModuleManagerService {
     this._currentBlueprintId.set(blueprintId);
 
     try {
-      const modules = await firstValueFrom(this.moduleRepo.findByBlueprintId(blueprintId));
+      const modules = await firstValueFrom<BlueprintModuleDocument[]>(this.moduleRepo.findByBlueprintId(blueprintId));
       this._modules.set(modules);
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Failed to load modules';

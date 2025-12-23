@@ -12,8 +12,8 @@
 
 import { Component, ChangeDetectionStrategy, inject, input, signal } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import type { Warranty, WarrantyDefect } from '../core';
-import { WarrantyDefectRepository } from '../core';
+import type { Warranty, WarrantyDefect } from './core';
+import { WarrantyDefectRepository } from './core';
 import { SHARED_IMPORTS } from '@shared';
 
 import { WarrantyDetailDrawerComponent } from './features/detail';
