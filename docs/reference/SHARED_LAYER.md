@@ -4,9 +4,11 @@
 - 系統多模組共用資源
 - 提升復用性與一致性
 
+> 實際路徑：`/src/app/shared`
+
 ## 2. 範疇
 - 公用 UI 組件 (Components)
-- 公用服務 (Services)
+- 公用服務 (Services) — 僅封裝無業務語意的共用邏輯
 - 公用型別 / Value Objects (Types / VO)
 - 工具函數 (Utils / Helpers)
 - 常量 / 配置 (Constants / Configs)
@@ -17,14 +19,13 @@
 - 封裝性：對外暴露最小接口
 - 版本控制：修改需考慮全系統影響
 
-## 4. 目錄建議
+## 4. 目錄建議（對應現況）
 ```
-
-src/app/shared/
-├─ components/
-├─ services/
-├─ types/
-├─ utils/
-├─ constants/
-
+/src/app/shared/
+├─ components/     # 自含型 UI 元件（支援無障礙、樣式隔離）
+├─ services/       # 無業務語意的共用服務（e.g. clipboard, download）
+├─ types/          # 共用型別/VO
+├─ utils/          # 純函式工具
+├─ constants/      # 共用常數、token
+└─ pipes/ | directives/  # 如需
 ```
