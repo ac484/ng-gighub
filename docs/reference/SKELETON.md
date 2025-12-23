@@ -315,6 +315,14 @@
 └─ README.md                                  # Blueprint Layer 總覽文件
 ```
 ````
+/src/app/shared/
+├─ components/     # 自含型 UI 元件（支援無障礙、樣式隔離）
+├─ services/       # 無業務語意的共用服務（e.g. clipboard, download）
+├─ types/          # 共用型別/VO
+├─ utils/          # 純函式工具
+├─ constants/      # 共用常數、token
+└─ pipes/ | directives/  # 如需
+
 ```
 /src                                       # 前端程式碼結構
 ├─ app/
