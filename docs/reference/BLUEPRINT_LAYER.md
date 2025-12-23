@@ -36,22 +36,22 @@
 
 提供事件的：
 - 發佈（emit / publish）
-- 訂閱（subscribe）
-- 分派（dispatch）
+ - 訂閱（subscribe）
+ - 分派（dispatch）
 
-確保事件：
-- 結構一致
-- 可追蹤（Correlation ID）
-- 可重試（Retry / DLQ）
+ 確保事件：
+ - 結構一致
+ - 可追蹤（Correlation ID）
+ - 可重試（Retry / DLQ）
 
-**❌ 絕對不能做的事情：**
-- ❌ 判斷「這個事件該不該發生」
-- ❌ 改寫事件 payload
-- ❌ 根據事件內容執行業務邏輯
-- ❌ 依賴任何 Domain Module
+ **❌ 絕對不能做的事情：**
+ - ❌ 判斷「這個事件該不該發生」
+ - ❌ 改寫事件 payload
+ - ❌ 根據事件內容執行業務邏輯
+ - ❌ 依賴任何 Domain Module
 
-**核心理念：**
-> Event Bus 是一個跨模組的流程基礎設施（Process Infrastructure），負責傳遞「已發生事實」，不承載業務決策。
+ **核心理念：**
+ > Event Bus 是一個跨模組的流程基礎設施（Process Infrastructure），負責傳遞「已發生事實」，不承載業務決策。
 
 ### 1.3 `/blueprint/workflow`
 
@@ -119,9 +119,160 @@
 **常見誤用：**
 > ❌ 用 Audit Log 當作「流程判斷依據」  
 > 👉 Audit 是歷史，不是真相來源
+### 3.1 目錄結構
 
-### 1.5 `/blueprint/policies`
+```
+/blueprint
+├─ modules/
+│  ├─ contract/
+│  │  ├─ models/                  # Aggregate / Value Objects
+│  │  │  └─ index.ts
+│  │  ├─ states/
+│  │  │  └─ contract.states.ts
+│  │  ├─ services/
+│  │  │  └─ contract.service.ts
+│  │  ├─ repositories/
+│  │  │  ├─ contract.repository.ts
+│  │  │  └─ contract.repository.impl.ts
+│  │  ├─ events/
+│  │  │  └─ contract.events.ts
+│  │  ├─ policies/
+│  │  │  └─ contract.policies.ts
+│  │  ├─ facade/
+│  │  │  └─ contract.facade.ts
+│  │  ├─ config/
+│  │  │  └─ contract.config.ts
+│  │  ├─ module.metadata.ts
+│  │  ├─ contract.module.ts
+│  │  └─ README.md
+│  │
+│  ├─ task/
+│  │  └─ ... (同 contract)
+│  │
+│  ├─ issue/
+│  │  └─ ...
+│  │
+│  ├─ acceptance/
+│  │  └─ ...
+│  │
+│  ├─ finance/
+│  │  └─ ...
+│  │
+│  └─ warranty/
+│     └─ ...
+│
+├─ asset/
+│  ├─ models/
+│  │  └─ asset.entity.ts
+│  ├─ states/
+│  │  └─ asset.states.ts
+│  ├─ services/
+│  │  ├─ asset.service.ts
+│  │  └─ asset-upload.service.ts
+│  ├─ repositories/
+│  │  └─ asset.repository.ts
+│  ├─ events/
+│  │  └─ asset.events.ts
+│  ├─ policies/
+│  │  └─ asset.policies.ts
+│  ├─ facade/
+│  │  └─ asset.facade.ts
+│  ├─ config/
+│  │  └─ asset.config.ts
+│  ├─ module.metadata.ts
+│  ├─ asset.module.ts
+│  └─ README.md
 
+├─ ai-facade/
+│  ├─ adapters/
+│  │  └─ index.ts
+│  ├─ constants/
+│  │  └─ retention.constants.ts
+│  ├─ context-providers/
+│  │  ├─ vertex/
+│  │  │  ├─ adapter.ts
+│  │  │  └─ client.ts
+│  │  ├─ genai/
+│  │  │  └─ adapter.ts
+│  │  └─ aiplatform/
+│  │     └─ adapter.ts
+│  ├─ orchestrators/
+│  │  └─ ai.orchestrator.ts
+│  ├─ policies/
+│  │  └─ pii.policy.ts
+│  ├─ prompts/
+│  │  ├─ templates.ts
+│  │  └─ prompt-manifest.yaml
+│  ├─ responses/
+│  │  └─ parser.ts
+│  ├─ types/
+│  │  └─ ai.types.ts
+│  ├─ utils/
+│  │  └─ sanitizer.ts
+│  └─ ai.facade.ts
+
+├─ analytics/
+│  ├─ collectors/
+│  │  └─ raw-snapshot.ts
+│  ├─ models/
+│  │  └─ feature.spec.ts
+│  ├─ policies/
+│  │  └─ data.policy.ts
+│  ├─ processors/
+│  │  └─ transforms/
+│  ├─ queries/
+│  │  └─ extractors/
+│  ├─ repositories/
+│  │  └─ dataset.repository.ts
+│  ├─ manifests/
+│  │  └─ dataset.yaml
+│  ├─ labels/
+│  │  └─ annotations.schema.json
+│  └─ analytics.facade.ts
+
+├─ notification/
+│  ├─ channels/
+│  │  ├─ email.channel.ts
+│  │  └─ push.channel.ts
+│  ├─ preferences/
+│  │  └─ user.preferences.ts
+│  ├─ queue/
+│  │  └─ delivery.queue.ts
+│  ├─ repositories/
+│  │  └─ notification.repository.ts
+│  ├─ rules/
+│  │  └─ delivery.rules.ts
+│  ├─ templates/
+│  │  └─ default.template.ts
+│  └─ notification.facade.ts
+
+├─ event-bus/
+│  ├─ adapters/
+│  │  └─ index.ts
+│  ├─ event-bus.service.ts
+│  ├─ event.types.ts
+│  └─ README.md
+
+├─ workflow/
+│  ├─ workflow.engine.ts
+│  ├─ workflow.registry.ts
+│  ├─ steps/
+│  │  └─ index.ts
+│  └─ README.md
+
+├─ audit/
+│  ├─ audit-log.entity.ts
+│  ├─ audit-log.service.ts
+│  ├─ audit-policies.ts
+│  └─ README.md
+
+├─ policies/
+│  ├─ access-control.policy.ts
+│  ├─ approval.policy.ts
+│  └─ README.md
+
+└─ README.md
+```
 **一句話定位：**
 > 跨模組的一致性規則與限制條件
 
@@ -418,12 +569,25 @@ open → in_progress → resolved → verified → closed
 │  ├─ asset.module.ts
 │  └─ README.md
  
-├─ ai-facade/
-│  ├─ adapters/
-│  │  └─ index.ts
+├─ ai/
+│  ├─ providers/
+│  │  ├─ vertex/
+│  │  │  ├─ adapter.ts           # Vendor adapter for @google-cloud/vertexai / @google-cloud/aiplatform
+│  │  │  ├─ client.ts
+│  │  │  └─ README.md
+│  │  ├─ genai/
+│  │  │  ├─ adapter.ts           # Vendor adapter for @google/genai
+│  │  │  └─ README.md
+│  │  └─ README.md
 │  ├─ facade/
-│  │  └─ ai.facade.ts
-│  ├─ ai.types.ts
+│  │  └─ ai.facade.ts            # Orchestrator only: single responsibility — coordinate providers, apply policies
+│  ├─ prompts/
+│  │  ├─ templates.ts
+│  │  └─ renderer.ts
+│  ├─ safety/
+│  │  ├─ sanitizer.ts
+│  │  └─ validator.ts
+│  ├─ types.ts
 │  └─ README.md
 
 ├─ analytics/
