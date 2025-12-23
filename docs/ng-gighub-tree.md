@@ -27,31 +27,24 @@
 │  │  │  │
 │  │  │  ├─container
 │  │  │  │      blueprint-container.interface.ts
-│  │  │  │      blueprint-container.spec.ts
 │  │  │  │      blueprint-container.ts
 │  │  │  │      index.ts
 │  │  │  │      lifecycle-manager.interface.ts
-│  │  │  │      lifecycle-manager.spec.ts
 │  │  │  │      lifecycle-manager.ts
 │  │  │  │      module-registry.interface.ts
-│  │  │  │      module-registry.spec.ts
 │  │  │  │      module-registry.ts
 │  │  │  │      resource-provider.interface.ts
-│  │  │  │      resource-provider.spec.ts
 │  │  │  │      resource-provider.ts
 │  │  │  │
 │  │  │  ├─context
 │  │  │  │      execution-context.interface.ts
 │  │  │  │      index.ts
-│  │  │  │      shared-context.spec.ts
 │  │  │  │      shared-context.ts
 │  │  │  │      tenant-info.interface.ts
 │  │  │  │
 │  │  │  ├─events
-│  │  │  │  │  enhanced-event-bus.service.spec.ts
 │  │  │  │  │  enhanced-event-bus.service.ts
 │  │  │  │  │  event-bus.interface.ts
-│  │  │  │  │  event-bus.spec.ts
 │  │  │  │  │  event-bus.ts
 │  │  │  │  │  event-types.ts
 │  │  │  │  │  index.ts
@@ -66,11 +59,6 @@
 │  │  │  │          index.ts
 │  │  │  │          system-event-type.enum.ts
 │  │  │  │
-│  │  │  ├─integration
-│  │  │  │      container-lifecycle.integration.spec.ts
-│  │  │  │      event-bus.integration.spec.ts
-│  │  │  │      module-communication.integration.spec.ts
-│  │  │  │
 │  │  │  ├─models
 │  │  │  │      index.ts
 │  │  │  │      module-connection.interface.ts
@@ -82,26 +70,6 @@
 │  │  │  │  │
 │  │  │  │  └─implementations
 │  │  │  │      │  index.ts
-│  │  │  │      │
-│  │  │  │      ├─acceptance
-│  │  │  │      │  │  acceptance.module.ts
-│  │  │  │      │  │  index.ts
-│  │  │  │      │  │  module.metadata.ts
-│  │  │  │      │  │  README.md
-│  │  │  │      │  │
-│  │  │  │      │  ├─models
-│  │  │  │      │  │      acceptance.model.ts
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─repositories
-│  │  │  │      │  │      acceptance.repository.ts
-│  │  │  │      │  │
-│  │  │  │      │  └─services
-│  │  │  │      │          conclusion.service.ts
-│  │  │  │      │          preliminary.service.ts
-│  │  │  │      │          re-inspection.service.ts
-│  │  │  │      │          request.service.ts
-│  │  │  │      │          review.service.ts
 │  │  │  │      │
 │  │  │  │      ├─audit-logs
 │  │  │  │      │  │  audit-logs.module.ts
@@ -128,73 +96,7 @@
 │  │  │  │      │  └─services
 │  │  │  │      │          audit-logs.service.ts
 │  │  │  │      │
-│  │  │  │      ├─climate
-│  │  │  │      │  │  climate.module.ts
-│  │  │  │      │  │  index.ts
-│  │  │  │      │  │  README.md
-│  │  │  │      │  │
-│  │  │  │      │  ├─config
-│  │  │  │      │  │      climate.config.ts
-│  │  │  │      │  │      cwb-api.constants.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─examples
-│  │  │  │      │  │      usage-example.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─exports
-│  │  │  │      │  │      climate-api.exports.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─models
-│  │  │  │      │  │      cwb-api-response.model.ts
-│  │  │  │      │  │      weather-forecast.model.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─repositories
-│  │  │  │      │  │      climate.repository.ts
-│  │  │  │      │  │
-│  │  │  │      │  └─services
-│  │  │  │      │          climate-cache.service.ts
-│  │  │  │      │          cwb-weather.service.ts
-│  │  │  │      │
-│  │  │  │      ├─cloud
-│  │  │  │      │  │  cloud.module.ts
-│  │  │  │      │  │  index.ts
-│  │  │  │      │  │  module.metadata.ts
-│  │  │  │      │  │  README.md
-│  │  │  │      │  │
-│  │  │  │      │  ├─models
-│  │  │  │      │  │      cloud.model.ts
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─repositories
-│  │  │  │      │  │      cloud.repository.ts
-│  │  │  │      │  │      cloud.repository.ts.mock-version
-│  │  │  │      │  │      cloud.repository.ts.supabase-version
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │
-│  │  │  │      │  └─services
-│  │  │  │      │          cloud-storage.service.ts
-│  │  │  │      │          index.ts
-│  │  │  │      │
-│  │  │  │      ├─communication
-│  │  │  │      │  │  communication.module.ts
-│  │  │  │      │  │  index.ts
-│  │  │  │      │  │  module.metadata.ts
-│  │  │  │      │  │  README.md
-│  │  │  │      │  │
-│  │  │  │      │  ├─models
-│  │  │  │      │  │      communication.model.ts
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─repositories
-│  │  │  │      │  │      communication.repository.ts
-│  │  │  │      │  │
-│  │  │  │      │  └─services
-│  │  │  │      │          group-message.service.ts
-│  │  │  │      │          push-notification.service.ts
-│  │  │  │      │          system-notification.service.ts
-│  │  │  │      │          task-reminder.service.ts
-│  │  │  │      │
 │  │  │  │      ├─finance
-│  │  │  │      │  │  finance.integration.spec.ts
 │  │  │  │      │  │  finance.module.ts
 │  │  │  │      │  │  index.ts
 │  │  │  │      │  │  module.metadata.ts
@@ -225,124 +127,14 @@
 │  │  │  │      │          budget.service.ts
 │  │  │  │      │          cost-management.service.ts
 │  │  │  │      │          financial-report.service.ts
-│  │  │  │      │          invoice-approval.service.spec.ts
 │  │  │  │      │          invoice-approval.service.ts
 │  │  │  │      │          invoice-generation.service.ts
 │  │  │  │      │          invoice.service.ts
 │  │  │  │      │          ledger.service.ts
-│  │  │  │      │          payment-approval.service.spec.ts
 │  │  │  │      │          payment-approval.service.ts
-│  │  │  │      │          payment-generation.service.spec.ts
 │  │  │  │      │          payment-generation.service.ts
-│  │  │  │      │          payment-status-tracking.service.spec.ts
 │  │  │  │      │          payment-status-tracking.service.ts
 │  │  │  │      │          payment.service.ts
-│  │  │  │      │
-│  │  │  │      ├─issue
-│  │  │  │      │  │  index.ts
-│  │  │  │      │  │  issue.module.ts
-│  │  │  │      │  │  module.metadata.ts
-│  │  │  │      │  │  README.md
-│  │  │  │      │  │
-│  │  │  │      │  ├─config
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │      issue.config.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─exports
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │      issue-api.exports.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─models
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │      issue.model.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─repositories
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │      issue.repository.ts
-│  │  │  │      │  │
-│  │  │  │      │  └─services
-│  │  │  │      │          index.ts
-│  │  │  │      │          issue-creation.service.spec.ts
-│  │  │  │      │          issue-creation.service.ts
-│  │  │  │      │          issue-event.service.ts
-│  │  │  │      │          issue-lifecycle.service.spec.ts
-│  │  │  │      │          issue-lifecycle.service.ts
-│  │  │  │      │          issue-management.service.spec.ts
-│  │  │  │      │          issue-management.service.ts
-│  │  │  │      │          issue-resolution.service.ts
-│  │  │  │      │          issue-verification.service.ts
-│  │  │  │      │
-│  │  │  │      ├─log
-│  │  │  │      │  │  index.ts
-│  │  │  │      │  │  log.module.ts
-│  │  │  │      │  │  module.metadata.ts
-│  │  │  │      │  │  README.md
-│  │  │  │      │  │
-│  │  │  │      │  ├─models
-│  │  │  │      │  │      activity-log.model.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─repositories
-│  │  │  │      │  │      log.repository.ts
-│  │  │  │      │  │
-│  │  │  │      │  └─services
-│  │  │  │      │          activity-log.service.ts
-│  │  │  │      │          attachment.service.ts
-│  │  │  │      │          change-history.service.ts
-│  │  │  │      │          comment.service.ts
-│  │  │  │      │          system-event.service.ts
-│  │  │  │      │
-│  │  │  │      ├─material
-│  │  │  │      │  │  index.ts
-│  │  │  │      │  │  material.module.ts
-│  │  │  │      │  │  module.metadata.ts
-│  │  │  │      │  │  README.md
-│  │  │  │      │  │
-│  │  │  │      │  ├─models
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │      material.model.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─repositories
-│  │  │  │      │  │      material.repository.ts
-│  │  │  │      │  │
-│  │  │  │      │  └─services
-│  │  │  │      │          consumption.service.ts
-│  │  │  │      │          equipment.service.ts
-│  │  │  │      │          inventory.service.ts
-│  │  │  │      │          material-issue.service.ts
-│  │  │  │      │          material-management.service.ts
-│  │  │  │      │
-│  │  │  │      ├─qa
-│  │  │  │      │  │  defect.integration.spec.ts
-│  │  │  │      │  │  index.ts
-│  │  │  │      │  │  module.metadata.ts
-│  │  │  │      │  │  qa.module.ts
-│  │  │  │      │  │  README.md
-│  │  │  │      │  │
-│  │  │  │      │  ├─config
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │      qa.config.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─exports
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │      qa-api.exports.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─models
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │      qa.model.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─repositories
-│  │  │  │      │  │      qa.repository.ts
-│  │  │  │      │  │
-│  │  │  │      │  └─services
-│  │  │  │      │          checklist.service.ts
-│  │  │  │      │          defect-issue-integration.service.ts
-│  │  │  │      │          defect-lifecycle.service.ts
-│  │  │  │      │          defect-reinspection.service.ts
-│  │  │  │      │          defect-resolution.service.ts
-│  │  │  │      │          defect.service.ts
-│  │  │  │      │          index.ts
-│  │  │  │      │          inspection.service.ts
-│  │  │  │      │          report.service.ts
 │  │  │  │      │
 │  │  │  │      ├─safety
 │  │  │  │      │  │  index.ts
@@ -363,46 +155,10 @@
 │  │  │  │      │          safety-inspection.service.ts
 │  │  │  │      │          safety-training.service.ts
 │  │  │  │      │
-│  │  │  │      ├─tasks
-│  │  │  │      │  │  index.ts
-│  │  │  │      │  │  module.metadata.ts
-│  │  │  │      │  │  README.md
-│  │  │  │      │  │  task-modal.component.ts
-│  │  │  │      │  │  tasks.component.ts
-│  │  │  │      │  │  tasks.module.spec.ts
-│  │  │  │      │  │  tasks.module.ts
-│  │  │  │      │  │  tasks.repository.ts
-│  │  │  │      │  │  tasks.routes.ts
-│  │  │  │      │  │  tasks.service.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─components
-│  │  │  │      │  │  ├─task-assign-modal
-│  │  │  │      │  │  │      task-assign-modal.component.ts
-│  │  │  │      │  │  │
-│  │  │  │      │  │  └─task-context-menu
-│  │  │  │      │  │          task-context-menu.component.html
-│  │  │  │      │  │          task-context-menu.component.less
-│  │  │  │      │  │          task-context-menu.component.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─services
-│  │  │  │      │  │      task-context-menu.service.ts
-│  │  │  │      │  │
-│  │  │  │      │  ├─types
-│  │  │  │      │  │      index.ts
-│  │  │  │      │  │      task-context-menu.types.ts
-│  │  │  │      │  │
-│  │  │  │      │  └─views
-│  │  │  │      │          task-gantt-view.component.ts
-│  │  │  │      │          task-kanban-view.component.ts
-│  │  │  │      │          task-list-view.component.ts
-│  │  │  │      │          task-timeline-view.component.ts
-│  │  │  │      │          task-tree-view.component.ts
-│  │  │  │      │
 │  │  │  │      ├─warranty
 │  │  │  │      │  │  index.ts
 │  │  │  │      │  │  module.metadata.ts
 │  │  │  │      │  │  README.md
-│  │  │  │      │  │  warranty.integration.spec.ts
 │  │  │  │      │  │  warranty.module.ts
 │  │  │  │      │  │
 │  │  │  │      │  ├─config
@@ -457,34 +213,12 @@
 │  │  │  │      blueprint.repository.ts
 │  │  │  │      index.ts
 │  │  │  │
-│  │  │  ├─services
-│  │  │  │      blueprint-validation-schemas.ts
-│  │  │  │      blueprint.service.ts
-│  │  │  │      dependency-validator.service.ts
-│  │  │  │      index.ts
-│  │  │  │      validation.service.ts
-│  │  │  │
-│  │  │  └─workflow
-│  │  │      │  index.ts
-│  │  │      │  setc-workflow-orchestrator.interface.ts
-│  │  │      │  setc-workflow-orchestrator.service.spec.ts
-│  │  │      │  setc-workflow-orchestrator.service.ts
-│  │  │      │
-│  │  │      ├─handlers
-│  │  │      │      acceptance-finalized.handler.ts
-│  │  │      │      index.ts
-│  │  │      │      log-created.handler.spec.ts
-│  │  │      │      log-created.handler.ts
-│  │  │      │      qc-failed.handler.ts
-│  │  │      │      qc-passed.handler.ts
-│  │  │      │      task-completed.handler.spec.ts
-│  │  │      │      task-completed.handler.ts
-│  │  │      │
-│  │  │      └─models
-│  │  │              index.ts
-│  │  │              workflow-config.model.ts
-│  │  │              workflow-context.model.ts
-│  │  │              workflow-handler.model.ts
+│  │  │  └─services
+│  │  │          blueprint-validation-schemas.ts
+│  │  │          blueprint.service.ts
+│  │  │          dependency-validator.service.ts
+│  │  │          index.ts
+│  │  │          validation.service.ts
 │  │  │
 │  │  ├─data-access
 │  │  │  │  index.ts
@@ -575,6 +309,7 @@
 │  │  │  │  │      index.ts
 │  │  │  │  │      task-quantity.types.ts
 │  │  │  │  │      task-view.types.ts
+│  │  │  │  │      task-wbs.types.ts
 │  │  │  │  │      task.types.ts
 │  │  │  │  │
 │  │  │  │  └─workflow
@@ -638,29 +373,24 @@
 │  │  │          console-transport.ts
 │  │  │          index.ts
 │  │  │          log-transport.interface.ts
-│  │  │          logger.service.spec.ts
 │  │  │          logger.service.ts
 │  │  │
 │  │  ├─startup
 │  │  │      startup.service.ts
 │  │  │
-│  │  ├─state
-│  │  │  │  index.ts
-│  │  │  │  README.md
-│  │  │  │
-│  │  │  └─stores
-│  │  │          AGENTS.md
-│  │  │          construction-log.store.ts
-│  │  │          friend.store.ts
-│  │  │          index.ts
-│  │  │          log.store.ts
-│  │  │          notification.store.ts
-│  │  │          partner.store.ts
-│  │  │          task.store.ts
-│  │  │          team.store.ts
-│  │  │
-│  │  └─utils
-│  │          task-hierarchy.util.ts
+│  │  └─state
+│  │      │  index.ts
+│  │      │  README.md
+│  │      │
+│  │      └─stores
+│  │              AGENTS.md
+│  │              construction-log.store.ts
+│  │              friend.store.ts
+│  │              index.ts
+│  │              log.store.ts
+│  │              notification.store.ts
+│  │              partner.store.ts
+│  │              team.store.ts
 │  │
 │  ├─layout
 │  │  │  AGENTS.md
@@ -694,8 +424,10 @@
 │  │  │  AGENTS.md
 │  │  │  routes.ts
 │  │  │
-│  │  ├─account
-│  │  │      AGENTS.md
+│  │  ├─admin
+│  │  │  └─monitoring
+│  │  │          monitoring-dashboard.component.ts
+│  │  │          routes.ts
 │  │  │
 │  │  ├─ai-assistant
 │  │  │      ai-assistant.component.ts
@@ -720,15 +452,13 @@
 │  │  │  └─modules
 │  │  │      │  AGENTS.md
 │  │  │      │  index.ts
-│  │  │      │  log-module-view.component.ts
-│  │  │      │  safety-module-view.component.ts
-│  │  │      │  workflow-module-view.component.ts
+│  │  │      │  README.md
 │  │  │      │
 │  │  │      ├─acceptance
 │  │  │      │  │  acceptance-module-view.component.ts
+│  │  │      │  │  acceptance.model.ts
+│  │  │      │  │  acceptance.repository.ts
 │  │  │      │  │  index.ts
-│  │  │      │  │  README.md
-│  │  │      │  │  REFACTORING_SUMMARY.md
 │  │  │      │  │
 │  │  │      │  ├─features
 │  │  │      │  │  ├─conclusion
@@ -772,6 +502,9 @@
 │  │  │      │
 │  │  │      ├─cloud
 │  │  │      │  │  cloud-module-view-refactored.component.ts
+│  │  │      │  │  cloud.model.ts
+│  │  │      │  │  cloud.repository.ts
+│  │  │      │  │  cloud.service.ts
 │  │  │      │  │  index.ts
 │  │  │      │  │
 │  │  │      │  ├─features
@@ -805,112 +538,47 @@
 │  │  │      │              file-utils.ts
 │  │  │      │
 │  │  │      ├─contract
-│  │  │      │  │  contract-module-view-refactored.component.ts
+│  │  │      │  │  contract-module-view.component.ts
+│  │  │      │  │  contract-shell.component.ts
+│  │  │      │  │  design.md
+│  │  │      │  │  IMPLEMENTATION_GUIDE.md
 │  │  │      │  │  index.ts
-│  │  │      │  │  README.old.md
+│  │  │      │  │  README.md
+│  │  │      │  │  routes.ts
 │  │  │      │  │
-│  │  │      │  ├─application
-│  │  │      │  │  │  index.ts
-│  │  │      │  │  │
-│  │  │      │  │  ├─services
-│  │  │      │  │  │      contract-upload.service.ts
-│  │  │      │  │  │      contract.service.ts
-│  │  │      │  │  │      index.ts
-│  │  │      │  │  │      README.md
-│  │  │      │  │  │      work-item.service.ts
-│  │  │      │  │  │
-│  │  │      │  │  └─state
-│  │  │      │  │          contract.store.ts
-│  │  │      │  │          index.ts
+│  │  │      │  ├─components
+│  │  │      │  │      contract-detail.component.ts
+│  │  │      │  │      contract-list.component.ts
+│  │  │      │  │      contract-upload.component.ts
+│  │  │      │  │      contract-wizard.component.ts
 │  │  │      │  │
-│  │  │      │  ├─config
-│  │  │      │  │      contract.config.ts
-│  │  │      │  │      index.ts
-│  │  │      │  │
-│  │  │      │  ├─data
-│  │  │      │  │  │  index.ts
-│  │  │      │  │  │
-│  │  │      │  │  ├─interfaces
-│  │  │      │  │  │      contract-api.interface.ts
-│  │  │      │  │  │      index.ts
-│  │  │      │  │  │
-│  │  │      │  │  └─models
-│  │  │      │  │          contract.model.ts
-│  │  │      │  │          dtos.ts
-│  │  │      │  │          index.ts
-│  │  │      │  │          parsed-contract-data.model.ts
-│  │  │      │  │          work-item.model.ts
-│  │  │      │  │
-│  │  │      │  ├─infrastructure
-│  │  │      │  │  │  index.ts
+│  │  │      │  ├─data-access
+│  │  │      │  │  ├─models
+│  │  │      │  │  │      contract.model.ts
 │  │  │      │  │  │
 │  │  │      │  │  └─repositories
 │  │  │      │  │          contract.repository.ts
-│  │  │      │  │          index.ts
-│  │  │      │  │          work-item.repository.ts
 │  │  │      │  │
-│  │  │      │  └─presentation
-│  │  │      │      │  index.ts
-│  │  │      │      │
-│  │  │      │      ├─features
-│  │  │      │      │  │  index.ts
-│  │  │      │      │  │
-│  │  │      │      │  ├─create
-│  │  │      │      │  │  │  contract-creation-wizard.component.ts
-│  │  │      │      │  │  │  index.ts
-│  │  │      │      │  │  │
-│  │  │      │      │  │  └─components
-│  │  │      │      │  │          basic-info-step.component.ts
-│  │  │      │      │  │          completion-step.component.ts
-│  │  │      │      │  │          confirm-step.component.ts
-│  │  │      │      │  │
-│  │  │      │      │  ├─detail
-│  │  │      │      │  │  │  contract-detail-drawer.component.ts
-│  │  │      │      │  │  │  index.ts
-│  │  │      │      │  │  │
-│  │  │      │      │  │  └─components
-│  │  │      │      │  │          attachments-tab.component.ts
-│  │  │      │      │  │          basic-info-tab.component.ts
-│  │  │      │      │  │          history-tab.component.ts
-│  │  │      │      │  │          parties-tab.component.ts
-│  │  │      │      │  │
-│  │  │      │      │  ├─edit
-│  │  │      │      │  │  │  contract-edit-modal.component.ts
-│  │  │      │      │  │  │  index.ts
-│  │  │      │      │  │  │
-│  │  │      │      │  │  └─components
-│  │  │      │      │  │          contract-form.component.ts
-│  │  │      │      │  │          contractor-form.component.ts
-│  │  │      │      │  │          owner-form.component.ts
-│  │  │      │      │  │
-│  │  │      │      │  ├─list
-│  │  │      │      │  │  │  contract-list.component.ts
-│  │  │      │      │  │  │  index.ts
-│  │  │      │      │  │  │
-│  │  │      │      │  │  └─components
-│  │  │      │      │  │          contract-filters.component.ts
-│  │  │      │      │  │          contract-statistics.component.ts
-│  │  │      │      │  │          contract-table.component.ts
-│  │  │      │      │  │
-│  │  │      │      │  ├─preview
-│  │  │      │      │  │      contract-parsing-modal.component.ts
-│  │  │      │      │  │      contract-preview-modal.component.ts
-│  │  │      │      │  │      index.ts
-│  │  │      │      │  │
-│  │  │      │      │  └─upload
-│  │  │      │      │          contract-upload-step.component.ts
-│  │  │      │      │          index.ts
-│  │  │      │      │
-│  │  │      │      └─shared
-│  │  │      │          │  index.ts
-│  │  │      │          │
-│  │  │      │          └─components
-│  │  │      │                  contract-status-badge.component.ts
+│  │  │      │  ├─services
+│  │  │      │  │      contract.facade.ts
+│  │  │      │  │
+│  │  │      │  ├─shared
+│  │  │      │  │  └─types
+│  │  │      │  │          contract.types.ts
+│  │  │      │  │
+│  │  │      │  ├─state
+│  │  │      │  │      contract.store.ts
+│  │  │      │  │
+│  │  │      │  └─ui
+│  │  │      │          contract-card.component.ts
+│  │  │      │          contract-status-badge.component.ts
 │  │  │      │
 │  │  │      ├─diary
 │  │  │      │  │  diary-module-view.component.ts
+│  │  │      │  │  diary.model.ts
+│  │  │      │  │  diary.repository.ts
+│  │  │      │  │  diary.service.ts
 │  │  │      │  │  index.ts
-│  │  │      │  │  README.md
 │  │  │      │  │
 │  │  │      │  ├─features
 │  │  │      │  │  ├─create
@@ -945,6 +613,9 @@
 │  │  │      ├─finance
 │  │  │      │  │  finance-module-view.component.html
 │  │  │      │  │  finance-module-view.component.ts
+│  │  │      │  │  finance.model.ts
+│  │  │      │  │  finance.repository.ts
+│  │  │      │  │  finance.service.ts
 │  │  │      │  │  index.ts
 │  │  │      │  │  routes.ts
 │  │  │      │  │
@@ -967,8 +638,15 @@
 │  │  │      │          index.ts
 │  │  │      │
 │  │  │      ├─issues
+│  │  │      │  │  design.md
+│  │  │      │  │  IMPLEMENTATION_GUIDE.md
 │  │  │      │  │  index.ts
+│  │  │      │  │  issue-lifecycle.service.ts
+│  │  │      │  │  issue-management.service.ts
 │  │  │      │  │  issues-module-view.component.ts
+│  │  │      │  │  issues.model.ts
+│  │  │      │  │  issues.repository.ts
+│  │  │      │  │  README.md
 │  │  │      │  │
 │  │  │      │  ├─features
 │  │  │      │  │  ├─issue-details
@@ -993,9 +671,35 @@
 │  │  │      │      └─utils
 │  │  │      │              issue-formatters.ts
 │  │  │      │
+│  │  │      ├─log
+│  │  │      │      index.ts
+│  │  │      │      log-module-view.component.ts
+│  │  │      │      log.model.ts
+│  │  │      │      log.repository.ts
+│  │  │      │      log.service.ts
+│  │  │      │
+│  │  │      ├─manager
+│  │  │      │  │  index.ts
+│  │  │      │  │  module-card.component.ts
+│  │  │      │  │  module-config-form.component.ts
+│  │  │      │  │  module-dependency-graph.component.ts
+│  │  │      │  │  module-manager.component.ts
+│  │  │      │  │  module-manager.routes.ts
+│  │  │      │  │  module-manager.service.ts
+│  │  │      │  │  module-status-badge.component.ts
+│  │  │      │  │
+│  │  │      │  └─components
+│  │  │      │          module-card.component.ts
+│  │  │      │          module-config-form.component.ts
+│  │  │      │          module-dependency-graph.component.ts
+│  │  │      │          module-status-badge.component.ts
+│  │  │      │
 │  │  │      ├─members
 │  │  │      │  │  index.ts
 │  │  │      │  │  members-module-view.component.ts
+│  │  │      │  │  members.model.ts
+│  │  │      │  │  members.repository.ts
+│  │  │      │  │  members.service.ts
 │  │  │      │  │  README.md
 │  │  │      │  │
 │  │  │      │  ├─features
@@ -1013,8 +717,9 @@
 │  │  │      ├─qa
 │  │  │      │  │  index.ts
 │  │  │      │  │  qa-module-view.component.ts
-│  │  │      │  │  README.md
-│  │  │      │  │  REFACTORING.md
+│  │  │      │  │  qa.model.ts
+│  │  │      │  │  qa.repository.ts
+│  │  │      │  │  qa.service.ts
 │  │  │      │  │
 │  │  │      │  └─features
 │  │  │      │      ├─qa-inspections
@@ -1028,6 +733,41 @@
 │  │  │      │      └─qa-stats
 │  │  │      │              index.ts
 │  │  │      │              qa-stats.component.ts
+│  │  │      │
+│  │  │      ├─safety
+│  │  │      │      index.ts
+│  │  │      │      safety-module-view.component.ts
+│  │  │      │
+│  │  │      ├─tasks
+│  │  │      │  │  design.md
+│  │  │      │  │  IMPLEMENTATION_GUIDE.md
+│  │  │      │  │  index.ts
+│  │  │      │  │  README.md
+│  │  │      │  │  routes.ts
+│  │  │      │  │  tasks-module-view.component.ts
+│  │  │      │  │  tasks-shell.component.ts
+│  │  │      │  │
+│  │  │      │  ├─components
+│  │  │      │  │      tasks-list.component.ts
+│  │  │      │  │      view-switcher.component.ts
+│  │  │      │  │
+│  │  │      │  ├─data-access
+│  │  │      │  │  ├─models
+│  │  │      │  │  │      task.model.ts
+│  │  │      │  │  │
+│  │  │      │  │  └─repositories
+│  │  │      │  │          task.repository.ts
+│  │  │      │  │
+│  │  │      │  ├─services
+│  │  │      │  │      tasks.facade.ts
+│  │  │      │  │
+│  │  │      │  ├─state
+│  │  │      │  │      task-view.store.ts
+│  │  │      │  │      task.store.ts
+│  │  │      │  │
+│  │  │      │  └─views
+│  │  │      │      └─tree-list
+│  │  │      │              task-tree-list-view.component.ts
 │  │  │      │
 │  │  │      ├─warranty
 │  │  │      │  │  index.ts
@@ -1069,22 +809,58 @@
 │  │  │      │      └─components
 │  │  │      │              warranty-status-badge.component.ts
 │  │  │      │
-│  │  │      └─weather
-│  │  │          │  index.ts
-│  │  │          │  README.md
-│  │  │          │  weather-module-view.component.ts
-│  │  │          │
-│  │  │          ├─components
-│  │  │          │      weather-card.component.ts
-│  │  │          │
-│  │  │          ├─services
-│  │  │          │      weather.service.ts
-│  │  │          │
-│  │  │          └─types
-│  │  │                  weather.types.ts
-│  │  │
-│  │  ├─dashboard
-│  │  │      AGENTS.md
+│  │  │      ├─weather
+│  │  │      │  │  IMPLEMENTATION_GUIDE.md
+│  │  │      │  │  index.ts
+│  │  │      │  │  README.md
+│  │  │      │  │  weather-module-view.component.ts
+│  │  │      │  │  weather.repository.ts
+│  │  │      │  │  weather.service.ts
+│  │  │      │  │  WEATHER_MODULE_DESIGN.md
+│  │  │      │  │
+│  │  │      │  ├─core
+│  │  │      │  │  ├─config
+│  │  │      │  │  │      api.config.ts
+│  │  │      │  │  │      constants.ts
+│  │  │      │  │  │      index.ts
+│  │  │      │  │  │
+│  │  │      │  │  ├─models
+│  │  │      │  │  │      api-response.model.ts
+│  │  │      │  │  │      index.ts
+│  │  │      │  │  │      weather.model.ts
+│  │  │      │  │  │
+│  │  │      │  │  └─services
+│  │  │      │  │          cache.service.ts
+│  │  │      │  │          index.ts
+│  │  │      │  │          weather-api.service.ts
+│  │  │      │  │
+│  │  │      │  ├─features
+│  │  │      │  │  ├─construction-suitability
+│  │  │      │  │  │      index.ts
+│  │  │      │  │  │      suitability-card.component.ts
+│  │  │      │  │  │
+│  │  │      │  │  ├─forecast-display
+│  │  │      │  │  │      forecast-display.component.ts
+│  │  │      │  │  │      index.ts
+│  │  │      │  │  │
+│  │  │      │  │  ├─location-selector
+│  │  │      │  │  │      index.ts
+│  │  │      │  │  │      location-selector.component.ts
+│  │  │      │  │  │
+│  │  │      │  │  └─weather-alerts
+│  │  │      │  │          index.ts
+│  │  │      │  │          weather-alerts.component.ts
+│  │  │      │  │
+│  │  │      │  └─shared
+│  │  │      │      └─utils
+│  │  │      │              calculators.ts
+│  │  │      │              formatters.ts
+│  │  │      │              icons.ts
+│  │  │      │              index.ts
+│  │  │      │
+│  │  │      └─workflow
+│  │  │              index.ts
+│  │  │              workflow-module-view.component.ts
 │  │  │
 │  │  ├─exception
 │  │  │      AGENTS.md
@@ -1109,24 +885,7 @@
 │  │  │  └─services
 │  │  │          explore-search.facade.ts
 │  │  │          index.ts
-│  │  │          search-cache.service.spec.ts
 │  │  │          search-cache.service.ts
-│  │  │
-│  │  ├─module-manager
-│  │  │  │  index.ts
-│  │  │  │  module-manager.component.ts
-│  │  │  │  module-manager.routes.ts
-│  │  │  │  module-manager.service.ts
-│  │  │  │
-│  │  │  └─components
-│  │  │          module-card.component.ts
-│  │  │          module-config-form.component.ts
-│  │  │          module-dependency-graph.component.ts
-│  │  │          module-status-badge.component.ts
-│  │  │
-│  │  ├─monitoring
-│  │  │      monitoring-dashboard.component.ts
-│  │  │      routes.ts
 │  │  │
 │  │  ├─organization
 │  │  │  │  AGENTS.md
@@ -1219,9 +978,6 @@
 │  │  │  │
 │  │  │  └─settings
 │  │  │          team-settings.component.ts
-│  │  │
-│  │  ├─tenant
-│  │  │      AGENTS.md
 │  │  │
 │  │  └─user
 │  │      │  AGENTS.md
@@ -1320,12 +1076,7 @@
 │      environment.prod.ts
 │      environment.ts
 │
-├─styles
-│      AGENTS.md
-│      index.less
-│      theme.less
-│
-└─test
-        firebase-emulator.setup.ts
-        README.md
-        test-data.factory.ts
+└─styles
+        AGENTS.md
+        index.less
+        theme.less
