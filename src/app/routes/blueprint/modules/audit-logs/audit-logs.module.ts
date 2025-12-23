@@ -135,8 +135,8 @@ export class AuditLogsModule implements IBlueprintModule {
 
     try {
       // Emit module ready event
-      if (this.context?.eventBus) {
-        this.context.eventBus.emit(AUDIT_LOGS_MODULE_EVENTS.LOGS_LOADED, { status: 'ready' }, this.id);
+      if (this.context?.['eventBus']) {
+        this.context['eventBus'].emit(AUDIT_LOGS_MODULE_EVENTS.LOGS_LOADED, { status: 'ready' }, this.id);
       }
 
       this.status.set(ModuleStatus.RUNNING);
@@ -206,28 +206,28 @@ export class AuditLogsModule implements IBlueprintModule {
    * Subscribe to module events
    */
   private subscribeToEvents(context: IExecutionContext): void {
-    if (!context.eventBus) {
+    if (!context['eventBus']) {
       this.logger.warn('[AuditLogsModule]', 'EventBus not available in context');
       return;
     }
 
-    const eventBus = context.eventBus;
+    const eventBus = context['eventBus'];
 
     // Subscribe to audit log events
     this.eventUnsubscribers.push(
-      eventBus.on<Record<string, unknown>>(AUDIT_LOGS_MODULE_EVENTS.LOG_CREATED, event => {
+      eventBus.on(AUDIT_LOGS_MODULE_EVENTS.LOG_CREATED, (event: any) => {
         this.logger.info('[AuditLogsModule]', 'Audit log created event received', event.payload);
       })
     );
 
     this.eventUnsubscribers.push(
-      eventBus.on<Record<string, unknown>>(AUDIT_LOGS_MODULE_EVENTS.LOGS_LOADED, event => {
+      eventBus.on(AUDIT_LOGS_MODULE_EVENTS.LOGS_LOADED, (event: any) => {
         this.logger.info('[AuditLogsModule]', 'Audit logs loaded event received', event.payload);
       })
     );
 
     this.eventUnsubscribers.push(
-      eventBus.on<Record<string, unknown>>(AUDIT_LOGS_MODULE_EVENTS.ERROR_OCCURRED, event => {
+      eventBus.on(AUDIT_LOGS_MODULE_EVENTS.ERROR_OCCURRED, (event: any) => {
         this.logger.error('[AuditLogsModule]', 'Audit error event received', new Error(JSON.stringify(event.payload)));
       })
     );
