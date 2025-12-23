@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, effect, inject } from '@angular/core';
 import { FirebaseService } from '@core/services/firebase.service';
-import { NotificationStore } from '@core/state/stores/notification.store';
+import { NotificationStore } from '@core/account/stores/notification.store';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { NzCardModule } from 'ng-zorro-antd/card';

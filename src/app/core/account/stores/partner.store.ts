@@ -1,7 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
-import { Partner, PartnerMember } from '../../account/models';
-import { PartnerRole } from '../../account/types';
+import { Partner, PartnerMember } from '../models';
+import { PartnerRole } from '../types';
 import { PartnerRepository } from '../../data-access/repositories';
 import { firstValueFrom } from 'rxjs';
 

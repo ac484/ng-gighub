@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, effect, inject } from '@angular/core';
 import { FirebaseService } from '@core/services/firebase.service';
 import { PushMessagingService } from '@core/services/push-messaging.service';
-import { NotificationStore } from '@core/state/stores/notification.store';
+import { NotificationStore } from '@core/account/stores/notification.store';
 import { NoticeIconModule, NoticeIconSelect } from '@delon/abc/notice-icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 

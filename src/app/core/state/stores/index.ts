@@ -1,3 +1,3 @@
-export * from './team.store';
-export * from './partner.store';
-export * from './notification.store';
+export * from '../../account/stores/team.store';
+export * from '../../account/stores/partner.store';
+export * from '../../account/stores/notification.store';
