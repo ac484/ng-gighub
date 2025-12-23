@@ -300,7 +300,7 @@ export class OrganizationTeamsComponent implements OnInit {
     });
   }
 
-  formatDate(dateStr: string | undefined): string {
+  formatDate(dateStr: string | Date | undefined): string {
     if (!dateStr) return '-';
     try {
       const date = new Date(dateStr);
