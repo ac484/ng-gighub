@@ -417,7 +417,32 @@ open → in_progress → resolved → verified → closed
 │  ├─ module.metadata.ts
 │  ├─ asset.module.ts
 │  └─ README.md
-│
+ 
+├─ ai-facade/
+│  ├─ adapters/
+│  │  └─ index.ts
+│  ├─ facade/
+│  │  └─ ai.facade.ts
+│  ├─ ai.types.ts
+│  └─ README.md
+
+├─ analytics/
+│  ├─ metrics/
+│  │  └─ metrics.service.ts
+│  ├─ reports/
+│  │  └─ report.generator.ts
+│  ├─ analytics.service.ts
+│  └─ README.md
+
+├─ notification/
+│  ├─ channels/
+│  │  ├─ email.channel.ts
+│  │  └─ push.channel.ts
+│  ├─ notification.service.ts
+│  ├─ templates/
+│  │  └─ default.template.ts
+│  └─ README.md
+
 ├─ event-bus/
 │  ├─ adapters/
 │  │  └─ index.ts
