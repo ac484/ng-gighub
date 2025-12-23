@@ -5,7 +5,7 @@
  * Structure (ADR-0002: Hybrid Repository Strategy):
  * - shared/ - Cross-module repositories (Account, Organization, Team, etc.)
  * - base/ - Base repository classes and interfaces
- * - Module-specific repositories remain here (Task, Log)
+ * - Module-specific repositories (Log - Task moved to route modules)
  * - Infrastructure repositories moved to core/infrastructure/storage/
  */
 
@@ -23,10 +23,8 @@ export * from './shared/notification.repository';
 // Base repository classes
 export * from './base/firestore-base.repository';
 
-// Module-specific repositories (Task, Log)
-export * from './task-firestore.repository';
+// Module-specific repositories (Log)
 export * from './log-firestore.repository';
 
 // Legacy aliases for backward compatibility (will be removed in future)
 export { LogFirestoreRepository as LogRepository } from './log-firestore.repository';
-export { TaskFirestoreRepository as TaskRepository } from './task-firestore.repository';
