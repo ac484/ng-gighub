@@ -17,7 +17,13 @@
 │  │  ├─ blueprint/                 # Blueprint UI（與 core/blueprint 對應）
 │  │  ├─ organization/ | team/ | partner/ | user/
 │  │  └─ ai-assistant/              # AI UX（前端入口）
-│  ├─ shared/                       # 公用組件、指令、Pipe、utils
+│  ├─ shared/                       # 公用功能模組 - 可重用 UI/工具/型別
+│  │  ├─ components/                # 自含型 UI 元件（支援無障礙、樣式隔離）
+│  │  ├─ services/                  # 無業務語意的共用服務（e.g. clipboard, download）
+│  │  ├─ types/                     # 共用型別 / Value Objects (VO)
+│  │  ├─ utils/                     # 純函式工具 (pure utility functions)
+│  │  ├─ constants/                 # 共用常數、InjectionToken
+│  │  └─ pipes/ | directives/       # 如需：自訂 Pipe 或 Directives
 │  └─ main.ts / app.config.ts
 │
 ├─ environments/                    # environment.{dev,prod,staging}.ts
