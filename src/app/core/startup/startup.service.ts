@@ -1,9 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { EnvironmentProviders, Injectable, Provider, inject, provideAppInitializer } from '@angular/core';
 import { Router } from '@angular/router';
-import { FirebaseService } from '@core/services/firebase.service';
-import { LoggerService } from '@core/services/logger/logger.service';
-import { PushMessagingService } from '@core/services/push-messaging.service';
 import { ACLService } from '@delon/acl';
 import { ALAIN_I18N_TOKEN, MenuService, SettingsService, TitleService } from '@delon/theme';
 import { NzSafeAny } from 'ng-zorro-antd/core/types';
@@ -37,9 +34,6 @@ export class StartupService {
   private httpClient = inject(HttpClient);
   private router = inject(Router);
   private i18n = inject<I18NService>(ALAIN_I18N_TOKEN);
-  private firebase = inject(FirebaseService);
-  private pushMessaging = inject(PushMessagingService);
-  private logger = inject(LoggerService);
 
   load(): Observable<void> {
     const defaultLang = this.i18n.defaultLang;
@@ -67,51 +61,7 @@ export class StartupService {
         // 设置页面标题的后缀
         this.titleService.default = '';
         this.titleService.suffix = appData.app.name;
-
-        // Initialize push notifications if user is authenticated
-        this.initializePushNotifications();
       })
     );
-  }
-
-  /**
-   * Initialize push notifications for authenticated users
-   *
-   * This method attempts to initialize FCM push notifications
-   * after the app has been bootstrapped. It's a non-blocking
-   * operation that won't fail the app startup if it encounters errors.
-   */
-  private async initializePushNotifications(): Promise<void> {
-    try {
-      const userId = this.firebase.getCurrentUserId();
-
-      if (!userId) {
-        this.logger.info('[StartupService]', 'Skipping push notification init: user not authenticated');
-        return;
-      }
-
-      // Initialize push notifications in background
-      // Use setTimeout to avoid blocking startup
-      setTimeout(async () => {
-        try {
-          await this.pushMessaging.init(userId);
-
-          if (this.pushMessaging.isReady()) {
-            this.logger.info('[StartupService]', 'Push notifications initialized successfully');
-          } else {
-            this.logger.warn('[StartupService]', 'Push notifications initialized but not ready', {
-              hasPermission: this.pushMessaging.hasPermission(),
-              isSupported: this.pushMessaging.isSupported()
-            });
-          }
-        } catch (error) {
-          this.logger.error('[StartupService]', 'Failed to initialize push notifications', error as Error);
-          // Don't throw - push notifications are non-critical
-        }
-      }, 1000); // Delay 1 second to let the app fully initialize first
-    } catch (error) {
-      this.logger.error('[StartupService]', 'Push notification init error', error as Error);
-      // Don't throw - this is non-critical
-    }
   }
 }

@@ -3,4 +3,5 @@
  * Centralized data access and repository management (ADR-0002)
  */
 
-export * from './repositories/index';
+// Storage repository is still used by some modules
+export * from './repositories/storage/log-storage.repository';
