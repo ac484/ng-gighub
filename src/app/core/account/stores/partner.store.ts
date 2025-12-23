@@ -1,10 +1,10 @@
-<<<<<<<< HEAD:src/app/core/account/stores/partner.store.ts
 import { inject, Injectable, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+
+import { PartnerRepository } from '../../data-access/repositories';
 import { Partner, PartnerMember } from '../models';
 import { PartnerRole } from '../types';
-import { PartnerRepository } from '../../data-access/repositories';
-import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -81,6 +81,4 @@ export class PartnerStore {
     this._members.update(list => list.filter(member => !(member.id === memberId && member.partner_id === partnerId)));
   }
 }
-========
 export * from '../../account/stores/partner.store';
->>>>>>>> 2dbff26bff59fc0954ae01a941bfad914078d10e:src/app/core/state/stores/partner.store.ts

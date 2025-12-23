@@ -7,15 +7,14 @@ export * from './account';
 export * from './domain/models';
 export * from './domain/types';
 export * from './data-access/repositories';
-export * from './state/stores';
 
 // Blueprint system (consolidated)
 // Export specific blueprint types that may be needed by other modules
 export { ModuleType, ModuleState } from './blueprint/domain/types';
 export { BlueprintStatus, OwnerType, BlueprintMemberType, BlueprintRole, BlueprintBusinessRole } from './blueprint/domain/types';
-export type { 
-  Blueprint, 
-  BlueprintMember, 
+export type {
+  Blueprint,
+  BlueprintMember,
   BlueprintQueryOptions,
   CreateBlueprintRequest,
   UpdateBlueprintRequest
