@@ -22,13 +22,4 @@
 - 可測試性：所有核心邏輯可單元測試
 
 ## 4. 目錄建議（對應現況）
-```
-/src/app/core/
-├─ domain/           # 聚合、VO、Domain events
-├─ blueprint/        # 跨模組流程/事件/模組實作
-├─ data-access/      # Firestore/API repositories
-├─ services/         # 業務協調服務
-├─ facades/          # 提供給 routes 的介面
-├─ i18n/ | errors/ | net/ | infrastructure/  # 橫切支援
-└─ index.ts
-```
+目錄與檔案結構請參考權威來源：[docs/reference/Skeleton.md](docs/reference/Skeleton.md)。

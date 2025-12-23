@@ -77,21 +77,7 @@
 - ❌ 其他模組的資料修改
 
 ### 2.3 標準模組目錄結構（強制）
-
-```
-/src/app/core/blueprint/modules/implementations/<module-name>/
-├─ models/              # Entity / Value Object
-├─ states/              # 狀態定義與轉移
-├─ services/            # Domain Services
-├─ repositories/        # Repository Interface + Impl
-├─ events/              # Domain Event 定義
-├─ policies/            # 模組內規則（非系統級）
-├─ facade/              # 對外操作入口（唯一）
-├─ config/              # 模組設定
-├─ module.metadata.ts   # 模組描述（名稱、事件、能力）
-├─ <module>.module.ts   # DI / Module 定義
-└─ README.md            # 模組說明
-```
+目錄與檔案結構請參考權威來源：[docs/reference/Skeleton.md](docs/reference/Skeleton.md)。
 
 > ❗ 任何跨模組呼叫，只能透過 `facade/`
 

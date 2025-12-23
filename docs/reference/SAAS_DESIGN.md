@@ -26,30 +26,7 @@
 
 > 下列路徑為本倉庫的實際根目錄，後續文件（MODULE_LAYER、BLUEPRINT_LAYER、AI_GUIDELINES）皆以此為基準，避免「/blueprint」或「/modules」與實際專案脫節。
 
-```
-/src
-├─ app/
-│  ├─ core/                         # 基礎設施 + Domain 層
-│  │  ├─ blueprint/                 # Blueprint Layer（事件/流程/模組實作）
-│  │  │  ├─ modules/implementations/<module>/   # 模組骨架（與 MODULE_LAYER 一致）
-│  │  │  ├─ workflow/ | event-bus/ | policies/ | audit/ | context/ | container/
-│  │  │  └─ integration/ | repositories/ | services/
-│  │  ├─ data-access/               # Repository + Firebase 存取封裝
-│  │  ├─ services/ | facades/       # 跨模組協作服務（不直接觸碰 Firestore）
-│  │  └─ auth / guards / interceptors / models
-│  │
-│  ├─ layout/                       # 全局 layout、navbar、workspace 切換器
-│  ├─ routes/                       # UI/Presentation（每個業務模組的頁面）
-│  │  ├─ blueprint/                 # Blueprint UI（與 core/blueprint 對應）
-│  │  ├─ organization/ | team/ | partner/ | user/
-│  │  └─ ai-assistant/              # AI UX（前端入口）
-│  ├─ shared/                       # 公用組件、指令、Pipe、utils
-│  └─ main.ts / app.config.ts
-│
-├─ environments/                    # environment.{dev,prod,staging}.ts
-├─ assets/
-└─ functions-*                      # Cloud Functions（AI / storage / firestore 等）
-```
+目錄與檔案結構請參考權威來源：[docs/reference/Skeleton.md](docs/reference/Skeleton.md)。
 
 > Blueprint 模組遵循 `MODULE_LAYER.md` 的骨架，所有跨模組協作仍走 Blueprint Layer 的 Event/Facade/Policy 原則。
 
