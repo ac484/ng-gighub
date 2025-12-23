@@ -27,7 +27,7 @@ import { IssuesModuleViewComponent } from './modules/issues';
 import { LogModuleViewComponent } from './modules/log';
 import { ModuleManagerComponent } from './modules/manager/module-manager.component';
 import { MembersModuleViewComponent } from './modules/members';
-import { QaModuleViewComponent } from './modules/qa';
+import { QaModuleViewComponent } from './modules/quality';
 import { SafetyModuleViewComponent } from './modules/safety';
 import { TasksModuleViewComponent } from './modules/tasks';
 import { WarrantyModuleViewComponent } from './modules/warranty';
