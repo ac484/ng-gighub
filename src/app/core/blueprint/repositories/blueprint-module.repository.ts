@@ -27,7 +27,6 @@ import {
   QueryConstraint,
   writeBatch
 } from '@angular/fire/firestore';
-import { LoggerService } from '@core';
 import { ModuleStatus } from '@core/blueprint/modules/module-status.enum';
 import {
   BlueprintModuleDocument,
@@ -48,7 +47,6 @@ import { Observable, from, map, catchError, of } from 'rxjs';
 })
 export class BlueprintModuleRepository {
   private readonly firestore = inject(Firestore);
-  private readonly logger = inject(LoggerService);
   private readonly parentCollection = 'blueprints';
   private readonly subcollectionName = 'modules';
 
@@ -106,7 +104,6 @@ export class BlueprintModuleRepository {
     return from(getDocs(q)).pipe(
       map(snapshot => snapshot.docs.map(docSnap => this.toModuleDocument(docSnap.data(), docSnap.id, blueprintId))),
       catchError(error => {
-        this.logger.error('[BlueprintModuleRepository]', 'findByBlueprintId failed', error as Error);
         return of([]);
       })
     );
@@ -121,7 +118,6 @@ export class BlueprintModuleRepository {
     return from(getDocs(q)).pipe(
       map(snapshot => snapshot.docs.map(docSnap => this.toModuleDocument(docSnap.data(), docSnap.id, blueprintId))),
       catchError(error => {
-        this.logger.error('[BlueprintModuleRepository]', 'findEnabledModules failed', error as Error);
         return of([]);
       })
     );
@@ -134,7 +130,6 @@ export class BlueprintModuleRepository {
     return from(getDoc(this.getModuleDoc(blueprintId, moduleId))).pipe(
       map(snapshot => (snapshot.exists() ? this.toModuleDocument(snapshot.data(), snapshot.id, blueprintId) : null)),
       catchError(error => {
-        this.logger.error('[BlueprintModuleRepository]', 'findById failed', error as Error);
         return of(null);
       })
     );
@@ -153,7 +148,6 @@ export class BlueprintModuleRepository {
         return this.toModuleDocument(doc.data(), doc.id, blueprintId);
       }),
       catchError(error => {
-        this.logger.error('[BlueprintModuleRepository]', 'findByType failed', error as Error);
         return of(null);
       })
     );
@@ -183,7 +177,6 @@ export class BlueprintModuleRepository {
 
     try {
       const docRef = await addDoc(this.getModulesCollection(blueprintId), docData);
-      this.logger.info('[BlueprintModuleRepository]', `Module created: ${docRef.id}`);
 
       const snapshot = await getDoc(docRef);
       if (snapshot.exists()) {
@@ -193,7 +186,6 @@ export class BlueprintModuleRepository {
       // Fallback
       return this.toModuleDocument(docData, docRef.id, blueprintId);
     } catch (error: any) {
-      this.logger.error('[BlueprintModuleRepository]', 'create failed', error as Error);
       throw error;
     }
   }
@@ -212,9 +204,7 @@ export class BlueprintModuleRepository {
 
     try {
       await updateDoc(this.getModuleDoc(blueprintId, moduleId), docData);
-      this.logger.info('[BlueprintModuleRepository]', `Module updated: ${moduleId}`);
     } catch (error: any) {
-      this.logger.error('[BlueprintModuleRepository]', 'update failed', error as Error);
       throw error;
     }
   }
@@ -237,9 +227,7 @@ export class BlueprintModuleRepository {
 
     try {
       await updateDoc(this.getModuleDoc(blueprintId, moduleId), docData);
-      this.logger.info('[BlueprintModuleRepository]', `Module status updated: ${moduleId} -> ${status}`);
     } catch (error: any) {
-      this.logger.error('[BlueprintModuleRepository]', 'updateStatus failed', error as Error);
       throw error;
     }
   }
@@ -253,9 +241,7 @@ export class BlueprintModuleRepository {
         enabled: true,
         updatedAt: Timestamp.now()
       });
-      this.logger.info('[BlueprintModuleRepository]', `Module enabled: ${moduleId}`);
     } catch (error: any) {
-      this.logger.error('[BlueprintModuleRepository]', 'enable failed', error as Error);
       throw error;
     }
   }
@@ -269,9 +255,7 @@ export class BlueprintModuleRepository {
         enabled: false,
         updatedAt: Timestamp.now()
       });
-      this.logger.info('[BlueprintModuleRepository]', `Module disabled: ${moduleId}`);
     } catch (error: any) {
-      this.logger.error('[BlueprintModuleRepository]', 'disable failed', error as Error);
       throw error;
     }
   }
@@ -282,9 +266,7 @@ export class BlueprintModuleRepository {
   async delete(blueprintId: string, moduleId: string): Promise<void> {
     try {
       await deleteDoc(this.getModuleDoc(blueprintId, moduleId));
-      this.logger.info('[BlueprintModuleRepository]', `Module deleted: ${moduleId}`);
     } catch (error: any) {
-      this.logger.error('[BlueprintModuleRepository]', 'delete failed', error as Error);
       throw error;
     }
   }
@@ -311,13 +293,7 @@ export class BlueprintModuleRepository {
 
       await batch.commit();
       result.success = moduleIds;
-
-      this.logger.info(
-        '[BlueprintModuleRepository]',
-        `Batch update completed: ${moduleIds.length} modules ${enabled ? 'enabled' : 'disabled'}`
-      );
     } catch (error: any) {
-      this.logger.error('[BlueprintModuleRepository]', 'batchUpdateEnabled failed', error as Error);
       result.failed = moduleIds.map(id => ({ moduleId: id, error: error.message }));
     }
 
@@ -368,7 +344,6 @@ export class BlueprintModuleRepository {
 
       return summary;
     } catch (error: any) {
-      this.logger.error('[BlueprintModuleRepository]', 'getStatusSummary failed', error as Error);
       throw error;
     }
   }
@@ -382,7 +357,6 @@ export class BlueprintModuleRepository {
       const snapshot = await getDocs(q);
       return !snapshot.empty;
     } catch (error: any) {
-      this.logger.error('[BlueprintModuleRepository]', 'exists failed', error as Error);
       return false;
     }
   }
