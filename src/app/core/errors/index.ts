@@ -1,8 +1,8 @@
 /**
- * Error classes for Blueprint module
- * 藍圖模組錯誤類別
+ * Error classes
+ * 錯誤類別
+ *
+ * Note: Blueprint-specific errors have been moved to @core/blueprint/errors
  */
-export * from './blueprint-error';
 export * from './permission-denied-error';
 export * from './validation-error';
-export * from './module-not-found-error';

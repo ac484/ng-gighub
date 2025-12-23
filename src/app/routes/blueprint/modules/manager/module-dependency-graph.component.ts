@@ -4,7 +4,7 @@
  */
 
 import { Component, OnInit, AfterViewInit, input, signal } from '@angular/core';
-import { BlueprintModuleDocument } from '@core/models/blueprint-module.model';
+import { BlueprintModuleDocument } from '@core/blueprint/domain/models';
 import { SHARED_IMPORTS } from '@shared';
 
 @Component({

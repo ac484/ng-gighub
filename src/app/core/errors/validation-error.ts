@@ -1,4 +1,4 @@
-import { BlueprintError } from './blueprint-error';
+import { BlueprintError } from '@core/blueprint/errors';
 
 /**
  * Validation error detail

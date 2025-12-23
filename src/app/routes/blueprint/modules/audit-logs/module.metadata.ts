@@ -9,7 +9,7 @@
  * @date 2025-12-13
  */
 
-import { BlueprintModuleConfiguration } from '@core/models/blueprint-module.model';
+import { BlueprintModuleConfiguration } from '@core/blueprint/domain/models';
 
 /**
  * Audit Logs Module Metadata

@@ -13,7 +13,7 @@ import {
   Timestamp
 } from '@angular/fire/firestore';
 import { BlueprintMemberType, LoggerService, OwnerType } from '@core';
-import { getAllowedMemberTypes } from '@core/domain/utils';
+import { getAllowedMemberTypes } from '@core';
 
 import { CreateMemberRequest, Member, MemberDocument, UpdateMemberRequest } from './members.model';
 

@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BlueprintMemberType, BlueprintRole, BusinessRole, OwnerType, LoggerService } from '@core';
-import { getAllowedMemberTypes } from '@core/domain/utils';
+import { getAllowedMemberTypes } from '@core';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';

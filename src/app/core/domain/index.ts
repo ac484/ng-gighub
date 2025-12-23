@@ -8,8 +8,8 @@
  * - Domain-specific validation logic
  *
  * Note: Domain layer should NOT depend on infrastructure
+ * Note: Blueprint-specific utilities have been moved to @core/blueprint/domain
  */
 
 export * from './models/index';
 export * from './types/index';
-export * from './utils/index';

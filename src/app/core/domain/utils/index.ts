@@ -5,4 +5,4 @@
  * @module core/domain/utils
  */
 
-export * from './blueprint-validation.utils';
+// Note: Blueprint validation utilities have been moved to @core/blueprint/domain/utils

@@ -19,7 +19,7 @@ import {
 } from '../audit-logs';
 import { ModuleStatus } from '../../shared/enums/module-status.enum';
 import { BlueprintModuleRepository } from '../../shared/repositories/blueprint-module.repository';
-import { BlueprintModuleDocument, CreateModuleData, BatchModuleOperationResult } from '@core/domain/models/blueprint-module.model';
+import { BlueprintModuleDocument, CreateModuleData, BatchModuleOperationResult } from '@core/blueprint/domain/models';
 import { FirebaseService } from '@core/services/firebase.service';
 import { firstValueFrom } from 'rxjs';
 

@@ -24,5 +24,7 @@ export * from './infrastructure/index';
 // State management (shared stores)
 export * from './state/index';
 
-// Note: blueprint directory has been removed as part of module self-containment (模組自有化).
-// Blueprint-specific functionality should now be imported from src/app/routes/blueprint/.
+// Blueprint system (consolidated)
+// Export specific blueprint types that may be needed by other modules
+export { ModuleType, ModuleState } from './blueprint/domain/types';
+export { getAllowedMemberTypes, isValidMemberTypeForOwner } from './blueprint/domain/utils';

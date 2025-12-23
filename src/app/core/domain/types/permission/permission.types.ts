@@ -1,6 +1,6 @@
 import { PermissionLevel } from './permission-level.enum';
 import { BusinessRole, SystemRole } from './role.enum';
-import { ModuleType } from '../module/module.types';
+import { ModuleType } from '@core/blueprint/domain/types';
 
 /**
  * Permission subject type

@@ -15,7 +15,7 @@ import {
   Timestamp
 } from '@angular/fire/firestore';
 import { BlueprintMember, BlueprintMemberType, OwnerType, LoggerService } from '@core';
-import { isValidMemberTypeForOwner } from '@core/domain/utils';
+import { isValidMemberTypeForOwner } from '@core';
 import { Observable, from, map, throwError } from 'rxjs';
 
 @Injectable({

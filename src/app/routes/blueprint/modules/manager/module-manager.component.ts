@@ -12,7 +12,7 @@ import { Component, OnInit, inject, signal, computed, DestroyRef, input, effect 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ModuleStatus } from '../../shared/enums/module-status.enum';
-import { BlueprintModuleDocument } from '@core/domain/models/blueprint-module.model';
+import { BlueprintModuleDocument } from '@core/blueprint/domain/models';
 import { STColumn, STData } from '@delon/abc/st';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS } from '@shared';

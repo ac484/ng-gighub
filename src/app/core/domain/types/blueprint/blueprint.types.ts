@@ -1,6 +1,6 @@
 import { BlueprintStatus } from './blueprint-status.enum';
 import { OwnerType } from './owner-type.enum';
-import { ModuleType } from '../module/module.types';
+import { ModuleType } from '@core/blueprint/domain/types';
 
 /**
  * Blueprint member type enumeration
@@ -193,7 +193,7 @@ export interface BlueprintQueryOptions {
 
 // ============================================================================
 // Note: Validation utility functions have been moved to @core/domain/utils
-// Import from '@core/domain/utils' for validation functions:
+// Import from '@core' for validation functions:
 // - isValidMemberTypeForOwner()
 // - getAllowedMemberTypes()
 // - isValidAssigneeTypeForOwner()

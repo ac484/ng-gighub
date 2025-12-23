@@ -4,7 +4,7 @@
  */
 
 import { Component, OnInit, inject, input, signal } from '@angular/core';
-import { BlueprintModuleDocument } from '@core/models/blueprint-module.model';
+import { BlueprintModuleDocument } from '@core/blueprint/domain/models';
 import { SFSchema, SFButton } from '@delon/form';
 import { SHARED_IMPORTS } from '@shared';
 import { NzModalRef } from 'ng-zorro-antd/modal';

@@ -10,7 +10,7 @@
  * @date 2025-12-16
  */
 
-import { BlueprintModuleConfiguration } from '@core/models/blueprint-module.model';
+import { BlueprintModuleConfiguration } from '@core/blueprint/domain/models';
 
 /**
  * 保固模組元資料

@@ -5,8 +5,8 @@
  * These models represent Firestore document structures.
  */
 
-// Blueprint models
-export * from './blueprint-module.model';
+// Friend models
+export * from './friend.model';
 
 // Notification models
 export * from './notification.model';
