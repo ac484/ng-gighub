@@ -1,15 +1,32 @@
-
----
-
-# SETC 工作流程定義
+# SETC 系統架構設計文檔
 
 > 文件版本: 3.23.0  
 > 更新日期: 2025-12-16  
-> 文件性質: 系統流程與模組協作定義（不包含實作進度與任務引用）
+> 文件性質: 系統流程與模組協作定義
+
+---
+
+## 目錄
+
+1. [整體設計原則](#一整體設計原則)
+2. [模組定義與規範](#二模組定義與規範)
+3. [Blueprint Layer 設計](#三blueprint-layer-設計)
+4. [工作流程定義](#四工作流程定義)
+5. [模組標準骨架](#五模組標準骨架)
 
 ---
 
 ## 一、整體設計原則
+
+### 核心理念
+
+**最重要的一條鐵律：**
+> Blueprint Layer 永遠不應該知道「資料長什麼樣子」，只知道「事件、規則與流程」。
+
+**模組與 Blueprint 的分工：**
+> 模組負責「把一件事做好」，Blueprint 負責「把事情串起來」。
+
+### 系統特性
 
 - 系統採 **事件驅動（Event-Driven）流程**
 - 模組彼此解耦，透過事件與 Facade 溝通
@@ -17,217 +34,836 @@
 - 核心實體（Contract / Task / Issue / Acceptance / Finance）皆具備獨立生命週期
 - 自動節點不包含 UI 行為，僅負責狀態推進與資料產生
 
+### 模組互動原則
+
+**每個模組只做兩件事：**
+1. 發事件（我完成了什麼）
+2. 訂閱事件（我對哪些事有反應）
+
 ---
 
-## 零、合約建立與來源流程
+## 二、模組定義與規範
 
-合約上傳（PDF / 圖檔）【手動】  
-↓  
-合約建檔（基本資料、業主、承商）【手動】  
-↓  
-合約解析（OCR / AI 解析條款、金額、工項）【自動】  
-↓  
-合約確認（確認解析結果或人工補齊）【手動】  
-↓  
-合約狀態：待生效  
-↓  
+### 2.1 模組的定義
+
+**一句話定義：**
+> 模組是「擁有明確業務語意與完整生命週期的 Domain 邊界」
+
+**模組必須具備的條件（缺一不可）：**
+
+| 條件 | 說明 |
+|------|------|
+| 業務語意 | 能回答「我在管什麼」 |
+| 核心實體 | 至少一個 Aggregate Root |
+| 生命週期 | 明確狀態流轉 |
+| 邊界 | 不被其他模組直接操作資料 |
+| 對外介面 | 只能透過 Facade / Events |
+
+### 2.2 模組的責任範圍
+
+**模組「可以」負責：**
+- Domain Entity / Value Object
+- 狀態轉換（State Machine）
+- Domain Service
+- Domain Event（發佈）
+- Repository Interface
+- Facade（對外 API）
+
+**模組「不能」負責：**
+- ❌ 跨模組流程協調
+- ❌ 全系統規則（Policy）
+- ❌ Queue / Retry / Orchestration
+- ❌ UI 權限決策（只能回傳結果）
+- ❌ 其他模組的資料修改
+
+### 2.3 標準模組目錄結構（強制）
+
+```
+/modules/<module-name>/
+├─ models/              # Entity / Value Object
+├─ states/              # 狀態定義與轉移
+├─ services/            # Domain Services
+├─ repositories/        # Repository Interface + Impl
+├─ events/              # Domain Event 定義
+├─ policies/            # 模組內規則（非系統級）
+├─ facade/              # 對外操作入口（唯一）
+├─ config/              # 模組設定
+├─ module.metadata.ts   # 模組描述（名稱、事件、能力）
+├─ <module>.module.ts   # DI / Module 定義
+└─ README.md            # 模組說明
+```
+
+> ❗ 任何跨模組呼叫，只能透過 `facade/`
+
+### 2.4 各資料夾責任說明
+
+#### `/models`
+
+**用途：**
+- 定義 Domain Entity
+- 定義 Value Object
+- 定義 Aggregate Root
+
+**禁止事項：**
+- ❌ 不包含 CRUD
+- ❌ 不包含 API / UI 邏輯
+- ❌ 不存取 Repository
+
+#### `/states`
+
+**用途：**
+- 狀態 enum
+- 狀態轉移表
+- State Machine
+
+```typescript
+TaskState: CREATED → IN_PROGRESS → COMPLETED
+```
+
+**禁止事項：**
+- ❌ 不直接改資料
+- ❌ 不呼叫其他模組
+
+#### `/services`
+
+**用途：**
+- 實作業務行為
+- 執行狀態轉換
+- 發佈 Domain Event
+
+**允許：**
+- 呼叫本模組 Repository
+- 呼叫 Blueprint EventBus
+- 使用本模組 Policy
+
+#### `/repositories`
+
+**用途：**
+- 資料存取抽象
+- Infrastructure 與 Domain 的隔離層
+
+**規範：**
+- Interface + Implementation 分離
+- Domain 不知道資料來源
+
+#### `/events`
+
+**用途：**
+- 定義模組可發佈的 Domain Event
+- 定義 Event Payload Schema
+
+**規範：**
+- 事件命名必須以模組為前綴
+
+```typescript
+task.created
+task.completed
+```
+
+#### `/policies`（模組內）
+
+**用途：**
+- 僅限本模組的業務規則
+- 不跨模組
+
+**範例：**
+- 任務完成條件
+- 狀態合法性檢查
+
+#### `/facade`
+
+> ⚠️ **最重要的一層** - Facade 是模組對外的唯一入口
+
+**責任：**
+- 接收外部請求
+- 驗證 Policy
+- 呼叫 Domain Service
+- 回傳結果
+- 發佈事件（或由 Service 發）
+
+**禁止：**
+- ❌ 不直接操作 DB
+- ❌ 不寫跨模組流程
+- ❌ 不寫 UI 邏輯
+
+#### `/module.metadata.ts`
+
+**用途：**
+- 描述模組能力
+- 宣告事件清單
+- 宣告對外 API
+
+**範例：**
+```typescript
+export const TaskModuleMetadata = {
+  name: 'task',
+  events: ['task.created', 'task.completed'],
+  capabilities: ['assign', 'complete', 'schedule']
+};
+```
+
+### 2.5 模組與模組之間的互動規則（鐵律）
+
+**只允許三種互動方式：**
+
+| 方式 | 說明 |
+|------|------|
+| Event | 非同步反應 |
+| Facade | 明確指令 |
+| Query | Read-only |
+
+**❌ 禁止行為：**
+- 直接存取別的 Repository
+- 直接 new 別的 Service
+- 改寫別的模組狀態
+
+### 2.6 模組事件規範（強制）
+
+**事件必須是「事實」：**
+- ✅ `task.completed`
+- ❌ `completeTask`
+
+**Payload 原則：**
+- 不包含 Domain Entity
+- 只包含識別資訊
+
+### 2.7 模組成熟度檢查表
+
+- [ ] 是否只有 Facade 對外？
+- [ ] 是否沒有直接依賴其他模組？
+- [ ] 是否所有狀態轉移集中管理？
+- [ ] 是否所有跨模組行為都是事件？
+- [ ] 是否無 Blueprint 反向依賴？
+
+---
+
+## 三、Blueprint Layer 設計
+
+> Blueprint Layer 提供跨模組的流程能力與系統規則，不承載任何業務語意、不擁有 Domain 狀態、不取代模組決策。
+
+### 3.1 Blueprint 層總結對照表
+
+| 資料夾 | 回答的問題 | 有狀態 | 有業務語意 |
+|--------|-----------|--------|-----------|
+| event-bus | 發生了什麼 | ❌ | ❌ |
+| workflow | 下一步是什麼 | ⚠️（流程狀態） | ❌ |
+| audit | 發生過什麼 | ✅（歷史） | ❌ |
+| policies | 可不可以 | ❌ | ⚠️（規則） |
+
+### 3.2 `/blueprint/event-bus`
+
+**一句話定位：**
+> 系統事件的傳遞與分發中樞（不包含業務邏輯）
+
+**核心職責：**
+
+提供事件的：
+- 發佈（emit / publish）
+- 訂閱（subscribe）
+- 分派（dispatch）
+
+確保事件：
+- 結構一致
+- 可追蹤（Correlation ID）
+- 可重試（Retry / DLQ）
+
+**❌ 絕對不能做的事情：**
+- ❌ 判斷「這個事件該不該發生」
+- ❌ 改寫事件 payload
+- ❌ 根據事件內容執行業務邏輯
+- ❌ 依賴任何 Domain Module
+
+**核心理念：**
+> Event Bus 是一個跨模組的流程基礎設施（Process Infrastructure），負責傳遞「已發生事實」，不承載業務決策。
+
+### 3.3 `/blueprint/workflow`
+
+**一句話定位：**
+> 跨模組流程的「協調者」，用於高風險或多步驟流程
+
+**什麼時候「需要」 Workflow：**
+
+只有在以下情況才使用：
+- 涉及多個模組
+- 中間步驟可能失敗
+- 需要補償（Rollback / Saga）
+- 流程「不能只靠事件自然擴散」
+
+**例如：**
+- 請款 → 開票 → 收款 → 入帳
+- 解約 → 回滾任務 → 回滾財務 → 通知
+
+**可以做的事情：**
+- 訂閱多個事件
+- 管理流程狀態（Process State）
+- 發出下一步指令型事件
+- 觸發補償事件
+
+**❌ 不能做的事情：**
+- ❌ 不得存取 Domain Repository
+- ❌ 不得改寫 Domain 狀態
+- ❌ 不得寫 UI 或權限邏輯
+- ❌ 不得變成流程上帝
+
+**正確心法：**
+> Workflow 不「做事」，只「決定接下來要叫誰做事」。
+
+### 3.4 `/blueprint/audit`
+
+**一句話定位：**
+> 系統行為的不可變歷史紀錄層
+
+**核心職責：**
+
+記錄所有：
+- 手動操作
+- 重要狀態變更
+- 關鍵事件
+
+提供：
+- 事後追蹤
+- 稽核查詢
+- 問責依據
+
+**可以記錄的內容：**
+- 操作人
+- 操作時間
+- 模組來源
+- 行為類型
+- 狀態前 / 後
+- Correlation ID
+
+**❌ 不能做的事情：**
+- ❌ 不影響流程
+- ❌ 不阻斷操作
+- ❌ 不當成業務資料來源
+- ❌ 不回寫 Domain
+
+**常見誤用：**
+> ❌ 用 Audit Log 當作「流程判斷依據」  
+> 👉 Audit 是歷史，不是真相來源
+
+### 3.5 `/blueprint/policies`
+
+**一句話定位：**
+> 跨模組的一致性規則與限制條件
+
+**適合放在 Policy 的東西：**
+- 狀態轉換規則
+- 操作前置條件
+- 角色 / 權限矩陣（邏輯層）
+- 系統級 Guard
+
+**例如：**
+- 未生效合約不可建立任務
+- 驗收未通過不可請款
+- 已結案問題不可再編輯
+
+**可以做的事情：**
+- 提供純邏輯判斷
+- 複用驗證碼
+
+```typescript
+canCreateTask(contract): boolean
+```
+
+- 被多個模組共用
+- 不依賴 UI / DB
+
+**❌ 不能做的事情：**
+- ❌ 不存資料
+- ❌ 不發事件
+- ❌ 不執行流程
+- ❌ 不處理例外流程
+
+**心法一句話：**
+> Policy 回答的是：「可不可以」，不是：「怎麼做」
+
+---
+
+## 四、工作流程定義
+
+### 4.1 合約建立與來源流程
+
+```
+合約上傳（PDF / 圖檔）【手動】
+↓
+合約建檔（基本資料、業主、承商）【手動】
+↓
+合約解析（OCR / AI 解析條款、金額、工項）【自動】
+↓
+合約確認（確認解析結果或人工補齊）【手動】
+↓
+合約狀態：待生效
+↓
 合約生效（僅已生效合約可建立任務）【手動】
+```
 
----
+### 4.2 任務與施工階段
 
-## 一、任務與施工階段
-
-任務建立（關聯合約 / 工項 / 金額）【手動】  
-↓  
-指派使用者或團隊【手動】  
-↓  
-施工執行  
-↓  
-提報完成【手動】  
-↓  
+```
+任務建立（關聯合約 / 工項 / 金額）【手動】
+↓
+指派使用者或團隊【手動】
+↓
+施工執行
+↓
+提報完成【手動】
+↓
 管理確認完成【手動】
+```
 
 > 此節點僅確認施工責任完成，不等同於驗收完成
 
----
+### 4.3 品質與驗收階段
 
-## 二、品質與驗收階段
-
-自動建立施工日誌【自動】  
-↓  
-自動建立 QC 待驗【自動】  
-↓  
+```
+自動建立施工日誌【自動】
+↓
+自動建立 QC 待驗【自動】
+↓
 QC 通過？
+```
 
-- 否  
-  - 建立缺失單【自動】  
-  - 整改【手動】  
-  - 複驗【手動】  
-  - 回到 QC 判定
+**QC 判定流程：**
 
-- 是  
-  ↓  
+- **否**
+  ```
+  建立缺失單【自動】
+  ↓
+  整改【手動】
+  ↓
+  複驗【手動】
+  ↓
+  回到 QC 判定
+  ```
+
+- **是**
+  ```
+  ↓
   驗收【手動】
+  ```
 
----
-
-### 驗收判定流程
+**驗收判定流程：**
 
 驗收通過？
 
-- 否  
-  - 建立問題單【可手動 / 可自動】  
-  - 問題處理【手動】  
-  - 回到驗收
+- **否**
+  ```
+  建立問題單【可手動 / 可自動】
+  ↓
+  問題處理【手動】
+  ↓
+  回到驗收
+  ```
 
-- 是  
-  ↓  
-  驗收資料封存【自動】  
-  ↓  
+- **是**
+  ```
+  ↓
+  驗收資料封存【自動】
+  ↓
   進入保固期【自動】
+  ```
 
----
+### 4.4 保固期管理流程
 
-## 保固期管理流程
+**保固期間：**
 
-保固期間：
+發生保固缺失？
 
-- 發生保固缺失？
-  - 是  
-    - 建立問題單【可手動 / 可自動】  
-    - 保固維修【手動】  
-    - 結案【手動】
+- **是**
+  ```
+  建立問題單【可手動 / 可自動】
+  ↓
+  保固維修【手動】
+  ↓
+  結案【手動】
+  ```
 
-  - 否  
-    - 持續保固監控
+- **否**
+  ```
+  持續保固監控
+  ```
 
-保固期滿【自動】  
-↓  
+**保固期滿：**
+```
+保固期滿【自動】
+↓
 最終驗收結案【手動】
+```
 
----
+### 4.5 財務與成本階段
 
-## 三、財務與成本階段
-
-金額 / 比例確認（可請款比例 / 可付款比例）【手動】  
-↓  
-建立可請款清單 + 可付款清單【自動】  
-（業主 / 承商分離）  
-↓  
+```
+金額 / 比例確認（可請款比例 / 可付款比例）【手動】
+↓
+建立可請款清單 + 可付款清單【自動】
+（業主 / 承商分離）
+↓
 請款 / 付款流程【手動】
+```
 
-流程狀態：
-
-- 草稿  
-- 送出  
-- 審核  
-- 開票  
+**流程狀態：**
+- 草稿
+- 送出
+- 審核
+- 開票
 - 收款 / 付款
 
----
-
-### 財務審核流程
+**財務審核流程：**
 
 審核結果：
-
-- 通過 → 繼續流程  
+- 通過 → 繼續流程
 - 退回 → 補件 → 修正 → 再次審核
 
----
+**財務狀態同步：**
 
-### 財務狀態同步
-
+```
 更新任務款項狀態【自動】
+```
 
-- 請款進度百分比  
+- 請款進度百分比
 - 付款進度百分比
 
----
-
-### 成本與分析
+**成本與分析：**
 
 自動計入成本管理：
-
-- 實際成本  
-- 應收金額  
-- 應付金額  
+- 實際成本
+- 應收金額
+- 應付金額
 - 毛利與成本分析
 
----
-
-## 問題單（Issue）設計原則
+### 4.6 問題單（Issue）設計原則
 
 - 問題單為 **獨立模組**
 - 不專屬於驗收流程
 - 可由多來源建立
 - 具備完整生命週期
 
-### 問題單生命週期
-
+**問題單生命週期：**
+```
 open → in_progress → resolved → verified → closed
+```
 
----
-
-### 問題單建立來源（概念）
-
+**問題單建立來源（概念）：**
 - 驗收失敗
 - QC 檢驗失敗
 - 保固缺失
 - 安全事件
 - 使用者手動建立
 
----
-
-## 事件與自動化原則
+### 4.7 事件與自動化原則
 
 - 所有自動流程皆由 **事件或 Queue 觸發**
 - 狀態改變即產生事件
 - 事件不包含 UI 或使用者互動邏輯
 
----
+### 4.8 稽核與權限控制
 
-## 稽核與權限控制
-
-### Audit Log（必要）
+**Audit Log（必要）：**
 
 所有【手動】節點需記錄：
-
 - 操作人
 - 操作時間
 - 狀態變更前後
 - 備註或原因
 
----
-
-### 權限設計
-
+**權限設計：**
 - 不同角色可操作不同節點
 - 權限不硬編碼於 UI
 - 由模組層或政策層控管
 
 ---
 
+## 五、模組標準骨架
+
+### 5.1 模組資料夾骨架（標準）
+
+```
+/modules/<module-name>/
+├─ models/
+│  └─ index.ts
+│
+├─ states/
+│  └─ <module>.states.ts
+│
+├─ services/
+│  ├─ <module>.service.ts
+│  └─ index.ts
+│
+├─ repositories/
+│  ├─ <module>.repository.ts        # Interface
+│  ├─ <module>.repository.impl.ts   # Implementation
+│  └─ index.ts
+│
+├─ events/
+│  ├─ <module>.events.ts
+│  └─ index.ts
+│
+├─ policies/
+│  ├─ <module>.policies.ts
+│  └─ index.ts
+│
+├─ facade/
+│  ├─ <module>.facade.ts
+│  └─ index.ts
+│
+├─ config/
+│  └─ <module>.config.ts
+│
+├─ module.metadata.ts
+├─ <module>.module.ts
+└─ README.md
+```
+
+> `<module-name>` 例如：task、issue、contract
+
+### 5.2 每個檔案的最小骨架內容
+
+> 以下內容不是示例，是標準起手式。
+
+#### `/models/index.ts`
+
+```typescript
+export * from './<module>.entity';
+export * from './<module>.value-object';
+```
+
+> ❗ models 只放純 Domain 結構
+
+#### `/states/<module>.states.ts`
+
+```typescript
+export enum <Module>State {
+  CREATED = 'CREATED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+}
+
+export const <Module>StateTransitions = {
+  CREATED: ['IN_PROGRESS'],
+  IN_PROGRESS: ['COMPLETED'],
+  COMPLETED: [],
+};
+```
+
+> ❗ 所有狀態轉移必須集中在這裡
+
+#### `/services/<module>.service.ts`
+
+```typescript
+export class <Module>Service {
+  constructor(
+    private readonly repository: <Module>Repository,
+  ) {}
+
+  executeAction(params: any) {
+    // 1. 驗證 policy
+    // 2. 狀態轉移
+    // 3. 儲存資料
+    // 4. 發佈事件
+  }
+}
+```
+
+#### `/services/index.ts`
+
+```typescript
+export * from './<module>.service';
+```
+
+#### `/repositories/<module>.repository.ts`
+
+```typescript
+import { <Module> } from '../models';
+
+export interface <Module>Repository {
+  findById(id: string): Promise<<Module> | null>;
+  save(entity: <Module>): Promise<void>;
+}
+```
+
+#### `/repositories/<module>.repository.impl.ts`
+
+```typescript
+import { <Module>Repository } from './<module>.repository';
+
+export class <Module>RepositoryImpl implements <Module>Repository {
+  async findById(id: string) {
+    // Infrastructure implementation
+    return null;
+  }
+
+  async save(entity: any) {
+    // Infrastructure implementation
+  }
+}
+```
+
+#### `/events/<module>.events.ts`
+
+```typescript
+export const <Module>Events = {
+  CREATED: '<module>.created',
+  UPDATED: '<module>.updated',
+  COMPLETED: '<module>.completed',
+} as const;
+```
+
+> ❗ 事件命名一定要：`<module>.<fact>`
+
+#### `/events/index.ts`
+
+```typescript
+export * from './<module>.events';
+```
+
+#### `/policies/<module>.policies.ts`
+
+```typescript
+export class <Module>Policies {
+  static canExecute(currentState: string): boolean {
+    return currentState !== 'COMPLETED';
+  }
+}
+```
+
+> ❗ Policy 只回傳 boolean 或錯誤原因
+
+#### `/policies/index.ts`
+
+```typescript
+export * from './<module>.policies';
+```
+
+#### `/facade/<module>.facade.ts`
+
+```typescript
+export class <Module>Facade {
+  constructor(
+    private readonly service: <Module>Service,
+  ) {}
+
+  async executeCommand(command: any) {
+    // 1. 驗證輸入
+    // 2. 呼叫 service
+    return this.service.executeAction(command);
+  }
+}
+```
+
+> ⚠️ 外部只能呼叫 Facade
+
+#### `/facade/index.ts`
+
+```typescript
+export * from './<module>.facade';
+```
+
+#### `/config/<module>.config.ts`
+
+```typescript
+export const <Module>Config = {
+  enableEvents: true,
+};
+```
+
+#### `/module.metadata.ts`
+
+```typescript
+export const <Module>ModuleMetadata = {
+  name: '<module>',
+  description: '<module> domain module',
+  events: [
+    '<module>.created',
+    '<module>.updated',
+  ],
+  capabilities: [
+    'create',
+    'update',
+    'complete',
+  ],
+};
+```
+
+#### `/<module>.module.ts`
+
+```typescript
+import { Module } from '@angular/core';
+
+@Module({
+  providers: [
+    // RepositoryImpl
+    // Service
+    // Facade
+  ],
+})
+export class <Module>Module {}
+```
+
+#### `/README.md`
+
+```markdown
+# <Module> Module
+
+## Purpose
+本模組負責：
+
+- XXX
+- XXX
+
+## Aggregate Root
+- <Module>
+
+## Events
+- <module>.created
+- <module>.updated
+
+## Facade API
+- executeCommand()
+
+## Notes
+- 本模組不得直接依賴其他模組
+```
+
+### 5.3 使用規範（請貼在 README 或 Blueprint）
+
+**新增模組流程（強制）：**
+
+1. 建立資料夾
+2. 補齊 `README.md`
+3. 定義 `module.metadata.ts`
+4. 只開放 Facade
+5. 事件一律從 Service 發出
+
+---
+
 ## 結語
 
-本文件定義的是：
+### 本文件定義的是：
 
 - **系統行為**
 - **模組協作方式**
 - **流程節點責任**
 - **事件與狀態邊界**
 
-不描述：
+### 不描述：
 
 - 實作完成度
 - 任務進度
 - 單一技術細節
 
-此文件可作為：
+### 此文件可作為：
 
 - 架構藍圖（Blueprint）
 - 系統驗收基準
 - 新模組設計依據
 - 文件與程式碼對齊的上位規範
 
+---
+
+## 最重要的提醒
+
+> **如果你不知道某段程式該放哪裡，那代表這段設計本身有問題。**
 
 ---
