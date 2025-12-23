@@ -13,6 +13,14 @@ Blueprint 層只負責「事件、規則與流程」，不承載任何業務語�
 - `SAAS_DESIGN.md`：SaaS 核心概念、資料夾架構、Blueprint 建立流程、權限矩陣與防濫用指引。
 - 各子資料夾 `DESIGN.md`：模組/子系統的設計要點與邊界，避免開發迷航。
 
+## 一致性檢查（避免衝突）
+
+- Blueprint 只能由「個人帳號」或「組織核心成員」建立，Partner/普通用戶無法建立（SAAS_DESIGN 與 MODULE/BLUEPRINT Layer 規則一致）。
+- 模組間互動僅透過 Facade、事件或查詢；禁止跨模組直接呼叫 Repository/Service。
+- 所有指令/事件需帶 Workspace/Blueprint Context；高風險操作需經 Policy/Guard + Audit。
+- Partner 僅限被授權的讀取/特定操作；刪除/封存/分享需擁有者或組織管理員並建議雙層確認。
+- 事件命名 `<module>.<fact>`，Payload 僅含識別資訊；Workflow 不改寫 Domain 狀態。
+
 ## Operating Principles
 
 - Blueprint 層不直接操作 Domain 資料，也不決定單一模組的業務邏輯。

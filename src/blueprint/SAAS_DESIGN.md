@@ -103,3 +103,11 @@
 - 資料：Firestore（存 Blueprint / Workspace / Permission Matrix）。
 - 後端：Firebase Functions（必要時補後端邏輯），Firebase Hosting / CDN。
 - AI / 自動化（可選）：Google Vertex AI / @google/genai。
+
+## 6️⃣ 一致性/缺口快速檢查
+
+- 建立者限定：僅個人帳號與組織核心成員可建立 Blueprint（與 BLUEPRINT/MODULE Layer 規則一致）。
+- 介面分層：UI → Facade → Service → Repository；禁止跨模組直呼 Repository/Service。
+- 事件/流程：事件命名 `<module>.<fact>`；Workflow 只協調不改寫 Domain；所有操作帶 Workspace Context。
+- 權限/防護：高風險操作雙層檢查 + Audit；Partner 最小權限；分享/刪除/封存需管理員或擁有者。
+- 稽核/追蹤：所有手動高風險節點紀錄 Audit，對齊 Correlation ID。
