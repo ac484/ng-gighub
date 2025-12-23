@@ -1,7 +1,6 @@
 // Errors (shared infrastructure)
 export * from './errors/index';
 
-// Services (shared infrastructure)
 export * from './i18n/i18n.service';
 export * from './net/index';
 export * from './services/firebase.service';
