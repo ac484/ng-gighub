@@ -12,22 +12,63 @@ export const saasFacade = {
    * Returns high-level module metadata.
    */
   async getMetadata(): Promise<Result<{ name: string; version: string }>> {
-    try {
-      return { ok: true, value: { name: 'GigHub SaaS', version: '0.1.0' } };
-    } catch (e) {
-      return { ok: false, error: String(e) };
-    }
-  },
+    /**
+     * SaaS facade contracts and minimal stubs.
+     *
+     * Guidelines:
+     * - Export typed interfaces for AI + developers to implement and test.
+     * - Use `Result<T>` with a structured `ErrorInfo` for machine-parseable errors.
+     */
 
-  /**
-   * Placeholder for an initialization step used by the app shell.
-   */
-  async initialize(): Promise<Result<null>> {
-    try {
-      // No-op placeholder. Real initialization belongs in services/repositories.
-      return { ok: true, value: null };
-    } catch (e) {
-      return { ok: false, error: String(e) };
+    export type ErrorInfo = {
+      code: string; // machine-readable error code (e.g., 'unauthorized', 'not_found')
+      message: string; // human readable
+      details?: unknown; // optional machine-readable details
+    };
+
+    export type Result<T> = { ok: true; value: T } | { ok: false; error: ErrorInfo };
+
+    export interface SaasMetadata {
+      id: string;
+      name: string;
+      version: string;
+      createdAt: string; // ISO date
     }
-  }
-};
+
+    export interface InitConfig {
+      env?: 'dev' | 'staging' | 'prod';
+    }
+
+    export const saasFacade = {
+      /**
+       * Returns high-level module metadata.
+       * Example success: { ok: true, value: { id, name, version, createdAt } }
+       */
+      async getMetadata(): Promise<Result<SaasMetadata>> {
+        // Stub implementation for documentation / AI to base tests on.
+        return {
+          ok: true,
+          value: {
+            id: 'saas-root',
+            name: 'GigHub SaaS',
+            version: '0.1.0',
+            createdAt: new Date().toISOString(),
+          },
+        };
+      },
+
+      /**
+       * Perform light initialization for the app shell.
+       * Should not perform privileged operations (move those to Cloud Functions).
+       */
+      async initialize(_config?: InitConfig): Promise<Result<null>> {
+        return { ok: true, value: null };
+      },
+
+      /**
+       * Example error helper to standardize error shapes.
+       */
+      _makeError(code: string, message: string, details?: unknown): Result<never> {
+        return { ok: false, error: { code, message, details } };
+      },
+    };
