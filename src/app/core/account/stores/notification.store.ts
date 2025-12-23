@@ -1,3 +1,4 @@
+<<<<<<<< HEAD:src/app/core/account/stores/notification.store.ts
 import { DestroyRef, Injectable, signal } from '@angular/core';
 import { NotificationPayload } from '../models';
 
@@ -58,3 +59,6 @@ export class NotificationStore {
     };
   }
 }
+========
+export * from '../../account/stores/notification.store';
+>>>>>>>> 2dbff26bff59fc0954ae01a941bfad914078d10e:src/app/core/state/stores/notification.store.ts

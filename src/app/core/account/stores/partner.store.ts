@@ -1,3 +1,4 @@
+<<<<<<<< HEAD:src/app/core/account/stores/partner.store.ts
 import { inject, Injectable, signal } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { Partner, PartnerMember } from '../models';
@@ -80,3 +81,6 @@ export class PartnerStore {
     this._members.update(list => list.filter(member => !(member.id === memberId && member.partner_id === partnerId)));
   }
 }
+========
+export * from '../../account/stores/partner.store';
+>>>>>>>> 2dbff26bff59fc0954ae01a941bfad914078d10e:src/app/core/state/stores/partner.store.ts

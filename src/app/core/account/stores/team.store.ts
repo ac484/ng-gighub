@@ -1,3 +1,4 @@
+<<<<<<<< HEAD:src/app/core/account/stores/team.store.ts
 import { inject, Injectable, computed, signal } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { Team, TeamMember } from '../models';
@@ -101,3 +102,6 @@ export class TeamStore {
     this._members.update(list => list.filter(member => !(member.id === memberId && member.team_id === teamId)));
   }
 }
+========
+export * from '../../account/stores/team.store';
+>>>>>>>> 2dbff26bff59fc0954ae01a941bfad914078d10e:src/app/core/state/stores/team.store.ts
