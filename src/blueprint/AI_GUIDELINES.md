@@ -31,3 +31,32 @@
 - Model Pinning：所有請求必須帶 concrete modelId（不要使用 "latest"），model→client mapping 建在 Firestore 的 `ai.modelConfigs`。
 - 分離責任：User‑Facing 與 Analytics Facade 應分開（不同 service account、不同 quota/retention/alerting），以降低合規與成本風險。
 - 日誌與儲存：User‑Facing 預設只保存 redacted summary + hash；Analytics 若需保存 raw，須有 explicit consent 與合規控制（CMEK、retention policy）。
+
+## 實作檢查清單（Checklist）
+
+- [ ] 所有前端呼叫都透過 `functions-ai` callable functions（或其他受控 Functions）。
+- [ ] Facade 層實作 adapter 並抽離 SDK 初始化與密鑰。前端只呼叫 Facade。 
+- [ ] Model pinning 已在 `ai.modelConfigs` 中設定並不可由用戶輸入自由變更。
+- [ ] 所有輸入皆執行 redaction hints，並在後端再次執行強制 redaction 與 PII 去標識。
+- [ ] 每次呼叫都產生 audit entry（redacted summary + correlationId + cost estimate），並匯出 metrics。
+- [ ] 配置 per-workspace quota、rate limiting 與 cost accounting（traceable 到 workspace）。
+- [ ] 在後端為高風險 prompt 建立人工審查（review queue）或顯示風險標記。
+
+## 簡易 Adapter 範例（伪代碼）
+
+```ts
+// adapter.ts (server-side)
+export async function callGenerate({ modelId, prompt, workspaceId }) {
+  // 1. select client based on modelId
+  // 2. enforce model pinning, quota, and redaction
+  // 3. call vendor SDK (@google/genai / vertexai / aiplatform)
+  // 4. record audit + metrics + cost
+  // 5. return redacted result + metadata
+}
+```
+
+## 參考與安全要點
+
+- 將 AI 回應視為不可信資料：在任何會改變 Domain 或觸發外部動作前，務必以 Domain 規則與人工/自動驗證再次確認。
+- 避免在前端執行敏感 redaction（僅作 UX 輔助），最終 redaction 應在後端強制執行並日誌化。
+- 若需保存 raw data（例如 for analytics），需征得使用者同意並限制保留週期與存取權限。
