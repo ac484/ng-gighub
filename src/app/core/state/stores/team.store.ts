@@ -1,7 +1,7 @@
 import { inject, Injectable, computed, signal } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
-import { Team, TeamMember } from '../../domain/models';
-import { TeamRole } from '../../domain/types';
+import { Team, TeamMember } from '../../account/models';
+import { TeamRole } from '../../account/types';
 import { TeamRepository } from '../../data-access/repositories';
 import { firstValueFrom } from 'rxjs';
 

@@ -1,5 +1,5 @@
 import { DestroyRef, Injectable, signal } from '@angular/core';
-import { NotificationPayload } from '../../domain/models';
+import { NotificationPayload } from '../../account/models';
 
 @Injectable({
   providedIn: 'root'

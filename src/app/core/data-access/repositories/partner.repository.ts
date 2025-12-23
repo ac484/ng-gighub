@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Firestore, collection, collectionData, query, where } from '@angular/fire/firestore';
 import { Observable, catchError, map, of } from 'rxjs';
-import { Partner } from '../../domain/models';
+import { Partner } from '../../account/models';
 import { LoggerService } from '../../services';
 
 @Injectable({
