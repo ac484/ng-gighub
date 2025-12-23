@@ -29,3 +29,9 @@ workflow/
 - `workflow.engine.ts`：根據 registry 執行步驟，管理流程狀態/Context。  
 - `workflow.registry.ts`：登記每個流程的步驟序列、補償邏輯與觸發事件。  
 - `steps/`：拆分可重用的流程步驟，保持單一責任。 
+
+## 基礎檔案起手式（必備）
+- `workflow.engine.ts`：流程執行與狀態管理。
+- `workflow.registry.ts`：流程/補償定義與觸發條件。
+- `steps/`：原子步驟實作，供流程組合。
+- `README.md`：使用準則與授權/Context 要求。 

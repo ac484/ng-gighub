@@ -28,3 +28,8 @@ policies/
 
 - `access-control.policy.ts`：定義角色矩陣/Workspace/Blueprint 授權檢查。  
 - `approval.policy.ts`：高風險操作的審批與多簽條件（僅邏輯，不執行流程）。 
+
+## 基礎檔案起手式（必備）
+- `access-control.policy.ts`：跨模組授權/角色矩陣邏輯。
+- `approval.policy.ts`：審批、多簽、前置條件判斷。
+- `README.md`：使用方式、輸入/輸出約束。 

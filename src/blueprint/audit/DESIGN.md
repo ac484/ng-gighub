@@ -28,3 +28,9 @@ audit/
 
 - `audit-log.service.ts`：統一寫入入口，確保包含操作者/時間/來源/前後狀態/Correlation ID。  
 - `audit-policies.ts`：處理需遮蔽或格式化的欄位規則。 
+
+## 基礎檔案起手式（必備）
+- `audit-log.entity.ts`：稽核紀錄資料結構。
+- `audit-log.service.ts`：寫入/查詢唯一入口，包裝安全與遮蔽。
+- `audit-policies.ts`：敏感欄位遮蔽與格式化規則。
+- `README.md`：使用方式與範圍。 

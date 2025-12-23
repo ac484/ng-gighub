@@ -29,3 +29,9 @@ event-bus/
 - `event-bus.service.ts`：維護訂閱表、派發事件、可插入重試/回退策略。  
 - `adapters/`：對特定基礎設施（如 Pub/Sub、SQS）的封裝，不洩漏到 Domain。  
 - `event.types.ts`：統一事件欄位與型別，避免 Payload 發散。 
+
+## 基礎檔案起手式（必備）
+- `event-bus.service.ts`：核心 publish/subscribe/dispatch。
+- `event.types.ts`：事件型別、必要欄位（id/timestamp/correlationId）。
+- `adapters/`：對外部 Queue/Broker 的抽象適配器。
+- `README.md`：事件使用規範。 

@@ -49,3 +49,15 @@ modules/<module>/
 - `facade/<module>.facade.ts`：對外指令入口，避免外部直呼 service/repo。  
 - `repositories/<module>.repository.ts`：介面隔離資料來源；impl 可接 Firestore/API。  
 - `events/<module>.events.ts`：事件名稱常數，保持事實命名。 
+
+## 基礎檔案起手式（必備）
+- `models/<module>.entity.ts`：Aggregate/Entity 定義。
+- `states/<module>.states.ts`：狀態 enum + 轉移表。
+- `services/<module>.service.ts`：業務行為、政策驗證、事件發布集中。
+- `repositories/<module>.repository.ts` + `.impl.ts`：介面/實作分離。
+- `events/<module>.events.ts`：`<module>.<fact>` 事件常數。
+- `policies/<module>.policies.ts`：模組內規則。
+- `facade/<module>.facade.ts`：唯一對外入口。
+- `module.metadata.ts`：名稱、能力、事件清單。
+- `<module>.module.ts`：DI 註冊。
+- `README.md`：模組說明與介面摘要。

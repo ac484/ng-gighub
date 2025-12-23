@@ -43,3 +43,12 @@ asset/
 - `policies/asset.policies.ts`：檔案大小/型態/擁有者檢查。  
 - `events/asset.events.ts`：事件名稱常數（uploaded/archived 等）。  
 - `facade/asset.facade.ts`：提供 upload/delete/archive 指令。 
+
+## 基礎檔案起手式（必備）
+- `models/asset.entity.ts`：定義 Asset Aggregate/VO。
+- `states/asset.states.ts`：列出狀態與允許轉移。
+- `services/asset.service.ts`：生命週期核心邏輯、事件發布集中處理。
+- `repositories/asset.repository.ts` + `.impl.ts`：介面與實作分離，隔離 Infra。
+- `events/asset.events.ts`：`asset.<fact>` 命名。
+- `policies/asset.policies.ts`：檔案/權限檢查。
+- `facade/asset.facade.ts`：外部唯一入口。 
