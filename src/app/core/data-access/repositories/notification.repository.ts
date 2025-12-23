@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Firestore, collection, addDoc } from '@angular/fire/firestore';
-import { NotificationPayload } from '../../domain/models';
+import { NotificationPayload } from '../../account/models';
 import { LoggerService } from '../../services';
 
 @Injectable({

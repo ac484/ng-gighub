@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Firestore, collection, addDoc } from '@angular/fire/firestore';
-import { InvitationStatus } from '../../domain/types';
+import { InvitationStatus } from '../../account/types';
 import { LoggerService } from '../../services';
 
 export interface OrganizationInvitation {

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Firestore, doc, docData, collection, collectionData, query, where, updateDoc, setDoc } from '@angular/fire/firestore';
 import { firstValueFrom, Observable, catchError, map, of } from 'rxjs';
-import { Account } from '../../domain/models';
+import { Account } from '../../account/models';
 import { LoggerService } from '../../services';
 
 @Injectable({
