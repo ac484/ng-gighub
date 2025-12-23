@@ -40,9 +40,9 @@
 │  │  ├─ services/                            # 任務領域服務
 │  │  │  ├─ task.service.ts
 │  │  │  └─ task-scheduler.service.ts         # 任務排程服務
-│  │  ├─ repositories/
-│  │  │  ├─ task.repository.ts
-│  │  │  └─ task.repository.impl.ts
+│  │  ├─ repositories/                            # 任務資料存取（Repository 定義與實作）
+│  │  │  ├─ task.repository.ts                    # repository 介面定義（抽象）
+│  │  │  └─ task.repository.impl.ts               # repository 實作（DB / Firestore adapter）
 │  │  ├─ events/                              # 任務事件
 │  │  │  └─ task.events.ts
 │  │  ├─ policies/                            # 任務策略
@@ -167,14 +167,14 @@
 │  │  └─ asset.states.ts
 │  ├─ services/
 │  │  ├─ asset.service.ts                     # 資產核心服務
-│  │  ├─ asset-upload.service.ts              # 檔案上傳服務
-│  │  └─ asset-validation.service.ts          # 檔案驗證服務
-│  ├─ repositories/
-│  │  ├─ asset.repository.ts
-│  │  └─ asset.repository.impl.ts
-│  ├─ events/
-│  │  └─ asset.events.ts
-│  ├─ policies/
+│  ├─ events/                                   # 問題單事件定義（事件名稱與 payload schema）
+│  │  │  └─ issue.events.ts                      # issue.created / issue.resolved 等事件
+│  ├─ policies/                                 # 問題單專屬策略（狀態/驗收/關閉規則）
+│  │  │  └─ issue.policies.ts                    # 函式式判斷：是否可關閉/退回等
+│  ├─ facade/                                   # 對外門面（複合操作入口）
+│  │  │  └─ issue.facade.ts                      # 提供整合多步驟操作方法
+│  ├─ config/                                   # 模組設定（可覆寫的常數）
+│  │  │  └─ issue.config.ts                      # module specific settings
 │  │  └─ asset.policies.ts                    # 檔案存取權限規則
 │  ├─ facade/
 │  │  └─ asset.facade.ts
