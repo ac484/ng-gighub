@@ -16,7 +16,6 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { firstValueFrom } from 'rxjs';
 
-import { ContainerDashboardComponent } from './container/container-dashboard.component';
 import { AcceptanceModuleViewComponent } from './modules/acceptance';
 import { AgreementModuleViewComponent } from './modules/agreement';
 import { CloudModuleViewComponent } from './modules/cloud';
@@ -25,14 +24,10 @@ import { DiaryModuleViewComponent } from './modules/diary';
 import { FinanceModuleViewComponent } from './modules/finance';
 import { IssuesModuleViewComponent } from './modules/issues';
 import { LogModuleViewComponent } from './modules/log';
-import { ModuleManagerComponent } from './modules/manager/module-manager.component';
 import { MembersModuleViewComponent } from './modules/members';
 import { QaModuleViewComponent } from './modules/quality';
-import { SafetyModuleViewComponent } from './modules/safety';
 import { TasksModuleViewComponent } from './modules/tasks';
-import { WarrantyModuleViewComponent } from './modules/warranty';
 import { WeatherModuleViewComponent } from './modules/weather';
-import { WorkflowModuleViewComponent } from './modules/workflow';
 
 /**
  * Blueprint Detail Component
@@ -46,14 +41,12 @@ import { WorkflowModuleViewComponent } from './modules/workflow';
  * - Integrated tasks (任務管理)
  * - Integrated audit logs (審計記錄) in overview sidebar
  * - Cloud module (雲端模組) for storage and backup
- * - Container monitoring (容器監控) in separate dedicated tab
- * - Module Manager (模組管理) for managing blueprint modules
  *
  * ✅ Modernized with AsyncState pattern
  * ✅ Updated: 2025-12-11 - Added Construction Log & Task modules
  * ✅ Updated: 2025-12-12 - Simplified design, added audit logs to overview
  * ✅ Updated: 2025-12-13 - Added Cloud module tab
- * ✅ Updated: 2025-12-16 - Separated Container Dashboard to dedicated "容器監控" tab
+ * ✅ Updated: 2025-12-23 - Removed workflow, safety, warranty, manager modules and container monitoring
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -72,21 +65,16 @@ import { WorkflowModuleViewComponent } from './modules/workflow';
     DatePipe,
     AuditLogsComponent,
     MembersModuleViewComponent,
-    ModuleManagerComponent,
     DiaryModuleViewComponent,
-    ContainerDashboardComponent,
     LogModuleViewComponent,
-    WorkflowModuleViewComponent,
     QaModuleViewComponent,
     AcceptanceModuleViewComponent,
     FinanceModuleViewComponent,
-    SafetyModuleViewComponent,
     CloudModuleViewComponent,
     IssuesModuleViewComponent,
     AgreementModuleViewComponent,
     ContractModuleViewComponent,
     TasksModuleViewComponent,
-    WarrantyModuleViewComponent,
     WeatherModuleViewComponent
   ],
   template: `
@@ -298,29 +286,12 @@ import { WorkflowModuleViewComponent } from './modules/workflow';
             </ng-template>
           </nz-tab>
 
-          <!-- Module Manager Tab -->
-          <nz-tab nzTitle="模組管理">
-            <ng-template nz-tab>
-              @if (blueprint()?.id) {
-                <app-module-manager [blueprintId]="blueprint()!.id" />
-              }
-            </ng-template>
-          </nz-tab>
 
           <!-- Log Domain Tab -->
           <nz-tab nzTitle="活動日誌">
             <ng-template nz-tab>
               @if (blueprint()?.id) {
                 <app-log-module-view [blueprintId]="blueprint()!.id" />
-              }
-            </ng-template>
-          </nz-tab>
-
-          <!-- Workflow Domain Tab -->
-          <nz-tab nzTitle="流程">
-            <ng-template nz-tab>
-              @if (blueprint()?.id) {
-                <app-workflow-module-view [blueprintId]="blueprint()!.id" />
               }
             </ng-template>
           </nz-tab>
@@ -352,14 +323,6 @@ import { WorkflowModuleViewComponent } from './modules/workflow';
             </ng-template>
           </nz-tab>
 
-          <!-- Safety Domain Tab -->
-          <nz-tab nzTitle="安全">
-            <ng-template nz-tab>
-              @if (blueprint()?.id) {
-                <app-safety-module-view [blueprintId]="blueprint()!.id" />
-              }
-            </ng-template>
-          </nz-tab>
 
           <!-- Cloud Domain Tab -->
           <nz-tab nzTitle="雲端">
@@ -397,14 +360,6 @@ import { WorkflowModuleViewComponent } from './modules/workflow';
             </ng-template>
           </nz-tab>
 
-          <!-- Warranty Domain Tab -->
-          <nz-tab nzTitle="保固">
-            <ng-template nz-tab>
-              @if (blueprint()?.id) {
-                <app-warranty-module-view [blueprintId]="blueprint()!.id" />
-              }
-            </ng-template>
-          </nz-tab>
 
           <!-- Weather Tab -->
           <nz-tab nzTitle="氣象">
@@ -509,15 +464,6 @@ import { WorkflowModuleViewComponent } from './modules/workflow';
                   </button>
                 </nz-space>
               </nz-card>
-            </ng-template>
-          </nz-tab>
-
-          <!-- Container Monitoring Tab -->
-          <nz-tab nzTitle="容器監控">
-            <ng-template nz-tab>
-              @if (blueprint()?.id) {
-                <app-container-dashboard />
-              }
             </ng-template>
           </nz-tab>
         </nz-tabset>
