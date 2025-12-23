@@ -16,3 +16,15 @@
 - 模組內專屬規則放各自 `modules/<name>/policies/`。
 - 在 Workflow/Facade 先行檢查，拒絕時給明確原因碼。
 - 輸入保持精簡（id、狀態、角色），避免傳遞整個 Entity。
+
+## 目錄結構與用途
+
+```
+policies/
+├─ access-control.policy.ts  # 跨模組角色/權限判斷
+├─ approval.policy.ts        # 審批/多簽等系統級前置條件
+└─ README.md                 # 說明文件
+```
+
+- `access-control.policy.ts`：定義角色矩陣/Workspace/Blueprint 授權檢查。  
+- `approval.policy.ts`：高風險操作的審批與多簽條件（僅邏輯，不執行流程）。 

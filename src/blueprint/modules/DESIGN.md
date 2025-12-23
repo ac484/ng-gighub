@@ -27,3 +27,25 @@
 2) 集中狀態轉移與事件發布於 Service。  
 3) 只開放 Facade；跨模組規則放 Policy/Workflow。  
 4) 事件命名 `<module>.<fact>`，Payload 僅識別資訊。
+
+## 目錄結構與用途
+
+```
+modules/<module>/
+├─ models/              # Entity / Value Object
+├─ states/              # 狀態 enum + 轉移表
+├─ services/            # 業務行為、事件發布
+├─ repositories/        # Repository 介面 + 實作
+├─ events/              # <module>.<fact> 事件定義
+├─ policies/            # 模組內規則
+├─ facade/              # 唯一入口（驗證 → service）
+├─ config/              # 模組設定
+├─ module.metadata.ts   # 模組描述（事件、能力）
+├─ <module>.module.ts   # DI 註冊
+└─ README.md            # 模組說明
+```
+
+- `services/<module>.service.ts`：狀態轉移、政策檢查、事件發布的集中點。  
+- `facade/<module>.facade.ts`：對外指令入口，避免外部直呼 service/repo。  
+- `repositories/<module>.repository.ts`：介面隔離資料來源；impl 可接 Firestore/API。  
+- `events/<module>.events.ts`：事件名稱常數，保持事實命名。 

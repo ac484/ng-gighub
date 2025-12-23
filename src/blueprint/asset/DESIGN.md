@@ -20,3 +20,26 @@
 **稽核/安全**
 - 高風險動作寫入 Audit（上傳/刪除/封存）。
 - 僅授權角色可上傳/刪除，並可加速率限制。
+
+## 目錄結構與用途
+
+```
+asset/
+├─ models/            # Asset Entity / Value Object 定義
+├─ states/            # 資產狀態與轉移表
+├─ services/          # 生命週期行為、事件發布
+├─ repositories/      # 資料存取抽象（對 Cloud/DB）
+├─ events/            # asset.<fact> 事件定義
+├─ policies/          # 檔案/權限檢查（僅限本模組）
+├─ facade/            # 對外唯一入口（upload/delete/封存）
+├─ config/            # 模組設定
+├─ module.metadata.ts # 模組描述（事件、能力）
+├─ asset.module.ts    # DI 註冊
+└─ README.md          # 模組說明
+```
+
+- `services/asset.service.ts`：驗證政策、呼叫 CloudFacade、更新狀態、發布事件。  
+- `repositories/asset.repository.ts`：介面，隔離資料來源（Firestore/Cloud）。  
+- `policies/asset.policies.ts`：檔案大小/型態/擁有者檢查。  
+- `events/asset.events.ts`：事件名稱常數（uploaded/archived 等）。  
+- `facade/asset.facade.ts`：提供 upload/delete/archive 指令。 

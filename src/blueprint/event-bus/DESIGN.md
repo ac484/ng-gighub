@@ -15,3 +15,17 @@
 - 事件由模組 Service 發布；訂閱端保持輕量。
 - 高風險事件可加簽或審批後再發布。
 - 若接入 Queue/DLQ/Adapter，封裝於 `adapters/`，Event Bus 只暴露抽象。
+
+## 目錄結構與用途
+
+```
+event-bus/
+├─ adapters/           # 對 Queue/DLQ/外部 bus 的適配層
+├─ event-bus.service.ts# publish/subscribe/dispatch 核心
+├─ event.types.ts      # 事件介面、標準欄位（id、timestamp、correlationId）
+└─ README.md           # 說明文件
+```
+
+- `event-bus.service.ts`：維護訂閱表、派發事件、可插入重試/回退策略。  
+- `adapters/`：對特定基礎設施（如 Pub/Sub、SQS）的封裝，不洩漏到 Domain。  
+- `event.types.ts`：統一事件欄位與型別，避免 Payload 發散。 

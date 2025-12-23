@@ -15,3 +15,17 @@
 - 僅在事件自然擴散不足以保證一致性或需要補償時建立 Workflow。
 - 以 `workflow.registry` 記錄步驟與補償策略，並強制 Audit 高風險節點。
 - 指令與事件必須攜帶 Workspace/Blueprint Context，以利授權核對。
+
+## 目錄結構與用途
+
+```
+workflow/
+├─ workflow.engine.ts    # 執行流程步驟，驅動指令事件
+├─ workflow.registry.ts  # 定義流程/步驟/補償策略
+├─ steps/                # 可重用步驟實作
+└─ README.md             # 說明文件
+```
+
+- `workflow.engine.ts`：根據 registry 執行步驟，管理流程狀態/Context。  
+- `workflow.registry.ts`：登記每個流程的步驟序列、補償邏輯與觸發事件。  
+- `steps/`：拆分可重用的流程步驟，保持單一責任。 

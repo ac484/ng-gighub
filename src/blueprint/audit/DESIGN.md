@@ -15,3 +15,16 @@
 - 高風險操作（刪除、權限變更）必須寫入 Audit。
 - 與事件的 Correlation ID 對齊，方便串聯追蹤。
 - 查詢介面保持唯讀，避免修改原始紀錄。
+
+## 目錄結構與用途
+
+```
+audit/
+├─ audit-log.entity.ts   # 稽核記錄資料結構
+├─ audit-log.service.ts  # 寫入/查詢稽核紀錄
+├─ audit-policies.ts     # 稽核相關政策（如遮蔽敏感欄位）
+└─ README.md             # 說明文件
+```
+
+- `audit-log.service.ts`：統一寫入入口，確保包含操作者/時間/來源/前後狀態/Correlation ID。  
+- `audit-policies.ts`：處理需遮蔽或格式化的欄位規則。 
