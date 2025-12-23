@@ -4,6 +4,8 @@
 
 ## 1️⃣ 核心概念
 
+注意：本文件的目錄與結構部分已統一採用 [docs/reference/Skeleton.md](docs/reference/Skeleton.md) 作為權威來源，請以該文件為主要參照。
+
 - **用戶（User）**：登入主體，可為個人或組織成員。
 - **個人帳號（Personal Account）**：個人擁有的帳號，可建立與管理 Blueprint。
 - **組織帳號（Organization Account）**：代表公司/團隊的帳號，承載核心成員與夥伴。

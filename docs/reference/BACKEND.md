@@ -4,6 +4,8 @@
 - 定義應用服務層與基礎設施
 - 負責資料存取、業務邏輯執行、整合第三方
 
+注意：本文件的目錄與結構部分已統一採用 [docs/reference/Skeleton.md](docs/reference/Skeleton.md) 作為權威來源，請以該文件為主要參照。
+
 > 前端應用的「後端」分兩層：  
 > 1) 前端內部的資料存取/服務層（`/src/app/core/data-access`, `/src/app/core/services`）  
 > 2) Cloud Functions 等真正的伺服端程式（本倉庫的 `functions-*` 套件）

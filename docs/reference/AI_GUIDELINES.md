@@ -2,6 +2,8 @@
 
 本節說明三個官方 Node.js 客戶端在本系統中建議的使用場景與適用情境。所有呼叫仍應透過 Cloud Functions（AI Facade）代理，並依照本文件其他章節強制執行 pinning、redaction、quota、audit 與 metrics。
 
+注意：本文件的目錄與結構部分已統一採用 [docs/reference/Skeleton.md](docs/reference/Skeleton.md) 作為權威來源，請以該文件為主要參照。
+
 ## 目錄結構範例（前端 + Cloud Functions）
 
 ```text

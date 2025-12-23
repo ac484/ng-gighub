@@ -6,6 +6,8 @@
 
 > 實際路徑：`/src/app/routes`（UI/Presentation），共用元件於 `/src/app/shared`
 
+注意：本文件的目錄與結構部分已統一採用 [docs/reference/Skeleton.md](docs/reference/Skeleton.md) 作為權威來源，請以該文件為主要參照。
+
 ## 2. 範疇
 - Standalone 組件 / 路由
 - 頁面 / Route

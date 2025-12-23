@@ -11,6 +11,10 @@
 │  │  └─ auth / guards / interceptors / models
 │  │
 │  ├─ layout/                       # 全局 layout、navbar、workspace 切換器
+│  │  ├─ basic/ 
+│  │  │  └─ widgets
+│  │  ├─ blank/ 
+│  │  └─ passport/ 
 │  ├─ routes/                       # UI/Presentation（每個業務模組的頁面）
 │  │  ├─ blueprint/                 # Blueprint UI（與 core/blueprint 對應）
 │  │  ├─ organization/ | team/ | partner/ | user/

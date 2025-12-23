@@ -6,6 +6,8 @@
 
 > 實際路徑：`/src/app/shared`
 
+注意：本文件的目錄與結構部分已統一採用 [docs/reference/Skeleton.md](docs/reference/Skeleton.md) 作為權威來源，請以該文件為主要參照。
+
 ## 2. 範疇
 - 公用 UI 組件 (Components)
 - 公用服務 (Services) — 僅封裝無業務語意的共用邏輯

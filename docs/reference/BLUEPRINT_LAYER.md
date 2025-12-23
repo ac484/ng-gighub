@@ -8,6 +8,8 @@
 
 ## 目錄
 
+注意：本文件的目錄與結構部分已統一採用 [docs/reference/Skeleton.md](docs/reference/Skeleton.md) 作為權威來源，請以該文件為主要參照。
+
 1. [Blueprint Layer 設計](#一blueprint-layer-設計)
 2. [工作流程定義](#二工作流程定義)
 3. [Blueprint Layer 完整骨架](#三blueprint-layer-完整骨架)
