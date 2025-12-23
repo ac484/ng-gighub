@@ -1,6 +1,4 @@
 ```
-/
-/app/
 /src                                       # 前端程式碼結構
 ├─ app/
 │  ├─ core/                         # 基礎設施 + Domain 層
@@ -29,7 +27,7 @@
 ├─ environments/                    # environment.{dev,prod,staging}.ts
 ├─ assets/
 
-/src/blueprint                                # Blueprint Layer - 跨模組流程與系統規則
+/src/blueprint                                # Blueprint Layer - 跨模組流程與系統規則（流程/事件/整合邏輯原始碼）
 │
 ├─ modules/                                   # 業務領域模組集合 - 具體業務聚合根
 │  │
@@ -68,20 +66,20 @@
 │  │  ├─ services/                            # 任務領域服務
 │  │  │  ├─ task.service.ts
 │  │  │  └─ task-scheduler.service.ts         # 任務排程服務
-│  │  ├─ repositories/                            # 任務資料存取（Repository 定義與實作）
-│  │  │  ├─ task.repository.ts                    # repository 介面定義（抽象）
-│  │  │  └─ task.repository.impl.ts               # repository 實作（DB / Firestore adapter）
-│  │  ├─ events/                              # 任務事件
-│  │  │  └─ task.events.ts
-│  │  ├─ policies/                            # 任務策略
-│  │  │  └─ task.policies.ts
-│  │  ├─ facade/
-│  │  │  └─ task.facade.ts
-│  │  ├─ config/
-│  │  │  └─ task.config.ts
-│  │  ├─ module.metadata.ts
-│  │  ├─ task.module.ts
-│  │  └─ README.md
+│  │  ├─ repositories/                        # 任務資料存取（Repository 定義與實作）
+│  │  │  ├─ task.repository.ts                # repository 介面定義（抽象）
+│  │  │  └─ task.repository.impl.ts           # repository 實作（DB / Firestore adapter）
+│  │  ├─ events/                              # 任務事件（Domain events 用於 EventBus / audit / workflow）
+│  │  │  └─ task.events.ts                     # 定義: TaskCreated, TaskAssigned, TaskCompleted 等事件
+│  │  ├─ policies/                            # 任務策略（權限與業務規則，供 guards/service 驗證）
+│  │  │  └─ task.policies.ts                   # 定義誰可建立/編輯/關閉任務，驗證邊界條件
+│  │  ├─ facade/                              # 對外門面（高階操作、複合用例的協調層）
+│  │  │  └─ task.facade.ts                     # 提供簡潔 API 給上層（routes / blueprint），組合 service + repository
+│  │  ├─ config/                              # 模組設定（常數、feature flags、預設值）
+│  │  │  └─ task.config.ts                     # 存放 collection 名稱、限制（e.g. 最長期限）等
+│  │  ├─ module.metadata.ts                   # 模組元資料（版本、相依性、註冊資訊）
+│  │  ├─ task.module.ts                       # 模組註冊檔（模組層級註冊/掃描用，不為 Angular NgModule）
+│  │  └─ README.md                            # 模組說明（導覽、主要型別、使用範例）
 │  │
 │  ├─ issue/                                  # 問題單模組 - 問題追蹤管理
 │  │  ├─ models/
