@@ -2,6 +2,22 @@
 
 本節說明三個官方 Node.js 客戶端在本系統中建議的使用場景與適用情境。所有呼叫仍應透過 Cloud Functions（AI Facade）代理，並依照本文件其他章節強制執行 pinning、redaction、quota、audit 與 metrics。
 
+## 目錄結構範例（前端 + Cloud Functions）
+
+```text
+Frontend (Angular)
+├─ src/app/routes/ai-assistant/         # UI 入口，呼叫 Facade 而非直接 SDK
+├─ src/app/core/facades/ai/             # Facade：協調 service、data-access
+├─ src/app/core/services/ai/            # Quota / policy / redaction 客戶端協調
+└─ src/app/core/data-access/ai/         # 呼叫 Cloud Functions 的封裝
+
+Backend (Cloud Functions)
+├─ functions-ai/src/functions/          # callable / https endpoints（唯一入口）
+├─ functions-ai/src/services/           # SDK adapter + vendor 選擇器
+├─ functions-ai/src/config/             # model pinning / quota / routing
+└─ functions-ai/src/utils/              # redaction / logging / metrics helper
+```
+
 ## @google/genai
 - 最適合：聊天/對話（chat sessions）、短文本生成、embeddings（若支援）、以及需要高階 GenAI helper 的快速互動體驗。
 - 場景：以 User‑Facing 為優先；亦可在需要高階對話管理或快速向量查詢時使用於內部服務。  
