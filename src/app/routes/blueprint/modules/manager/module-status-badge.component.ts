@@ -9,7 +9,7 @@
  */
 
 import { Component, input, computed } from '@angular/core';
-import { ModuleStatus } from '@core/blueprint/modules/module-status.enum';
+import { ModuleStatus } from '../../../shared/enums/module-status.enum';
 import { SHARED_IMPORTS } from '@shared';
 
 /**

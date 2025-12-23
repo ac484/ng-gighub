@@ -13,8 +13,8 @@
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal, computed, DestroyRef, output, input } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { WarrantyRepository, WarrantyQueryOptions } from '@core/blueprint/modules/implementations/warranty';
-import type { Warranty, WarrantyStatus } from '@core/blueprint/modules/implementations/warranty';
+import { WarrantyRepository, WarrantyQueryOptions } from '../../../../core';
+import type { Warranty, WarrantyStatus } from '../../../../core';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 

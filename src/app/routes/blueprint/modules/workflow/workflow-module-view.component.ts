@@ -16,12 +16,12 @@
  */
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal, computed } from '@angular/core';
-import { WorkflowStatus } from '@core/blueprint/modules/implementations/workflow/models';
-import { ApprovalService } from '@core/blueprint/modules/implementations/workflow/services/approval.service';
-import { AutomationService } from '@core/blueprint/modules/implementations/workflow/services/automation.service';
-import { CustomWorkflowService } from '@core/blueprint/modules/implementations/workflow/services/custom-workflow.service';
-import { StateMachineService } from '@core/blueprint/modules/implementations/workflow/services/state-machine.service';
-import { TemplateService } from '@core/blueprint/modules/implementations/workflow/services/template.service';
+import { WorkflowStatus } from './core/models';
+import { ApprovalService } from './core/services/approval.service';
+import { AutomationService } from './core/services/automation.service';
+import { CustomWorkflowService } from './core/services/custom-workflow.service';
+import { StateMachineService } from './core/services/state-machine.service';
+import { TemplateService } from './core/services/template.service';
 import { STColumn } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 import { NzAlertModule } from 'ng-zorro-antd/alert';

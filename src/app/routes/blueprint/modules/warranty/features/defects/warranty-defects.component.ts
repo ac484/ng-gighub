@@ -12,8 +12,8 @@
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal, computed, DestroyRef, output, input } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { WarrantyDefectRepository, WarrantyDefectService, DefectStatistics } from '@core/blueprint/modules/implementations/warranty';
-import type { WarrantyDefect, WarrantyDefectStatus } from '@core/blueprint/modules/implementations/warranty';
+import { WarrantyDefectRepository, WarrantyDefectService, DefectStatistics } from '../../../../core';
+import type { WarrantyDefect, WarrantyDefectStatus } from '../../../../core';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';

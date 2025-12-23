@@ -11,7 +11,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, inject, input, output, signal } from '@angular/core';
-import type { Warranty, WarrantyDefect } from '@core/blueprint/modules/implementations/warranty';
+import type { Warranty, WarrantyDefect } from '../../../../core';
 import { SHARED_IMPORTS } from '@shared';
 
 import { WarrantyStatusBadgeComponent } from '../../shared';

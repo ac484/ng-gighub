@@ -10,8 +10,8 @@
  */
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal } from '@angular/core';
-import { IncidentReportService } from '@core/blueprint/modules/implementations/safety/services/incident-report.service';
-import { SafetyInspectionService } from '@core/blueprint/modules/implementations/safety/services/safety-inspection.service';
+import { IncidentReportService } from './core/services/incident-report.service';
+import { SafetyInspectionService } from './core/services/safety-inspection.service';
 import { STColumn } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 import { NzAlertModule } from 'ng-zorro-antd/alert';

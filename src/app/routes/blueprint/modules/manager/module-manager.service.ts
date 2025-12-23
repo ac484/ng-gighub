@@ -17,8 +17,8 @@ import {
   AuditStatus,
   ActorType
 } from '../audit-logs';
-import { ModuleStatus } from '@core/blueprint/modules/module-status.enum';
-import { BlueprintModuleRepository } from '@core/blueprint/repositories/blueprint-module.repository';
+import { ModuleStatus } from '../../../shared/enums/module-status.enum';
+import { BlueprintModuleRepository } from '../../../shared/repositories/blueprint-module.repository';
 import { BlueprintModuleDocument, CreateModuleData, BatchModuleOperationResult } from '@core/domain/models/blueprint-module.model';
 import { FirebaseService } from '@core/services/firebase.service';
 import { firstValueFrom } from 'rxjs';

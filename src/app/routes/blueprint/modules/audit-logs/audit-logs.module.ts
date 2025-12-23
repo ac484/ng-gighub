@@ -10,9 +10,9 @@
 
 import { Injectable, signal, inject, WritableSignal } from '@angular/core';
 import { LoggerService } from '@core';
-import type { IExecutionContext } from '@core/blueprint/context/execution-context.interface';
-import { ModuleStatus } from '@core/blueprint/modules/module-status.enum';
-import { IBlueprintModule } from '@core/blueprint/modules/module.interface';
+import type { IExecutionContext } from '../../../shared/interfaces/execution-context.interface';
+import { ModuleStatus } from '../../../shared/enums/module-status.enum';
+import { IBlueprintModule } from '../../../shared/interfaces/module.interface';
 
 import { AUDIT_LOGS_MODULE_METADATA, AUDIT_LOGS_MODULE_DEFAULT_CONFIG, AUDIT_LOGS_MODULE_EVENTS } from './module.metadata';
 import { AuditLogRepository } from './repositories/audit-log.repository';
