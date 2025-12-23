@@ -77,7 +77,7 @@
 ### 2.3 標準模組目錄結構（強制）
 
 ```
-/modules/<module-name>/
+/src/app/core/blueprint/modules/implementations/<module-name>/
 ├─ models/              # Entity / Value Object
 ├─ states/              # 狀態定義與轉移
 ├─ services/            # Domain Services
@@ -240,7 +240,7 @@ export const TaskModuleMetadata = {
 ### 3.1 模組資料夾骨架（標準）
 
 ```
-/modules/<module-name>/
+/src/app/core/blueprint/modules/implementations/<module-name>/
 ├─ models/
 │  └─ index.ts
 │
@@ -276,7 +276,7 @@ export const TaskModuleMetadata = {
 └─ README.md
 ```
 
-> `<module-name>` 例如：task、issue、contract
+> `<module-name>` 例如：task、issue、contract（UI 對應的畫面則放在 `/src/app/routes/<module-name>/`）
 
 ### 3.2 每個檔案的最小骨架內容
 

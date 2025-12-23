@@ -4,6 +4,8 @@
 > 更新日期: 2025-12-16  
 > 文件性質: 跨模組流程與系統規則定義
 
+> **路徑說明（與實際倉庫一致）：** Blueprint Layer 的根目錄位於 `/src/app/core/blueprint`，對應的 UI 入口在 `/src/app/routes/blueprint`。以下凡提及「/blueprint」皆指向此實際路徑，並與 `MODULE_LAYER.md` 的模組骨架（`/src/app/core/blueprint/modules/implementations/<module>`）對齊。
+
 ---
 
 ## 目錄
@@ -27,7 +29,7 @@
 | audit | 發生過什麼 | ✅（歷史） | ❌ |
 | policies | 可不可以 | ❌ | ⚠️（規則） |
 
-### 1.2 `/blueprint/event-bus`
+### 1.2 `/src/app/core/blueprint/event-bus`
 
 **一句話定位：**
 > 系統事件的傳遞與分發中樞（不包含業務邏輯）
@@ -52,7 +54,7 @@
 
  **核心理念：**
  > Event Bus 是一個跨模組的流程基礎設施（Process Infrastructure），負責傳遞「已發生事實」，不承載業務決策。
-### 1.3 `/blueprint/workflow`
+### 1.3 `/src/app/core/blueprint/workflow`
 
 **一句話定位：**
 > 跨模組流程的「協調者」，用於高風險或多步驟流程
@@ -80,10 +82,10 @@
 - [1. 概覽 (Overview)](#1-概覽-overview)
 - [2. Blueprint Layer 設計原則](#2-blueprint-layer-設計原則)
   - [2.1 層級總覽對照表](#21-層級總覽對照表)
-  - [2.2 Event Bus (/blueprint/event-bus)](#22-event-bus-blueprintevent-bus)
-  - [2.3 Workflow (/blueprint/workflow)](#23-workflow-blueprintworkflow)
-  - [2.4 Audit (/blueprint/audit)](#24-audit-blueprintaudit)
-  - [2.5 Policies (/blueprint/policies)](#25-policies-blueprintpolicies)
+- [2.2 Event Bus (/src/app/core/blueprint/event-bus)](#22-event-bus-srcappcoreblueprintevent-bus)
+- [2.3 Workflow (/src/app/core/blueprint/workflow)](#23-workflow-srcappcoreblueprintworkflow)
+- [2.4 Audit (/src/app/core/blueprint/audit)](#24-audit-srcappcoreblueprintaudit)
+- [2.5 Policies (/src/app/core/blueprint/policies)](#25-policies-srcappcoreblueprintpolicies)
 - [3. 工作流程定義 (Workflows)](#3-工作流程定義-workflows)
   - [3.1 合約建立流程](#31-合約建立流程)
   - [3.2 任務與施工階段](#32-任務與施工階段)
@@ -127,7 +129,7 @@ Blueprint Layer 提供跨模組的流程協調能力與系統級規則。其目�
 | `audit` | 發生過什麼 | ✅（歷史） | ❌ |
 | `policies` | 可不可以 | ❌ | ⚠️（規則） |
 
-### 2.2 Event Bus (/blueprint/event-bus)
+### 2.2 Event Bus (/src/app/core/blueprint/event-bus)
 
 一句話定位：系統事件的傳遞與分發中樞（不包含業務邏輯）。
 
@@ -143,7 +145,7 @@ Blueprint Layer 提供跨模組的流程協調能力與系統級規則。其目�
 
 設計心法：Event Bus 是流程基礎設施，傳遞「已發生事實」，不承載業務決策。
 
-### 2.3 Workflow (/blueprint/workflow)
+### 2.3 Workflow (/src/app/core/blueprint/workflow)
 
 一句話定位：跨模組流程的協調者，用於高風險或多步驟流程。
 
@@ -165,7 +167,7 @@ Blueprint Layer 提供跨模組的流程協調能力與系統級規則。其目�
 
 正確心法：Workflow 不「做事」，只「決定接下來要叫誰做事」。
 
-### 2.4 Audit (/blueprint/audit)
+### 2.4 Audit (/src/app/core/blueprint/audit)
 
 一句話定位：系統行為的不可變歷史紀錄層。
 
@@ -182,7 +184,7 @@ Blueprint Layer 提供跨模組的流程協調能力與系統級規則。其目�
 
 提醒：不要把 Audit Log 當成流程判斷依據；Audit 是歷史紀錄，而非即時真相來源。
 
-### 2.5 Policies (/blueprint/policies)
+### 2.5 Policies (/src/app/core/blueprint/policies)
 
 一句話定位：跨模組的一致性規則與限制條件。
 
@@ -368,60 +370,58 @@ Audit Log（必要）應記錄：操作人、操作時間、狀態變更前後�
 ### 4.1 目錄結構範例
 
 ```text
-/blueprint
+/src/app/core/blueprint
 ├─ modules/
-│  ├─ contract/
-│  ├─ task/
-│  ├─ issue/
-│  ├─ acceptance/
-│  ├─ finance/
-│  └─ warranty/
-├─ asset/
-├─ ai/
-├─ analytics/
-├─ notification/
-├─ event-bus/
-├─ workflow/
-├─ audit/
-└─ policies/
+│  └─ implementations/
+│     ├─ acceptance/ | finance/ | issue/ | qa/ | communication/ | warranty/ | cloud/ | workflow/ | audit-logs/ | safety/ | log/
+│     ├─ <module>/models | services | repositories | policies | events | facade | config
+│     └─ module.metadata.ts / <module>.module.ts / README.md
+├─ container/ | context/ | config/ | events/
+├─ workflow/ | event-bus/ | audit/ | policies/
+├─ integration/ | repositories/ | services/
+└─ index.ts
 ```
 
-（詳見 repo 中的 `/blueprint` 範例目錄）
+（詳見 repo 中的 `/src/app/core/blueprint` 範例目錄）
 
 ### 4.2 實作骨架與樣板程式碼
 
 以下為簡要樣板，供快速參考：
 
-#### 4.2.1 Facade 範例（Asset）
+#### 4.2.1 Facade 範例（Issue）
 
 ```typescript
-// /blueprint/asset/facade/asset.facade.ts
-import { AssetService } from '../services/asset.service';
+// /src/app/core/blueprint/modules/implementations/issue/facade/issue.facade.ts
+import { IssueService } from '../services/issue.service';
 
-export class AssetFacade {
-  constructor(private readonly assetService: AssetService) {}
+export class IssueFacade {
+  constructor(private readonly issueService: IssueService) {}
 
-  async upload(file: any, ownerId: string, ownerType: string) {
-    return this.assetService.upload(file, ownerId, ownerType);
+  async create(payload: any) {
+    // TODO: 驗證 policy
+    return this.issueService.create(payload);
   }
 }
 ```
 
-#### 4.2.2 Service 範例（Asset）
+#### 4.2.2 Service 範例（Issue）
 
 ```typescript
-// /blueprint/asset/services/asset.service.ts
-import { CloudFacade } from '../../infrastructure/cloud/cloud.facade';
+// /src/app/core/blueprint/modules/implementations/issue/services/issue.service.ts
+import { IssueRepository } from '../repositories/issue.repository';
+import { EventBusService } from '../../../event-bus/event-bus.service';
 
-export class AssetService {
-  constructor(private readonly cloud: CloudFacade) {}
+export class IssueService {
+  constructor(
+    private readonly repository: IssueRepository,
+    private readonly eventBus: EventBusService,
+  ) {}
 
-  async upload(file: any, ownerId: string, ownerType: string) {
+  async create(payload: any) {
     // TODO: 驗證 policy
-    const cloudFile = await this.cloud.uploadFile({ file });
-    // TODO: 建立 Asset Entity / 更新狀態
-    // TODO: 發布 asset.uploaded event
-    return cloudFile;
+    const issue = await this.repository.save(payload);
+    this.eventBus.publish('issue.created', { id: issue.id });
+    return issue;
   }
 }
 ```
@@ -429,7 +429,7 @@ export class AssetService {
 #### 4.2.3 EventBus 起手式
 
 ```typescript
-// /blueprint/event-bus/event-bus.service.ts
+// /src/app/core/blueprint/event-bus/event-bus.service.ts
 export class EventBusService {
   private subscribers: Record<string, Function[]> = {};
 
@@ -447,7 +447,7 @@ export class EventBusService {
 #### 4.2.4 Workflow Engine 起手式
 
 ```typescript
-// /blueprint/workflow/workflow.engine.ts
+// /src/app/core/blueprint/workflow/workflow.engine.ts
 export class WorkflowEngine {
   execute(workflowId: string, context: any) {
     // TODO: 根據 workflow steps 執行
@@ -458,7 +458,7 @@ export class WorkflowEngine {
 #### 4.2.5 Audit 起手式
 
 ```typescript
-// /blueprint/audit/audit-log.service.ts
+// /src/app/core/blueprint/audit/audit-log.service.ts
 export class AuditLogService {
   log(action: string, entityId: string, userId: string, data?: any) {
     console.log(`[AUDIT] ${action} by ${userId} on ${entityId}`, data);
@@ -567,131 +567,17 @@ open → in_progress → resolved → verified → closed
 ### 3.1 目錄結構
 
 ```
-/blueprint
+/src/app/core/blueprint
 ├─ modules/
-│  ├─ contract/
-│  │  ├─ models/                  # Aggregate / Value Objects
-│  │  │  └─ index.ts
-│  │  ├─ states/
-│  │  │  └─ contract.states.ts
-│  │  ├─ services/
-│  │  │  └─ contract.service.ts
-│  │  ├─ repositories/
-│  │  │  ├─ contract.repository.ts
-│  │  │  └─ contract.repository.impl.ts
-│  │  ├─ events/
-│  │  │  └─ contract.events.ts
-│  │  ├─ policies/
-│  │  │  └─ contract.policies.ts
-│  │  ├─ facade/
-│  │  │  └─ contract.facade.ts
-│  │  ├─ config/
-│  │  │  └─ contract.config.ts
-│  │  ├─ module.metadata.ts
-│  │  ├─ contract.module.ts
-│  │  └─ README.md
-│  │
-│  ├─ task/
-│  │  └─ ... (同 contract)
-│  │
-│  ├─ issue/
-│  │  └─ ...
-│  │
-│  ├─ acceptance/
-│  │  └─ ...
-│  │
-│  ├─ finance/
-│  │  └─ ...
-│  │
-│  └─ warranty/
-│     └─ ...
+│  └─ implementations/
+│     ├─ acceptance/ | finance/ | issue/ | qa/ | communication/ | warranty/ | cloud/ | workflow/ | audit-logs/ | safety/ | log/
+│     ├─ <module>/models | services | repositories | policies | events | facade | config
+│     └─ module.metadata.ts / <module>.module.ts / README.md
 │
-├─ asset/
-│  ├─ models/
-│  │  └─ asset.entity.ts
-│  ├─ states/
-│  │  └─ asset.states.ts
-│  ├─ services/
-│  │  ├─ asset.service.ts
-│  │  └─ asset-upload.service.ts
-│  ├─ repositories/
-│  │  └─ asset.repository.ts
-│  ├─ events/
-│  │  └─ asset.events.ts
-│  ├─ policies/
-│  │  └─ asset.policies.ts
-│  ├─ facade/
-│  │  └─ asset.facade.ts
-│  ├─ config/
-│  │  └─ asset.config.ts
-│  ├─ module.metadata.ts
-│  ├─ asset.module.ts
-│  └─ README.md
- 
-├─ ai/
-│  ├─ providers/
-│  │  ├─ vertex/
-│  │  │  ├─ adapter.ts           # Vendor adapter for @google-cloud/vertexai / @google-cloud/aiplatform
-│  │  │  ├─ client.ts
-│  │  │  └─ README.md
-│  │  ├─ genai/
-│  │  │  ├─ adapter.ts           # Vendor adapter for @google/genai
-│  │  │  └─ README.md
-│  │  └─ README.md
-│  ├─ facade/
-│  │  └─ ai.facade.ts            # Orchestrator only: single responsibility — coordinate providers, apply policies
-│  ├─ prompts/
-│  │  ├─ templates.ts
-│  │  └─ renderer.ts
-│  ├─ safety/
-│  │  ├─ sanitizer.ts
-│  │  └─ validator.ts
-│  ├─ types.ts
-│  └─ README.md
-
-├─ analytics/
-│  ├─ metrics/
-│  │  └─ metrics.service.ts
-│  ├─ reports/
-│  │  └─ report.generator.ts
-│  ├─ analytics.service.ts
-│  └─ README.md
-
-├─ notification/
-│  ├─ channels/
-│  │  ├─ email.channel.ts
-│  │  └─ push.channel.ts
-│  ├─ notification.service.ts
-│  ├─ templates/
-│  │  └─ default.template.ts
-│  └─ README.md
-
-├─ event-bus/
-│  ├─ adapters/
-│  │  └─ index.ts
-│  ├─ event-bus.service.ts
-│  ├─ event.types.ts
-│  └─ README.md
-│
-├─ workflow/
-│  ├─ workflow.engine.ts
-│  ├─ workflow.registry.ts
-│  ├─ steps/
-│  │  └─ index.ts
-│  └─ README.md
-│
-├─ audit/
-│  ├─ audit-log.entity.ts
-│  ├─ audit-log.service.ts
-│  ├─ audit-policies.ts
-│  └─ README.md
-│
-├─ policies/
-│  ├─ access-control.policy.ts
-│  ├─ approval.policy.ts
-│  └─ README.md
-│
-└─ README.md
+├─ container/ | context/ | config/ | events/
+├─ workflow/ | event-bus/ | audit/ | policies/
+├─ integration/ | repositories/ | services/
+└─ index.ts
 ```
 
 ### 3.2 實作骨架範例
@@ -699,33 +585,36 @@ open → in_progress → resolved → verified → closed
 #### 3.2.1 Facade 範例（Asset）
 
 ```typescript
-// /blueprint/asset/facade/asset.facade.ts
-import { AssetService } from '../services/asset.service';
+// /src/app/core/blueprint/modules/implementations/issue/facade/issue.facade.ts
+import { IssueService } from '../services/issue.service';
 
-export class AssetFacade {
-  constructor(private readonly assetService: AssetService) {}
+export class IssueFacade {
+  constructor(private readonly issueService: IssueService) {}
 
-  async upload(file: any, ownerId: string, ownerType: string) {
-    return this.assetService.upload(file, ownerId, ownerType);
+  async create(payload: any) {
+    return this.issueService.create(payload);
   }
 }
 ```
 
-#### 3.2.2 Service 範例（Asset）
+#### 3.2.2 Service 範例（Issue）
 
 ```typescript
-// /blueprint/asset/services/asset.service.ts
-import { CloudFacade } from '../../infrastructure/cloud/cloud.facade';
+// /src/app/core/blueprint/modules/implementations/issue/services/issue.service.ts
+import { IssueRepository } from '../repositories/issue.repository';
+import { EventBusService } from '../../../event-bus/event-bus.service';
 
-export class AssetService {
-  constructor(private readonly cloud: CloudFacade) {}
+export class IssueService {
+  constructor(
+    private readonly repository: IssueRepository,
+    private readonly eventBus: EventBusService,
+  ) {}
 
-  async upload(file: any, ownerId: string, ownerType: string) {
+  async create(payload: any) {
     // TODO: 驗證 policy
-    const cloudFile = await this.cloud.uploadFile({ file });
-    // TODO: 建立 Asset Entity / 更新狀態
-    // TODO: 發布 asset.uploaded event
-    return cloudFile;
+    const issue = await this.repository.save(payload);
+    this.eventBus.publish('issue.created', { id: issue.id });
+    return issue;
   }
 }
 ```
@@ -733,7 +622,7 @@ export class AssetService {
 #### 3.2.3 EventBus 起手式
 
 ```typescript
-// /blueprint/event-bus/event-bus.service.ts
+// /src/app/core/blueprint/event-bus/event-bus.service.ts
 export class EventBusService {
   private subscribers: Record<string, Function[]> = {};
 
@@ -751,7 +640,7 @@ export class EventBusService {
 #### 3.2.4 Workflow Engine 起手式
 
 ```typescript
-// /blueprint/workflow/workflow.engine.ts
+// /src/app/core/blueprint/workflow/workflow.engine.ts
 export class WorkflowEngine {
   execute(workflowId: string, context: any) {
     // TODO: 根據 workflow steps 執行
@@ -762,7 +651,7 @@ export class WorkflowEngine {
 #### 3.2.5 Audit 起手式
 
 ```typescript
-// /blueprint/audit/audit-log.service.ts
+// /src/app/core/blueprint/audit/audit-log.service.ts
 export class AuditLogService {
   log(action: string, entityId: string, userId: string, data?: any) {
     console.log(`[AUDIT] ${action} by ${userId} on ${entityId}`, data);
@@ -774,43 +663,38 @@ export class AuditLogService {
 
 | 層級 / 資源 | 責任 |
 |------------|------|
-| modules/ | 具體業務模組，Domain 聚合根、狀態、規則、事件、Facade。只能依賴 Blueprint 內的其他模組或 Infrastructure Facade（Cloud、Queue、AI）。 |
-| asset/ | 檔案 / 附件模組。負責檔案生命週期、狀態、政策。呼叫 CloudFacade 儲存/讀取。 |
+| modules/implementations | 具體業務模組，Domain 聚合根、狀態、規則、事件、Facade。只能依賴 Blueprint 內的其他模組或 Infrastructure Facade（Cloud、Queue、AI）。 |
 | event-bus/ | Domain Event Dispatcher。負責事件發布與訂閱。事件由 Domain 層產生，不應有業務邏輯。 |
 | workflow/ | 工作流程編排器。定義流程步驟、狀態轉移、事件觸發，執行 Domain Service。 |
 | audit/ | 系統稽核。負責紀錄手動操作、狀態變更、事件觸發，可被各模組呼叫。 |
 | policies/ | 跨模組策略。包含存取控制、審核策略等，模組內策略只管模組內規則，不管跨模組流程。 |
+| integration/ | 封裝對外服務（Cloud/AI/Queue）或跨模組協作的 Adapter。 |
 
 ### 3.4 事件流範例（Contract PDF 上傳）
 
 ```
-ContractFacade.uploadContractPDF(file)
+IssueFacade.createIssue(command)
     ↓
-AssetFacade.upload(file)
+IssueService.validatePolicy()
     ↓
-AssetService.validatePolicy()
+IssueRepository.save()
     ↓
-CloudFacade.uploadFile()
+event-bus.emit('issue.created')
     ↓
-AssetService.updateAssetStatus()
-    ↓
-event-bus.emit('asset.uploaded')
-    ↓
-ContractService.onAssetUploaded()
+NotificationService.onIssueCreated()
 ```
 
 **關鍵點：**
-- Contract 不存檔案，只存 AssetId
-- Asset 模組負責檔案狀態管理
-- CloudFacade 完全不認識 Domain
-- 事件由 Blueprint Domain 發布到 event-bus
+- Domain 模組只透過 Facade 進入，並由 Service 驗證 Policy。
+- Repository 與外部基礎設施隔離在 Blueprint Layer，不穿透到 UI。
+- 事件由 Domain 發布到 event-bus，其他模組透過訂閱回應。
 
 ### 3.5 建議開發規範
 
 1. 模組之間只透過 Facade + EventBus 通訊
 2. 所有 Domain Event 必須由模組 Service 發布
 3. Cloud / AI / Queue / Notification 統一經由 Infrastructure Facade
-4. Asset / File 是 Blueprint Domain，不直接依賴 Contract / Task / Issue
+4. File / Asset 類型（如需）仍屬 Blueprint Domain，不直接依賴 Contract / Task / Issue
 5. Audit / Policy / Workflow 集中管理，Domain Service 呼叫即可
 
 ---
