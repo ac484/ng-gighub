@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { AccountRepository } from '@core/data-access/repositories/shared/account.repository';
+import { AccountRepository } from '@core/account/repositories';
 import { FirebaseAuthService } from '@core/services/firebase-auth.service';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';

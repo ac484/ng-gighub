@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ContextType, InvitationStatus, OrganizationMember, OrganizationRole } from '@core';
-import { NotificationType } from '@core/models/notification.model';
+import { NotificationType } from '@core/account/types';
 import {
   AccountRepository,
   NotificationRepository,

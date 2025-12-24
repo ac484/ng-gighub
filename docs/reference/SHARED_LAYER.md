@@ -6,6 +6,8 @@
 
 > 實際路徑：`/src/app/shared`
 
+注意：本文件的目錄與結構部分已統一採用 [docs/reference/Skeleton.md](docs/reference/Skeleton.md) 作為權威來源，請以該文件為主要參照。
+
 ## 2. 範疇
 - 公用 UI 組件 (Components)
 - 公用服務 (Services) — 僅封裝無業務語意的共用邏輯
@@ -20,12 +22,4 @@
 - 版本控制：修改需考慮全系統影響
 
 ## 4. 目錄建議（對應現況）
-```
-/src/app/shared/
-├─ components/     # 自含型 UI 元件（支援無障礙、樣式隔離）
-├─ services/       # 無業務語意的共用服務（e.g. clipboard, download）
-├─ types/          # 共用型別/VO
-├─ utils/          # 純函式工具
-├─ constants/      # 共用常數、token
-└─ pipes/ | directives/  # 如需
-```
+目錄與檔案結構請參考權威來源：[docs/reference/Skeleton.md](docs/reference/Skeleton.md)。

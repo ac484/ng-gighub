@@ -238,27 +238,31 @@ export class OrganizationPartnersComponent implements OnInit {
     return this.workspaceContext.contextType() === ContextType.ORGANIZATION;
   }
 
-  getPartnerTypeLabel(type: PartnerType): string {
+  getPartnerTypeLabel(type?: PartnerType): string {
     const labels: Record<PartnerType, string> = {
       [PartnerType.CONTRACTOR]: '承包商',
       [PartnerType.SUPPLIER]: '供應商',
       [PartnerType.CONSULTANT]: '顧問',
-      [PartnerType.SUBCONTRACTOR]: '次承包商'
+      [PartnerType.SUBCONTRACTOR]: '次承包商',
+      [PartnerType.CLIENT]: '客戶',
+      [PartnerType.OTHER]: '其他'
     };
-    return labels[type] || type;
+    return type ? labels[type] || type : '未分類';
   }
 
-  getPartnerTypeColor(type: PartnerType): string {
+  getPartnerTypeColor(type?: PartnerType): string {
     const colors: Record<PartnerType, string> = {
       [PartnerType.CONTRACTOR]: 'blue',
       [PartnerType.SUPPLIER]: 'green',
       [PartnerType.CONSULTANT]: 'purple',
-      [PartnerType.SUBCONTRACTOR]: 'orange'
+      [PartnerType.SUBCONTRACTOR]: 'orange',
+      [PartnerType.CLIENT]: 'cyan',
+      [PartnerType.OTHER]: 'default'
     };
-    return colors[type] || 'default';
+    return type ? colors[type] || 'default' : 'default';
   }
 
-  formatDate(dateStr: string | undefined): string {
+  formatDate(dateStr: string | Date | undefined): string {
     if (!dateStr) return '-';
     const date = new Date(dateStr);
     return date.toLocaleDateString('zh-TW', {

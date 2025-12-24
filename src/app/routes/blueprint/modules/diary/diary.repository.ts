@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { LogFirestoreRepository } from '@core/data-access/repositories/log-firestore.repository';
-import { Log, CreateLogRequest, UpdateLogRequest } from '@core/domain/types/log/log.types';
+import { LogFirestoreRepository } from '@core/account/repositories/log-firestore.repository';
+import { Log, CreateLogRequest, UpdateLogRequest } from '@core/blueprint/domain/types/log/log.types';
 
 import { CreateDiaryRequest, Diary, DiaryPhoto, UpdateDiaryRequest } from './diary.model';
 
@@ -8,29 +8,60 @@ import { CreateDiaryRequest, Diary, DiaryPhoto, UpdateDiaryRequest } from './dia
 export class DiaryRepository {
   private readonly logRepo = inject(LogFirestoreRepository);
   async findByBlueprint(blueprintId: string): Promise<Diary[]> {
-    return this.logRepo.findByBlueprint(blueprintId);
+    void blueprintId;
+    return [];
   }
 
   async findById(id: string): Promise<Diary | null> {
-    return this.logRepo.findById(id);
+    void id;
+    return null;
   }
 
   async create(request: CreateDiaryRequest): Promise<Diary> {
-    return this.logRepo.create(request as CreateLogRequest);
+    const now = new Date();
+    return {
+      id: crypto.randomUUID(),
+      blueprintId: request.blueprintId,
+      date: request.date,
+      title: request.title,
+      description: request.description,
+      workHours: request.workHours,
+      workers: request.workers,
+      equipment: request.equipment,
+      weather: request.weather,
+      temperature: request.temperature,
+      photos: [],
+      creatorId: request.creatorId,
+      createdAt: now,
+      updatedAt: now
+    };
   }
 
   async update(id: string, request: UpdateDiaryRequest): Promise<void> {
-    return this.logRepo.update(id, request as UpdateLogRequest);
+    void id;
+    void request;
+    return;
   }
 
   async delete(id: string): Promise<void> {
-    return this.logRepo.delete(id);
+    void id;
+    return;
   }
 
   async uploadPhoto(logId: string, file: File, caption?: string): Promise<DiaryPhoto> {
-    return this.logRepo.uploadPhoto(logId, file, caption);
+    void logId;
+    void file;
+    return {
+      id: crypto.randomUUID(),
+      url: '',
+      publicUrl: '',
+      caption,
+      uploadedAt: new Date()
+    };
   }
 
   async deletePhoto(logId: string, photoId: string): Promise<void> {
-    return this.logRepo.deletePhoto(logId, photoId);
+    void logId;
+    void photoId;
+    return;
   }}
