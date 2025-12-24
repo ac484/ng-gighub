@@ -15,7 +15,6 @@ import {
   where,
   QueryConstraint
 } from '@angular/fire/firestore';
-import { LoggerService } from '@core/services/logger';
 import { Observable, catchError, from, map, of } from 'rxjs';
 
 import { AcceptanceQueryOptions, AcceptanceRecord, AcceptanceStatus, CreateAcceptanceData, UpdateAcceptanceData } from './acceptance.model';
@@ -23,7 +22,6 @@ import { AcceptanceQueryOptions, AcceptanceRecord, AcceptanceStatus, CreateAccep
 @Injectable({ providedIn: 'root' })
 export class AcceptanceRepository {
   private readonly firestore = inject(Firestore);
-  private readonly logger = inject(LoggerService);
   private readonly parentCollection = 'blueprints';
   private readonly subcollectionName = 'acceptance_records';
 
@@ -41,10 +39,7 @@ export class AcceptanceRepository {
     const q = query(this.getCollection(blueprintId), ...constraints);
     return from(getDocs(q)).pipe(
       map(snapshot => snapshot.docs.map(docSnap => this.toEntity(docSnap.data(), docSnap.id))),
-      catchError(error => {
-        this.logger.error('[AcceptanceRepository]', 'findByBlueprintId failed', error as Error, { blueprintId });
-        return of([]);
-      })
+      catchError(() => of([]))
     );
   }
 
@@ -65,13 +60,8 @@ export class AcceptanceRepository {
       updatedAt: now
     };
 
-    try {
-      const docRef = await addDoc(this.getCollection(blueprintId), docData);
-      return this.toEntity(docData, docRef.id);
-    } catch (error) {
-      this.logger.error('[AcceptanceRepository]', 'create failed', error as Error, { blueprintId, title: data.title });
-      throw error;
-    }
+    const docRef = await addDoc(this.getCollection(blueprintId), docData);
+    return this.toEntity(docData, docRef.id);
   }
 
   async update(blueprintId: string, recordId: string, data: UpdateAcceptanceData): Promise<void> {
@@ -79,21 +69,11 @@ export class AcceptanceRepository {
     const payload: Record<string, unknown> = { ...data, updatedAt: Timestamp.now() };
     if (data.reviewDate) payload['reviewDate'] = Timestamp.fromDate(data.reviewDate);
 
-    try {
-      await updateDoc(docRef, payload);
-    } catch (error) {
-      this.logger.error('[AcceptanceRepository]', 'update failed', error as Error, { blueprintId, recordId });
-      throw error;
-    }
+    await updateDoc(docRef, payload);
   }
 
   async delete(blueprintId: string, recordId: string): Promise<void> {
-    try {
-      await deleteDoc(doc(this.firestore, this.parentCollection, blueprintId, this.subcollectionName, recordId));
-    } catch (error) {
-      this.logger.error('[AcceptanceRepository]', 'delete failed', error as Error, { blueprintId, recordId });
-      throw error;
-    }
+    await deleteDoc(doc(this.firestore, this.parentCollection, blueprintId, this.subcollectionName, recordId));
   }
 
   private toEntity(data: Record<string, unknown>, id: string): AcceptanceRecord {

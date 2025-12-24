@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, OnInit, inject, input } from '@angular/core';
-import { LoggerService } from '@core';
 import { STColumn } from '@delon/abc/st';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS, createAsyncArrayState } from '@shared';
@@ -61,9 +60,7 @@ import { MembersService } from '../../members.service';
 })
 export class MemberListComponent implements OnInit {
   private readonly message = inject(NzMessageService);
-  private readonly modal = inject(ModalHelper);
-  private readonly logger = inject(LoggerService);
-  private readonly membersService = inject(MembersService);
+  private readonly modal = inject(ModalHelper);  private readonly membersService = inject(MembersService);
 
   // Input: blueprint ID and owner type (required for member validation)
   blueprintId = input.required<string>();
@@ -152,12 +149,8 @@ export class MemberListComponent implements OnInit {
   private async loadMembers(): Promise<void> {
     try {
       const members = await this.membersService.list(this.blueprintId());
-      await this.membersState.load(Promise.resolve(members));
-      this.logger.info('[MemberListComponent]', `Loaded ${this.membersState.length()} members`);
-    } catch (error) {
-      this.message.error('載入成員失敗');
-      this.logger.error('[MemberListComponent]', 'Failed to load members', error as Error);
-    }
+      await this.membersState.load(Promise.resolve(members));    } catch (error) {
+      this.message.error('載入成員失敗');    }
   }
 
   /**
@@ -238,8 +231,6 @@ export class MemberListComponent implements OnInit {
       this.message.success('成員已移除');
       this.loadMembers();
     } catch (error) {
-      this.message.error('移除成員失敗');
-      this.logger.error('[MemberListComponent]', 'Failed to remove member', error as Error);
-    }
+      this.message.error('移除成員失敗');    }
   }
 }

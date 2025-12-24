@@ -8,6 +8,8 @@
 
 ## 目錄
 
+注意：本文件的目錄與結構部分已統一採用 [docs/reference/Skeleton.md](docs/reference/Skeleton.md) 作為權威來源，請以該文件為主要參照。
+
 1. [Blueprint Layer 設計](#一blueprint-layer-設計)
 2. [工作流程定義](#二工作流程定義)
 3. [Blueprint Layer 完整骨架](#三blueprint-layer-完整骨架)
@@ -23,289 +25,118 @@
 | 資料夾 | 回答的問題 | 有狀態 | 有業務語意 |
 |--------|-----------|--------|-----------|
 | event-bus | 發生了什麼 | ❌ | ❌ |
-| workflow | 下一步是什麼 | ⚠️（流程狀態） | ❌ |
-| audit | 發生過什麼 | ✅（歷史） | ❌ |
-| policies | 可不可以 | ❌ | ⚠️（規則） |
+### 3.1 目錄結構
 
-### 1.2 `/blueprint/event-bus`
-
-**一句話定位：**
-> 系統事件的傳遞與分發中樞（不包含業務邏輯）
-
-**核心職責：**
-
-提供事件的：
-- 發佈（emit / publish）
- - 訂閱（subscribe）
- - 分派（dispatch）
-
- 確保事件：
- - 結構一致
- - 可追蹤（Correlation ID）
- - 可重試（Retry / DLQ）
-
- **❌ 絕對不能做的事情：**
- - ❌ 判斷「這個事件該不該發生」
- - ❌ 改寫事件 payload
- - ❌ 根據事件內容執行業務邏輯
- - ❌ 依賴任何 Domain Module
-
- **核心理念：**
- > Event Bus 是一個跨模組的流程基礎設施（Process Infrastructure），負責傳遞「已發生事實」，不承載業務決策。
-### 1.3 `/blueprint/workflow`
-
-**一句話定位：**
-> 跨模組流程的「協調者」，用於高風險或多步驟流程
-
-**什麼時候「需要」 Workflow：**
-
-只有在以下情況才使用：
-- 涉及多個模組
-- 中間步驟可能失敗
-- 需要補償（Rollback / Saga）
-- 流程「不能只靠事件自然擴散」
-
-**例如：**
-- 請款 → 開票 → 收款 → 入帳
-# 藍圖層架構設計文檔 (Blueprint Layer)
-
-> 文件版本: 3.23.0
-> 更新日期: 2025-12-16
-> 文件性質: 跨模組流程與系統規則定義
-
----
-
-## 目次
-
-- [1. 概覽 (Overview)](#1-概覽-overview)
-- [2. Blueprint Layer 設計原則](#2-blueprint-layer-設計原則)
-  - [2.1 層級總覽對照表](#21-層級總覽對照表)
-  - [2.2 Event Bus (/blueprint/event-bus)](#22-event-bus-blueprintevent-bus)
-  - [2.3 Workflow (/blueprint/workflow)](#23-workflow-blueprintworkflow)
-  - [2.4 Audit (/blueprint/audit)](#24-audit-blueprintaudit)
-  - [2.5 Policies (/blueprint/policies)](#25-policies-blueprintpolicies)
-- [3. 工作流程定義 (Workflows)](#3-工作流程定義-workflows)
-  - [3.1 合約建立流程](#31-合約建立流程)
-  - [3.2 任務與施工階段](#32-任務與施工階段)
-  - [3.3 品質與驗收流程](#33-品質與驗收流程)
-  - [3.4 保固期管理](#34-保固期管理)
-  - [3.5 財務與成本流程](#35-財務與成本流程)
-  - [3.6 問題單 (Issue) 原則](#36-問題單-issue-原則)
-  - [3.7 事件與自動化原則](#37-事件與自動化原則)
-  - [3.8 稽核與權限控制](#38-稽核與權限控制)
-- [4. Blueprint Layer 完整骨架 (Skeleton)](#4-blueprint-layer-完整骨架-skeleton)
-  - [4.1 目錄結構範例](#41-目錄結構範例)
-  - [4.2 實作骨架與樣板程式碼](#42-實作骨架與樣板程式碼)
-  - [4.3 責任邊界](#43-責任邊界)
-  - [4.4 事件流範例（Contract PDF 上傳）](#44-事件流範例contract-pdf-上傳)
-  - [4.5 建議開發規範](#45-建議開發規範)
-- [5. 結語與注意事項](#5-結語與注意事項)
-
----
-
-## 1 概覽 (Overview)
-
-Blueprint Layer 提供跨模組的流程協調能力與系統級規則。其目標是支援模組間的流程、事件與稽核需求，但不應承載具體業務語意或直接修改 Domain 狀態。
-
-核心要點：
-- 不承載業務語意
-- 不擁有 Domain 狀態
-- 不取代模組決策
-
----
-
-## 2 Blueprint Layer 設計原則
-
-以下分節說明 Blueprint 常見的子子系統與設計原則。
-
-### 2.1 層級總覽對照表
-
-| 資料夾 | 回答的問題 | 有狀態 | 有業務語意 |
-|--------|-----------:|:------:|:-----------:|
-| `event-bus` | 發生了什麼 | ❌ | ❌ |
-| `workflow` | 下一步是什麼 | ⚠️（流程狀態） | ❌ |
-| `audit` | 發生過什麼 | ✅（歷史） | ❌ |
-| `policies` | 可不可以 | ❌ | ⚠️（規則） |
-
-### 2.2 Event Bus (/blueprint/event-bus)
-
-一句話定位：系統事件的傳遞與分發中樞（不包含業務邏輯）。
-
-核心職責：
-- 提供發佈（emit / publish）、訂閱（subscribe）、分派（dispatch）
-- 確保事件結構一致、可追蹤（Correlation ID）、可重試（Retry / DLQ）
-
-不可做事項（硬性限制）：
-- 不得判斷「這個事件該不該發生」
-- 不得改寫事件 payload
-- 不得根據事件內容執行業務邏輯
-- 不得依賴任何 Domain Module
-
-設計心法：Event Bus 是流程基礎設施，傳遞「已發生事實」，不承載業務決策。
-
-### 2.3 Workflow (/blueprint/workflow)
-
-一句話定位：跨模組流程的協調者，用於高風險或多步驟流程。
-
-何時需要 Workflow：僅在下列情況使用：
-- 涉及多個模組
-- 中間步驟可能失敗
-- 需要補償（Rollback / Saga）
-- 流程不能只靠事件自然擴散
-
-可做的事：
-- 訂閱多個事件並管理流程狀態（Process State）
-- 發出下一步之指令型事件
-- 觸發補償事件
-
-不可做的事：
-- 不得存取 Domain Repository
-- 不得直接改寫 Domain 狀態
-- 不得實作 UI 或權限邏輯
-
-正確心法：Workflow 不「做事」，只「決定接下來要叫誰做事」。
-
-### 2.4 Audit (/blueprint/audit)
-
-一句話定位：系統行為的不可變歷史紀錄層。
-
-核心職責：
-- 記錄手動操作、重要狀態變更與關鍵事件
-- 提供事後追蹤、稽核查詢與問責依據
-
-可記錄欄位：操作人、操作時間、模組來源、行為類型、狀態前/後、Correlation ID 等。
-
-不可做事項：
-- 不影響流程
-- 不阻斷操作
-- 不當作業務資料來源或回寫 Domain
-
-提醒：不要把 Audit Log 當成流程判斷依據；Audit 是歷史紀錄，而非即時真相來源。
-
-### 2.5 Policies (/blueprint/policies)
-
-一句話定位：跨模組的一致性規則與限制條件。
-
-適合放在 `policies` 的範例：
-- 狀態轉換規則
-- 操作前置條件
-- 角色/權限矩陣（邏輯層）
-- 系統級 Guard
-
-例子：未生效合約不可建立任務；驗收未通過不可請款；已結案問題不可再編輯。
-
-Policy 的責任是回答「可不可以」，而不是「怎麼做」。
-
-示範簽名：
-```typescript
-function canCreateTask(contract): boolean
+目錄與檔案結構請參考權威來源：[docs/reference/Skeleton.md](docs/reference/Skeleton.md)。
+│  │  ├─ asset.repository.ts                  # repository 介面
+│  │  └─ asset.repository.impl.ts             # 實作（CloudFacade 調用）
+│  ├─ events/
+│  │  └─ asset.events.ts                      # asset.uploaded / deleted 等
+│  ├─ policies/
+│  │  └─ asset.policies.ts                    # 檔案存取與保留期限規則
+│  ├─ facade/
+│  │  └─ asset.facade.ts                      # 上傳/下載/刪除等高階操作
+│  ├─ config/
+│  │  └─ asset.config.ts                      # 存儲設定與限制
+│  ├─ module.metadata.ts                      # 模組資訊
+│  ├─ asset.module.ts                         # 模組入口
+│  └─ README.md                               # 模組說明
+│
+├─ ai/                                        # AI 服務模組 - AI 能力統一入口與安全封裝
+│  ├─ providers/                              # AI 供應商適配器集合（各供應商 client 封裝）
+│  │  ├─ vertex/                              # Google Vertex AI 適配器
+│  │  │  ├─ adapter.ts                        # Vertex 適配器：呼叫封裝與錯誤處理
+│  │  │  ├─ client.ts                         # Vertex 客戶端工廠 / 設定
+│  │  │  └─ README.md                         # Vertex 使用說明與限制
+│  │  ├─ genai/                               # 其他 GenAI 適配器
+│  │  │  ├─ adapter.ts
+│  │  │  ├─ client.ts
+│  │  │  └─ README.md
+│  │  └─ README.md                            # 供應商整合說明與選擇準則
+│  ├─ facade/
+│  │  └─ ai.facade.ts                         # 高層 AI 操作入口（淨化 / 速率 / 安全）
+│  ├─ prompts/                                # Prompt 管理與模板
+│  │  ├─ templates.ts                         # prompt 範本定義
+│  │  └─ renderer.ts                          # prompt 渲染器（變數替換）
+│  ├─ safety/
+│  │  ├─ sanitizer.ts                         # 輸入淨化（阻止 prompt injection）
+│  │  └─ validator.ts                         # 輸出驗證（格式 / 安全檢查）
+│  ├─ types.ts                                # 共用型別定義
+│  └─ README.md                               # 模組使用說明與安全指南
+│
+├─ analytics/                                 # 分析模組 - 指標、報表與監控資料轉換
+│  ├─ metrics/
+│  │  ├─ metrics.service.ts                   # 指標計算機
+│  │  └─ metric-definitions.ts                # 指標定義與說明
+│  ├─ reports/
+│  │  ├─ report.generator.ts                  # 報表產生邏輯
+│  │  └─ report-templates.ts                  # 報表模板
+│  ├─ analytics.service.ts                    # 分析流程協調
+│  └─ README.md                               # 使用與資料需求說明
+│
+├─ notification/                              # 通知模組 - 多渠道通知發送
+│  ├─ channels/
+│  │  ├─ email.channel.ts                     # 電子郵件渠道實作
+│  │  ├─ push.channel.ts                      # 行動推播渠道
+│  │  └─ sms.channel.ts                       # 簡訊渠道
+│  ├─ templates/
+│  │  ├─ default.template.ts                  # 預設通知模板
+│  │  └─ template.renderer.ts                 # 模板渲染器
+│  ├─ notification.service.ts                 # 通知發送協調服務（多渠道路由）
+│  └─ README.md                               # 使用與範本說明
+│
+├─ event-bus/                                 # 事件匯流排 - 事件發布/訂閱中樞（adapter 驅動）
+│  ├─ adapters/                               # 事件匯流排實作適配器
+│  │  ├─ memory.adapter.ts                    # 本機記憶體適配器（開發 / 測試用）
+│  │  ├─ redis.adapter.ts                     # Redis 適配器（跨進程/可擴展）
+│  │  └─ index.ts                             # adapters 匯出
+│  ├─ event-bus.service.ts                    # 核心 EventBus 介面/邏輯
+│  ├─ event.types.ts                          # 事件型別定義（共用 schema）
+│  ├─ event.metadata.ts                       # 事件元資料（correlation / version）
+│  └─ README.md                               # 架構與使用說明
+│
+├─ workflow/                                  # 工作流程引擎 - 定義流程、執行上下文、補償
+│  ├─ engine/
+│  │  ├─ workflow.engine.ts                   # 執行器核心（步驟調度）
+│  │  └─ execution-context.ts                 # 執行上下文型別 / transient state
+│  ├─ registry/
+│  │  ├─ workflow.registry.ts                 # 流程註冊與查詢服務
+│  │  └─ workflow-definition.ts               # 流程定義介面（宣告式步驟）
+│  ├─ steps/
+│  │  ├─ step.interface.ts                    # 步驟介面
+│  │  ├─ contract-workflow-steps.ts           # 合約流程步驟定義
+│  │  ├─ task-workflow-steps.ts               # 任務流程步驟定義
+│  │  └─ index.ts                             # steps 匯出
+│  ├─ compensation/
+│  │  └─ saga.handler.ts                      # 補償 / Saga 處理器
+│  └─ README.md                               # 設計與使用指南
+│
+├─ audit/                                     # 稽核模組 - 不可變的操作歷史紀錄
+│  ├─ models/
+│  │  └─ audit-log.entity.ts                  # 稽核紀錄實體（schema definition）
+│  ├─ services/
+│  │  ├─ audit-log.service.ts                 # 寫入稽核紀錄的服務
+│  │  └─ audit-query.service.ts               # 提供稽核查詢與篩選功能
+│  ├─ repositories/
+│  │  ├─ audit-log.repository.ts              # repository 介面
+│  │  └─ audit-log.repository.impl.ts         # 實作（查詢優化）
+│  ├─ policies/
+│  │  └─ audit.policies.ts                    # 稽核保留與可見性規則
+│  └─ README.md                               # 稽核使用說明
+│
+├─ policies/                                  # 策略模組 - 跨模組規則集合
+│  ├─ access-control/
+│  │  ├─ access-control.policy.ts             # 存取控制規則集合
+│  │  └─ role-permissions.ts                  # 角色對應權限矩陣
+│  ├─ approval/
+│  │  ├─ approval.policy.ts                   # 審核判斷邏輯
+│  │  └─ approval-chain.ts                    # 多層審核鏈定義
+│  ├─ state-transition/
+│  │  └─ transition.policy.ts                 # 狀態轉換驗證
+│  └─ README.md                               # 策略模組說明
+│
+└─ README.md                                  # Blueprint Layer 總覽文件
 ```
-
-不可做事項：
-- 不存資料
-- 不發事件
-- 不執行流程
-- 不處理例外流程
-
----
-
-## 3 工作流程定義 (Workflows)
-
-本節列出主要業務流程（範例），說明事件來源、人工/自動節點與狀態轉換。
-
-### 3.1 合約建立流程
-
-流程：
-
-```text
-合約上傳（PDF / 圖檔）【手動】
-↓
-合約建檔（基本資料、業主、承商）【手動】
-↓
-合約解析（OCR / AI 解析條款、金額、工項）【自動】
-↓
-合約確認（確認解析結果或人工補齊）【手動】
-↓
-合約狀態：待生效
-↓
-合約生效（僅已生效合約可建立任務）【手動】
-```
-
-### 3.2 任務與施工階段
-
-流程：
-
-```text
-任務建立（關聯合約 / 工項 / 金額）【手動】
-↓
-指派使用者或團隊【手動】
-↓
-施工執行
-↓
-提報完成【手動】
-↓
-管理確認完成【手動】
-```
-
-註：此節點僅確認施工責任完成，不等同於驗收完成。
-
-### 3.3 品質與驗收流程
-
-流程節點：
-
-```text
-自動建立施工日誌【自動】
-↓
-自動建立 QC 待驗【自動】
-↓
-QC 判定
-```
-
-QC 判定：
-- 否：
-  ```text
-  建立缺失單【自動】
-  ↓
-  整改【手動】
-  ↓
-  複驗【手動】
-  ↓
-  回到 QC 判定
-  ```
-- 是：
-  ```text
-  驗收【手動】
-  ```
-
-驗收判定：
-- 否：
-  ```text
-  建立問題單【可手動 / 可自動】
-  ↓
-  問題處理【手動】
-  ↓
-  回到驗收
-  ```
-- 是：
-  ```text
-  驗收資料封存【自動】
-  ↓
-  進入保固期【自動】
-  ```
-
-### 3.4 保固期管理
-
-保固期間處理：
-
-- 發生保固缺失？
-  - 是：
-    ```text
-    建立問題單【可手動 / 可自動】
-    ↓
-    保固維修【手動】
-    ↓
-    結案【手動】
-    ```
   - 否：持續保固監控
 
 保固期滿：
@@ -562,137 +393,6 @@ open → in_progress → resolved → verified → closed
 
 ---
 
-## 三、Blueprint Layer 完整骨架
-
-### 3.1 目錄結構
-
-```
-/blueprint
-├─ modules/
-│  ├─ contract/
-│  │  ├─ models/                  # Aggregate / Value Objects
-│  │  │  └─ index.ts
-│  │  ├─ states/
-│  │  │  └─ contract.states.ts
-│  │  ├─ services/
-│  │  │  └─ contract.service.ts
-│  │  ├─ repositories/
-│  │  │  ├─ contract.repository.ts
-│  │  │  └─ contract.repository.impl.ts
-│  │  ├─ events/
-│  │  │  └─ contract.events.ts
-│  │  ├─ policies/
-│  │  │  └─ contract.policies.ts
-│  │  ├─ facade/
-│  │  │  └─ contract.facade.ts
-│  │  ├─ config/
-│  │  │  └─ contract.config.ts
-│  │  ├─ module.metadata.ts
-│  │  ├─ contract.module.ts
-│  │  └─ README.md
-│  │
-│  ├─ task/
-│  │  └─ ... (同 contract)
-│  │
-│  ├─ issue/
-│  │  └─ ...
-│  │
-│  ├─ acceptance/
-│  │  └─ ...
-│  │
-│  ├─ finance/
-│  │  └─ ...
-│  │
-│  └─ warranty/
-│     └─ ...
-│
-├─ asset/
-│  ├─ models/
-│  │  └─ asset.entity.ts
-│  ├─ states/
-│  │  └─ asset.states.ts
-│  ├─ services/
-│  │  ├─ asset.service.ts
-│  │  └─ asset-upload.service.ts
-│  ├─ repositories/
-│  │  └─ asset.repository.ts
-│  ├─ events/
-│  │  └─ asset.events.ts
-│  ├─ policies/
-│  │  └─ asset.policies.ts
-│  ├─ facade/
-│  │  └─ asset.facade.ts
-│  ├─ config/
-│  │  └─ asset.config.ts
-│  ├─ module.metadata.ts
-│  ├─ asset.module.ts
-│  └─ README.md
- 
-├─ ai/
-│  ├─ providers/
-│  │  ├─ vertex/
-│  │  │  ├─ adapter.ts           # Vendor adapter for @google-cloud/vertexai / @google-cloud/aiplatform
-│  │  │  ├─ client.ts
-│  │  │  └─ README.md
-│  │  ├─ genai/
-│  │  │  ├─ adapter.ts           # Vendor adapter for @google/genai
-│  │  │  └─ README.md
-│  │  └─ README.md
-│  ├─ facade/
-│  │  └─ ai.facade.ts            # Orchestrator only: single responsibility — coordinate providers, apply policies
-│  ├─ prompts/
-│  │  ├─ templates.ts
-│  │  └─ renderer.ts
-│  ├─ safety/
-│  │  ├─ sanitizer.ts
-│  │  └─ validator.ts
-│  ├─ types.ts
-│  └─ README.md
-
-├─ analytics/
-│  ├─ metrics/
-│  │  └─ metrics.service.ts
-│  ├─ reports/
-│  │  └─ report.generator.ts
-│  ├─ analytics.service.ts
-│  └─ README.md
-
-├─ notification/
-│  ├─ channels/
-│  │  ├─ email.channel.ts
-│  │  └─ push.channel.ts
-│  ├─ notification.service.ts
-│  ├─ templates/
-│  │  └─ default.template.ts
-│  └─ README.md
-
-├─ event-bus/
-│  ├─ adapters/
-│  │  └─ index.ts
-│  ├─ event-bus.service.ts
-│  ├─ event.types.ts
-│  └─ README.md
-│
-├─ workflow/
-│  ├─ workflow.engine.ts
-│  ├─ workflow.registry.ts
-│  ├─ steps/
-│  │  └─ index.ts
-│  └─ README.md
-│
-├─ audit/
-│  ├─ audit-log.entity.ts
-│  ├─ audit-log.service.ts
-│  ├─ audit-policies.ts
-│  └─ README.md
-│
-├─ policies/
-│  ├─ access-control.policy.ts
-│  ├─ approval.policy.ts
-│  └─ README.md
-│
-└─ README.md
-```
 
 ### 3.2 實作骨架範例
 

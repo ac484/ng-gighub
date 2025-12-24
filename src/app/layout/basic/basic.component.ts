@@ -9,16 +9,16 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 
-import { HeaderClearStorageComponent } from './widgets/clear-storage.component';
-import { HeaderContextSwitcherComponent } from './widgets/context-switcher.component';
-import { HeaderFullScreenComponent } from './widgets/fullscreen.component';
-import { HeaderI18nComponent } from './widgets/i18n.component';
-import { HeaderIconComponent } from './widgets/icon.component';
-import { HeaderNotifyComponent } from './widgets/notify.component';
-import { HeaderRTLComponent } from './widgets/rtl.component';
-import { HeaderSearchComponent } from './widgets/search.component';
-import { HeaderTaskComponent } from './widgets/task.component';
-import { HeaderUserComponent } from './widgets/user.component';
+import { HeaderNotifyComponent } from './widgets/communication/notify.component';
+import { HeaderTaskComponent } from './widgets/communication/task.component';
+import { HeaderContextSwitcherComponent } from './widgets/account-switcher/context-switcher.component';
+import { HeaderI18nComponent } from './widgets/locale/i18n.component';
+import { HeaderClearStorageComponent } from './widgets/system/clear-storage.component';
+import { HeaderFullScreenComponent } from './widgets/system/fullscreen.component';
+import { HeaderRTLComponent } from './widgets/system/rtl.component';
+import { HeaderUserComponent } from './widgets/account-switcher/user.component';
+import { HeaderIconComponent } from './widgets/utility/icon.component';
+import { HeaderSearchComponent } from './widgets/utility/search.component';
 import { CreateOrganizationComponent } from '../../shared/components/create-organization/create-organization.component';
 import { CreateTeamModalComponent } from '../../shared/components/create-team-modal/create-team-modal.component';
 

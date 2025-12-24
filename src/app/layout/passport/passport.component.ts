@@ -5,7 +5,7 @@ import { DA_SERVICE_TOKEN } from '@delon/auth';
 import { ThemeBtnComponent } from '@delon/theme/theme-btn';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 
-import { HeaderI18nComponent } from '../basic/widgets/i18n.component';
+import { HeaderI18nComponent } from '../basic/widgets/locale/i18n.component';
 
 @Component({
   selector: 'layout-passport',

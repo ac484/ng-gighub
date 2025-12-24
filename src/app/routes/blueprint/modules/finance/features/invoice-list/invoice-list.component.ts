@@ -14,7 +14,7 @@
 import { Component, ChangeDetectionStrategy, OnInit, inject, signal, computed, input, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import type { Invoice, InvoiceStatus } from '@core/blueprint/modules/implementations/finance';
+import type { Invoice, InvoiceStatus } from '../../core/models';
 import { STColumn, STChange } from '@delon/abc/st';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';

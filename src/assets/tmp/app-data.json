@@ -2,13 +2,7 @@
   "app": {
     "name": "GigHub",
     "description": "工地施工進度追蹤管理系統"
-  },
-  "user": {
-    "name": "User",
-    "avatar": "./assets/tmp/img/avatar.jpg",
-    "email": ""
-  },
-    
+  },    
   "menu": [
     {
       "text": "主導航",
