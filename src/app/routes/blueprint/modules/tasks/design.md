@@ -14,11 +14,12 @@
 
 ### 重要提醒
 
-1. **Task 模型定義位置**: 專案已有現存的 Task 類型定義於 `/src/app/core/domain/types/task/task.types.ts`，請使用該定義，不要重複定義
-2. **Repository 基類**: 必須使用 `/src/app/core/data-access/repositories/base/firestore-base.repository.ts`
-3. **EventBus**: 使用現有的 `/src/app/core/blueprint/events/enhanced-event-bus.service.ts`
-4. **依賴注入**: 統一使用 `inject()` 函式，禁止使用建構函式注入
-5. **日期工具函式**: 需自行實作或使用 `date-fns` 庫的 `isSameDay`, `isSameMonth` 函式
+1. **模組自包含設計**: 本模組採用完全自包含架構，直接使用 `@angular/fire` 進行 Firebase 整合，不依賴 `@core` 層
+2. **Task 模型定義位置**: 在模組內部定義 Task 類型 (`./core/models/task.model.ts`)
+3. **Repository 實作**: 直接注入 `Firestore` from `@angular/fire/firestore`
+4. **EventBus**: 如需事件總線，在模組內部實作或使用共享的 EventBus
+5. **依賴注入**: 統一使用 `inject()` 函式，禁止使用建構函式注入
+6. **日期工具函式**: 使用 `date-fns` 庫的 `isSameDay`, `isSameMonth` 函式
 
 ---
 
@@ -84,18 +85,18 @@
 ┌─────────────────────────────────────────────────────────┐
 │                     Business Layer                       │
 │                  (Services / Facades)                    │
-│  - TaskFacade: 任務業務協調                             │
-│  - TaskViewService: 視圖轉換邏輯                        │
-│  - TaskValidationService: 業務規則驗證                  │
-│  - EventBus 整合                                        │
+│  - TaskFacade: 任務業務協調 (模組內部)                 │
+│  - TaskViewService: 視圖轉換邏輯 (模組內部)            │
+│  - TaskValidationService: 業務規則驗證 (模組內部)      │
+│  - EventBus 整合 (如需)                                 │
 └─────────────────────────────────────────────────────────┘
                            ↓ inject()
 ┌─────────────────────────────────────────────────────────┐
 │                      Data Layer                          │
 │                    (Repositories)                        │
-│  - TaskRepository: CRUD + 查詢                          │
-│  - TaskRealtimeRepository: 即時更新                     │
-│  - FirestoreBaseRepository 繼承                         │
+│  - TaskRepository: CRUD + 查詢 (使用 @angular/fire)    │
+│  - TaskRealtimeRepository: 即時更新 (使用 @angular/fire)│
+│  - 直接注入 Firestore                                   │
 └─────────────────────────────────────────────────────────┘
                            ↓
 ┌─────────────────────────────────────────────────────────┐

@@ -39,28 +39,28 @@
         "src/app/core/*"
       ],
       "@core/models": [
-        "src/app/core/domain/models"
+        "src/app/core/account/models"
       ],
       "@core/models/*": [
-        "src/app/core/domain/models/*"
+        "src/app/core/account/models/*"
       ],
       "@core/types": [
-        "src/app/core/domain/types"
+        "src/app/core/account/types"
       ],
       "@core/types/*": [
-        "src/app/core/domain/types/*"
+        "src/app/core/account/types/*"
       ],
       "@core/repositories": [
-        "src/app/core/data-access/repositories"
+        "src/app/core/account/repositories"
       ],
       "@core/stores": [
-        "src/app/core/state/stores"
+        "src/app/core/account/stores"
       ],
       "@core/domain": [
-        "src/app/core/domain"
+        "src/app/core/account"
       ],
       "@core/domain/*": [
-        "src/app/core/domain/*"
+        "src/app/core/account/*"
       ],
       "@core/data-access": [
         "src/app/core/data-access"

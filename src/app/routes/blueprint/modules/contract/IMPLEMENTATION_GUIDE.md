@@ -1,8 +1,8 @@
 # 合約模組實作指南 (Contract Module Implementation Guide)
 
 > **補充文件**: 搭配 `design.md` 使用，提供實作細節與最佳實踐  
-> **版本**: v1.0.0  
-> **最後更新**: 2025-12-22
+> **版本**: v2.0.0 - 自包含架構  
+> **最後更新**: 2025-12-23
 
 ## 📋 目的
 
@@ -11,6 +11,7 @@
 2. **程式碼範例**: 完整可執行的程式碼片段
 3. **常見陷阱**: 實作時容易出錯的地方及解決方案
 4. **測試策略**: 如何測試每個層級的程式碼
+5. **自包含架構**: 直接使用 `@angular/fire` 進行 Firebase 整合
 
 ---
 
@@ -20,14 +21,13 @@
 
 **檢查清單**:
 - [ ] 確認已閱讀 `design.md` 完整內容
-- [ ] 確認了解三層架構: UI → Service → Repository → Firestore
-- [ ] 確認了解專案使用 FirebaseService 而非直接注入 Firestore
+- [ ] 確認了解三層架構: UI → Service → Repository
+- [ ] **確認模組採用自包含設計**: 直接使用 `@angular/fire`，不依賴 `@core` 層
 - [ ] 確認已設定 Firebase Emulator（用於本地測試）
 
 **關鍵檔案**:
 - `.github/instructions/ng-gighub-architecture.instructions.md`
-- `.github/instructions/ng-gighub-firestore-repository.instructions.md`
-- `src/app/core/data-access/repositories/base/firestore-base.repository.ts`
+- `src/app/routes/blueprint/modules/cloud/core/cloud-storage.repository.ts` (自包含範例)
 
 ---
 
@@ -35,9 +35,9 @@
 
 #### 步驟 1.1: 更新 Contract Model
 
-**目標**: 將現有的簡化模型擴展為完整模型
+**目標**: 將現有的簡化模型擴展為完整模型（在模組內部）
 
-**現有模型** (`src/app/routes/blueprint/modules/contract/data-access/models/contract.model.ts`):
+**現有模型** (`src/app/routes/blueprint/modules/contract/core/models/contract.model.ts`):
 ```typescript
 export interface ContractModel {
   id: string;

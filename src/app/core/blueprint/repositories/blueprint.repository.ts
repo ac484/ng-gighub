@@ -17,7 +17,7 @@ import {
   DocumentReference,
   QueryConstraint
 } from '@angular/fire/firestore';
-import { Blueprint, BlueprintQueryOptions, BlueprintStatus, CreateBlueprintRequest, OwnerType, LoggerService } from '@core';
+import { Blueprint, BlueprintQueryOptions, BlueprintStatus, CreateBlueprintRequest, OwnerType } from '@core';
 import { Observable, catchError, from, map, of } from 'rxjs';
 
 @Injectable({
@@ -25,7 +25,6 @@ import { Observable, catchError, from, map, of } from 'rxjs';
 })
 export class BlueprintRepository {
   private readonly firestore = inject(Firestore);
-  private readonly logger = inject(LoggerService);
   private readonly collectionName = 'blueprints';
 
   private getCollectionRef(): CollectionReference {
@@ -60,7 +59,6 @@ export class BlueprintRepository {
     return from(getDoc(this.getDocRef(id))).pipe(
       map(snapshot => (snapshot.exists() ? this.toBlueprint(snapshot.data(), snapshot.id) : null)),
       catchError(error => {
-        this.logger.error('[BlueprintRepository]', 'findById failed', error as Error);
         return of(null);
       })
     );
@@ -92,7 +90,6 @@ export class BlueprintRepository {
         });
       }),
       catchError(error => {
-        this.logger.error('[BlueprintRepository]', 'findByOwner failed', error as Error);
         console.error('[BlueprintRepository] findByOwner error details:', {
           code: error?.code,
           message: error?.message,
@@ -129,7 +126,6 @@ export class BlueprintRepository {
         });
       }),
       catchError(error => {
-        this.logger.error('[BlueprintRepository]', 'findWithOptions failed', error as Error);
         console.error('[BlueprintRepository] findWithOptions error details:', {
           code: error?.code,
           message: error?.message,
@@ -169,7 +165,6 @@ export class BlueprintRepository {
         return this.toBlueprint(docData, docRef.id);
       }
     } catch (error: any) {
-      this.logger.error('[BlueprintRepository]', 'create failed', error as Error);
       console.error('[BlueprintRepository] Error details:', {
         code: error.code,
         message: error.message,
@@ -190,7 +185,6 @@ export class BlueprintRepository {
     try {
       await updateDoc(this.getDocRef(id), docData);
     } catch (error: any) {
-      this.logger.error('[BlueprintRepository]', 'update failed', error as Error);
       throw error;
     }
   }
@@ -203,7 +197,6 @@ export class BlueprintRepository {
         updatedAt: Timestamp.now()
       });
     } catch (error: any) {
-      this.logger.error('[BlueprintRepository]', 'soft delete failed', error as Error);
       throw error;
     }
   }
@@ -212,7 +205,6 @@ export class BlueprintRepository {
     try {
       await deleteDoc(this.getDocRef(id));
     } catch (error: any) {
-      this.logger.error('[BlueprintRepository]', 'hard delete failed', error as Error);
       throw error;
     }
   }

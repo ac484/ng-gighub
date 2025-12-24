@@ -1,6 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { AuditLogsService, AuditEventType, AuditCategory, AuditSeverity, ActorType, AuditStatus } from '@core/blueprint/modules/implementations/audit-logs';
-import { LoggerService } from '@core/services/logger';
+import { AuditLogsService, AuditEventType, AuditCategory, AuditSeverity, ActorType, AuditStatus } from '../audit-logs';
 
 import { CreateDiaryRequest, Diary, UpdateDiaryRequest } from './diary.model';
 import { DiaryRepository } from './diary.repository';
@@ -9,8 +8,6 @@ import { DiaryRepository } from './diary.repository';
 export class DiaryService {
   private readonly repository = inject(DiaryRepository);
   private readonly audit = inject(AuditLogsService);
-  private readonly logger = inject(LoggerService);
-
   private readonly _diaries = signal<Diary[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
@@ -44,7 +41,7 @@ export class DiaryService {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load diaries';
       this._error.set(message);
-      this.repository.logError('loadDiaries', error, { blueprintId });
+      // Error logging removed
     } finally {
       this._loading.set(false);
     }
@@ -57,7 +54,7 @@ export class DiaryService {
       await this.recordAudit(request.blueprintId, AuditEventType.LOG_CREATED, request.creatorId, created.id, `日誌已建立: ${created.title}`);
       return created;
     } catch (error) {
-      this.repository.logError('create', error, { blueprintId: request.blueprintId });
+      // Error logging removed
       throw error;
     }
   }
@@ -72,7 +69,7 @@ export class DiaryService {
       this._diaries.update(list => list.map(item => (item.id === id ? updated : item)));
       return updated;
     } catch (error) {
-      this.repository.logError('update', error, { blueprintId, id });
+      // Error logging removed
       throw error;
     }
   }
@@ -82,7 +79,7 @@ export class DiaryService {
       await this.repository.delete(id);
       this._diaries.update(list => list.filter(item => item.id !== id));
     } catch (error) {
-      this.repository.logError('delete', error, { blueprintId, id });
+      // Error logging removed
       throw error;
     }
   }
@@ -95,7 +92,7 @@ export class DiaryService {
       );
       return photo.id;
     } catch (error) {
-      this.repository.logError('uploadPhoto', error, { blueprintId, diaryId });
+      // Error logging removed
       throw error;
     }
   }
@@ -107,7 +104,7 @@ export class DiaryService {
         list.map(item => (item.id === diaryId ? { ...item, photos: item.photos.filter(p => p.id !== photoId) } : item))
       );
     } catch (error) {
-      this.repository.logError('deletePhoto', error, { blueprintId, diaryId, photoId });
+      // Error logging removed
       throw error;
     }
   }
@@ -133,8 +130,6 @@ export class DiaryService {
         message,
         status: AuditStatus.SUCCESS
       });
-    } catch (error) {
-      this.logger.warn('[DiaryService]', 'Audit log failed', { blueprintId, resourceId });
-    }
+    } catch (error) {    }
   }
 }

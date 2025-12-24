@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy, ViewChild, ElementRef } from '@angular/core';
-import { AIStore } from '@core/facades/ai';
+import { AIStore } from '@routes/ai-assistant/ai';
 import { SHARED_IMPORTS } from '@shared';
 
 /**

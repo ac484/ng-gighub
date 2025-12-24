@@ -17,11 +17,6 @@ export const routes: Routes = [
     data: { title: '藍圖設計器' }
   },
   {
-    path: ':id/modules',
-    loadComponent: () => import('./modules/manager/module-manager.component').then(m => m.ModuleManagerComponent),
-    data: { title: '模組管理' }
-  },
-  {
     path: ':id/members',
     loadComponent: () => import('./modules/members').then(m => m.MembersModuleViewComponent),
     data: { title: '成員管理' }
@@ -33,7 +28,7 @@ export const routes: Routes = [
   },
   {
     path: ':id/audit',
-    loadComponent: () => import('@core/blueprint/modules/implementations/audit-logs').then(m => m.AuditLogsComponent),
+    loadComponent: () => import('./modules/audit-logs').then(m => m.AuditLogsComponent),
     data: { title: '審計日誌' }
   },
   {

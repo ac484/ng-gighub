@@ -1,7 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { getDownloadURL, uploadBytes } from '@angular/fire/storage';
-import { FirebaseService } from '@core/services/firebase.service';
+import { Storage, ref, getDownloadURL, uploadBytes } from '@angular/fire/storage';
 
 import { Agreement } from './agreement.model';
 import { AgreementRepository } from './agreement.repository';
@@ -9,7 +8,7 @@ import { AgreementRepository } from './agreement.repository';
 @Injectable({ providedIn: 'root' })
 export class AgreementService {
   private readonly repository = inject(AgreementRepository);
-  private readonly firebase = inject(FirebaseService);
+  private readonly storage = inject(Storage);
   private readonly functions = inject(Functions);
 
   // ✅ Create callable during injection context with reasonable timeout
@@ -50,7 +49,7 @@ export class AgreementService {
     this._uploading.set(true);
     try {
       const path = `agreements/${agreementId}/${file.name}`;
-      const storageRef = this.firebase.storageRef(path);
+      const storageRef = ref(this.storage, path);
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       await this.repository.saveAttachmentUrl(agreementId, url, path);
@@ -76,7 +75,7 @@ export class AgreementService {
 
     try {
       // 構建 GCS URI
-      const storageRef = this.firebase.storageRef(agreement.attachmentPath);
+      const storageRef = ref(this.storage, agreement.attachmentPath);
       const bucket: string | undefined = (storageRef as any).bucket;
       const gcsUri = bucket ? `gs://${bucket}/${agreement.attachmentPath}` : null;
 
@@ -104,7 +103,7 @@ export class AgreementService {
       const parsedPath = `agreements/${agreement.id}/parsed.json`;
 
       console.log('[AgreementService] Uploading parsed result', { parsedPath });
-      const parsedRef = this.firebase.storageRef(parsedPath);
+      const parsedRef = ref(this.storage, parsedPath);
       await uploadBytes(parsedRef, blob);
 
       const parsedUrl = await getDownloadURL(parsedRef);

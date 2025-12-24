@@ -19,7 +19,6 @@
  */
 
 import { Component, ChangeDetectionStrategy, OnInit, inject, input, signal, computed, effect } from '@angular/core';
-import { LoggerService } from '@core/services/logger';
 import { ModalHelper } from '@delon/theme';
 import { SHARED_IMPORTS } from '@shared';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -88,9 +87,7 @@ import { escapeHtml, formatStatusText, formatSeverityText, formatSourceText } fr
   ]
 })
 export class IssuesModuleViewComponent implements OnInit {
-  private readonly managementService = inject(IssueManagementService);
-  private readonly logger = inject(LoggerService);
-  private readonly message = inject(NzMessageService);
+  private readonly managementService = inject(IssueManagementService);  private readonly message = inject(NzMessageService);
   private readonly modal = inject(NzModalService);
   private readonly modalHelper = inject(ModalHelper);
 
@@ -158,9 +155,7 @@ export class IssuesModuleViewComponent implements OnInit {
       const issueList = await this.managementService.listIssues(blueprintId);
       this.issues.set(issueList);
     } catch (error) {
-      this.message.error('載入問題列表失敗');
-      this.logger.error('[IssuesModuleView]', 'loadIssues failed', error as Error);
-    } finally {
+      this.message.error('載入問題列表失敗');    } finally {
       this.loading.set(false);
     }
   }
@@ -223,8 +218,6 @@ export class IssuesModuleViewComponent implements OnInit {
       this.message.success(`問題 ${issue.issueNumber} 已刪除`);
       await this.loadIssues();
     } catch (error) {
-      this.message.error('刪除問題失敗');
-      this.logger.error('[IssuesModuleView]', 'deleteIssue failed', error as Error);
-    }
+      this.message.error('刪除問題失敗');    }
   }
 }

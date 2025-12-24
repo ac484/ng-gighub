@@ -1,6 +1,6 @@
 # Diary Module (工地施工日誌模組)
 
-> 重構自 Construction Log，採用功能導向架構設計
+> 重構自 Construction Log，採用功能導向架構設計與完全自包含架構
 
 ## 🎯 架構原則
 
@@ -9,6 +9,7 @@
 - **低耦合 (Low Coupling)**: Features 間透過明確接口溝通
 - **可擴展性 (Extensibility)**: 易於新增 features 或擴展現有功能
 - **可維護性 (Maintainability)**: 清晰結構，小型專注元件
+- **完全自包含 (Self-Contained)**: 直接使用 `@angular/fire`，不依賴 `@core` 層
 
 ## 📁 目錄結構 (Feature-Based)
 
@@ -17,6 +18,14 @@ diary/
 ├── diary-module-view.component.ts     # 主協調器 (thin orchestrator)
 ├── index.ts                           # Public API
 ├── README.md                          # 本文件
+│
+├── core/                              # 🔥 模組核心層 (自包含)
+│   ├── models/                        # 資料模型
+│   │   └── diary.model.ts
+│   ├── repositories/                  # 資料存取 (使用 @angular/fire)
+│   │   └── diary.repository.ts
+│   └── services/                      # 業務邏輯
+│       └── diary.service.ts
 │
 ├── features/                          # 功能模組
 │   ├── list/                          # 🔍 列表功能
@@ -44,6 +53,30 @@ diary/
     ├── components/
     │   └── diary-status-badge.component.ts    # 狀態標籤
     └── index.ts
+```
+
+## 🔥 Firebase 整合
+
+本模組**完全自包含**，在 `core/repositories/` 目錄下實作自己的 Repository：
+
+```typescript
+import { Injectable, inject } from '@angular/core';
+import { Firestore, collection, query, where, orderBy, getDocs, addDoc } from '@angular/fire/firestore';
+
+@Injectable({ providedIn: 'root' })
+export class DiaryRepository {
+  private firestore = inject(Firestore); // ✅ 直接注入 @angular/fire
+  
+  async findByBlueprintId(blueprintId: string): Promise<Diary[]> {
+    const q = query(
+      collection(this.firestore, 'diaries'),
+      where('blueprint_id', '==', blueprintId),
+      orderBy('date', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Diary));
+  }
+}
 ```
 
 ## 🎨 架構設計

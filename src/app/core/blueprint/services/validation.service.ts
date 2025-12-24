@@ -1,5 +1,26 @@
 import { Injectable } from '@angular/core';
-import { ValidationError, ValidationErrorDetail } from '@core';
+
+/**
+ * Validation error detail
+ */
+export interface ValidationErrorDetail {
+  field: string;
+  message: string;
+  value?: unknown;
+}
+
+/**
+ * Validation error class
+ */
+export class ValidationError extends Error {
+  constructor(
+    message: string,
+    public readonly errors: ValidationErrorDetail[]
+  ) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
 
 /**
  * Field validator definition
@@ -129,7 +150,7 @@ export class ValidationService {
   validateOrThrow(data: unknown, schema: ValidationSchema, fieldName = 'data'): void {
     const result = this.validate(data, schema);
     if (!result.valid) {
-      throw new ValidationError(fieldName, `Validation failed with ${result.errors.length} errors`, result.errors);
+      throw new ValidationError(`Validation failed with ${result.errors.length} errors`, result.errors);
     }
   }
 }

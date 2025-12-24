@@ -1,5 +1,4 @@
 import { Injectable, inject, computed } from '@angular/core';
-import { LoggerService } from '@core';
 
 import type {
   CloudFile,
@@ -15,8 +14,6 @@ import { CloudRepository } from './cloud.repository';
 @Injectable({ providedIn: 'root' })
 export class CloudService {
   private readonly repository = inject(CloudRepository);
-  private readonly logger = inject(LoggerService);
-
   readonly files = this.repository.files;
   readonly backups = this.repository.backups;
   readonly loading = this.repository.loading;
@@ -46,11 +43,7 @@ export class CloudService {
 
   async loadFiles(blueprintId: string): Promise<void> {
     try {
-      await this.repository.listFiles(blueprintId);
-      this.logger.info('[CloudService]', `Loaded files for blueprint: ${blueprintId}`);
-    } catch (error) {
-      this.logger.error('[CloudService]', 'Failed to load files', error as Error);
-      throw error;
+      await this.repository.listFiles(blueprintId);    } catch (error) {      throw error;
     }
   }
 
@@ -58,67 +51,49 @@ export class CloudService {
     try {
       const file = await this.repository.uploadFile(blueprintId, request);
       return file;
-    } catch (error) {
-      this.logger.error('[CloudService]', 'Upload failed', error as Error);
-      throw error;
+    } catch (error) {      throw error;
     }
   }
 
   async downloadFile(blueprintId: string, request: CloudDownloadRequest): Promise<Blob> {
     try {
       return await this.repository.downloadFile(blueprintId, request.fileId);
-    } catch (error) {
-      this.logger.error('[CloudService]', 'Download failed', error as Error);
-      throw error;
+    } catch (error) {      throw error;
     }
   }
 
   async deleteFile(blueprintId: string, fileId: string): Promise<void> {
     try {
       await this.repository.deleteFile(blueprintId, fileId);
-    } catch (error) {
-      this.logger.error('[CloudService]', 'Delete failed', error as Error);
-      throw error;
+    } catch (error) {      throw error;
     }
   }
 
   async updateFilePath(blueprintId: string, fileId: string, newPath: string): Promise<void> {
     try {
       await this.repository.updateFilePath(blueprintId, fileId, newPath);
-    } catch (error) {
-      this.logger.error('[CloudService]', 'Update file path failed', error as Error);
-      throw error;
+    } catch (error) {      throw error;
     }
   }
 
   async createBackup(blueprintId: string, request: CloudBackupRequest): Promise<CloudBackup> {
     try {
       return await this.repository.createBackup(blueprintId, request);
-    } catch (error) {
-      this.logger.error('[CloudService]', 'Create backup failed', error as Error);
-      throw error;
+    } catch (error) {      throw error;
     }
   }
 
-  async restoreBackup(blueprintId: string, request: CloudRestoreRequest): Promise<void> {
-    this.logger.info('[CloudService]', `Restore backup requested: ${request.backupId} for blueprint ${blueprintId}`);
-    // Placeholder: add actual restore logic when backend is ready
+  async restoreBackup(blueprintId: string, request: CloudRestoreRequest): Promise<void> {    // Placeholder: add actual restore logic when backend is ready
   }
 
   async loadBackups(blueprintId: string): Promise<void> {
     try {
-      await this.repository.listBackups(blueprintId);
-      this.logger.info('[CloudService]', `Loaded backups for blueprint: ${blueprintId}`);
-    } catch (error) {
-      this.logger.error('[CloudService]', 'Failed to load backups', error as Error);
-      throw error;
+      await this.repository.listBackups(blueprintId);    } catch (error) {      throw error;
     }
   }
 
   clearState(): void {
-    this.repository.clearState();
-    this.logger.debug('[CloudService]', 'State cleared');
-  }
+    this.repository.clearState();  }
 
   private calculateFilesByType(files: CloudFile[]): Record<string, number> {
     const byType: Record<string, number> = {};

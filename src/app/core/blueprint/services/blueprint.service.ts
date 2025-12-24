@@ -1,13 +1,12 @@
 import { Injectable, inject } from '@angular/core';
+import { Auth } from '@angular/fire/auth';
 import {
   Blueprint,
   BlueprintQueryOptions,
   BlueprintRole,
   CreateBlueprintRequest,
   OwnerType,
-  UpdateBlueprintRequest,
-  LoggerService,
-  FirebaseAuthService
+  UpdateBlueprintRequest
 } from '@core';
 import {
   AuditLogsService,
@@ -16,7 +15,7 @@ import {
   AuditSeverity,
   ActorType,
   AuditStatus
-} from '@core/blueprint/modules/implementations/audit-logs';
+} from '@routes/blueprint/modules/audit-logs';
 import { BlueprintMemberRepository, BlueprintRepository } from '@core/blueprint/repositories';
 import { Observable } from 'rxjs';
 
@@ -29,10 +28,9 @@ import { ValidationService } from './validation.service';
 export class BlueprintService {
   private readonly repository = inject(BlueprintRepository);
   private readonly memberRepository = inject(BlueprintMemberRepository);
-  private readonly logger = inject(LoggerService);
   private readonly validator = inject(ValidationService);
   private readonly auditService = inject(AuditLogsService);
-  private readonly authService = inject(FirebaseAuthService);
+  private readonly auth = inject(Auth);
 
   getById(id: string): Observable<Blueprint | null> {
     return this.repository.findById(id);
@@ -52,7 +50,6 @@ export class BlueprintService {
 
     try {
       const blueprint = await this.repository.create(request);
-      this.logger.info('[BlueprintService]', `Blueprint created ${blueprint.id}`);
 
       // Record audit log for blueprint creation
       try {
@@ -70,7 +67,6 @@ export class BlueprintService {
           status: AuditStatus.SUCCESS
         });
       } catch (auditError) {
-        this.logger.error('[BlueprintService]', 'Failed to record audit log for blueprint creation', auditError as Error);
         // Don't fail the operation if audit logging fails
       }
 
@@ -91,7 +87,6 @@ export class BlueprintService {
             canDeleteBlueprint: true
           }
         });
-        this.logger.info('[BlueprintService]', `Creator ${request.createdBy} added as MAINTAINER to blueprint ${blueprint.id}`);
 
         // Record audit log for member addition
         try {
@@ -109,17 +104,13 @@ export class BlueprintService {
             status: AuditStatus.SUCCESS
           });
         } catch (auditError) {
-          this.logger.error('[BlueprintService]', 'Failed to record audit log for member addition', auditError as Error);
         }
       } catch (memberError) {
         // Graceful degradation: Log error but don't fail blueprint creation
-        this.logger.error('[BlueprintService]', 'Failed to add creator as member', memberError as Error);
-        this.logger.warn('[BlueprintService]', `Blueprint ${blueprint.id} created but creator not added as member`);
       }
 
       return blueprint;
     } catch (error) {
-      this.logger.error('[BlueprintService]', 'Failed to create blueprint', error as Error);
       throw error;
     }
   }
@@ -129,11 +120,10 @@ export class BlueprintService {
     this.validator.validateOrThrow(updates, BlueprintUpdateSchema, 'blueprint');
 
     // Get actorId from auth service if not provided
-    const currentActorId = actorId || this.authService.currentUser?.uid || 'system';
+    const currentActorId = actorId || this.auth.currentUser?.uid || 'system';
 
     try {
       await this.repository.update(id, updates);
-      this.logger.info('[BlueprintService]', `Blueprint updated ${id}`);
 
       // Record audit log
       try {
@@ -151,10 +141,8 @@ export class BlueprintService {
           status: AuditStatus.SUCCESS
         });
       } catch (auditError) {
-        this.logger.error('[BlueprintService]', 'Failed to record audit log for blueprint update', auditError as Error);
       }
     } catch (error) {
-      this.logger.error('[BlueprintService]', 'Failed to update blueprint', error as Error);
       throw error;
     }
   }
@@ -162,9 +150,7 @@ export class BlueprintService {
   async delete(id: string): Promise<void> {
     try {
       await this.repository.delete(id);
-      this.logger.info('[BlueprintService]', `Blueprint deleted ${id}`);
     } catch (error) {
-      this.logger.error('[BlueprintService]', 'Failed to delete blueprint', error as Error);
       throw error;
     }
   }
@@ -176,9 +162,7 @@ export class BlueprintService {
   ): Promise<void> {
     try {
       await this.memberRepository.addMember(blueprintId, blueprintOwnerType, member);
-      this.logger.info('[BlueprintService]', `Member added to ${blueprintId}`);
     } catch (error) {
-      this.logger.error('[BlueprintService]', 'Failed to add member', error as Error);
       throw error;
     }
   }
