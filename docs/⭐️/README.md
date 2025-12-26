@@ -42,6 +42,31 @@ Read this to understand:
 
 **Use when**: You need specific guidance on implementation patterns, architectural decisions, or code generation workflows.
 
+### 📋 [Task Planning Template](./📋Task_Planning_Template.md)
+**Systematic task planning and execution framework**
+
+Read this to understand:
+- Task structure and metadata
+- Implementation phases (Preparation → Data → Business → UI → Testing)
+- File tree structure for new features
+- Quality standards and acceptance criteria
+- Testing strategy and risk assessment
+
+**Use when**: Planning a new feature, module, or significant code change.
+
+### 🌲 [File Tree Planning](./🌲File_Tree_Planning.md)
+**Project structure and organization guide**
+
+Read this to understand:
+- Complete GigHub project structure
+- Module organization principles
+- File naming conventions
+- Integration points with existing code
+- Duplication prevention strategies
+- Decision trees for file placement
+
+**Use when**: Deciding where to place new files or how to organize a new module.
+
 ---
 
 ## 🎯 Quick Start Guide
@@ -62,9 +87,23 @@ Purpose: Learn the architectural rules and patterns
 Time: 30-45 minutes
 ```
 
-**Step 3: Reference During Development**
+**Step 3: Learn Task Planning**
 ```
-Consult: Both documents during code generation
+Then read: 📋Task_Planning_Template.md
+Purpose: Understand how to plan and execute tasks
+Time: 15-20 minutes
+```
+
+**Step 4: Understand Project Structure**
+```
+Then read: 🌲File_Tree_Planning.md
+Purpose: Learn project organization and avoid duplication
+Time: 20-30 minutes
+```
+
+**Step 5: Reference During Development**
+```
+Consult: All documents during code generation
 Purpose: Ensure compliance with project standards
 Frequency: Before every code change
 ```
@@ -85,14 +124,14 @@ Frequency: Before every code change
 
 ## 📖 Document Structure Comparison
 
-| Aspect | Character Profile | Behavior Guidelines |
-|--------|------------------|---------------------|
-| **Focus** | Identity & Personality | Rules & Patterns |
-| **Scope** | High-level principles | Detailed implementation |
-| **Length** | ~15 pages | ~50+ pages |
-| **Updates** | Quarterly | As needed |
-| **Audience** | AI understanding itself | AI implementing code |
-| **Style** | Narrative | Reference manual |
+| Aspect | Character Profile | Behavior Guidelines | Task Planning | File Tree Planning |
+|--------|------------------|---------------------|---------------|-------------------|
+| **Focus** | Identity & Personality | Rules & Patterns | Execution Framework | Organization & Structure |
+| **Scope** | High-level principles | Detailed implementation | Task methodology | Project layout |
+| **Length** | ~15 pages | ~50+ pages | ~15 pages | ~20 pages |
+| **Updates** | Quarterly | As needed | As needed | As needed |
+| **Audience** | AI understanding itself | AI implementing code | AI planning work | AI organizing files |
+| **Style** | Narrative | Reference manual | Template | Directory guide |
 
 ---
 
@@ -167,32 +206,51 @@ Frequency: Before every code change
 
 ### Use Case 1: Creating a New Feature
 **Documents to reference**:
-1. Behavior Guidelines → "Code Generation Workflows" → "Workflow 1: New Feature (CRUD)"
-2. Character Profile → "Workflow Execution"
-3. Repository Pattern → Behavior Guidelines → "Repository Pattern Implementation"
+1. Task Planning Template → Complete task planning process
+2. File Tree Planning → Determine file locations and prevent duplication
+3. Behavior Guidelines → "Code Generation Workflows" → "Workflow 1: New Feature (CRUD)"
+4. Character Profile → "Workflow Execution"
+5. Repository Pattern → Behavior Guidelines → "Repository Pattern Implementation"
 
-### Use Case 2: Fixing a Bug
+### Use Case 2: Creating a New Module
+**Documents to reference**:
+1. File Tree Planning → "Template 2: New Module (Complete)"
+2. File Tree Planning → "Module Organization Principles"
+3. Task Planning Template → Phase-by-phase implementation
+4. Behavior Guidelines → Three-layer architecture enforcement
+5. Character Profile → Quality standards
+
+### Use Case 3: Fixing a Bug
 **Documents to reference**:
 1. Behavior Guidelines → "Code Generation Workflows" → "Workflow 3: Bug Fix"
 2. Character Profile → "Problem-Solving Approach"
+3. File Tree Planning → Locate affected files
 
-### Use Case 3: Reviewing Code
+### Use Case 4: Reviewing Code
 **Documents to reference**:
 1. Character Profile → "Quality Standards" → "Code Review Checklist"
 2. Behavior Guidelines → "Anti-Patterns to Avoid"
 3. Character Profile → "Self-Check Before Submitting"
 
-### Use Case 4: Understanding Architecture
+### Use Case 5: Understanding Architecture
 **Documents to reference**:
 1. Behavior Guidelines → "Omniscient Architecture Overview"
 2. Behavior Guidelines → "Three-Layer Architecture Rules"
-3. Character Profile → "Design Philosophy"
+3. File Tree Planning → "Project Structure Overview"
+4. Character Profile → "Design Philosophy"
 
-### Use Case 5: Implementing Security
+### Use Case 6: Implementing Security
 **Documents to reference**:
 1. Behavior Guidelines → "Firestore Security Rules"
 2. Behavior Guidelines → "Security Best Practices"
 3. Character Profile → "Security Mindset"
+
+### Use Case 7: Planning File Organization
+**Documents to reference**:
+1. File Tree Planning → Complete guide
+2. File Tree Planning → "Duplication Prevention Checklist"
+3. File Tree Planning → "Decision Tree: Where Should My File Go?"
+4. Behavior Guidelines → "Repository Pattern Implementation"
 
 ---
 
@@ -212,6 +270,20 @@ Frequency: Before every code change
 - **Patterns**: 15+ documented patterns
 - **Anti-Patterns**: 4 major anti-patterns
 - **Focus**: Implementation, patterns, workflows
+
+### Task Planning Template
+- **Pages**: ~15
+- **Code Examples**: 10+
+- **Sections**: 12 major sections
+- **Templates**: 5 implementation phases
+- **Focus**: Task methodology, execution
+
+### File Tree Planning
+- **Pages**: ~20
+- **Code Examples**: 15+
+- **Sections**: 6 major sections
+- **Templates**: 4 file tree templates
+- **Focus**: Project structure, organization
 
 ---
 
@@ -304,7 +376,7 @@ To contribute:
 
 ## 📋 Quick Reference Card
 
-### The AI Trinity
+### The AI Trinity + Planning Framework
 ```
 1. Copilot Instructions (.github/copilot-instructions.md)
    → Core mandatory rules
@@ -314,6 +386,12 @@ To contribute:
    
 3. Behavior Guidelines (🧠AI_Behavior_Guidelines.md)
    → What the AI does
+   
+4. Task Planning Template (📋Task_Planning_Template.md)
+   → How the AI plans work
+   
+5. File Tree Planning (🌲File_Tree_Planning.md)
+   → Where the AI places files
 ```
 
 ### Golden Rules (Never Violate)
